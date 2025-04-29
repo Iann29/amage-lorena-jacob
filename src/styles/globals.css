@@ -1,14 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --blue-light: #52A4DB;
+  --blue-dark: #365F71;
+  --stone: #6E6B46;
+  --gray-light: #D9D9D9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Poppins', var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -22,5 +27,27 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Configurações para o header */
+.nav-link {
+  color: var(--stone);
+  font-size: 1.25rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
+
+.nav-link-active {
+  font-weight: 700;
+}
+
+.nav-link:hover {
+  color: var(--blue-light);
+}
+
+.nav-separator {
+  width: 2px;
+  height: 40px;
+  background-color: var(--gray-light);
 }
