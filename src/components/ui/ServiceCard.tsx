@@ -51,7 +51,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               alt={title} 
               fill
               priority
-              className="absolute w-full h-full object-cover opacity-60 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+              className="absolute w-full h-full object-cover opacity-60 mix-blend-multiply"
             />
           </div>
         )}
@@ -64,7 +64,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             width={800} 
             height={600}
             priority
-            className="absolute w-full h-full object-cover opacity-40 transform scale-105 transition-transform duration-500 group-hover:scale-110"
+            className="absolute w-full h-full object-cover opacity-40 transform scale-105"
           />
         </div>
 
