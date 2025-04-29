@@ -255,8 +255,8 @@ export default function Home() {
         <div className="container mx-auto px-4">
           {/* Título */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-['Museo_Sans_Rounded'] mb-2" style={{ color: '#806D52', fontWeight: 900 }}>Os temas que você vai</h2>
-            <h2 className="text-5xl md:text-6xl italic" style={{ color: '#806D52', fontFamily: 'Mogila', fontWeight: 'bold' }}>encontrar no blog</h2>
+            <h2 className="text-4xl md:text-5xl font-['Museo_Sans_Rounded'] mb-2" style={{ color: '#806D52', fontWeight: 900, fontSize: 'calc(1.25rem + 1.5vw)' }}>Os temas que você vai</h2>
+            <h2 className="text-4xl md:text-5xl italic" style={{ color: '#806D52', fontFamily: 'Mogila', fontWeight: 'bold' }}>encontrar no blog</h2>
           </div>
           
           {/* Cards do Blog - 3 cards em carrossel */}
