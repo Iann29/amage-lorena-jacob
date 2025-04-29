@@ -84,7 +84,7 @@ export default function Home() {
               </div>
             
               <div className="mt-3 relative pl-2">
-                <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 transition">
+                <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200">
                   Agende uma Avaliação
                 </Link>
               </div>
@@ -101,14 +101,14 @@ export default function Home() {
             
             {/* Botão para tablet e desktop */}
             <div className="hidden sm:block md:hidden pl-4">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 transition mt-8">
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 mt-8">
                 Agende uma Avaliação
               </Link>
             </div>
             
             {/* Botão para desktop */}
             <div className="hidden md:flex pl-[32px] mt-12 justify-center">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 transition">
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md">
                 Agende uma Avaliação
               </Link>
             </div>
