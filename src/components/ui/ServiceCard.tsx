@@ -1,10 +1,12 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import React from 'react';
 
 interface ServiceCardProps {
   title: string;
+  subtitle?: string;
   buttonText: string;
   backgroundImage?: string;
   linkHref: string;
@@ -12,31 +14,81 @@ interface ServiceCardProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ 
   title, 
+  subtitle = '',
   buttonText, 
   backgroundImage,
   linkHref 
 }) => {
+  // Dividir o título em duas partes se não houver subtítulo fornecido
+  const [firstPart, secondPart] = subtitle ? [title, subtitle] : title.includes(' ') ? 
+    [title.split(' ').slice(0, 1).join(' '), title.split(' ').slice(1).join(' ')] : 
+    [title, ''];
+    
   return (
-    <div 
-      className="flex flex-col items-center justify-between p-6 rounded-lg"
-      style={{ 
-        backgroundColor: '#FAFFE7',
-        border: '0.92px solid #27769B',
-        minHeight: '210px',
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
-      <h3 className="text-center font-medium text-xl mb-4">{title}</h3>
+    <div className="relative mx-auto" style={{ width: '212px', height: '480px' }}>
+      {/* Sombra abaixo do card */}
+      <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 z-0 w-[313px]">
+        <Image 
+          src="/assets/sombra.png" 
+          alt="Sombra" 
+          width={313} 
+          height={58}
+          priority
+          className="w-full"
+        />
+      </div>
       
-      <Link href={linkHref}>
-        <button 
-          className="bg-[#27769B] text-white py-2 px-6 rounded-md font-medium hover:bg-opacity-90 transition-all"
-        >
-          {buttonText}
-        </button>
-      </Link>
+      {/* Card principal */}
+      <div className="w-[212px] h-[418px] relative overflow-hidden group transition-all duration-300 z-10 mt-0">
+        {/* Card base com borda */}
+        <div className="w-full h-full absolute bg-[#FAFFE7] rounded-2xl outline outline-1 outline-[#27769B]"></div>
+        
+        {/* Imagem de fundo personalizada, se fornecida */}
+        {backgroundImage && (
+          <div className="w-full h-full absolute overflow-hidden rounded-2xl">
+            <Image 
+              src={backgroundImage} 
+              alt={title} 
+              fill
+              priority
+              className="absolute w-full h-full object-cover opacity-40 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
+        )}
+        
+        {/* Máscara de imagem - sempre exibida por cima */}
+        <div className="w-full h-full absolute overflow-hidden rounded-2xl">
+          <Image 
+            src="/assets/cardmask1.png" 
+            alt="Card Background" 
+            width={800} 
+            height={600}
+            priority
+            className="absolute w-full h-full object-cover opacity-40 transform scale-105 transition-transform duration-500 group-hover:scale-110"
+          />
+        </div>
+
+        {/* Textos do título */}
+        <div className="absolute top-16 left-0 w-full flex flex-col items-center z-10 px-4 space-y-0">
+          <div className="text-[#025074] text-base font-bold font-['Museo_Sans_Rounded'] leading-none mb-0 text-center">
+            {firstPart}
+          </div>
+          {secondPart && (
+            <div className="text-[#27769B] text-xl font-bold font-['Museo_Sans_Rounded'] leading-none mt-0 text-center">
+              {secondPart}
+            </div>
+          )}
+        </div>
+        
+        {/* Botão SAIBA MAIS */}
+        <div className="absolute top-[127px] left-0 w-full flex justify-center z-10">
+          <Link href={linkHref}>
+            <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold font-['Museo_Sans_Rounded'] w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105">
+              {buttonText}
+            </div>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

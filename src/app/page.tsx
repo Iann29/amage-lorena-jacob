@@ -185,29 +185,28 @@ export default function Home() {
             <h3 className="text-4xl font-bold mb-12 text-center" style={{ color: '#8B7659' }}>O DIFERENCIAL</h3>
             
             {/* Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
               <ServiceCard 
-                title="Acompanhamento Personalizado"
+                title="Acompanhamento"
+                subtitle="Personalizado"
                 buttonText="SAIBA MAIS"
                 linkHref="/sobre"
               />
               
               <ServiceCard 
-                title="Treinamento para Pais & Educadores"
+                title="Treinamento para"
+                subtitle="Pais & Educadores"
                 buttonText="SAIBA MAIS"
                 linkHref="/servicos"
+                backgroundImage="/assets/treinamento-bg.jpg"
               />
               
               <ServiceCard 
-                title="Palestras & Consultorias"
+                title="Palestras &"
+                subtitle="Consultorias"
                 buttonText="SAIBA MAIS"
                 linkHref="/contato"
-              />
-              
-              <ServiceCard 
-                title="Material Educativo"
-                buttonText="SAIBA MAIS"
-                linkHref="/loja"
+                backgroundImage="/assets/palestras-bg.jpg"
               />
             </div>
           </div>
