@@ -180,7 +180,7 @@ export default function Home() {
           </div>
           
           {/* O Diferencial Section */}
-          <div className="md:w-1/2 md:pl-12 md:-mt-16">
+          <div className="md:w-1/2 md:pl-12 md:-mt-40 relative z-10">
             <h2 className="text-5xl font-bold mb-1 text-center" style={{ color: 'white', WebkitTextStroke: '0.61px #7A674C' }}>O DIFERENCIAL</h2>
             <h3 className="text-5xl font-bold mb-10 text-center" style={{ color: '#8B7659' }}>O DIFERENCIAL</h3>
             
