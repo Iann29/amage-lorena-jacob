@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ServiceCard from "@/components/ui/ServiceCard";
+import Separator from "@/components/ui/Separator";
 
 export default function Home() {
   return (
@@ -90,10 +91,10 @@ export default function Home() {
               </div>
               
               <div className="mt-4 border-l-4 border-white pl-3 py-1">
-                <p className="text-[10px] leading-tight whitespace-nowrap font-['MuseoSansRounded900']">
+                <p className="text-[10px] leading-tight whitespace-nowrap font-['Museo_Sans_Rounded']">
                   Acompanhamento especializado para <span className="font-medium">auxiliar crianças com autismo, TDAH</span>
                 </p>
-                <p className="text-[10px] leading-tight whitespace-nowrap font-['MuseoSansRounded900']">
+                <p className="text-[10px] leading-tight whitespace-nowrap font-['Museo_Sans_Rounded']">
                   e outras necessidades especiais.
                 </p>
               </div>
@@ -115,20 +116,20 @@ export default function Home() {
 
             {/* Texto informativo para tablet */}
             <div className="mt-8 border-l-4 border-white pl-4 py-1 hidden sm:block md:hidden">
-              <p className="text-sm whitespace-nowrap font-['MuseoSansRounded900']">
+              <p className="text-sm whitespace-nowrap font-['Museo_Sans_Rounded']">
                 Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
               </p>
-              <p className="text-sm whitespace-nowrap font-['MuseoSansRounded900']">
+              <p className="text-sm whitespace-nowrap font-['Museo_Sans_Rounded']">
                 <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
               </p>
             </div>
             
             {/* Texto informativo para desktop */}
             <div className="mt-12 border-l-6 border-white pl-6 py-2 hidden md:block">
-              <p className="text-lg md:text-xl whitespace-nowrap font-['MuseoSansRounded900']">
+              <p className="text-lg md:text-xl whitespace-nowrap font-['Museo_Sans_Rounded']">
                 Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
               </p>
-              <p className="text-lg md:text-xl whitespace-nowrap font-['MuseoSansRounded900']">
+              <p className="text-lg md:text-xl whitespace-nowrap font-['Museo_Sans_Rounded']">
                 <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
               </p>
             </div>
@@ -213,6 +214,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Separador antes da seção de redes sociais */}
+      <Separator />
 
       {/* Redes Sociais Section */}
       <section className="py-12 md:py-16" style={{ backgroundColor: '#E9F291' }}>
@@ -239,6 +243,116 @@ export default function Home() {
                 <div key={index} className="bg-white aspect-square rounded-lg"></div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Separador depois da seção de redes sociais */}
+      <Separator />
+
+      {/* Seção Blog - Temas */}
+      <section className="py-12 md:py-16" style={{ backgroundColor: '#FBFEEF' }}>
+        <div className="container mx-auto px-4">
+          {/* Título */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-['Museo_Sans_Rounded'] mb-2" style={{ color: '#806D52', fontWeight: 900 }}>Os temas que você vai</h2>
+            <h2 className="text-5xl md:text-6xl italic" style={{ color: '#806D52', fontFamily: 'Mogila', fontWeight: 'bold' }}>encontrar no blog</h2>
+          </div>
+          
+          {/* Cards do Blog - 3 cards em carrossel */}
+          <div className="relative max-w-6xl mx-auto">
+            {/* Setas de navegação */}
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
+              <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Card 1 */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-52 overflow-hidden">
+                  <Image 
+                    src="/assets/blog-placeholder.jpg" 
+                    alt="Post do blog" 
+                    width={400} 
+                    height={300}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
+                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <a href="/blog/post-1" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
+                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+                    <span>4 visualizações</span>
+                    <span>3 comentários</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-52 overflow-hidden">
+                  <Image 
+                    src="/assets/blog-placeholder.jpg" 
+                    alt="Post do blog" 
+                    width={400} 
+                    height={300}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
+                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <a href="/blog/post-2" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
+                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+                    <span>4 visualizações</span>
+                    <span>3 comentários</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-52 overflow-hidden">
+                  <Image 
+                    src="/assets/blog-placeholder.jpg" 
+                    alt="Post do blog" 
+                    width={400} 
+                    height={300}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
+                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <a href="/blog/post-3" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
+                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+                    <span>4 visualizações</span>
+                    <span>3 comentários</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Seta direita */}
+            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
+              <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          {/* Botão para acessar o blog */}
+          <div className="mt-12 text-center">
+            <a href="/blog" className="inline-block py-3 px-8 bg-[#806D52] text-white rounded-lg text-xl font-bold hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md">
+              ACESSE O BLOG
+            </a>
           </div>
         </div>
       </section>
