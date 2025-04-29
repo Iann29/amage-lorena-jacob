@@ -32,37 +32,42 @@ const Footer = () => {
     <footer className="bg-white">
       {/* Seção do menu principal com a logo */}
       <div className="container mx-auto pt-14 pb-10">
-        <div className="pb-12">
-          <div className="flex flex-col md:flex-row px-6 md:px-0">
-            {/* Logo */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="flex items-start justify-center md:justify-start mb-10 md:mb-0 md:w-1/3 pr-0 md:pr-0 pt-10 md:pt-16 md:pl-10"
-            >
-              <Link href="/" className="block">
-                <Image 
-                  src="/logos/logo1.webp" 
-                  alt="Lorena Jacob - Terapeuta Infantil" 
-                  width={320} 
-                  height={64}
-                  priority
-                  style={{ width: '320px', height: 'auto' }}
-                  className="max-w-none"
-                />
-              </Link>
-            </motion.div>
+        <div className="pb-12 relative">
+          {/* Container com linhas de grid */}
+          <div className="md:grid md:grid-cols-12 px-6 md:px-0">
+            {/* Coluna da esquerda para a logo */}
+            <div className="md:col-span-3 lg:col-span-4 relative">
+              {/* Logo posicionada absolutamente para centralização perfeita */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="flex justify-center mb-10 md:mb-0 w-full md:absolute md:top-1/2 md:left-1/2 md:transform md:-translate-y-1/2 md:-translate-x-1/2"
+              >
+                <Link href="/" className="block">
+                  <Image 
+                    src="/logos/logo1.webp" 
+                    alt="Lorena Jacob - Terapeuta Infantil" 
+                    width={320} 
+                    height={64}
+                    priority
+                    style={{ width: 'clamp(180px, 20vw, 280px)', height: 'auto' }}
+                    className="max-w-none"
+                  />
+                </Link>
+              </motion.div>
+            </div>
 
             {/* Separador vertical */}
-            <div className="hidden md:block h-auto w-px bg-gray-200 mx-4"></div>
+            <div className="hidden md:block md:col-span-1 h-auto w-px bg-gray-200 mx-auto"></div>
+            
             {/* Menu com os 4 itens */}
-            <div className="flex-1 flex flex-col md:flex-row md:justify-end space-x-0 md:space-x-7 lg:space-x-9 pl-0 md:pl-2">
+            <div className="flex flex-col md:flex-row md:justify-end md:col-span-8 lg:col-span-7 space-x-0 md:space-x-10 lg:space-x-16 pl-0">
               {/* Início */}
-              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "170px"}}>
+              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-2">Início</h3>
-                <ul className="text-[#6E6B46] space-y-1.5 text-xs font-['Poppins']">
+                <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/#suporte" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-start">
                       <span className="mr-2 mt-0.5">•</span> <span>Suporte personalizado para o desenvolvimento infantil</span>
@@ -92,9 +97,9 @@ const Footer = () => {
               </div>
 
               {/* Sobre mim */}
-              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "170px"}}>
+              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-bold font-['Poppins'] mb-2">Sobre mim</h3>
-                <ul className="text-[#6E6B46] space-y-1.5 text-xs font-['Poppins']">
+                <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/sobre" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> Lorena Jacob, Terapeuta infantil
@@ -109,9 +114,9 @@ const Footer = () => {
               </div>
 
               {/* Blog */}
-              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "170px"}}>
+              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-2">Blog</h3>
-                <ul className="text-[#6E6B46] space-y-1.5 text-xs font-['Poppins']">
+                <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/blog/categoria/dicas" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> Dicas para estimular o desenvolvimento infantil
@@ -126,9 +131,9 @@ const Footer = () => {
               </div>
 
               {/* Loja */}
-              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "170px"}}>
+              <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-2">Loja</h3>
-                <ul className="text-[#6E6B46] space-y-1.5 text-xs font-['Poppins']">
+                <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/loja/categoria/brinquedos-sensoriais" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> Brinquedos sensoriais
