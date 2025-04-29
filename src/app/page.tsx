@@ -142,38 +142,39 @@ export default function Home() {
       </section>
 
       {/* Sobre Mim Section */}
-      <section className="py-12 md:py-16 bg-white">
+      <section className="py-12 md:py-16 bg-white overflow-visible relative">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center">
           {/* Sobre Mim Card */}
-          <div className="md:w-1/2 mb-8 md:mb-0 relative">
-            <div className="rounded-3xl overflow-hidden" style={{ backgroundColor: '#8B7659' }}>
-              <div className="flex flex-col md:flex-row p-6 md:p-8">
-                {/* Texto */}
-                <div className="md:w-1/2 text-white p-4">
-                  <h2 className="text-[#FFF786] text-3xl font-bold mb-6">SOBRE MIM</h2>
-                  
-                  <p className="mb-4 text-sm">
-                    Sou <strong>Lorena Jacob</strong>, terapeuta infantil, mãe de duas crianças autistas em formação para Terapeuta Ocupacional. Atuo há mais de 10 anos com TEA, TDAH, TOD, seletividade alimentar, deficiência intelectual, entre outros.
-                  </p>
-                  
-                  <p className="mb-4 text-sm">
-                    Atendo presencialmente em Londres e online para outros lugares.
-                  </p>
-                  
-                  <p className="text-sm">
-                    Ajudo famílias a compreenderem o autismo utilizando abordagens lúdicas e personalizadas para promover avanços no comportamento, linguagem, socialização, autonomia, habilidades cognitivas e motoras.
-                  </p>
-                </div>
-                
-                {/* Imagem */}
-                <div className="md:w-1/2 flex justify-center items-center mt-6 md:mt-0">
+          <div className="md:w-1/2 mb-8 md:mb-0 relative overflow-visible">
+            <div className="rounded-3xl overflow-visible">
+              <div className="relative">
+                {/* Imagem em tamanho grande */}
+                <div className="w-full relative overflow-visible" style={{ marginLeft: '-5%', marginTop: '-27%', zIndex: 10 }}>
                   <Image 
                     src="/assets/lorenasobremim.webp" 
                     alt="Lorena Jacob" 
-                    width={300} 
-                    height={400} 
-                    className="rounded-2xl"
+                    width={605} 
+                    height={805} 
+                    className="rounded-2xl w-full h-auto max-w-[680px]"
+                    priority
                   />
+                </div>
+                
+                {/* Texto sobreposto */}
+                <div className="absolute top-12 left-6 md:w-[320px] text-white p-4" style={{ zIndex: 20, maxWidth: '320px' }}>
+                  <h2 className="text-[#FFF786] text-3xl font-bold mb-4 text-center">SOBRE MIM</h2>
+                  
+                  <p className="mb-3 text-sm leading-tight">
+                    Sou <strong>Lorena Jacob</strong>, terapeuta infantil, mãe de duas crianças autistas em formação para Terapeuta Ocupacional. Atuo há mais de 10 anos com <strong>TEA</strong>, <strong>TDAH</strong>, <strong>TOD</strong>, <strong>seletividade alimentar</strong>, <strong>deficiência intelectual</strong>, entre outros.
+                  </p>
+                  
+                  <p className="mb-3 text-sm leading-tight">
+                    Atendo presencialmente em Londres e online para outros lugares.
+                  </p>
+                  
+                  <p className="text-sm leading-tight">
+                    <strong>Ajudo famílias a compreenderem o</strong> <strong>autismo</strong> utilizando abordagens lúdicas e personalizadas para promover avanços no comportamento, linguagem, socialização, autonomia, habilidades cognitivas e motoras.
+                  </p>
                 </div>
               </div>
             </div>
