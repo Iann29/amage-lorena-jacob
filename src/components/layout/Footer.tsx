@@ -31,8 +31,8 @@ const Footer = () => {
   return (
     <footer className="bg-white">
       {/* Seção do menu principal com a logo */}
-      <div className="container mx-auto pt-14 pb-10">
-        <div className="pb-12 relative">
+      <div className="container mx-auto pt-14 pb-5">
+        <div className="pb-6 relative">
           {/* Container com linhas de grid */}
           <div className="md:grid md:grid-cols-12 px-6 md:px-0">
             {/* Coluna da esquerda para a logo */}
@@ -225,9 +225,9 @@ const Footer = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center md:items-end"
+              className="flex flex-col items-center"
             >
-              <div className="text-center md:text-right mb-2 justify-center">
+              <div className="text-center mb-2 justify-center">
                 <span className="text-white text-xl font-normal font-['Poppins'] leading-snug">FORMAS DE</span>
                 <span className="text-white text-xl font-extrabold font-['Poppins'] leading-snug"> PAGAMENTO</span>
               </div>
@@ -244,9 +244,9 @@ const Footer = () => {
       </div>
 
       {/* Termos e Copyright */}
-      <div className="container mx-auto pt-8 pb-4 px-6 md:px-0">
-        <div className="flex flex-col md:flex-row justify-center md:justify-between items-center text-xs text-[#6E6B46] font-['Poppins']">
-          <div className="mb-3 md:mb-0 flex space-x-8">
+      <div className="container mx-auto py-4 px-6 md:px-0 text-center">
+        <div className="flex flex-col items-center justify-center text-xs text-[#6E6B46] font-['Poppins']">
+          <div className="flex justify-center space-x-8 mb-2">
             <Link href="/termos-de-uso" className="hover:text-[#52A4DB] transition-colors duration-200">
               Termos de Uso
             </Link>
@@ -254,8 +254,8 @@ const Footer = () => {
               Políticas de Privacidade
             </Link>
           </div>
-          <div className="text-center md:text-right">
-            <p className="text-[#6E6B46]">
+          <div className="text-center">
+            <p className="text-[#6E6B46] font-bold">
               ©{anoAtual} <span className="mx-2">•</span> Lorena Jacob <span className="mx-2">•</span> Todos os Direitos Reservados
             </p>
           </div>
