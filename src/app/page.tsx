@@ -33,22 +33,103 @@ export default function Home() {
           />
         </div>
 
-        <div className="container mx-auto px-4 py-8 md:py-20 absolute top-0 left-0 right-0 z-10 flex flex-col md:flex-row items-center">
+        <div className="container mx-auto px-4 pt-12 md:pt-32 pb-8 md:pb-20 absolute top-0 left-0 right-0 z-10 flex flex-col md:flex-row items-start">
           {/* Texto do Banner Principal */}
-          <div className="md:w-1/2 text-white mb-12 md:mb-0">
-            <h1 className="text-5xl md:text-7xl font-bold mb-2">SUPORTE</h1>
-            <h2 className="text-4xl md:text-6xl font-bold mb-2">PERSONALIZADO</h2>
-            <h3 className="text-xl md:text-3xl mb-6">PARA O <span className="text-[#FFF786] font-bold text-3xl md:text-5xl">DESENVOLVIMENTO</span></h3>
-            <h2 className="text-[#FFF786] font-bold text-5xl md:text-7xl mb-8">INFANTIL</h2>
+          <div className="relative w-full md:w-[570px] md:h-80 text-white mb-12 md:mb-0 pl-6 md:pl-16 lg:pl-32">
+            {/* Banner para Desktop */}
+            <div className="hidden md:block">
+              <div className="w-[600px] relative left-[32px] justify-center">
+                <h1 className="text-white text-8xl lg:text-9xl font-bold font-['Museo_Sans_Rounded'] leading-none">SUPORTE</h1>
+              </div>
+              
+              <div className="w-[650px] relative left-[16px] justify-center -mt-1">
+                <h2 className="text-white text-6xl lg:text-7xl font-bold font-['Museo_Sans_Rounded'] leading-none">PERSONALIZADO</h2>
+              </div>
+              
+              <div className="w-[650px] relative left-[24px] justify-center mt-1">
+                <span className="text-white text-4xl lg:text-5xl font-bold font-['Museo_Sans_Rounded'] leading-none">PARA O </span>
+                <span className="text-[#FFFCB3] text-4xl lg:text-5xl font-bold font-['Museo_Sans_Rounded'] leading-none">DESENVOLVIMENTO</span>
+              </div>
+              
+              <div className="w-[650px] relative left-[32px] justify-center mt-1">
+                <h2 className="text-[#FFFCB3] text-7xl lg:text-9xl font-bold font-['Museo_Sans_Rounded'] leading-none">INFANTIL</h2>
+              </div>
+            </div>
             
-            <Link href="/contato" className="bg-white text-[#27769B] px-8 py-3 rounded-full font-medium inline-block hover:bg-opacity-90 transition">
-              Agende uma Avaliação
-            </Link>
+            {/* Banner para Tablets */}
+            <div className="hidden sm:block md:hidden">
+              <h1 className="text-white text-5xl font-bold font-['Museo_Sans_Rounded'] leading-none">SUPORTE</h1>
+              <h2 className="text-white text-4xl font-bold font-['Museo_Sans_Rounded'] leading-none -mt-1">PERSONALIZADO</h2>
+              <div className="mt-1">
+                <span className="text-white text-xl font-bold font-['Museo_Sans_Rounded'] leading-none">PARA O </span>
+                <span className="text-[#FFFCB3] text-xl font-bold font-['Museo_Sans_Rounded'] leading-none">DESENVOLVIMENTO</span>
+              </div>
+              <h2 className="text-[#FFFCB3] text-5xl font-bold font-['Museo_Sans_Rounded'] leading-none mt-1">INFANTIL</h2>
+            </div>
+            
+            {/* Banner para Mobile */}
+            <div className="sm:hidden pl-4">
+              <div className="relative left-[8px]">
+                <h1 className="text-white text-xl font-bold font-['Museo_Sans_Rounded'] leading-none">SUPORTE</h1>
+              </div>
+              <div className="relative -mt-0.5">
+                <h2 className="text-white text-lg font-bold font-['Museo_Sans_Rounded'] leading-none">PERSONALIZADO</h2>
+              </div>
+              <div className="mt-0.5 relative left-[2px]">
+                <span className="text-white text-xs font-bold font-['Museo_Sans_Rounded'] leading-none">PARA O </span>
+                <span className="text-[#FFFCB3] text-xs font-bold font-['Museo_Sans_Rounded'] leading-none">DESENVOLVIMENTO</span>
+              </div>
+              <div className="relative left-[8px] -mt-0.5">
+                <h2 className="text-[#FFFCB3] text-xl font-bold font-['Museo_Sans_Rounded'] leading-none">INFANTIL</h2>
+              </div>
+            
+              <div className="mt-3 relative pl-2">
+                <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 transition">
+                  Agende uma Avaliação
+                </Link>
+              </div>
+              
+              <div className="mt-4 border-l-4 border-white pl-3 py-1">
+                <p className="text-[10px] leading-tight whitespace-nowrap font-['MuseoSansRounded900']">
+                  Acompanhamento especializado para <span className="font-medium">auxiliar crianças com autismo, TDAH</span>
+                </p>
+                <p className="text-[10px] leading-tight whitespace-nowrap font-['MuseoSansRounded900']">
+                  e outras necessidades especiais.
+                </p>
+              </div>
+            </div>
+            
+            {/* Botão para tablet e desktop */}
+            <div className="hidden sm:block md:hidden pl-4">
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 transition mt-8">
+                Agende uma Avaliação
+              </Link>
+            </div>
+            
+            {/* Botão para desktop */}
+            <div className="hidden md:flex pl-[32px] mt-12 justify-center">
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 transition">
+                Agende uma Avaliação
+              </Link>
+            </div>
 
-            <div className="mt-8 border-l-4 border-white pl-4 py-1">
-              <p className="text-sm md:text-base">
-                Acompanhamento especializado para auxiliar crianças<br />
-                com o autismo, TDAH e outras necessidades especiais
+            {/* Texto informativo para tablet */}
+            <div className="mt-8 border-l-4 border-white pl-4 py-1 hidden sm:block md:hidden">
+              <p className="text-sm whitespace-nowrap font-['MuseoSansRounded900']">
+                Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
+              </p>
+              <p className="text-sm whitespace-nowrap font-['MuseoSansRounded900']">
+                <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
+              </p>
+            </div>
+            
+            {/* Texto informativo para desktop */}
+            <div className="mt-12 border-l-6 border-white pl-6 py-2 hidden md:block">
+              <p className="text-lg md:text-xl whitespace-nowrap font-['MuseoSansRounded900']">
+                Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
+              </p>
+              <p className="text-lg md:text-xl whitespace-nowrap font-['MuseoSansRounded900']">
+                <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
               </p>
             </div>
           </div>
