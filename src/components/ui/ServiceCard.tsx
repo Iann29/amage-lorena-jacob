@@ -41,7 +41,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       {/* Card principal */}
       <div className="w-[212px] h-[418px] relative overflow-hidden group transition-all duration-300 z-10 mt-0">
         {/* Card base com borda */}
-        <div className="w-full h-full absolute bg-[#FAFFE7] rounded-2xl outline outline-1 outline-[#27769B]"></div>
+        <div className="w-full h-full absolute bg-[#FAFFE7] rounded-2xl border border-[#27769B]"></div>
         
         {/* Imagem de fundo personalizada, se fornecida */}
         {backgroundImage && (
@@ -51,7 +51,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               alt={title} 
               fill
               priority
-              className="absolute w-full h-full object-cover opacity-40 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+              className="absolute w-full h-full object-cover opacity-60 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
             />
           </div>
         )}
