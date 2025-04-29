@@ -3,6 +3,22 @@
 
 @font-face {
   font-family: 'Museo Sans Rounded';
+  src: url('/fonts/MuseoSansRounded300.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Museo Sans Rounded';
+  src: url('/fonts/MuseoSansRounded500.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Museo Sans Rounded';
   src: url('/fonts/MuseoSansRounded900.otf') format('opentype');
   font-weight: 900;
   font-style: normal;
