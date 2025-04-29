@@ -19,7 +19,7 @@ const Header = () => {
   const headerBgColor = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 0.9)"]
+    ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"]
   );
   const headerShadow = useTransform(
     scrollY,
@@ -48,7 +48,7 @@ const Header = () => {
 
   return (
     <motion.header 
-      className="w-full sticky top-0 z-50 backdrop-blur-sm transition-all duration-300"
+      className="w-full sticky top-0 z-50 transition-all duration-300 bg-white"
       style={{
         backgroundColor: headerBgColor,
         boxShadow: headerShadow,
