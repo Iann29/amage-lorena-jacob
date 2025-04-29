@@ -8,14 +8,15 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative w-full bg-white overflow-hidden">
         {/* Background Image - Desktop */}
-        <div className="w-screen hidden md:block" style={{ height: '900px', position: 'relative' }}>
+        <div className="w-screen hidden md:block relative" style={{ height: 'auto' }}>
           <Image 
             src="/Backgroud.webp" 
             alt="Fundo Desktop" 
-            fill 
+            width={3000}
+            height={3000}
             priority
-            className="object-cover"
-            style={{ objectPosition: 'top center' }}
+            className="w-full h-auto"
+            style={{ display: 'block' }}
           />
         </div>
         
