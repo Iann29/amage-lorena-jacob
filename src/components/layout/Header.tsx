@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,99 +18,149 @@ const Header = () => {
   return (
     <header className="w-full bg-white py-3.5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
       <div className="container mx-auto px-6 flex justify-between items-center min-h-[80px] max-w-[1280px]">
-        {/* Logo à esquerda */}
-        <Link href="/" className="flex items-center">
-          <Image 
-            src="/logos/logo1.webp" 
-            alt="Lorena Jacob - Terapeuta Infantil" 
-            width={250} 
-            height={50}
-            priority
-            unoptimized
-            style={{ width: '250px', height: 'auto' }}
-            className="max-w-none"
-          />
-        </Link>
+        {/* Logo à esquerda - animado */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/logos/logo1.webp" 
+              alt="Lorena Jacob - Terapeuta Infantil" 
+              width={250} 
+              height={50}
+              priority
+              unoptimized
+              style={{ width: '250px', height: 'auto' }}
+              className="max-w-none"
+            />
+          </Link>
+        </motion.div>
 
         {/* Menu de navegação centralizado - desktop */}
-        <nav className="hidden lg:flex items-center justify-center flex-[0.7]">
+        <motion.nav 
+          className="hidden lg:flex items-center justify-center flex-[0.7]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
           <div className="flex items-center justify-center">
-            <Link 
-              href="/" 
-              className={`text-[#6E6B46] text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
-            >
-              Início
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/" 
+                className={`text-[#6E6B46] text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+              >
+                Início
+              </Link>
+            </motion.div>
             
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
             
-            <Link 
-              href="/sobre" 
-              className={`text-[#6E6B46] text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
-            >
-              Sobre Mim
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/sobre" 
+                className={`text-[#6E6B46] text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+              >
+                Sobre Mim
+              </Link>
+            </motion.div>
             
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
             
-            <Link 
-              href="/blog" 
-              className={`text-[#6E6B46] text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
-            >
-              Blog
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/blog" 
+                className={`text-[#6E6B46] text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+              >
+                Blog
+              </Link>
+            </motion.div>
             
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
             
-            <Link 
-              href="/contato" 
-              className={`text-[#6E6B46] text-base ${pathname === '/contato' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
-            >
-              Contato
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link 
+                href="/contato" 
+                className={`text-[#6E6B46] text-base ${pathname === '/contato' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+              >
+                Contato
+              </Link>
+            </motion.div>
             
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
             
             <div className="px-3">
-              <Link 
-                href="/loja" 
-                className="bg-[#52A4DB] text-white text-sm font-['Poppins'] rounded-md px-4 py-1 hover:bg-[#4790c2] transition"
+              <motion.div 
+                whileHover={{ scale: 1.05 }} 
+                whileTap={{ scale: 0.95 }}
               >
-                Loja
-              </Link>
+                <Link 
+                  href="/loja" 
+                  className="bg-[#52A4DB] text-white text-sm font-['Poppins'] rounded-md px-4 py-1 hover:bg-[#4790c2] transition"
+                >
+                  Loja
+                </Link>
+              </motion.div>
             </div>
           </div>
-        </nav>
+        </motion.nav>
 
         {/* Área direita - desktop */}
-        <div className="hidden lg:flex items-center flex-[0.3]">
+        <motion.div 
+          className="hidden lg:flex items-center flex-[0.3]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
           <div className="flex-1"></div> {/* Espaçador para empurrar conteúdo para direita */}
           
           {/* Área de "Minha Conta" (estilo da segunda imagem) */}
-          <div className="flex flex-col items-center mr-32">
+          <motion.div 
+            className="flex flex-col items-center mr-32"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Link href="/minha-conta" className="flex flex-col items-center">
-              <Image 
-                src="/assets/perfilIcon.png" 
-                alt="Minha Conta" 
-                width={40} 
-                height={40}
-                className="mb-0.5"
-                unoptimized
-                style={{ width: '40px', height: '40px' }}
-              />
+              <motion.div
+                whileHover={{ y: -2 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <Image 
+                  src="/assets/perfilIcon.png" 
+                  alt="Minha Conta" 
+                  width={40} 
+                  height={40}
+                  className="mb-0.5"
+                  unoptimized
+                  style={{ width: '40px', height: '40px' }}
+                />
+              </motion.div>
               <span className="text-[#365F71] text-xs font-['Poppins']">Minha Conta</span>
             </Link>
-          </div>
+          </motion.div>
           
           {/* Área de "Siga-me nas redes sociais" */}
-          <div className="flex flex-col items-center">
+          <motion.div 
+            className="flex flex-col items-center"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, duration: 0.3 }}
+          >
             <div className="text-[10px] font-['Poppins'] mb-1 text-center">
               <span className="text-[#52A4DB] font-bold">Siga-me</span>
               <span className="text-[#52A4DB]"> nas</span><br/>
               <span className="text-[#52A4DB]">redes sociais</span>
             </div>
             <div className="flex items-center">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="mx-1.5">
+              <motion.a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="mx-1.5"
+                whileHover={{ scale: 1.2, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <Image 
                   src="/assets/facebookHe.png" 
                   alt="Facebook" 
@@ -117,8 +168,15 @@ const Header = () => {
                   height={20}
                   className="w-5 h-5"
                 />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="mx-1.5">
+              </motion.a>
+              <motion.a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="mx-1.5"
+                whileHover={{ scale: 1.2, rotate: -5 }}
+                whileTap={{ scale: 0.9 }}
+              >
                 <Image 
                   src="/assets/instagramHe.png" 
                   alt="Instagram" 
@@ -126,16 +184,18 @@ const Header = () => {
                   height={24}
                   className="w-6 h-6"
                 />
-              </a>
+              </motion.a>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Botão do menu mobile */}
-        <button 
+        <motion.button 
           className="lg:hidden text-[#6E6B46] focus:outline-none"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Menu"
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
         >
           {isMenuOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,47 +206,90 @@ const Header = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
-        </button>
+        </motion.button>
       </div>
 
       {/* Menu móvel */}
-      {isMenuOpen && (
-        <div className="lg:hidden mt-1 py-2 border-t border-gray-200 px-4">
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            className="lg:hidden mt-1 py-2 border-t border-gray-200 px-4"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
           <nav className="flex flex-col space-y-2">
-            <Link 
-              href="/" 
-              className={`text-[#6E6B46] text-xs ${pathname === '/' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Início
-            </Link>
+              <Link 
+                href="/" 
+                className={`text-[#6E6B46] text-xs ${pathname === '/' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+              >
+                Início
+              </Link>
+            </motion.div>
             
-            <Link 
-              href="/sobre" 
-              className={`text-[#6E6B46] text-xs ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Sobre Mim
-            </Link>
+              <Link 
+                href="/sobre" 
+                className={`text-[#6E6B46] text-xs ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+              >
+                Sobre Mim
+              </Link>
+            </motion.div>
             
-            <Link 
-              href="/blog" 
-              className={`text-[#6E6B46] text-xs ${pathname === '/blog' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Blog
-            </Link>
+              <Link 
+                href="/blog" 
+                className={`text-[#6E6B46] text-xs ${pathname === '/blog' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+              >
+                Blog
+              </Link>
+            </motion.div>
             
-            <Link 
-              href="/contato" 
-              className={`text-[#6E6B46] text-xs ${pathname === '/contato' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Contato
-            </Link>
+              <Link 
+                href="/contato" 
+                className={`text-[#6E6B46] text-xs ${pathname === '/contato' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+              >
+                Contato
+              </Link>
+            </motion.div>
             
-            <Link 
-              href="/loja" 
-              className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1"
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Loja
-            </Link>
+              <Link 
+                href="/loja" 
+                className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full"
+              >
+                Loja
+              </Link>
+            </motion.div>
             
             <div className="flex justify-between pt-2 mt-1 border-t border-gray-200">
               {/* Siga-me nas redes sociais (mobile) */}
@@ -230,8 +333,9 @@ const Header = () => {
               </Link>
             </div>
           </nav>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
