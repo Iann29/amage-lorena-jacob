@@ -15,22 +15,24 @@ const Header = () => {
   }, [pathname]);
 
   return (
-    <header className="w-full bg-white py-2 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+    <header className="w-full bg-white py-3.5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]">
+      <div className="container mx-auto px-6 flex justify-between items-center min-h-[80px] max-w-[1280px]">
         {/* Logo à esquerda */}
         <Link href="/" className="flex items-center">
           <Image 
             src="/logos/logo1.webp" 
             alt="Lorena Jacob - Terapeuta Infantil" 
-            width={150} 
-            height={30}
+            width={250} 
+            height={50}
             priority
-            className="w-auto h-auto"
+            unoptimized
+            style={{ width: '250px', height: 'auto' }}
+            className="max-w-none"
           />
         </Link>
 
         {/* Menu de navegação centralizado - desktop */}
-        <nav className="hidden lg:flex items-center justify-center flex-1">
+        <nav className="hidden lg:flex items-center justify-center flex-[0.7]">
           <div className="flex items-center justify-center">
             <Link 
               href="/" 
@@ -80,47 +82,52 @@ const Header = () => {
         </nav>
 
         {/* Área direita - desktop */}
-        <div className="hidden lg:flex items-center space-x-6">
-          {/* Área de "Siga-me nas redes sociais" */}
-          <div className="flex items-center">
-            <div className="text-xs font-['Poppins']">
-              <span className="text-[#52A4DB] font-medium">Siga-me</span>
-              <span className="text-[#52A4DB]"> nas redes sociais</span>
-            </div>
-            <div className="flex items-center ml-2">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="mx-1">
-                <Image 
-                  src="/assets/facebookHe.png" 
-                  alt="Facebook" 
-                  width={16} 
-                  height={16}
-                  className="w-4 h-4"
-                />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="mx-1">
-                <Image 
-                  src="/assets/instagramHe.png" 
-                  alt="Instagram" 
-                  width={16} 
-                  height={16}
-                  className="w-4 h-4"
-                />
-              </a>
-            </div>
-          </div>
-
+        <div className="hidden lg:flex items-center flex-[0.3]">
+          <div className="flex-1"></div> {/* Espaçador para empurrar conteúdo para direita */}
+          
           {/* Área de "Minha Conta" (estilo da segunda imagem) */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mr-32">
             <Link href="/minha-conta" className="flex flex-col items-center">
               <Image 
                 src="/assets/perfilIcon.png" 
                 alt="Minha Conta" 
-                width={24} 
-                height={24}
-                className="w-6 h-6 mb-0.5"
+                width={40} 
+                height={40}
+                className="mb-0.5"
+                unoptimized
+                style={{ width: '40px', height: '40px' }}
               />
               <span className="text-[#365F71] text-xs font-['Poppins']">Minha Conta</span>
             </Link>
+          </div>
+          
+          {/* Área de "Siga-me nas redes sociais" */}
+          <div className="flex flex-col items-center">
+            <div className="text-[10px] font-['Poppins'] mb-1 text-center">
+              <span className="text-[#52A4DB] font-bold">Siga-me</span>
+              <span className="text-[#52A4DB]"> nas</span><br/>
+              <span className="text-[#52A4DB]">redes sociais</span>
+            </div>
+            <div className="flex items-center">
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="mx-1.5">
+                <Image 
+                  src="/assets/facebookHe.png" 
+                  alt="Facebook" 
+                  width={20} 
+                  height={20}
+                  className="w-5 h-5"
+                />
+              </a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="mx-1.5">
+                <Image 
+                  src="/assets/instagramHe.png" 
+                  alt="Instagram" 
+                  width={24} 
+                  height={24}
+                  className="w-6 h-6"
+                />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -185,7 +192,7 @@ const Header = () => {
               {/* Siga-me nas redes sociais (mobile) */}
               <div className="flex flex-col">
                 <div className="text-[10px] font-['Poppins']">
-                  <span className="text-[#52A4DB] font-medium">Siga-me</span>
+                  <span className="text-[#52A4DB] font-bold">Siga-me</span>
                   <span className="text-[#52A4DB]"> nas redes sociais</span>
                 </div>
                 <div className="flex items-center mt-1 space-x-2">
