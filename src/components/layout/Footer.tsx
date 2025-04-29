@@ -56,12 +56,12 @@ const Footer = () => {
             </motion.div>
 
             {/* Separador vertical */}
-            <div className="hidden md:block h-auto w-px bg-gray-200 mx-6"></div>
+            <div className="hidden md:block h-auto w-px bg-gray-200 mx-4"></div>
             {/* Menu com os 4 itens */}
-            <div className="flex-1 flex flex-col md:flex-row md:justify-between">
+            <div className="flex-1 flex flex-col md:flex-row md:justify-end space-x-0 md:space-x-10 lg:space-x-14 pl-0 md:pl-2">
               {/* Início */}
-              <div className="mb-8 md:mb-0">
-                <h3 className="text-[#52A4DB] text-xl font-semibold font-['Poppins'] mb-4">Início</h3>
+              <div className="mb-8 md:mb-0 md:w-auto">
+                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-3">Início</h3>
                 <ul className="text-[#6E6B46] space-y-2 text-xs font-['Poppins']">
                   <li>
                     <Link href="/#suporte" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -92,8 +92,8 @@ const Footer = () => {
               </div>
 
               {/* Sobre mim */}
-              <div className="mb-8 md:mb-0">
-                <h3 className="text-[#52A4DB] text-xl font-semibold font-['Poppins'] mb-4">Sobre mim</h3>
+              <div className="mb-8 md:mb-0 md:w-auto">
+                <h3 className="text-[#07B1E4] text-lg font-bold font-['Poppins'] mb-3">Sobre mim</h3>
                 <ul className="text-[#6E6B46] space-y-2 text-xs font-['Poppins']">
                   <li>
                     <Link href="/sobre" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -109,8 +109,8 @@ const Footer = () => {
               </div>
 
               {/* Blog */}
-              <div className="mb-8 md:mb-0">
-                <h3 className="text-[#52A4DB] text-xl font-semibold font-['Poppins'] mb-4">Blog</h3>
+              <div className="mb-8 md:mb-0 md:w-auto">
+                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-3">Blog</h3>
                 <ul className="text-[#6E6B46] space-y-2 text-xs font-['Poppins']">
                   <li>
                     <Link href="/blog/categoria/dicas" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -126,8 +126,8 @@ const Footer = () => {
               </div>
 
               {/* Loja */}
-              <div className="mb-8 md:mb-0">
-                <h3 className="text-[#52A4DB] text-xl font-semibold font-['Poppins'] mb-4">Loja</h3>
+              <div className="mb-8 md:mb-0 md:w-auto">
+                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-3">Loja</h3>
                 <ul className="text-[#6E6B46] space-y-2 text-xs font-['Poppins']">
                   <li>
                     <Link href="/loja/categoria/brinquedos-sensoriais" className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
