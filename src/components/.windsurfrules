@@ -1,0 +1,8 @@
+# Regras para a Pasta /components
+
+- Esta pasta contém todos os componentes React reutilizáveis da aplicação.
+- **Organização:** Componentes devem ser organizados em subpastas por clareza (ex: `ui/` para botões, inputs; `layout/` para Header, Footer; `products/` para ProductCard, ProductList; `blog/` para PostPreview).
+- **Layout Principal:** O componente `Layout.js` (em `components/layout/` ou raiz de `/components`) é responsável pela estrutura geral (Header, Main, Footer).
+- **Estilização:** Usar CSS Modules (arquivos `.module.css` com o mesmo nome do componente, na mesma pasta) ou a abordagem definida no root (`Tailwind`, etc.).
+- **Propriedades (Props):** Definir `propTypes` ou usar TypeScript para tipagem clara das props dos componentes.
+- **Foco:** Criar componentes genéricos e reutilizáveis sempre que possível.

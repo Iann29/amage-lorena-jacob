@@ -1,0 +1,36 @@
+# Regras Globais para o Projeto Lorena Jacob
+
+1 - Fale sempre em portugues brasil.
+
+## Visão Geral do Projeto
+- **Nome:** E-commerce e Blog para Lorena Jacob (Terapeuta Infantil).
+- **Objetivo:** Vender produtos digitais/físicos e compartilhar conteúdo de blog sobre desenvolvimento infantil, autismo, TDAH, etc.
+- **Tecnologias Principais:**
+  - **Frontend Framework:** Next.js (v15.3.1 (Turbopack)) com App Router - usando React.
+  - **Backend:** Supabase (PostgreSQL DB, Auth, Edge Functions, Storage).
+  - **Estilização:** CSS Modules / Tailwind CSS / Styled Components. Mencione também o uso de `styles/globals.css`.
+  - **Gateway de Pagamento:** Mercado Pago (integrado via Edge Function para webhook).
+
+## Estrutura e Convenções
+- **Roteamento:** Utiliza o sistema de roteamento baseado em arquivos do Next.js (ex: `pages/loja.js` -> `/loja` ou `app/loja/page.js`).
+- **Componentes:** Componentes reutilizáveis ficam na pasta `/components`. Organizar em subpastas por funcionalidade ou tipo (ex: `components/ui`, `components/products`, `components/layout`).
+- **Layout:** Layout principal (Header, Footer) definido em `components/Layout.js` e aplicado globalmente via `pages/_app.js` (ou `app/layout.js` no App Router).
+- **Utilitários/Libs:** Funções auxiliares e configuração do cliente Supabase ficam em `/lib` ou `/utils`.
+- **Variáveis de Ambiente:** Chaves Supabase (URL, Anon Key) devem ser carregadas de variáveis de ambiente (`.env.local`) prefixadas com `NEXT_PUBLIC_` para uso no cliente (ex: `NEXT_PUBLIC_SUPABASE_URL`). Chaves secretas (Supabase Service Role, Mercado Pago Secret) *NÃO* devem ter o prefixo e só podem ser usadas no backend (API Routes ou Edge Functions).
+
+## Integração com Supabase
+- **Cliente Supabase:** Um cliente Supabase é inicializado em `lib/supabaseClient.js` (ou similar) e reutilizado.
+- **Autenticação:** Usa `supabase.auth` para login, cadastro, sessão, etc.
+- **Banco de Dados:** Interage com as tabelas definidas no script SQL (products, orders, users_profiles, etc.) usando `supabase.from('nome_tabela')...`. Respeitar as políticas RLS definidas.
+- **Edge Functions:** Usadas para operações críticas de backend (ex: webhook do Mercado Pago em `supabase/functions/mercadopago-webhook/`).
+- **Storage:** Pode ser usado para imagens de produtos, blog, avatares.
+
+## Foco Atual
+- Implementar a estrutura básica das páginas (Home, Sobre, Blog, Loja, Contato).
+- Criar componentes de layout (Header, Footer).
+- Conectar o frontend ao Supabase para buscar dados públicos (produtos, posts).
+
+## Evitar
+- Colocar chaves secretas diretamente no código do frontend.
+- Lógica de negócio complexa ou sensível diretamente no frontend (usar Edge Functions ou API Routes se necessário).
+- Modificar diretamente a tabela `auth.users` (usar `user_profiles` para dados customizados).

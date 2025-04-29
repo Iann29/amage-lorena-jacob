@@ -1,0 +1,7 @@
+# Regras para a Pasta /lib
+
+- Esta pasta contém código auxiliar, configurações e utilitários.
+- **Cliente Supabase:** O arquivo `supabaseClient.js` (ou similar) configura e exporta a instância do cliente Supabase para ser usada em todo o projeto. Ele deve ler as variáveis de ambiente `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **Funções Auxiliares:** Pode conter helpers para formatação de datas, cálculos, chamadas de API específicas, etc.
+- **Tipos:** Se usar TypeScript, pode conter definições de tipos compartilhados.
+- **Não colocar:** Componentes React ou lógica de página específica aqui.

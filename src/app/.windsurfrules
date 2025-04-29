@@ -1,0 +1,36 @@
+# Regras para a Pasta /src/app (Next.js App Router)
+
+## Visão Geral
+- Esta pasta implementa o roteamento e a UI usando o App Router do Next.js.
+- **Roteamento baseado em pastas:** Cada pasta dentro de `/app` representa um segmento de rota na URL.
+- **Arquivos Especiais:** Arquivos com nomes específicos (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `route.ts`) têm funções especiais.
+
+## Estrutura e Convenções
+- **`layout.tsx`:** Define a UI compartilhada para um segmento de rota e seus filhos. O `app/layout.tsx` é o Root Layout, obrigatório, que envolve toda a aplicação.
+- **`page.tsx`:** Define a UI única para um segmento de rota. É o componente renderizado para aquela URL específica.
+- **`loading.tsx`:** (Opcional) Define uma UI de carregamento mostrada via React Suspense enquanto o conteúdo da rota (`page.tsx`) carrega.
+- **`error.tsx`:** (Opcional) Define uma UI de erro para tratar erros inesperados em um segmento de rota.
+- **`route.ts` (ou `.js`):** Define endpoints de API para um segmento de rota (substitui a antiga pasta `pages/api`).
+
+## Rotas do Projeto (Exemplos de Estrutura):
+- **Home:** `app/page.tsx` (a raiz `/`)
+- **Sobre Mim:** `app/sobre/page.tsx` (rota `/sobre`)
+- **Blog (Listagem):** `app/blog/page.tsx` (rota `/blog`)
+- **Loja (Listagem):** `app/loja/page.tsx` (rota `/loja`)
+- **Contato:** `app/contato/page.tsx` (rota `/contato`)
+- **Login:** `app/login/page.tsx` (rota `/login`)
+- **Minha Conta:** `app/minha-conta/page.tsx` (rota `/minha-conta`)
+
+## Rotas Dinâmicas:
+- **Post do Blog:** `app/blog/[slug]/page.tsx` (rota `/blog/o-slug-do-post`)
+- **Detalhe do Produto:** `app/loja/[slug]/page.tsx` (rota `/loja/o-slug-do-produto`) - Ou usar `[id]` se preferir.
+
+## Componentes e Data Fetching:
+- **Server Components (Padrão):** A maioria dos componentes em `/app` são Server Components por padrão. Eles podem buscar dados diretamente usando `async/await` (ex: `await supabase.from(...).select()`). São ótimos para SEO e performance inicial.
+- **Client Components:** Componentes que precisam de interatividade (hooks como `useState`, `useEffect`, event handlers) devem ter a diretiva `"use client";` no topo do arquivo. Eles buscam dados usando `useEffect` ou bibliotecas como SWR/TanStack Query (React Query).
+- **Dados do Supabase:** Buscar dados do Supabase conforme necessário, respeitando as RLS. Usar Server Components para buscar dados que não dependem de interação do usuário imediata.
+
+## Foco Atual:
+- Definir a estrutura de pastas para as rotas principais (Sobre, Blog, Loja, Contato).
+- Implementar o `app/layout.tsx` com o Header e Footer básicos (importados de `/components`).
+- Criar arquivos `page.tsx` básicos para cada rota principal.
