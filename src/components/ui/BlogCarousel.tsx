@@ -91,8 +91,8 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
         </button>
       </div>
 
-      {/* Container do carrossel */}
-      <div className="relative pb-6 pt-6 px-4">
+      {/* Container do carrossel com altura fixa para evitar saltos */}
+      <div className="relative pb-6 pt-6 px-4" style={{ height: '520px' }}>
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div 
             key={currentPage}
@@ -105,7 +105,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 }
             }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto h-full"
           >
             {currentPosts.map((post) => (
               <BlogPostCard 
