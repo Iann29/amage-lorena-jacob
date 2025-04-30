@@ -18,7 +18,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
     <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 flex flex-col items-center mx-auto relative w-full min-h-[280px] sm:min-h-[320px] md:min-h-[340px]" style={{ width: '100%', maxWidth: '320px' }}>
       {/* Citação */}
       <p className="text-center text-[#555555] italic text-xs sm:text-sm leading-relaxed flex-1">
-        "{quote}"
+        &quot;{quote}&quot;
       </p>
       
       {/* Área do Avatar */}

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
 // Interface para os dados de depoimento
@@ -19,6 +19,7 @@ interface TestimonialsCarouselProps {
 
 const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   testimonials,
+  // Usando o parâmetro diretamente na configuração abaixo
   visibleItems = 3
 }) => {
   // Estado para controlar o índice inicial dos depoimentos visíveis
@@ -65,7 +66,8 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   }, []);
   
   // Criar um array circular para facilitar a rotação dos itens
-  const getCircularItems = () => {
+  // Usando useCallback para memoizar a função e evitar recriações desnecessárias
+  const getCircularItems = useCallback(() => {
     const items = [...testimonials];
     const { itemsToShow } = displayConfig;
     
@@ -83,7 +85,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
     }
     
     return visibleTestimonials;
-  };
+  }, [activeIndex, displayConfig, testimonials]); // Dependências da função
   
   // Obter os itens visíveis no momento
   const [visibleTestimonials, setVisibleTestimonials] = useState(getCircularItems());
@@ -91,7 +93,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   // Atualizar os itens visíveis quando o índice ativo muda ou quando a configuração de exibição muda
   useEffect(() => {
     setVisibleTestimonials(getCircularItems());
-  }, [activeIndex, displayConfig.itemsToShow]);
+  }, [activeIndex, displayConfig.itemsToShow, getCircularItems]);
 
   // Direção da animação (1 = direita, -1 = esquerda)
   const [direction, setDirection] = useState(0);

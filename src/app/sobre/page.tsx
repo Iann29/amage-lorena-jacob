@@ -1,4 +1,4 @@
-import Image from 'next/image';
+// Import removido conforme não está sendo utilizado
 
 export const metadata = {
   title: 'Sobre | Lorena Jacob',
@@ -31,7 +31,7 @@ export default function SobrePage() {
           </p>
           
           <div className="mt-6 border-l-4 border-purple-500 pl-4 italic text-gray-600">
-            "Meu objetivo é criar um ambiente acolhedor onde cada criança possa se sentir segura para explorar, aprender e superar seus desafios."
+            &quot;Meu objetivo é criar um ambiente acolhedor onde cada criança possa se sentir segura para explorar, aprender e superar seus desafios.&quot;
           </div>
         </div>
       </div>

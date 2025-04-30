@@ -47,7 +47,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   
   // Exemplo de função para buscar estatísticas do post no futuro
   // No futuro, isso chamará o Supabase
-  const fetchPostStats = async (postId: string | number | undefined, postSlug: string | undefined): Promise<PostStats> => {
+  // Removidos os parâmetros não utilizados diretamente na implementação atual
+  // Parâmetros serão reativados quando a integração com o Supabase for implementada
+  const fetchPostStats = async (/*postId: string | number | undefined, postSlug: string | undefined*/): Promise<PostStats> => {
     // Função mockada - no futuro, será substituída por uma chamada real ao Supabase
     // Exemplo de como será a consulta no futuro:
     // const { data, error } = await supabase
@@ -75,7 +77,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
     if ((id || slug) && (!initialViewCount || !initialCommentCount)) {
       const loadStats = async () => {
         try {
-          const stats = await fetchPostStats(id, slug);
+          // Parâmetros comentados pois não são usados na implementação atual
+          const stats = await fetchPostStats(/*id, slug*/);
           setViewCount(stats.views);
           setCommentCount(stats.comments);
         } catch (error) {
@@ -87,7 +90,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
       // Comentado para não executar agora, será habilitado quando conectar ao Supabase
       // loadStats();
     }
-  }, [id, slug, initialViewCount, initialCommentCount]);
+  }, [id, slug, initialViewCount, initialCommentCount, fetchPostStats]);
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3" style={{ maxWidth: '380px', height: '450px' }}>

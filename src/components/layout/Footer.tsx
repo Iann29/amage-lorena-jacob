@@ -9,26 +9,9 @@ const Footer = () => {
   const router = useRouter();
   const anoAtual = new Date().getFullYear();
 
-  // Animações para os elementos do footer
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      } 
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300 }
-    }
-  };
+  // Animações para os elementos do footer - variáveis removidas pois não estão sendo utilizadas
+  // const containerVariants = { ... };
+  // const itemVariants = { ... };
 
   return (
     <footer className="bg-white">

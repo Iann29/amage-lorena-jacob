@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface LoaderProps {
+  // Este parâmetro é recebido mas não é chamado diretamente neste componente
+  // É usado apenas para tipagem, pois o componente pai (LoadingWrapper) o chama
   finishLoading: () => void;
 }
 
-const Loader = ({ finishLoading }: LoaderProps) => {
+const Loader = ({ /* finishLoading não utilizado diretamente */ }: LoaderProps) => {
   const [counter, setCounter] = useState(0);
 
   // O finishLoading é chamado pelo componente pai (LoadingWrapper)

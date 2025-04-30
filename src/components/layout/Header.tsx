@@ -8,7 +8,8 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform }
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  // Variável comentada pois não está sendo utilizada no código
+  // const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { scrollY } = useScroll();
   
@@ -22,14 +23,14 @@ const Header = () => {
     ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
   
-  // Usar useMotionValueEvent em vez de addEventListener para melhor performance
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 50) {
-      setIsScrolled(true);
-    } else {
-      setIsScrolled(false);
-    }
-  });
+  // Código comentado pois a variável isScrolled não está sendo utilizada
+  // useMotionValueEvent(scrollY, "change", (latest) => {
+  //   if (latest > 50) {
+  //     setIsScrolled(true);
+  //   } else {
+  //     setIsScrolled(false);
+  //   }
+  // });
 
   // Fechar o menu ao trocar de página
   useEffect(() => {
