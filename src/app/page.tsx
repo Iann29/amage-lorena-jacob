@@ -4,6 +4,7 @@ import ServiceCard from "@/components/ui/ServiceCard";
 import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
+import TestimonialsCarousel from "@/components/ui/TestimonialsCarousel";
 
 export default function Home() {
   return (
@@ -332,6 +333,69 @@ export default function Home() {
       
       {/* Seção de E-book */}
       <EbookBanner />
+      
+      {/* Seção de Depoimentos */}
+      <section className="py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
+        {/* Imagem de fundo */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/assets/depoimentosbackground.png" 
+            alt="Fundo de depoimentos" 
+            fill 
+            priority
+            className="object-cover object-center"
+          />
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Título */}
+          <div className="text-center mb-16">
+            <h2 className="text-6xl md:text-7xl font-bold text-white font-['Museo_Sans_Rounded']">DEPOIMENTOS</h2>
+          </div>
+          
+          {/* Carrossel de Depoimentos */}
+          <TestimonialsCarousel 
+            testimonials={[
+              {
+                id: 1,
+                quote: "Que no mundo venha ter mais profissionais assim como você.",
+                name: "Gabryella",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              },
+              {
+                id: 2,
+                quote: "Que no mundo venha ter mais profissionais assim como você.",
+                name: "Bruna",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              },
+              {
+                id: 3,
+                quote: "Que no mundo venha ter mais profissionais assim como você.",
+                name: "Luana",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              },
+              {
+                id: 4,
+                quote: "Meu filho evoluiu muito com suas técnicas e abordagem personalizada.",
+                name: "Carla",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              },
+              {
+                id: 5,
+                quote: "A forma como a Lorena trabalha é extraordinária, recomendo a todos os pais.",
+                name: "Paulo",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              },
+              {
+                id: 6,
+                quote: "Finalmente encontramos uma profissional que entende nossas necessidades.",
+                name: "Roberta",
+                avatarSrc: "/assets/avatar-placeholder.png"
+              }
+            ]}
+          />
+        </div>
+      </section>
       
       {/* Decorative footer icons */}
       <div className="w-full h-12 bg-white flex justify-center items-center">
