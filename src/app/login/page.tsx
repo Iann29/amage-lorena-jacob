@@ -115,11 +115,13 @@ export default function LoginPage() {
         <div className={styles.overlay}>
           {/* Citação */}
           <div className={styles.quote}>
-            <div className={styles.quoteSymbol}>“</div>
-            <div className={styles.quoteText}>
-              Conhecimento, estímulo<br/>e constância <span className={styles.highlight}>transformam</span><br/>o desenvolvimento da<br/>criança com autismo.
+            <div>
+              <div className={styles.quoteSymbol}>“</div>
+              <div className={styles.quoteText}>
+                Conhecimento, estímulo<br/>e constância <span className={styles.highlight}>transformam</span><br/>o desenvolvimento da<br/>criança com autismo.
+              </div>
+              <div className={styles.quoteAuthor}>Lorena Jacob</div>
             </div>
-            <div className={styles.quoteAuthor}>Lorena Jacob</div>
           </div>
           
           {/* Link do Instagram */}
