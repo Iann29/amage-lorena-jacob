@@ -10,7 +10,7 @@ export default function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Este layout não faz nada além de definir metadados
-  // A visão e ocultamento do header e footer é gerenciado pelos próprios componentes
+  // Na abordagem do App Router, não precisamos definir a estrutura HTML completa
+  // Apenas retornamos o conteúdo e o layout pai (app/layout.tsx) vai lidar com o resto
   return children;
 }

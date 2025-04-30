@@ -73,11 +73,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} ${museoSansRounded.variable} ${mogilaBold.variable} antialiased`}>
         <LoadingWrapper>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
+          {children}
         </LoadingWrapper>
       </body>
     </html>

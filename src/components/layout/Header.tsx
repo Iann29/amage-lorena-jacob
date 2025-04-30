@@ -13,14 +13,6 @@ const Header = () => {
   const pathname = usePathname();
   const { scrollY } = useScroll();
   
-  // Páginas onde o header não deve ser exibido
-  const noHeaderPages = ['/login', '/cadastro', '/esqueci-minha-senha'];
-  
-  // Verifica se está em uma página que não deve exibir o header
-  if (noHeaderPages.some(page => pathname === page)) {
-    return null;
-  }
-  
   // Valores para transformações baseadas no scroll - com transições mais suaves
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
@@ -31,6 +23,13 @@ const Header = () => {
     ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
   
+  // Fechar o menu ao trocar de página - movido para antes da verificação condicional
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [pathname, isMenuOpen]);
+  
   // Código comentado pois a variável isScrolled não está sendo utilizada
   // useMotionValueEvent(scrollY, "change", (latest) => {
   //   if (latest > 50) {
@@ -39,11 +38,8 @@ const Header = () => {
   //     setIsScrolled(false);
   //   }
   // });
-
-  // Fechar o menu ao trocar de página
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+  
+  // A lógica de exibição/ocultação do Header foi movida para o template.tsx principal
 
   return (
     <motion.header 

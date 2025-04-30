@@ -10,13 +10,7 @@ const Footer = () => {
   const pathname = usePathname();
   const anoAtual = new Date().getFullYear();
   
-  // Páginas onde o footer não deve ser exibido
-  const noFooterPages = ['/login', '/cadastro', '/esqueci-minha-senha'];
-  
-  // Verifica se está em uma página que não deve exibir o footer
-  if (noFooterPages.some(page => pathname === page)) {
-    return null;
-  }
+  // A lógica de exibição/ocultação do Footer foi movida para o template.tsx principal
 
   // Animações para os elementos do footer - variáveis removidas pois não estão sendo utilizadas
   // const containerVariants = { ... };
