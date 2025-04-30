@@ -259,80 +259,95 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl italic" style={{ color: '#806D52', fontFamily: 'Mogila', fontWeight: 'bold' }}>encontrar no blog</h2>
           </div>
           
-          {/* Cards do Blog - 3 cards em carrossel */}
-          <div className="relative max-w-6xl mx-auto">
-            {/* Setas de navegação */}
+          {/* Cards do Blog - Carrossel */}
+          <div className="relative max-w-6xl mx-auto px-12">
+            {/* Seta esquerda */}
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
-              <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <button className="bg-transparent border-none hover:scale-110 transition-transform">
+                <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22 2L2 22.5L22 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto">
               {/* Card 1 */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="h-52 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
+                <div className="h-64 overflow-hidden">
                   <Image 
                     src="/assets/blog-placeholder.jpg" 
                     alt="Post do blog" 
                     width={400} 
                     height={300}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
-                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <a href="/blog/post-1" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
-                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-                    <span>4 visualizações</span>
-                    <span>3 comentários</span>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
+                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <div className="mt-auto">
+                    <a href="/blog/post-1" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
+                      SAIBA MAIS
+                    </a>
+                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
+                      <span>4 visualizações</span>
+                      <span>2 comentários</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Card 2 */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="h-52 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
+                <div className="h-64 overflow-hidden">
                   <Image 
                     src="/assets/blog-placeholder.jpg" 
                     alt="Post do blog" 
                     width={400} 
                     height={300}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
-                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <a href="/blog/post-2" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
-                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-                    <span>4 visualizações</span>
-                    <span>3 comentários</span>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
+                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <div className="mt-auto">
+                    <a href="/blog/post-2" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
+                      SAIBA MAIS
+                    </a>
+                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
+                      <span>4 visualizações</span>
+                      <span>2 comentários</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Card 3 */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="h-52 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
+                <div className="h-64 overflow-hidden">
                   <Image 
                     src="/assets/blog-placeholder.jpg" 
                     alt="Post do blog" 
                     width={400} 
                     height={300}
                     className="w-full h-full object-cover"
+                    unoptimized
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#0B5394] mb-2">Título aqui</h3>
-                  <p className="text-sm text-gray-600 mb-4">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <a href="/blog/post-3" className="bg-[#0B5394] text-white text-center py-2 px-4 rounded-lg inline-block w-full hover:bg-opacity-90 transition-all">SAIBA MAIS</a>
-                  <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
-                    <span>4 visualizações</span>
-                    <span>3 comentários</span>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
+                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
+                  <div className="mt-auto">
+                    <a href="/blog/post-3" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
+                      SAIBA MAIS
+                    </a>
+                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
+                      <span>4 visualizações</span>
+                      <span>2 comentários</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -340,9 +355,9 @@ export default function Home() {
 
             {/* Seta direita */}
             <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
-              <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <button className="bg-transparent border-none hover:scale-110 transition-transform">
+                <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 2L22 22.5L2 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
