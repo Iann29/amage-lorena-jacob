@@ -1,37 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-@font-face {
-  font-family: 'Museo Sans Rounded';
-  src: url('/fonts/MuseoSansRounded300.otf') format('opentype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Museo Sans Rounded';
-  src: url('/fonts/MuseoSansRounded500.otf') format('opentype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Museo Sans Rounded';
-  src: url('/fonts/MuseoSansRounded900.otf') format('opentype');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Mogila';
-  src: url('/fonts/Mogila Bold.otf') format('opentype');
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
+/* Removido importações de fontes diretas e @font-face
+   As fontes agora são carregadas pelo sistema de fontes do Next.js */
 
 :root {
   --background: #ffffff;
@@ -45,7 +15,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Poppins', var(--font-geist-sans);
+  --font-sans: var(--font-poppins), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -59,7 +29,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 /* Configurações para o header */

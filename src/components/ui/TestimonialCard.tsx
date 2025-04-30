@@ -42,7 +42,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
         </div>
         
         {/* Nome */}
-        <h4 className="text-lg sm:text-xl font-bold text-[#333333] font-['Museo_Sans_Rounded'] mt-3">{name}</h4>
+        <h4 className="text-lg sm:text-xl font-bold text-[#333333] font-[var(--font-museo-sans)] mt-3">{name}</h4>
       </div>
     </div>
   );
