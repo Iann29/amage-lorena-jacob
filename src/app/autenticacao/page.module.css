@@ -6,13 +6,13 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  font-family: 'Museo_Sans_Rounded', sans-serif;
+  font-family: var(--font-museo-sans), sans-serif;
 }
 
 /* Fundo azul na parte superior */
 .topBackground {
   background-color: #6FB1CE;
-  padding: 2rem 1rem 4rem;
+  padding: 10rem 1rem 14rem; /* Aumentei MUITO mais o espaçamento vertical */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -32,20 +32,21 @@
   margin-top: -2rem;
   display: flex;
   justify-content: center;
+  padding-bottom: 4rem; /* Adicionando espaço abaixo do conteúdo */
 }
 
 /* Card de autenticação */
 .authCard {
   background-color: white;
   border-radius: 1.5rem;
-  padding: 2rem;
+  padding: 1.75rem; /* Reduzindo o padding interno */
   width: 100%;
   max-width: 550px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
-  /* Ajustes para diminuir a altura do cartão */
-  transform: translateY(-50px);
-  margin-bottom: -50px;
+  /* Ajustes para posicionar o cartão sobre a área azul maior */
+  transform: translateY(-120px);
+  margin-bottom: 2rem; /* Alterando para margem positiva para criar espaço até o footer */
 }
 
 /* Estilo do texto de boas-vindas */
@@ -54,7 +55,7 @@
   color: #333;
   /* Diminuindo o espaço entre o texto e os botões */
   margin-bottom: 1.5rem;
-  font-weight: 900;
+  font-weight: normal; /* Removido o negrito do texto base */
 }
 
 /* Destaque no texto */
@@ -82,21 +83,22 @@
   background-color: #FFFEEC;
   color: #378DB2;
   border: none;
-  border-radius: 27px;
-  padding: 0.75rem 1.5rem;
+  border-radius: 15px; /* Botão menos arredondado */
+  padding: 1rem 2rem; /* Padding ainda maior */
   /* Limitando a largura do botão */
   width: auto;
-  min-width: 180px;
-  max-width: 250px;
-  font-family: 'Museo_Sans_Rounded', sans-serif;
-  font-size: 1.1rem;
+  min-width: 260px; /* Botão ainda mais largo */
+  max-width: 320px; /* Aumentado mais o tamanho máximo */
+  font-family: var(--font-museo-sans), sans-serif;
+  font-size: 1.25rem; /* Fonte maior */
   font-weight: 900;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem; /* Aumentando o espaço entre o ícone e o texto */
   transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adicionando sombra como na imagem */
 }
 
 .loginButton:hover {
@@ -108,13 +110,13 @@
   background-color: transparent;
   color: #378DB2;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem; /* Padding maior para combinar com o botão de login */
   /* Limitando a largura do botão */
   width: auto;
-  min-width: 180px;
-  max-width: 250px;
-  font-family: 'Museo_Sans_Rounded', sans-serif;
-  font-size: 1.1rem;
+  min-width: 260px; /* Botão mais largo para combinar */
+  max-width: 320px; /* Aumentado o tamanho máximo */
+  font-family: var(--font-museo-sans), sans-serif;
+  font-size: 1.25rem; /* Fonte maior */
   font-weight: 900;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -126,18 +128,18 @@
 
 /* Estilo para o ícone de perfil */
 .perfilIcon {
-  width: 20px;
-  height: 20px;
+  width: 28px; /* Ícone maior */
+  height: 28px; /* Ícone maior */
   object-fit: contain;
 }
 
 /* Responsividade */
 @media (max-width: 640px) {
   .authCard {
-    padding: 1.5rem;
+    padding: 1.25rem; /* Reduzindo padding no mobile */
     /* Ajustando para mobile */
     transform: translateY(-30px);
-    margin-bottom: -30px;
+    margin-bottom: 1.5rem; /* Alterando para margem positiva no mobile */
   }
   
   .greeting {
@@ -147,6 +149,13 @@
   
   .loginButton,
   .registerButton {
-    min-width: 160px;
+    min-width: 230px; /* Ajustado para manter a proporção */
+    padding: 0.9rem 1.8rem; /* Padding ajustado para mobile */
+    font-size: 1.15rem; /* Texto um pouco menor em mobile, mas ainda grande */
+  }
+  
+  .perfilIcon {
+    width: 24px; /* Ícone um pouco menor em mobile */
+    height: 24px;
   }
 }
