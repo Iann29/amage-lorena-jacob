@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
@@ -14,53 +14,80 @@ interface Testimonial {
 
 interface TestimonialsCarouselProps {
   testimonials: Testimonial[];
-  testimonialsPerPage?: number;
+  visibleItems?: number;
 }
 
 const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   testimonials,
-  testimonialsPerPage = 3
+  visibleItems = 3
 }) => {
-  // Estado para controlar qual página de depoimentos está sendo exibida
-  const [currentPage, setCurrentPage] = useState(0);
+  // Estado para controlar o índice inicial dos depoimentos visíveis
+  const [activeIndex, setActiveIndex] = useState(0);
   
-  // Calculando o número total de páginas
-  const totalPages = Math.ceil(testimonials.length / testimonialsPerPage);
+  // Criar um array circular para facilitar a rotação dos itens
+  const getCircularItems = () => {
+    const items = [...testimonials];
+    // Garantir que temos itens suficientes para preencher a visualização
+    if (items.length < visibleItems) {
+      return items;
+    }
+    
+    // Criar uma visualização circular dos itens
+    const visibleTestimonials: Testimonial[] = [];
+    
+    for (let i = 0; i < visibleItems; i++) {
+      const index = (activeIndex + i) % testimonials.length;
+      visibleTestimonials.push(items[index]);
+    }
+    
+    return visibleTestimonials;
+  };
   
-  // Depoimentos a serem exibidos na página atual
-  const currentTestimonials = testimonials.slice(
-    currentPage * testimonialsPerPage, 
-    (currentPage * testimonialsPerPage) + testimonialsPerPage
-  );
+  // Obter os itens visíveis no momento
+  const [visibleTestimonials, setVisibleTestimonials] = useState(getCircularItems());
+  
+  // Atualizar os itens visíveis quando o índice ativo muda
+  useEffect(() => {
+    setVisibleTestimonials(getCircularItems());
+  }, [activeIndex]);
 
   // Direção da animação (1 = direita, -1 = esquerda)
   const [direction, setDirection] = useState(0);
 
-  // Funções para controlar a navegação com direção
+  // Funções para controlar a navegação
   const handleNext = () => {
     setDirection(1);
-    setCurrentPage((prev) => (prev + 1) % totalPages);
+    setActiveIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const handlePrev = () => {
     setDirection(-1);
-    setCurrentPage((prev) => (prev === 0 ? totalPages - 1 : prev - 1));
+    setActiveIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
   };
 
-  // Variantes para animação de deslize simples e rápida
-  const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
+  // Variantes para animação de deslize suave
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: (custom: number) => ({
+      x: custom > 0 ? 100 : -100,
       opacity: 0
     }),
-    center: {
+    visible: {
       x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      x: direction < 0 ? '100%' : '-100%',
-      opacity: 0
-    })
+      opacity: 1,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 300
+      }
+    }
   };
 
   return (
@@ -78,32 +105,32 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
         </button>
       </div>
 
-      {/* Container do carrossel com altura fixa para evitar saltos */}
+      {/* Container do carrossel com deslizamento individual */}
       <div className="relative py-8 md:py-10" style={{ minHeight: '320px' }}>
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div 
-            key={currentPage}
-            custom={direction}
-            variants={variants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              duration: 0.25,
-              ease: "easeInOut"
-            }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mx-auto justify-items-center"
-          >
-            {currentTestimonials.map((testimonial) => (
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          key={`container-${activeIndex}`}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mx-auto justify-items-center"
+        >
+          {visibleTestimonials.map((testimonial, idx) => (
+            <motion.div
+              key={`${testimonial.id}-${idx}-${activeIndex}`}
+              custom={direction}
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              className="w-full"
+            >
               <TestimonialCard 
-                key={testimonial.id}
                 quote={testimonial.quote}
                 name={testimonial.name}
                 avatarSrc={testimonial.avatarSrc}
               />
-            ))}
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
 
       {/* Seta direita em formato circular */}
@@ -119,24 +146,25 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
         </button>
       </div>
 
-      {/* Indicadores de página */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-8 space-x-3">
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setDirection(i > currentPage ? 1 : -1);
-                setCurrentPage(i);
-              }}
-              className={`h-3 rounded-full transition-all ${
-                i === currentPage ? 'bg-white w-6' : 'bg-white bg-opacity-50 w-3'
-              }`}
-              aria-label={`Ir para página ${i + 1} de depoimentos`}
-            />
-          ))}
-        </div>
-      )}
+      {/* Indicadores de posição */}
+      <div className="flex justify-center mt-8 space-x-3">
+        {testimonials.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => {
+              setDirection(i > activeIndex ? 1 : -1);
+              setActiveIndex(i);
+            }}
+            className={`h-3 rounded-full transition-all ${
+              i === activeIndex || 
+              i === (activeIndex + 1) % testimonials.length || 
+              i === (activeIndex + 2) % testimonials.length 
+              ? 'bg-white w-6' : 'bg-white bg-opacity-50 w-3'
+            }`}
+            aria-label={`Ir para depoimento ${i + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

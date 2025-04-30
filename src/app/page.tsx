@@ -414,20 +414,14 @@ export default function Home() {
               {
                 id: 4,
                 quote: "Meu filho evoluiu muito com suas técnicas e abordagem personalizada.",
-                name: "Carla",
-                avatarSrc: "/assets/avatar/carla-placeholder.png"
+                name: "Michele",
+                avatarSrc: "/assets/avatar/michele-placeholder.png"
               },
               {
                 id: 5,
                 quote: "A forma como a Lorena trabalha é extraordinária, recomendo a todos os pais.",
-                name: "Paulo",
-                avatarSrc: "/assets/avatar/paulo-placeholder.png"
-              },
-              {
-                id: 6,
-                quote: "Finalmente encontramos uma profissional que entende nossas necessidades.",
-                name: "Roberta",
-                avatarSrc: "/assets/avatar/roberta-placeholder.png"
+                name: "Raphaella",
+                avatarSrc: "/assets/avatar/raphaella-placeholder.png"
               }
             ]}
           />
