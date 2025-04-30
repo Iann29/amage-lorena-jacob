@@ -15,35 +15,35 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   avatarSrc = "/assets/avatar-placeholder.png"
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 flex flex-col items-center mx-auto h-full relative w-full" style={{ minHeight: '200px' }}>
+    <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 flex flex-col items-center mx-auto relative w-full min-h-[280px] sm:min-h-[320px] md:min-h-[340px]" style={{ width: '100%', maxWidth: '320px' }}>
       {/* Citação */}
-      <p className="text-center text-[#555555] mb-4 sm:mb-6 italic text-xs sm:text-sm leading-relaxed">
+      <p className="text-center text-[#555555] italic text-xs sm:text-sm leading-relaxed flex-1">
         "{quote}"
       </p>
       
-      {/* Avatar - Aumentado e permitindo ultrapassar o círculo */}
-      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mb-2 sm:mb-4 mt-auto relative">
-        
-        {/* Imagem que pode ultrapassar o círculo */}
-        {avatarSrc ? (
-          <div className="absolute inset-0 overflow-visible">
+      {/* Área do Avatar */}
+      <div className="flex flex-col items-center mt-auto">
+        {/* Avatar */}
+        <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gray-200 overflow-hidden relative">
+          {avatarSrc ? (
             <Image
               src={avatarSrc}
               alt={`Avatar de ${name}`}
-              width={130}
-              height={130}
-              className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-[5%] w-[130%] h-auto scale-110"
-              style={{ objectFit: 'contain' }}
+              fill
+              sizes="(max-width: 640px) 6rem, (max-width: 768px) 7rem, 8rem"
+              className="object-cover"
               priority
+              unoptimized
+              style={{ width: '100%', height: '100%' }}
             />
-          </div>
-        ) : (
-          <div className="w-full h-full bg-gray-300 rounded-full" />
-        )}
+          ) : (
+            <div className="w-full h-full bg-gray-300 rounded-full" />
+          )}
+        </div>
+        
+        {/* Nome */}
+        <h4 className="text-lg sm:text-xl font-bold text-[#333333] font-['Museo_Sans_Rounded'] mt-3">{name}</h4>
       </div>
-      
-      {/* Nome */}
-      <h4 className="text-lg sm:text-xl font-bold text-[#333333] font-['Museo_Sans_Rounded'] mt-1 sm:mt-2">{name}</h4>
     </div>
   );
 };

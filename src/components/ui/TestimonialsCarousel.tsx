@@ -45,7 +45,14 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
           itemsToShow = 2; // Tablet
         }
         
-        setDisplayConfig({ width, itemsToShow });
+        setDisplayConfig(prevConfig => {
+          if (prevConfig.itemsToShow !== itemsToShow) {
+            // Forçar uma atualização dos itens visíveis quando o número de itens muda
+            setTimeout(() => setVisibleTestimonials(getCircularItems()), 0);
+            return { width, itemsToShow };
+          }
+          return { ...prevConfig, width };
+        });
       };
       
       // Atualizar imediatamente
@@ -81,10 +88,10 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   // Obter os itens visíveis no momento
   const [visibleTestimonials, setVisibleTestimonials] = useState(getCircularItems());
   
-  // Atualizar os itens visíveis quando o índice ativo muda
+  // Atualizar os itens visíveis quando o índice ativo muda ou quando a configuração de exibição muda
   useEffect(() => {
     setVisibleTestimonials(getCircularItems());
-  }, [activeIndex]);
+  }, [activeIndex, displayConfig.itemsToShow]);
 
   // Direção da animação (1 = direita, -1 = esquerda)
   const [direction, setDirection] = useState(0);
@@ -126,7 +133,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12 overflow-hidden">
+    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12 overflow-hidden" style={{ minHeight: '420px' }}>
       {/* Seta esquerda em formato circular */}
       <div className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 z-50">
         <button 
@@ -141,13 +148,13 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com deslizamento individual */}
-      <div className="relative py-6 sm:py-8 md:py-10" style={{ minHeight: '280px' }}>
+      <div className="relative py-6 sm:py-8 md:py-10 flex flex-col items-center" style={{ height: '350px' }}>
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          key={`container-${activeIndex}`}
-          className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-4 sm:gap-6 md:gap-8 mx-auto justify-items-center ${displayConfig.itemsToShow === 1 ? 'max-w-xs sm:max-w-md mx-auto' : 'w-full'}`}
+          key={`container-${activeIndex}-${displayConfig.itemsToShow}`}
+          className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full`}
         >
           {visibleTestimonials.map((testimonial, idx) => (
             <motion.div
@@ -182,7 +189,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Indicadores de posição */}
-      <div className="flex justify-center mt-6 sm:mt-8 space-x-2 sm:space-x-3">
+      <div className="flex justify-center mt-12 sm:mt-16 md:mt-20 space-x-2 sm:space-x-3">
         {testimonials.map((_, i) => (
           <button
             key={i}
