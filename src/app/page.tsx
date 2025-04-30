@@ -3,6 +3,7 @@ import Link from "next/link";
 import ServiceCard from "@/components/ui/ServiceCard";
 import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
+import EbookBanner from "@/components/ui/EbookBanner";
 
 export default function Home() {
   return (
@@ -328,6 +329,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Seção de E-book */}
+      <EbookBanner />
       
       {/* Decorative footer icons */}
       <div className="w-full h-12 bg-white flex justify-center items-center">
