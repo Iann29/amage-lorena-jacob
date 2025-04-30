@@ -360,37 +360,37 @@ export default function Home() {
                 id: 1,
                 quote: "Que no mundo venha ter mais profissionais assim como você.",
                 name: "Gabryella",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/gabryella-placeholder.png"
               },
               {
                 id: 2,
                 quote: "Que no mundo venha ter mais profissionais assim como você.",
                 name: "Bruna",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/bruna-placeholder.png"
               },
               {
                 id: 3,
                 quote: "Que no mundo venha ter mais profissionais assim como você.",
                 name: "Luana",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/luana-placeholder.png"
               },
               {
                 id: 4,
                 quote: "Meu filho evoluiu muito com suas técnicas e abordagem personalizada.",
                 name: "Carla",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/carla-placeholder.png"
               },
               {
                 id: 5,
                 quote: "A forma como a Lorena trabalha é extraordinária, recomendo a todos os pais.",
                 name: "Paulo",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/paulo-placeholder.png"
               },
               {
                 id: 6,
                 quote: "Finalmente encontramos uma profissional que entende nossas necessidades.",
                 name: "Roberta",
-                avatarSrc: "/assets/avatar-placeholder.png"
+                avatarSrc: "/assets/avatar/roberta-placeholder.png"
               }
             ]}
           />
