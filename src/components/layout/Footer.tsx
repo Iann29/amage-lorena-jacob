@@ -235,11 +235,11 @@ const Footer = () => {
                 <span className="text-white text-xl font-extrabold font-['Poppins'] leading-snug"> PAGAMENTO</span>
               </div>
               <div className="flex space-x-3">
-                <Image src="/assets/pix-icon.png" alt="PIX" width={60} height={30} unoptimized className="max-w-none" style={{ height: '30px', width: 'auto' }} />
-                <Image src="/assets/boleto-icon.png" alt="Boleto" width={60} height={30} unoptimized className="max-w-none" style={{ height: '30px', width: 'auto' }} />
-                <Image src="/assets/visa-icon.png" alt="Visa" width={60} height={30} unoptimized className="max-w-none" style={{ height: '30px', width: 'auto' }} />
-                <Image src="/assets/mastercard-icon.png" alt="Mastercard" width={60} height={30} unoptimized className="max-w-none" style={{ height: '30px', width: 'auto' }} />
-                <Image src="/assets/mercadopago-icon.png" alt="Mercado Pago" width={80} height={30} unoptimized className="max-w-none" style={{ height: '30px', width: 'auto' }} />
+                <Image src="/assets/pix-icon.png" alt="PIX" width={60} height={30} className="max-w-none h-[30px] w-auto" />
+                <Image src="/assets/boleto-icon.png" alt="Boleto" width={60} height={30} className="max-w-none h-[30px] w-auto" />
+                <Image src="/assets/visa-icon.png" alt="Visa" width={60} height={30} className="max-w-none h-[30px] w-auto" />
+                <Image src="/assets/mastercard-icon.png" alt="Mastercard" width={60} height={30} className="max-w-none h-[30px] w-auto" />
+                <Image src="/assets/mercadopago-icon.png" alt="Mercado Pago" width={80} height={30} className="max-w-none h-[30px] w-auto" />
               </div>
             </motion.div>
           </div>

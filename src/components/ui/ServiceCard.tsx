@@ -59,6 +59,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 src={backgroundImage} 
                 alt={title} 
                 fill
+                sizes="(max-width: 768px) 100vw, 212px"
                 priority
                 className="absolute w-full h-full object-cover opacity-60 mix-blend-multiply"
               />
