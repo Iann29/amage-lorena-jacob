@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ServiceCard from "@/components/ui/ServiceCard";
 import Separator from "@/components/ui/Separator";
+import BlogPostCard from "@/components/ui/BlogPostCard";
 
 export default function Home() {
   return (
@@ -271,86 +272,32 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto">
-              {/* Card 1 */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
-                <div className="h-64 overflow-hidden">
-                  <Image 
-                    src="/assets/blog-placeholder.jpg" 
-                    alt="Post do blog" 
-                    width={400} 
-                    height={300}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
-                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <div className="mt-auto">
-                    <a href="/blog/post-1" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
-                      SAIBA MAIS
-                    </a>
-                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
-                      <span>4 visualizações</span>
-                      <span>2 comentários</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
-                <div className="h-64 overflow-hidden">
-                  <Image 
-                    src="/assets/blog-placeholder.jpg" 
-                    alt="Post do blog" 
-                    width={400} 
-                    height={300}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
-                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <div className="mt-auto">
-                    <a href="/blog/post-2" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
-                      SAIBA MAIS
-                    </a>
-                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
-                      <span>4 visualizações</span>
-                      <span>2 comentários</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
-                <div className="h-64 overflow-hidden">
-                  <Image 
-                    src="/assets/blog-placeholder.jpg" 
-                    alt="Post do blog" 
-                    width={400} 
-                    height={300}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-bold text-[#52A4DB] mb-2">Título aqui</h3>
-                  <p className="text-sm text-[#555555] mb-5 leading-tight">Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.</p>
-                  <div className="mt-auto">
-                    <a href="/blog/post-3" className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all">
-                      SAIBA MAIS
-                    </a>
-                    <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
-                      <span>4 visualizações</span>
-                      <span>2 comentários</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <BlogPostCard 
+                title="Título aqui"
+                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
+                imageUrl="/assets/blog-placeholder.jpg"
+                postUrl="/blog/post-1"
+                viewCount={4}
+                commentCount={2}
+              />
+              
+              <BlogPostCard 
+                title="Título aqui"
+                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
+                imageUrl="/assets/blog-placeholder.jpg"
+                postUrl="/blog/post-2"
+                viewCount={4}
+                commentCount={2}
+              />
+              
+              <BlogPostCard 
+                title="Título aqui"
+                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
+                imageUrl="/assets/blog-placeholder.jpg"
+                postUrl="/blog/post-3"
+                viewCount={4}
+                commentCount={2}
+              />
             </div>
 
             {/* Seta direita */}
@@ -364,8 +311,8 @@ export default function Home() {
           </div>
           
           {/* Botão para acessar o blog */}
-          <div className="mt-12 text-center">
-            <a href="/blog" className="inline-block py-3 px-8 bg-[#806D52] text-white rounded-lg text-xl font-bold hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-md">
+          <div className="mt-16 text-center">
+            <a href="/blog" className="inline-block py-4 px-12 bg-[#806D52] text-white rounded-lg text-2xl font-bold hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-lg">
               ACESSE O BLOG
             </a>
           </div>
