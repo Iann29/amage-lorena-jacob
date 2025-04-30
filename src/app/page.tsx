@@ -355,9 +355,15 @@ export default function Home() {
           
           {/* Botão para acessar o blog */}
           <div className="mt-16 text-center">
-            <a href="/blog" className="inline-block py-4 px-12 bg-[#806D52] text-white rounded-lg text-2xl font-bold hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-lg">
+            <motion.a 
+              href="/blog" 
+              className="inline-block py-4 px-12 bg-[#806D52] text-white rounded-lg text-2xl font-bold hover:bg-opacity-90"
+              style={{ boxShadow: '0 6px 15px rgba(128, 109, 82, 0.6), 0 4px 6px rgba(0, 0, 0, 0.2)' }}
+              whileHover={{ boxShadow: '0 8px 20px rgba(128, 109, 82, 0.7), 0 6px 8px rgba(0, 0, 0, 0.25)', scale: 1.05 }}
+              transition={{ duration: 0.1 }}
+            >
               ACESSE O BLOG
-            </a>
+            </motion.a>
           </div>
         </div>
       </section>
