@@ -49,7 +49,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
   // Variantes para animação de deslize
   const variants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? '100%' : '-100%',
       opacity: 0
     }),
     center: {
@@ -57,7 +57,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       opacity: 1
     },
     exit: (direction: number) => ({
-      x: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? '100%' : '-100%',
       opacity: 0
     })
   };
@@ -77,9 +77,9 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto px-12">
+    <div className="relative max-w-6xl mx-auto px-12 overflow-hidden">
       {/* Seta esquerda */}
-      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
+      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-50">
         <button 
           className="bg-transparent border-none hover:scale-110 transition-transform"
           onClick={handlePrev}
@@ -92,7 +92,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Container do carrossel */}
-      <div className="overflow-hidden">
+      <div className="relative pb-6 pt-6 px-4">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div 
             key={currentPage}
@@ -105,7 +105,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 }
             }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto"
           >
             {currentPosts.map((post) => (
               <BlogPostCard 
@@ -123,7 +123,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Seta direita */}
-      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
+      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-50">
         <button 
           className="bg-transparent border-none hover:scale-110 transition-transform"
           onClick={handleNext}

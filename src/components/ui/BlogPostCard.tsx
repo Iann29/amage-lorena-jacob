@@ -19,7 +19,7 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   commentCount
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col" style={{ maxWidth: '380px' }}>
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3" style={{ maxWidth: '380px' }}>
       <div className="h-64 overflow-hidden">
         <Image 
           src={imageUrl} 
