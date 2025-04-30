@@ -68,7 +68,9 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row md:justify-end md:col-span-8 lg:col-span-7 space-x-0 md:space-x-10 lg:space-x-16 pl-0">
               {/* Início */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>Início</h3>
+                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
+                  <Link href="/" className="hover:opacity-80 transition-opacity duration-200 inline-block">Início</Link>
+                </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/#suporte" className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-start">
@@ -100,7 +102,9 @@ const Footer = () => {
 
               {/* Sobre mim */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-black font-['Poppins'] mb-7" style={{fontSize: '1.49rem', display: 'block', height: '38px', lineHeight: '38px'}}>Sobre mim</h3>
+                <h3 className="text-[#07B1E4] text-lg font-black font-['Poppins'] mb-7" style={{fontSize: '1.49rem', display: 'block', height: '38px', lineHeight: '38px'}}>
+                  <Link href="/sobre" className="hover:opacity-80 transition-opacity duration-200 inline-block">Sobre mim</Link>
+                </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/sobre" className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -117,7 +121,9 @@ const Footer = () => {
 
               {/* Blog */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>Blog</h3>
+                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
+                  <Link href="/blog" className="hover:opacity-80 transition-opacity duration-200 inline-block">Blog</Link>
+                </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/blog/categoria/dicas" className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -135,7 +141,9 @@ const Footer = () => {
               {/* Loja */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <div style={{height: '38px', display: 'flex', alignItems: 'center', marginBottom: '28px'}}>
-                  <h3 className="text-white text-lg font-semibold font-['Poppins'] mb-0 px-6 py-0 rounded-md bg-[#52a4db]" style={{fontSize: '1.24rem', display: 'inline-block', lineHeight: '1.6rem'}}>Loja</h3>
+                  <h3 className="text-white text-lg font-semibold font-['Poppins'] mb-0 px-6 py-0 rounded-md bg-[#52a4db]" style={{fontSize: '1.24rem', display: 'inline-block', lineHeight: '1.6rem'}}>
+                    <Link href="/loja" className="hover:opacity-90 transition-opacity duration-200 inline-block">Loja</Link>
+                  </h3>
                 </div>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
