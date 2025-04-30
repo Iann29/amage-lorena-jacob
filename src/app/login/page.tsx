@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-
-// Os metadados agora são exportados de um arquivo separado
-// pois componentes 'use client' não podem exportar metadados
+import styles from './page.module.css';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -24,135 +23,113 @@ export default function LoginPage() {
     e.preventDefault();
     // Aqui será implementada a integração com Supabase Auth
     console.log('Login enviado:', formData);
-    alert('Login realizado com sucesso!');
-    // Futuramente redirecionaremos para a página de minha-conta após o login bem-sucedido
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold text-purple-800 mb-6 text-center">
-          Entrar na sua conta
-        </h1>
-        
-        <form onSubmit={handleSubmit}>
-          
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-1">E-mail</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="seu.email@exemplo.com"
+    <div className={styles.loginContainer}>
+      {/* Lado do formulário (esquerdo) */}
+      <div className={styles.formSide}>
+        <div className={styles.formContent}>
+          {/* Logo */}
+          <div className={styles.logoContainer}>
+            <Image 
+              src="/logos/logo1.webp" 
+              alt="Lorena Jacob - Terapeuta Infantil" 
+              width={280} 
+              height={90} 
+              className={styles.logo}
+              priority
             />
           </div>
           
-          <div className="mb-4">
-            <label htmlFor="senha" className="block text-gray-700 font-medium mb-1">Senha</label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              value={formData.senha}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="********"
-            />
-          </div>
-          
-          <div className="flex justify-end mb-4">
-            <Link href="/recuperar-senha" className="text-purple-700 text-sm hover:underline">
-              Esqueceu sua senha?
-            </Link>
-          </div>
-          
-          <button
-            type="submit"
-            className="w-full bg-purple-700 text-white py-3 rounded-md font-medium hover:bg-purple-800 transition mb-4"
-          >
-            Entrar
-          </button>
-          
-          <div className="text-center">
-            <Link href="/cadastro" className="text-purple-700 hover:underline">
-              Não tem uma conta? Cadastre-se
-            </Link>
-          </div>
-        </form>
-        
-        <div className="mt-8">
-          <div className="relative flex items-center">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-600">ou continue com</span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-google" viewBox="0 0 16 16">
-                <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
-              </svg>
-              <span>Google</span>
-            </button>
+          {/* Formulário de login */}
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.inputGroup}>
+              <label htmlFor="email" className={styles.inputLabel}>
+                E-mail
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Digite seu e-mail"
+                className={styles.inputField}
+                required
+              />
+            </div>
             
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-facebook" viewBox="0 0 16 16">
-                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-              </svg>
-              <span>Facebook</span>
+            <div className={styles.inputGroup}>
+              <label htmlFor="senha" className={styles.inputLabel}>
+                Senha
+              </label>
+              <input
+                type="password"
+                id="senha"
+                name="senha"
+                value={formData.senha}
+                onChange={handleChange}
+                placeholder="Digite sua senha"
+                className={styles.inputField}
+                required
+              />
+            </div>
+            
+            <Link href="/esqueci-minha-senha" className={styles.forgotPasswordLink}>
+              Esqueci minha Senha
+            </Link>
+            
+            <button type="submit" className={styles.loginButton}>
+              Entrar
             </button>
+          </form>
+          
+          {/* Separador */}
+          <div className={styles.separator}>
+            <span>ou</span>
           </div>
+          
+          {/* Botão do Google */}
+          <button className={styles.googleButton}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 3.979c1.688 0 2.813.73 3.458 1.335l2.563-2.5C14.354 1.218 12.313.02 10 .02 6.105.02 2.792 2.39 1.146 5.787l2.979 2.312C4.875 5.583 7.25 3.979 10 3.979z" fill="#EA4335"/>
+              <path d="M19.375 10.208c0-.73-.063-1.25-.188-1.802H10v3.25h5.321c-.115.844-.73 2.115-2.084 2.969l2.917 2.26c1.73-1.595 2.73-3.943 2.73-6.677z" fill="#4285F4"/>
+              <path d="M4.136 11.901l-.511.428-2.917-2.261-.26.021C1.676 14.302 5.427 20 10 20c2.313 0 4.26-.76 5.677-2.073l-2.917-2.26c-.813.552-1.86.937-3.26.937-2.75 0-5.083-1.844-5.927-4.323l-.166-.368.094-.012z" fill="#34A853"/>
+              <path d="M1.147 5.787C.417 7.208 0 8.802 0 10.5c0 1.698.417 3.292 1.135 4.703.1.01.012.021.023.021l3.188-2.468c-.188-.563-.292-1.167-.292-1.803 0-.635.1-1.24.281-1.802L1.147 5.787z" fill="#FBBC05"/>
+            </svg>
+            Acessar com a Conta Google
+          </button>
         </div>
       </div>
       
-      <div className="max-w-md mx-auto mt-8 p-6 bg-purple-50 rounded-lg border border-purple-100">
-        <h2 className="text-xl font-semibold text-purple-800 mb-2">Por que criar uma conta?</h2>
-        <ul className="space-y-2 text-gray-700">
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      {/* Lado da imagem (direito) */}
+      <div className={styles.imageSide}>
+        <Image 
+          src="/backgroundLogin.png"
+          alt="Lorena Jacob com criança"
+          fill
+          className={styles.backgroundImage}
+          priority
+        />
+        <div className={styles.overlay}>
+          {/* Citação */}
+          <div className={styles.quote}>
+            <div className={styles.quoteSymbol}>“</div>
+            <div className={styles.quoteText}>
+              Conhecimento, estímulo<br/>e constância <span className={styles.highlight}>transformam</span><br/>o desenvolvimento da<br/>criança com autismo.
+            </div>
+            <div className={styles.quoteAuthor}>Lorena Jacob</div>
+          </div>
+          
+          {/* Link do Instagram */}
+          <Link href="https://instagram.com/lorenajacob" className={styles.instagramLink} target="_blank">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="#fff"/>
             </svg>
-            <span>Acesse facilmente seus cursos e produtos digitais</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Acompanhe o histórico dos seus pedidos</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Receba conteúdos exclusivos e promoções especiais</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Checkout mais rápido nas próximas compras</span>
-          </li>
-        </ul>
-      </div>
-      
-      <div className="flex justify-center mt-4">
-        <Link href="/autenticacao" className="text-purple-700 hover:underline flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Voltar para opções de autenticação
-        </Link>
+            Siga-me no Instagram
+          </Link>
+        </div>
       </div>
     </div>
   );

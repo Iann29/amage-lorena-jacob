@@ -1,0 +1,268 @@
+/* Estilos para a página de login */
+.loginContainer {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Lado esquerdo (formulário) */
+.formSide {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: #ffffff;
+}
+
+/* Conteúdo do formulário */
+.formContent {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Logo */
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4rem;
+  margin-top: 1rem;
+}
+
+.logo {
+  max-width: 220px;
+  height: auto;
+}
+
+/* Formulário */
+.form {
+  width: 100%;
+}
+
+/* Campo de entrada */
+.inputGroup {
+  margin-bottom: 1.5rem;
+}
+
+.inputLabel {
+  display: block;
+  font-family: var(--font-museo-sans), sans-serif;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: var(--font-museo-sans), sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  background-color: #fafafa;
+}
+
+.inputField:focus {
+  outline: none;
+  border-color: #3068ad;
+  box-shadow: 0 0 0 2px rgba(48, 104, 173, 0.1);
+}
+
+/* Link de esqueceu a senha */
+.forgotPasswordLink {
+  display: block;
+  text-align: right;
+  margin-bottom: 1.5rem;
+  color: #3068ad;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  font-family: var(--font-museo-sans), sans-serif;
+}
+
+.forgotPasswordLink:hover {
+  text-decoration: underline;
+}
+
+/* Botão de entrar */
+.loginButton {
+  width: 100%;
+  background-color: #3068ad;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  font-family: var(--font-museo-sans), sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(48, 104, 173, 0.3);
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.loginButton:hover {
+  background-color: #265896;
+}
+
+/* Separador ou */
+.separator {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #e0e0e0;
+}
+
+.separator span {
+  padding: 0 1rem;
+}
+
+/* Botão do Google */
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.9rem;
+  font-size: 0.95rem;
+  font-family: var(--font-museo-sans), sans-serif;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.googleButton:hover {
+  background-color: #f5f5f5;
+}
+
+/* Lado direito (imagem) */
+.imageSide {
+  position: relative;
+  width: 50%;
+}
+
+.backgroundImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(106, 181, 214, 0.85); /* #6AB5D6 com opacidade */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estilo para a citação */
+.quote {
+  max-width: 80%;
+  color: #ffffff;
+  text-align: left;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-bottom: 2rem;
+  margin-top: -4rem;
+}
+
+.quoteSymbol {
+  font-size: 4rem;
+  line-height: 0;
+  color: #ffffff;
+  position: absolute;
+  top: -1.5rem;
+  left: -1rem;
+}
+
+.quoteText {
+  font-family: var(--font-museo-sans), sans-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.highlight {
+  font-family: var(--font-mogila), serif;
+  color: #fdffc8;
+  font-style: italic;
+  font-weight: normal;
+}
+
+.quoteAuthor {
+  font-family: var(--font-museo-sans), sans-serif;
+  font-size: 1rem;
+  color: #ffffff;
+  margin-top: 1rem;
+}
+
+/* Instagram link */
+.instagramLink {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  text-decoration: none;
+  font-family: var(--font-museo-sans), sans-serif;
+}
+
+.instagramLink:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+  }
+  
+  .formSide,
+  .imageSide {
+    width: 100%;
+  }
+  
+  .formSide {
+    padding: 2rem 1.5rem;
+    order: 2;
+  }
+  
+  .imageSide {
+    min-height: 40vh;
+    order: 1;
+  }
+  
+  .quote {
+    max-width: 90%;
+  }
+  
+  .quoteText {
+    font-size: 1.4rem;
+  }
+}
