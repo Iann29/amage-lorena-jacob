@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-// Os metadados agora são exportados de um arquivo separado
-// pois componentes 'use client' não podem exportar metadados
-
-export default function LoginPage() {
+export default function CadastroPage() {
   const [formData, setFormData] = useState({
+    nome: '',
     email: '',
-    senha: ''
+    senha: '',
+    confirmarSenha: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,19 +22,32 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Aqui será implementada a integração com Supabase Auth
-    console.log('Login enviado:', formData);
-    alert('Login realizado com sucesso!');
-    // Futuramente redirecionaremos para a página de minha-conta após o login bem-sucedido
+    console.log('Cadastro enviado:', formData);
+    alert('Cadastro realizado com sucesso!');
+    // Futuramente redirecionaremos para a página de minha-conta após o cadastro bem-sucedido
   };
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-3xl font-bold text-purple-800 mb-6 text-center">
-          Entrar na sua conta
+          Criar uma conta
         </h1>
         
         <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome Completo</label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Seu nome completo"
+            />
+          </div>
           
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 font-medium mb-1">E-mail</label>
@@ -63,24 +75,33 @@ export default function LoginPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="********"
             />
+            <p className="mt-1 text-xs text-gray-500">Mínimo 8 caracteres, com pelo menos uma letra maiúscula e um número</p>
           </div>
           
-          <div className="flex justify-end mb-4">
-            <Link href="/recuperar-senha" className="text-purple-700 text-sm hover:underline">
-              Esqueceu sua senha?
-            </Link>
+          <div className="mb-6">
+            <label htmlFor="confirmarSenha" className="block text-gray-700 font-medium mb-1">Confirmar Senha</label>
+            <input
+              type="password"
+              id="confirmarSenha"
+              name="confirmarSenha"
+              value={formData.confirmarSenha}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="********"
+            />
           </div>
           
           <button
             type="submit"
             className="w-full bg-purple-700 text-white py-3 rounded-md font-medium hover:bg-purple-800 transition mb-4"
           >
-            Entrar
+            Cadastrar
           </button>
           
           <div className="text-center">
-            <Link href="/cadastro" className="text-purple-700 hover:underline">
-              Não tem uma conta? Cadastre-se
+            <Link href="/login" className="text-purple-700 hover:underline">
+              Já tem uma conta? Faça login
             </Link>
           </div>
         </form>
@@ -88,7 +109,7 @@ export default function LoginPage() {
         <div className="mt-8">
           <div className="relative flex items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-600">ou continue com</span>
+            <span className="flex-shrink mx-4 text-gray-600">ou cadastre-se com</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
           
@@ -114,36 +135,6 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-      </div>
-      
-      <div className="max-w-md mx-auto mt-8 p-6 bg-purple-50 rounded-lg border border-purple-100">
-        <h2 className="text-xl font-semibold text-purple-800 mb-2">Por que criar uma conta?</h2>
-        <ul className="space-y-2 text-gray-700">
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Acesse facilmente seus cursos e produtos digitais</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Acompanhe o histórico dos seus pedidos</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Receba conteúdos exclusivos e promoções especiais</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Checkout mais rápido nas próximas compras</span>
-          </li>
-        </ul>
       </div>
       
       <div className="flex justify-center mt-4">
