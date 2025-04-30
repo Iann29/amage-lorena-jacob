@@ -78,15 +78,15 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
 
   return (
     <div className="relative max-w-6xl mx-auto px-12 overflow-hidden">
-      {/* Seta esquerda */}
-      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-50">
+      {/* Seta esquerda em formato circular */}
+      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-50">
         <button 
-          className="bg-transparent border-none hover:scale-110 transition-transform"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handlePrev}
           aria-label="Ver posts anteriores"
         >
-          <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 2L2 22.5L22 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="14" height="24" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L2 22.5L22 43" stroke="#806D52" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
@@ -122,15 +122,15 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Seta direita */}
-      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-50">
+      {/* Seta direita em formato circular */}
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50">
         <button 
-          className="bg-transparent border-none hover:scale-110 transition-transform"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handleNext}
           aria-label="Ver próximos posts"
         >
-          <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 2L22 22.5L2 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="14" height="24" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 2L22 22.5L2 43" stroke="#806D52" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
