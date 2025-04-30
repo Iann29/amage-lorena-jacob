@@ -47,7 +47,7 @@ const EbookBanner: React.FC<EbookBannerProps> = ({
         {/* Conteúdo textual */}
         <div className="md:w-2/3 text-white text-center md:text-left md:pl-16 lg:pl-24">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 font-['Museo_Sans_Rounded']" style={{ color: '#eef494' }}>{title}</h2>
-          <h3 className="text-4xl md:text-5xl font-bold mb-8 font-['Museo_Sans_Rounded']">{subtitle}</h3>
+          <h3 className="text-4xl md:text-5xl font-bold mb-8 font-['Museo_Sans_Rounded']" style={{ paddingLeft: '20px' }}>{subtitle}</h3>
           
           <div className="md:pl-12 lg:pl-16">
             <Link 
