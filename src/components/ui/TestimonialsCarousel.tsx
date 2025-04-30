@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
@@ -24,18 +24,53 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   // Estado para controlar o índice inicial dos depoimentos visíveis
   const [activeIndex, setActiveIndex] = useState(0);
   
+  // Estado para rastrear o tamanho da tela e itens visíveis
+  const [displayConfig, setDisplayConfig] = useState({
+    width: 0,
+    itemsToShow: 1 // Valor inicial seguro para SSR
+  });
+  
+  // Determinar número de itens a exibir com base no tamanho da tela
+  useEffect(() => {
+    // Garantir que estamos executando apenas no cliente
+    if (typeof window !== 'undefined') {
+      // Função para calcular e atualizar a configuração de exibição
+      const updateDisplayConfig = () => {
+        const width = window.innerWidth;
+        let itemsToShow = 1; // Padrão para mobile
+        
+        if (width >= 1024) {
+          itemsToShow = 3; // Desktop
+        } else if (width >= 640) {
+          itemsToShow = 2; // Tablet
+        }
+        
+        setDisplayConfig({ width, itemsToShow });
+      };
+      
+      // Atualizar imediatamente
+      updateDisplayConfig();
+      
+      // Adicionar listener para resize
+      window.addEventListener('resize', updateDisplayConfig);
+      return () => window.removeEventListener('resize', updateDisplayConfig);
+    }
+  }, []);
+  
   // Criar um array circular para facilitar a rotação dos itens
   const getCircularItems = () => {
     const items = [...testimonials];
+    const { itemsToShow } = displayConfig;
+    
     // Garantir que temos itens suficientes para preencher a visualização
-    if (items.length < visibleItems) {
+    if (items.length < itemsToShow) {
       return items;
     }
     
     // Criar uma visualização circular dos itens
     const visibleTestimonials: Testimonial[] = [];
     
-    for (let i = 0; i < visibleItems; i++) {
+    for (let i = 0; i < itemsToShow; i++) {
       const index = (activeIndex + i) % testimonials.length;
       visibleTestimonials.push(items[index]);
     }
@@ -91,7 +126,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto px-6 md:px-12 overflow-hidden">
+    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12 overflow-hidden">
       {/* Seta esquerda em formato circular */}
       <div className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 z-50">
         <button 
@@ -106,13 +141,13 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com deslizamento individual */}
-      <div className="relative py-8 md:py-10" style={{ minHeight: '320px' }}>
+      <div className="relative py-6 sm:py-8 md:py-10" style={{ minHeight: '280px' }}>
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           key={`container-${activeIndex}`}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mx-auto justify-items-center"
+          className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-4 sm:gap-6 md:gap-8 mx-auto justify-items-center ${displayConfig.itemsToShow === 1 ? 'max-w-xs sm:max-w-md mx-auto' : 'w-full'}`}
         >
           {visibleTestimonials.map((testimonial, idx) => (
             <motion.div
@@ -147,7 +182,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Indicadores de posição */}
-      <div className="flex justify-center mt-8 space-x-3">
+      <div className="flex justify-center mt-6 sm:mt-8 space-x-2 sm:space-x-3">
         {testimonials.map((_, i) => (
           <button
             key={i}
@@ -155,11 +190,12 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
               setDirection(i > activeIndex ? 1 : -1);
               setActiveIndex(i);
             }}
-            className={`h-3 rounded-full transition-all ${
-              i === activeIndex || 
-              i === (activeIndex + 1) % testimonials.length || 
-              i === (activeIndex + 2) % testimonials.length 
-              ? 'bg-white w-6' : 'bg-white bg-opacity-50 w-3'
+            className={`h-2 sm:h-3 rounded-full transition-all ${
+              // Verificar se este índice está dentro dos itens visíveis atuais
+              Array.from({ length: displayConfig.itemsToShow }).some((_, offset) => 
+                i === (activeIndex + offset) % testimonials.length
+              )
+              ? 'bg-white w-5 sm:w-6' : 'bg-white bg-opacity-50 w-2 sm:w-3'
             }`}
             aria-label={`Ir para depoimento ${i + 1}`}
           />

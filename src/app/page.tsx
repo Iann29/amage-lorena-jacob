@@ -372,7 +372,7 @@ export default function Home() {
       <EbookBanner />
       
       {/* Seção de Depoimentos */}
-      <section className="py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
+      <section className="py-10 sm:py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
         {/* Imagem de fundo */}
         <div className="absolute inset-0 z-0">
           <Image 
@@ -386,8 +386,8 @@ export default function Home() {
         
         <div className="container mx-auto px-4 relative z-10">
           {/* Título */}
-          <div className="text-center mb-16">
-            <h2 className="text-6xl md:text-7xl font-bold text-white font-['Museo_Sans_Rounded']">DEPOIMENTOS</h2>
+          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white font-['Museo_Sans_Rounded']">DEPOIMENTOS</h2>
           </div>
           
           {/* Carrossel de Depoimentos */}
