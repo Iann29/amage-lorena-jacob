@@ -14,9 +14,12 @@ const EbookBanner: React.FC = () => {
               alt="E-book Rotina Diária - Clique para comprar"
               width={1920}
               height={500}
-              className="w-full h-auto object-cover"
+              className="w-full h-auto object-contain"
               priority
+              unoptimized
+              quality={100}
               sizes="100vw"
+              style={{ maxWidth: '100%' }}
             />
           </div>
         </Link>
