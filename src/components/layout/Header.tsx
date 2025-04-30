@@ -94,9 +94,10 @@ const Header = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/" 
-                className={`text-[#6E6B46] text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+                className={`text-[#6E6B46] text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
               >
                 Início
+                <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
               </Link>
             </motion.div>
             
@@ -105,9 +106,10 @@ const Header = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/sobre" 
-                className={`text-[#6E6B46] text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+                className={`text-[#6E6B46] text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
               >
                 Sobre Mim
+                <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
               </Link>
             </motion.div>
             
@@ -116,9 +118,10 @@ const Header = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/blog" 
-                className={`text-[#6E6B46] text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+                className={`text-[#6E6B46] text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
               >
                 Blog
+                <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
               </Link>
             </motion.div>
             
@@ -127,9 +130,10 @@ const Header = () => {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/contato" 
-                className={`text-[#6E6B46] text-base ${pathname === '/contato' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins']`}
+                className={`text-[#6E6B46] text-base ${pathname === '/contato' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
               >
                 Contato
+                <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
               </Link>
             </motion.div>
             
