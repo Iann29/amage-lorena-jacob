@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,34 +12,24 @@ const Header = () => {
   const pathname = usePathname();
   const { scrollY } = useScroll();
   
-  // Valores para transformações baseadas no scroll
+  // Valores para transformações baseadas no scroll - com transições mais suaves
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
-  const logoWidth = useTransform(scrollY, [0, 100], [250, 180]);
-  const headerBgColor = useTransform(
-    scrollY,
-    [0, 100],
-    ["rgba(255, 255, 255, 1)", "rgba(255, 255, 255, 1)"]
-  );
+  const logoScale = useTransform(scrollY, [0, 100], [1, 0.72]);
   const headerShadow = useTransform(
     scrollY,
-    [0, 100],
-    ["0px 4px 4px 0px rgba(0,0,0,0.25)", "0px 4px 12px 0px rgba(0,0,0,0.15)"]
+    [0, 20, 100],
+    ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
-
-  // Detectar scroll para adicionar efeitos adicionais
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  
+  // Usar useMotionValueEvent em vez de addEventListener para melhor performance
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 50) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  });
 
   // Fechar o menu ao trocar de página
   useEffect(() => {
@@ -48,15 +38,15 @@ const Header = () => {
 
   return (
     <motion.header 
-      className="w-full sticky top-0 z-50 transition-all duration-300 bg-white"
+      className="w-full sticky top-0 z-50 bg-white"
       style={{
-        backgroundColor: headerBgColor,
         boxShadow: headerShadow,
         height: headerHeight,
         opacity: headerOpacity,
       }}
-      initial={{ y: 0 }}
+      initial={{ y: -100 }}
       animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
         {/* Logo à esquerda - animado */}
@@ -64,10 +54,16 @@ const Header = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className={isScrolled ? "scale-90 transition-all duration-300" : "transition-all duration-300"}
         >
           <Link href="/" className="flex items-center">
-            <motion.div style={{ width: logoWidth, height: 'auto' }} className="transition-all duration-300">
+            <motion.div 
+              style={{ 
+                scale: logoScale,
+                transformOrigin: "left center",
+                width: "250px" 
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            >
               <Image 
                 src="/logos/logo1.webp" 
                 alt="Lorena Jacob - Terapeuta Infantil" 
@@ -76,7 +72,6 @@ const Header = () => {
                 priority
                 unoptimized
                 style={{ width: '100%', height: 'auto' }}
-                className="max-w-none transition-all duration-300"
               />
             </motion.div>
           </Link>
@@ -84,11 +79,14 @@ const Header = () => {
 
         {/* Menu de navegação centralizado - desktop */}
         <motion.nav 
-          className={`hidden lg:flex items-center justify-center flex-[0.7] transition-all duration-300 ${isScrolled ? "pt-0" : "pt-1"}`}
+          className="hidden lg:flex items-center justify-center flex-[0.7]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          style={{ scale: isScrolled ? 0.95 : 1 }}
+          style={{ 
+            translateY: useTransform(scrollY, [0, 100], [0, -2]),
+            scale: useTransform(scrollY, [0, 100], [1, 0.95]) 
+          }}
         >
           <div className="flex items-center justify-center">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
