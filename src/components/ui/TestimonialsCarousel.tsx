@@ -65,15 +65,15 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 
   return (
     <div className="relative max-w-6xl mx-auto px-6 md:px-12 overflow-hidden">
-      {/* Seta esquerda */}
+      {/* Seta esquerda em formato circular */}
       <div className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 z-50">
         <button 
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-[#FFFAE5] bg-opacity-90 shadow-md hover:bg-opacity-100 transition-all"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handlePrev}
           aria-label="Ver depoimentos anteriores"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 18L9 12L15 6" stroke="#00BCD4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="14" height="24" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L2 22.5L22 43" stroke="#806D52" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
@@ -106,15 +106,15 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Seta direita */}
+      {/* Seta direita em formato circular */}
       <div className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 z-50">
         <button 
-          className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-[#FFFAE5] bg-opacity-90 shadow-md hover:bg-opacity-100 transition-all"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handleNext}
           aria-label="Ver próximos depoimentos"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="#00BCD4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="14" height="24" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 2L22 22.5L2 43" stroke="#806D52" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </div>
