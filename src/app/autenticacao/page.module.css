@@ -1,0 +1,158 @@
+/* Importação da fonte */
+@font-face {
+  font-family: 'Museo_Sans_Rounded';
+  src: url('/fonts/MuseoSansRounded900.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Container principal */
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Museo_Sans_Rounded', sans-serif;
+}
+
+/* Fundo azul na parte superior */
+.topBackground {
+  background-color: #6FB1CE;
+  padding: 2rem 1rem 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container da logo */
+.logoContainer {
+  max-width: 350px;
+  width: 100%;
+}
+
+/* Container do conteúdo principal */
+.contentContainer {
+  flex: 1;
+  background-color: #f5f5f5;
+  padding: 0 1rem;
+  margin-top: -2rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* Card de autenticação */
+.authCard {
+  background-color: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 550px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  /* Ajustes para diminuir a altura do cartão */
+  transform: translateY(-50px);
+  margin-bottom: -50px;
+}
+
+/* Estilo do texto de boas-vindas */
+.greeting {
+  font-size: 1.5rem;
+  color: #333;
+  /* Diminuindo o espaço entre o texto e os botões */
+  margin-bottom: 1.5rem;
+  font-weight: 900;
+}
+
+/* Destaque no texto */
+.highlight {
+  font-weight: 900;
+}
+
+/* Container dos botões */
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Diminuindo o espaço entre os botões */
+  align-items: center; /* Centralizar os botões */
+}
+
+/* Link de autenticação */
+.authLink {
+  text-decoration: none;
+  width: auto; /* Permitir que o tamanho se ajuste ao conteúdo */
+  display: block;
+}
+
+/* Botão de login (Já tenho conta) */
+.loginButton {
+  background-color: #FFFEEC;
+  color: #378DB2;
+  border: none;
+  border-radius: 27px;
+  padding: 0.75rem 1.5rem;
+  /* Limitando a largura do botão */
+  width: auto;
+  min-width: 180px;
+  max-width: 250px;
+  font-family: 'Museo_Sans_Rounded', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.loginButton:hover {
+  filter: brightness(0.95);
+}
+
+/* Botão de registro (Criar Conta) */
+.registerButton {
+  background-color: transparent;
+  color: #378DB2;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  /* Limitando a largura do botão */
+  width: auto;
+  min-width: 180px;
+  max-width: 250px;
+  font-family: 'Museo_Sans_Rounded', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.registerButton:hover {
+  opacity: 0.8;
+}
+
+/* Estilo para o ícone de perfil */
+.perfilIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Responsividade */
+@media (max-width: 640px) {
+  .authCard {
+    padding: 1.5rem;
+    /* Ajustando para mobile */
+    transform: translateY(-30px);
+    margin-bottom: -30px;
+  }
+  
+  .greeting {
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .loginButton,
+  .registerButton {
+    min-width: 160px;
+  }
+}
