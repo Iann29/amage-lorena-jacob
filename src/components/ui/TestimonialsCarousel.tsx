@@ -47,7 +47,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
     setCurrentPage((prev) => (prev === 0 ? totalPages - 1 : prev - 1));
   };
 
-  // Variantes para animação de deslize
+  // Variantes para animação de deslize simples e rápida
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
@@ -89,8 +89,8 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
             animate="center"
             exit="exit"
             transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
+              duration: 0.25,
+              ease: "easeInOut"
             }}
             className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mx-auto justify-items-center"
           >
