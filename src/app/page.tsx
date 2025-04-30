@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ServiceCard from "@/components/ui/ServiceCard";
 import Separator from "@/components/ui/Separator";
-import BlogPostCard from "@/components/ui/BlogPostCard";
+import BlogCarousel from "@/components/ui/BlogCarousel";
 
 export default function Home() {
   return (
@@ -261,54 +261,64 @@ export default function Home() {
           </div>
           
           {/* Cards do Blog - Carrossel */}
-          <div className="relative max-w-6xl mx-auto px-12">
-            {/* Seta esquerda */}
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
-              <button className="bg-transparent border-none hover:scale-110 transition-transform">
-                <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 2L2 22.5L22 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mx-auto">
-              <BlogPostCard 
-                title="Título aqui"
-                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
-                imageUrl="/assets/blog-placeholder.jpg"
-                postUrl="/blog/post-1"
-                viewCount={4}
-                commentCount={2}
-              />
-              
-              <BlogPostCard 
-                title="Título aqui"
-                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
-                imageUrl="/assets/blog-placeholder.jpg"
-                postUrl="/blog/post-2"
-                viewCount={4}
-                commentCount={2}
-              />
-              
-              <BlogPostCard 
-                title="Título aqui"
-                summary="Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo."
-                imageUrl="/assets/blog-placeholder.jpg"
-                postUrl="/blog/post-3"
-                viewCount={4}
-                commentCount={2}
-              />
-            </div>
-
-            {/* Seta direita */}
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10">
-              <button className="bg-transparent border-none hover:scale-110 transition-transform">
-                <svg width="24" height="45" viewBox="0 0 24 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 2L22 22.5L2 43" stroke="#806D52" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
+          <BlogCarousel 
+            posts={[
+              {
+                id: 1,
+                title: "Título aqui",
+                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-1",
+                viewCount: 4,
+                commentCount: 2
+              },
+              {
+                id: 2,
+                title: "Título aqui",
+                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-2",
+                viewCount: 4,
+                commentCount: 2
+              },
+              {
+                id: 3,
+                title: "Título aqui",
+                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-3",
+                viewCount: 4,
+                commentCount: 2
+              },
+              {
+                id: 4,
+                title: "Outro post",
+                summary: "Este é um post adicional que aparecerá quando o usuário clicar na seta para avançar no carrossel.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-4",
+                viewCount: 6,
+                commentCount: 3
+              },
+              {
+                id: 5,
+                title: "Mais um post",
+                summary: "Este é mais um post adicional para demonstrar a funcionalidade do carrossel de blog.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-5",
+                viewCount: 8,
+                commentCount: 4
+              },
+              {
+                id: 6,
+                title: "Post final",
+                summary: "Este é o último post de exemplo para o carrossel de posts do blog na página inicial.",
+                imageUrl: "/assets/blog-placeholder.jpg",
+                postUrl: "/blog/post-6",
+                viewCount: 5,
+                commentCount: 1
+              }
+            ]}
+          />
           
           {/* Botão para acessar o blog */}
           <div className="mt-16 text-center">
