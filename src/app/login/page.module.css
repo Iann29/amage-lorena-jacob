@@ -51,17 +51,19 @@
   font-family: var(--font-museo-sans), sans-serif;
   font-weight: 500;
   margin-bottom: 0.5rem;
+  color: #333333; /* Cor mais escura para o label */
 }
 
 .inputField {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #cccccc; /* Borda mais escura */
   border-radius: 4px;
   font-family: var(--font-museo-sans), sans-serif;
   font-size: 0.95rem;
+  color: #333333; /* Texto mais escuro */
   transition: all 0.2s ease;
-  background-color: #fafafa;
+  background-color: #f5f5f5; /* Fundo um pouco mais escuro */
 }
 
 .inputField:focus {
@@ -75,9 +77,9 @@
   display: block;
   text-align: right;
   margin-bottom: 1.5rem;
-  color: #3068ad;
+  color: #285590; /* Azul mais escuro para melhor contraste */
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600; /* Um pouco mais negrito */
   text-decoration: none;
   font-family: var(--font-museo-sans), sans-serif;
 }
