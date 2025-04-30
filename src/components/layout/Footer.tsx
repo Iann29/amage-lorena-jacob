@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 const Footer = () => {
+  const router = useRouter();
   const anoAtual = new Date().getFullYear();
 
   // Animações para os elementos do footer
@@ -69,7 +71,9 @@ const Footer = () => {
               {/* Início */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <Link href="/" className="hover:opacity-80 transition-opacity duration-200 inline-block">Início</Link>
+                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/')}>
+                    Início
+                  </span>
                 </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
@@ -103,7 +107,9 @@ const Footer = () => {
               {/* Sobre mim */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-black font-['Poppins'] mb-7" style={{fontSize: '1.49rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <Link href="/sobre" className="hover:opacity-80 transition-opacity duration-200 inline-block">Sobre mim</Link>
+                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/sobre')}>
+                    Sobre mim
+                  </span>
                 </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
@@ -122,7 +128,9 @@ const Footer = () => {
               {/* Blog */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <Link href="/blog" className="hover:opacity-80 transition-opacity duration-200 inline-block">Blog</Link>
+                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/blog')}>
+                    Blog
+                  </span>
                 </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
@@ -142,7 +150,9 @@ const Footer = () => {
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
                 <div style={{height: '38px', display: 'flex', alignItems: 'center', marginBottom: '28px'}}>
                   <h3 className="text-white text-lg font-semibold font-['Poppins'] mb-0 px-6 py-0 rounded-md bg-[#52a4db]" style={{fontSize: '1.24rem', display: 'inline-block', lineHeight: '1.6rem'}}>
-                    <Link href="/loja" className="hover:opacity-90 transition-opacity duration-200 inline-block">Loja</Link>
+                    <span className="inline-block cursor-pointer hover:opacity-90 transition-opacity duration-200" onClick={() => router.push('/loja')}>
+                      Loja
+                    </span>
                   </h3>
                 </div>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
