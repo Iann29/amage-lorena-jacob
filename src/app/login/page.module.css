@@ -223,9 +223,14 @@
 
 .highlight {
   font-family: var(--font-mogila), serif;
-  color: #fdffc8;
+  color: #ffffff; /* Corrigido para branco */
   font-style: italic;
   font-weight: normal;
+}
+
+.highlightYellow {
+  color: #FDFFC8;
+  font-weight: 700;
 }
 
 .quoteAuthor {

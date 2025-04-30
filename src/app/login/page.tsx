@@ -118,7 +118,7 @@ export default function LoginPage() {
             <div>
               <div className={styles.quoteSymbol}>“</div>
               <div className={styles.quoteText}>
-                Conhecimento, estímulo<br/>e constância <span className={styles.highlight}>transformam</span><br/>o desenvolvimento da<br/>criança com autismo.
+                <span className={styles.highlightYellow}>Conhecimento, estímulo<br/>e constância</span> <span className={styles.highlight}>transformam</span><br/>o desenvolvimento da<br/>criança com autismo.
               </div>
               <div className={styles.quoteAuthor}>Lorena Jacob</div>
             </div>
