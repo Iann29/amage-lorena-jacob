@@ -13,6 +13,14 @@ const Header = () => {
   const pathname = usePathname();
   const { scrollY } = useScroll();
   
+  // Páginas onde o header não deve ser exibido
+  const noHeaderPages = ['/login', '/cadastro', '/esqueci-minha-senha'];
+  
+  // Verifica se está em uma página que não deve exibir o header
+  if (noHeaderPages.some(page => pathname === page)) {
+    return null;
+  }
+  
   // Valores para transformações baseadas no scroll - com transições mais suaves
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);

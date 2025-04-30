@@ -2,12 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 const Footer = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const anoAtual = new Date().getFullYear();
+  
+  // Páginas onde o footer não deve ser exibido
+  const noFooterPages = ['/login', '/cadastro', '/esqueci-minha-senha'];
+  
+  // Verifica se está em uma página que não deve exibir o footer
+  if (noFooterPages.some(page => pathname === page)) {
+    return null;
+  }
 
   // Animações para os elementos do footer - variáveis removidas pois não estão sendo utilizadas
   // const containerVariants = { ... };
