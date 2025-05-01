@@ -4,12 +4,11 @@ import { Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "../styles/globals.css";
 
-// Componentes de layout
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-
 // Wrapper para animação de carregamento
 import LoadingWrapper from "@/components/layout/LoadingWrapper";
+
+// Provedor de layout que gerencia Header e Footer
+import LayoutProvider from "@/components/layout/LayoutProvider";
 
 // Fontes do Google
 const poppins = Poppins({
@@ -71,9 +70,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} ${museoSansRounded.variable} ${mogilaBold.variable} antialiased`}>
+      <body className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} ${museoSansRounded.variable} ${mogilaBold.variable} antialiased flex flex-col min-h-screen`}>
         <LoadingWrapper>
-          {children}
+          <LayoutProvider>
+            {children}
+          </LayoutProvider>
         </LoadingWrapper>
       </body>
     </html>
