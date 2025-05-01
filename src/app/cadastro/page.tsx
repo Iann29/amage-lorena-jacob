@@ -89,7 +89,7 @@ export default function CadastroPage() {
               value={formData.nome}
               onChange={handleChange}
               required
-              className={styles.input}
+              className={`${styles.input} ${styles.largeInput}`}
               placeholder="Ex: Sabrina Meireles dos Santos"
               autoComplete="name"
             />
@@ -104,7 +104,7 @@ export default function CadastroPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              className={styles.input}
+              className={`${styles.input} ${styles.largeInput}`}
               placeholder="Ex: sabrinamei@gmail.com"
               autoComplete="email"
             />
