@@ -115,28 +115,28 @@ export default function Home() {
             
             {/* Botão para desktop */}
             <div className="hidden md:flex pl-[32px] mt-12 justify-center">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md">
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                 Agende uma Avaliação
               </Link>
             </div>
 
             {/* Texto informativo para tablet */}
             <div className="mt-8 border-l-4 border-white pl-4 py-1 hidden sm:block md:hidden">
-              <p className="text-sm whitespace-nowrap font-[var(--font-museo-sans)]">
-                Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
+              <p className="text-sm whitespace-nowrap" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                Acompanhamento especializado para <span className="font-bold" style={{ fontFamily: 'var(--font-museo-sans)' }}>auxiliar crianças</span>
               </p>
-              <p className="text-sm whitespace-nowrap font-[var(--font-museo-sans)]">
-                <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
+              <p className="text-sm whitespace-nowrap" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                <span className="font-bold" style={{ fontFamily: 'var(--font-museo-sans)' }}>com o autismo, TDAH</span> e outras necessidades especiais.
               </p>
             </div>
             
             {/* Texto informativo para desktop */}
             <div className="mt-12 border-l-6 border-white pl-6 py-2 hidden md:block">
-              <p className="text-lg md:text-xl whitespace-nowrap font-[var(--font-museo-sans)]">
-                Acompanhamento especializado para <span className="font-bold">auxiliar crianças</span>
+              <p className="text-lg md:text-xl whitespace-nowrap" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                Acompanhamento especializado para <span className="font-bold" style={{ fontFamily: 'var(--font-museo-sans)' }}>auxiliar crianças</span>
               </p>
-              <p className="text-lg md:text-xl whitespace-nowrap font-[var(--font-museo-sans)]">
-                <span className="font-bold">com o autismo, TDAH</span> e outras necessidades especiais.
+              <p className="text-lg md:text-xl whitespace-nowrap" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                <span className="font-bold" style={{ fontFamily: 'var(--font-museo-sans)' }}>com o autismo, TDAH</span> e outras necessidades especiais.
               </p>
             </div>
           </div>
