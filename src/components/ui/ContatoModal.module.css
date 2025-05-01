@@ -48,11 +48,9 @@
   margin-bottom: 1.5rem;
   text-align: center;
   font-family: var(--font-museo-sans);
-  width: 100%;
-  position: absolute;
-  top: 1rem;
-  left: 0;
-  right: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  /* Removido position absolute para não ficar sobre toda a largura */
 }
 
 .logoContainer {

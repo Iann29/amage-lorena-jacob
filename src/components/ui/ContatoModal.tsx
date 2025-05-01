@@ -51,8 +51,6 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
           </svg>
         </button>
 
-        <h2 className={styles.title}>Entre em Contato</h2>
-
         <div className={styles.logoContainer}>
           <Image 
             src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logoverdeclaro.webp"
@@ -70,6 +68,7 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
         <div className={styles.divider}></div>
         
         <div className={styles.contentContainer}>
+          <h2 className={styles.title}>Entre em Contato</h2>
         
         <p className={styles.whatsappText}>Entre em contato pelo WhatsApp</p>
         
