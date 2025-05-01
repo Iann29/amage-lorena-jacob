@@ -1,15 +1,25 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./styles.module.css";
 
-export default function CodigoVerificacaoPage() {
-  const router = useRouter();
+// Componente separado para lidar com parâmetros da URL
+function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => void }) {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
+  
+  useEffect(() => {
+    onEmailRead(emailParam);
+  }, [emailParam, onEmailRead]);
+  
+  return null;
+}
+
+export default function CodigoVerificacaoPage() {
+  const router = useRouter();
   
   // Refs para os inputs de código
   const inputRefs = [
@@ -21,10 +31,15 @@ export default function CodigoVerificacaoPage() {
   
   // Estado para os valores dos campos de código
   const [codigo, setCodigo] = useState(["", "", "", ""]);
-  const [email, setEmail] = useState(emailParam);
+  const [email, setEmail] = useState("");
   const [isVerificando, setIsVerificando] = useState(false);
   const [codigoVerificado, setCodigoVerificado] = useState(false);
   const [erro, setErro] = useState("");
+  
+  // Função para atualizar o email do parâmetro da URL
+  const handleEmailRead = (emailFromParam: string) => {
+    setEmail(emailFromParam);
+  };
   
   // Função para lidar com a mudança em um campo de código
   const handleCodigoChange = (value: string, index: number) => {
@@ -96,6 +111,11 @@ export default function CodigoVerificacaoPage() {
 
   return (
     <div className={styles.container}>
+      {/* Componente para ler o email da URL dentro de Suspense */}
+      <Suspense fallback={null}>
+        <EmailParamReader onEmailRead={handleEmailRead} />
+      </Suspense>
+      
       {/* Botão para voltar para a página anterior */}
       <Link 
         href="/esqueci-minha-senha" 
