@@ -164,6 +164,12 @@
   color: white;
   font-size: 0.85rem;
   line-height: 1.2;
+  font-weight: 500;
+}
+
+.highlightedTerms {
+  color: #FBF8C6;
+  font-weight: 600;
 }
 
 .button {

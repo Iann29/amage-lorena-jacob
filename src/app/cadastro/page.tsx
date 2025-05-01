@@ -195,7 +195,7 @@ export default function CadastroPage() {
               required
             />
             <span className={styles.checkboxLabel}>
-              Li e estou de acordo com os Termos de Uso e a Política de Privacidade. *
+              Li e estou de acordo com <span className={styles.highlightedTerms}>os Termos de Uso e a Política de Privacidade. *</span>
             </span>
           </label>
           
