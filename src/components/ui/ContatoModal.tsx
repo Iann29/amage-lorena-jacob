@@ -45,7 +45,7 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
     <div className={styles.modalOverlay} onClick={handleOverlayClick}>
       <div className={styles.modalContent} ref={modalRef}>
         <button className={styles.closeButton} onClick={onClose} aria-label="Fechar modal">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="12" fill="#00D3C7" />
             <path d="M17 7L7 17M7 7L17 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -55,14 +55,20 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
 
         <div className={styles.logoContainer}>
           <Image 
-            src="/logos/logo1.webp"
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logoverdeclaro.webp"
             alt="Lorena Jacob Terapeuta Infantil"
-            width={200}
-            height={80}
+            width={220}
+            height={90}
             className={styles.logo}
+            priority
+            quality={90}
+            sizes="300px"
+            style={{ objectFit: 'contain', maxWidth: '100%' }}
           />
         </div>
 
+        <div className={styles.divider}></div>
+        
         <p className={styles.whatsappText}>Entre em contato pelo WhatsApp</p>
         
         <a 
