@@ -80,11 +80,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
           {/* Textos do título */}
           <div className="absolute top-16 left-0 w-full flex flex-col items-center z-10 px-4 space-y-0">
-            <div className="text-[#025074] text-base font-bold font-[var(--font-museo-sans)] leading-none mb-0 text-center">
+            <div className="text-[#025074] text-base font-bold leading-none mb-0 text-center" style={{ fontFamily: 'var(--font-museo-sans)' }}>
               {firstPart}
             </div>
             {secondPart && (
-              <div className="text-[#27769B] text-xl font-bold font-[var(--font-museo-sans)] leading-none mt-0 text-center">
+              <div className="text-[#27769B] text-xl font-bold leading-none mt-0 text-center" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                 {secondPart}
               </div>
             )}
@@ -93,7 +93,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           {/* Botão SAIBA MAIS */}
           <div className="absolute top-[127px] left-0 w-full flex justify-center z-10">
             <Link href={linkHref}>
-              <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold font-[var(--font-museo-sans)] w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                 {buttonText}
               </div>
             </Link>
