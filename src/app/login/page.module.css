@@ -299,26 +299,14 @@
     flex-direction: column;
   }
   
-  .formSide,
-  .imageSide {
-    width: 100%;
-  }
-  
   .formSide {
+    width: 100%;
     padding: 2rem 1.5rem;
-    order: 2;
+    order: 1;
+    min-height: 100vh;
   }
   
   .imageSide {
-    min-height: 40vh;
-    order: 1;
-  }
-  
-  .quote {
-    max-width: 90%;
-  }
-  
-  .quoteText {
-    font-size: 1.4rem;
+    display: none; /* Oculta completamente a parte direita em dispositivos móveis */
   }
 }
