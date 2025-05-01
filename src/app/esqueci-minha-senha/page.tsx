@@ -77,15 +77,16 @@ export default function EsqueciMinhaSenha() {
                         required
                       />
                     </div>
-
-                    <button 
-                      type="submit" 
-                      className={styles.submitButton}
-                      disabled={isSending}
-                    >
-                      {isSending ? "Enviando..." : "Enviar"}
-                    </button>
                   </form>
+                  
+                  <button 
+                    type="button" 
+                    className={styles.submitButton}
+                    disabled={isSending}
+                    onClick={handleSubmit}
+                  >
+                    {isSending ? "Enviando..." : "Enviar"}
+                  </button>
                 </>
               ) : (
                 <div className={styles.successMessage}>

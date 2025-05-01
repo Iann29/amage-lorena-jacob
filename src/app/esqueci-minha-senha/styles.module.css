@@ -34,6 +34,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 900px;
   position: relative;
   align-items: center;
 }
@@ -56,7 +57,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 500px;
+  max-width: 800px;
   margin-bottom: 2rem;
   z-index: 2;
 }
@@ -111,6 +112,7 @@
 
 .form {
   width: 100%;
+  max-width: 550px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -126,8 +128,10 @@
 .label {
   font-family: var(--font-museo-sans);
   font-weight: 300;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #777777;
+  display: inline-block;
+  margin-bottom: 0.2rem;
 }
 
 .input {
@@ -137,8 +141,9 @@
   border-radius: 8px;
   font-family: var(--font-museo-sans);
   font-weight: 300;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #000000;
+  min-width: 450px;
 }
 
 .input::placeholder {
@@ -160,17 +165,22 @@
 }
 
 .submitButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
+  width: 50%;
+  max-width: 300px;
+  padding: 0.5rem 0.8rem;
   background-color: #3068AD;
   color: white;
   border: none;
   border-radius: 8px;
   font-family: var(--font-museo-sans);
   font-weight: 500;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 1rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .submitButton:hover {
