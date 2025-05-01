@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
@@ -22,19 +22,35 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   // Usando o parâmetro diretamente na configuração abaixo
   visibleItems = 3
 }) => {
+  // Referência para saber se o componente foi montado
+  const isMounted = useRef(false);
+  
   // Estado para controlar o índice inicial dos depoimentos visíveis
   const [activeIndex, setActiveIndex] = useState(0);
+  
+  // Estado para controlar se o cliente já foi hidratado
+  const [isClient, setIsClient] = useState(false);
   
   // Estado para rastrear o tamanho da tela e itens visíveis
   const [displayConfig, setDisplayConfig] = useState({
     width: 0,
-    itemsToShow: 1 // Valor inicial seguro para SSR
+    itemsToShow: 3 // Começar com valor para desktop
   });
+  
+  // Marcar quando o componente estiver montado no cliente
+  useEffect(() => {
+    setIsClient(true);
+    isMounted.current = true;
+    
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   // Determinar número de itens a exibir com base no tamanho da tela
   useEffect(() => {
     // Garantir que estamos executando apenas no cliente
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && isClient) {
       // Função para calcular e atualizar a configuração de exibição
       const updateDisplayConfig = () => {
         const width = window.innerWidth;
@@ -46,14 +62,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
           itemsToShow = 2; // Tablet
         }
         
-        setDisplayConfig(prevConfig => {
-          if (prevConfig.itemsToShow !== itemsToShow) {
-            // Forçar uma atualização dos itens visíveis quando o número de itens muda
-            setTimeout(() => setVisibleTestimonials(getCircularItems()), 0);
-            return { width, itemsToShow };
-          }
-          return { ...prevConfig, width };
-        });
+        setDisplayConfig({ width, itemsToShow });
       };
       
       // Atualizar imediatamente
@@ -63,13 +72,13 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       window.addEventListener('resize', updateDisplayConfig);
       return () => window.removeEventListener('resize', updateDisplayConfig);
     }
-  }, []);
+  }, [isClient]);
   
   // Criar um array circular para facilitar a rotação dos itens
   // Usando useCallback para memoizar a função e evitar recriações desnecessárias
   const getCircularItems = useCallback(() => {
     const items = [...testimonials];
-    const { itemsToShow } = displayConfig;
+    const itemsToShow = isClient ? displayConfig.itemsToShow : 3; // Usar 3 por padrão até que o cliente seja hidratado
     
     // Garantir que temos itens suficientes para preencher a visualização
     if (items.length < itemsToShow) {
@@ -77,23 +86,24 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
     }
     
     // Criar uma visualização circular dos itens
-    const visibleTestimonials: Testimonial[] = [];
+    const visibleItems: Testimonial[] = [];
     
     for (let i = 0; i < itemsToShow; i++) {
       const index = (activeIndex + i) % testimonials.length;
-      visibleTestimonials.push(items[index]);
+      visibleItems.push(items[index]);
     }
     
-    return visibleTestimonials;
-  }, [activeIndex, displayConfig, testimonials]); // Dependências da função
-  
-  // Obter os itens visíveis no momento
-  const [visibleTestimonials, setVisibleTestimonials] = useState(getCircularItems());
+    return visibleItems;
+  }, [activeIndex, displayConfig.itemsToShow, testimonials, isClient]); // Adicionado isClient como dependência
   
   // Atualizar os itens visíveis quando o índice ativo muda ou quando a configuração de exibição muda
+  const [visibleTestimonials, setVisibleTestimonials] = useState<Testimonial[]>([]);
+  
   useEffect(() => {
-    setVisibleTestimonials(getCircularItems());
-  }, [activeIndex, displayConfig.itemsToShow, getCircularItems]);
+    if (isClient) {
+      setVisibleTestimonials(getCircularItems());
+    }
+  }, [activeIndex, displayConfig.itemsToShow, getCircularItems, isClient]);
 
   // Direção da animação (1 = direita, -1 = esquerda)
   const [direction, setDirection] = useState(0);
@@ -151,13 +161,21 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 
       {/* Container do carrossel com deslizamento individual */}
       <div className="relative py-6 sm:py-8 md:py-10 flex flex-col items-center" style={{ height: '350px' }}>
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          key={`container-${activeIndex}-${displayConfig.itemsToShow}`}
-          className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full`}
-        >
+        {!isClient ? (
+          // Mostrar placeholder ou esqueleto durante SSR
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full">
+            {[...Array(3)].map((_, idx) => (
+              <div key={`skeleton-${idx}`} className="w-full h-64 bg-gray-100 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            key={`container-${activeIndex}-${displayConfig.itemsToShow}`}
+            className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full`}
+          >
           {visibleTestimonials.map((testimonial, idx) => (
             <motion.div
               key={`${testimonial.id}-${idx}-${activeIndex}`}
@@ -175,6 +193,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
             </motion.div>
           ))}
         </motion.div>
+        )}
       </div>
 
       {/* Seta direita em formato circular */}
@@ -191,7 +210,8 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Indicadores de posição */}
-      <div className="flex justify-center mt-12 sm:mt-16 md:mt-20 space-x-2 sm:space-x-3">
+      {isClient && (
+        <div className="flex justify-center mt-12 sm:mt-16 md:mt-20 space-x-2 sm:space-x-3">
         {testimonials.map((_, i) => (
           <button
             key={i}
@@ -210,6 +230,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
           />
         ))}
       </div>
+      )}
     </div>
   );
 };
