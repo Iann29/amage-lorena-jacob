@@ -1,12 +1,17 @@
 .container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #F8F7FB;
-  position: relative;
-  padding: 2rem 1rem;
+  min-height: 100vh;
+  width: 100%;
+  background: #fff;
+  overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .backButton {
@@ -36,20 +41,12 @@
   transform: translateY(-1px);
 }
 
-.contentWrapper {
-  width: 100%;
-  max-width: 960px;
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  margin-top: 2rem;
-}
+
 
 .logoContainer {
   display: flex;
   justify-content: center;
-  padding: 2rem 0 1rem;
+  margin-bottom: 2.5rem;
 }
 
 .logo {
@@ -58,35 +55,40 @@
 }
 
 .mainContent {
-  padding: 1rem 2rem 3rem;
+  width: 100%;
+  max-width: 960px;
 }
 
 .textCenter {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .title {
   color: #26578C;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   font-family: var(--font-museo-sans);
+  text-shadow: 0px 2px 4px rgba(38, 87, 140, 0.1);
 }
 
 .subtitle {
   color: #666;
-  font-size: 1rem;
+  font-size: 1.1rem;
   max-width: 600px;
   margin: 0 auto;
   font-family: var(--font-museo-sans);
+  line-height: 1.5;
 }
 
 .content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 4rem;
+  width: 100%;
+  max-width: 1000px;
 }
 
 .formSection {
@@ -97,21 +99,22 @@
 .codigoContainer {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.2rem;
   margin: 2rem 0;
 }
 
 .digitInput {
-  width: 60px;
-  height: 70px;
+  width: 70px;
+  height: 80px;
   border: 2px solid #DDD;
-  border-radius: 8px;
+  border-radius: 12px;
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 600;
   color: #3068AD;
   background-color: white;
   transition: all 0.2s ease;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .digitInput:focus {
@@ -122,16 +125,17 @@
 
 .submitButton {
   width: 100%;
-  padding: 1rem;
+  padding: 1.2rem;
   background-color: #3068AD;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 1rem;
+  margin-top: 2rem;
+  box-shadow: 0px 4px 12px rgba(48, 104, 173, 0.25);
 }
 
 .submitButton:hover {
@@ -187,8 +191,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   text-align: center;
+  background-color: rgba(76, 175, 80, 0.05);
+  border-radius: 16px;
+  border: 1px dashed rgba(76, 175, 80, 0.3);
+  padding: 2.5rem 1.5rem;
 }
 
 .checkIcon {
@@ -197,7 +205,7 @@
 
 .successTitle {
   color: #4CAF50;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 700;
   margin-bottom: 1rem;
   font-family: var(--font-museo-sans);

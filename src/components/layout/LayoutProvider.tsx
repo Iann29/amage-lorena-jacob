@@ -13,7 +13,14 @@ export default function LayoutProvider({
   const pathname = usePathname();
   
   // Páginas que não devem exibir Header e Footer
-  const authPages = ['/login', '/cadastro', '/esqueci-minha-senha', '/autenticacao', '/recuperar-senha'];
+  const authPages = [
+    '/login',
+    '/cadastro',
+    '/esqueci-minha-senha',
+    '/autenticacao',
+    '/recuperar-senha',
+    '/recuperar-senha/codigo-verificacao'
+  ];
   const isAuthPage = authPages.some(page => pathname === page);
   
   return (
