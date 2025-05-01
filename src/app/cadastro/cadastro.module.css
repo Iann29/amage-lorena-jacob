@@ -97,24 +97,24 @@
 
 /* Estilos para os placeholders */
 .input::placeholder {
-  color: #888;
+  color: #AEAEAE;
   opacity: 1;
 }
 
 /* Para Firefox */
 .input::-moz-placeholder {
-  color: #888;
+  color: #AEAEAE;
   opacity: 1;
 }
 
 /* Para Edge */
 .input:-ms-input-placeholder {
-  color: #888;
+  color: #AEAEAE;
 }
 
 /* Para Chrome, Safari e Opera */
 .input::-webkit-input-placeholder {
-  color: #888;
+  color: #AEAEAE;
 }
 
 .passwordContainer {
@@ -123,7 +123,7 @@
 
 .passwordToggle {
   position: absolute;
-  right: 1rem;
+  right: calc(40% + 0.5rem); /* Posiciona o botão próximo ao final do campo reduzido */
   top: 50%;
   transform: translateY(-50%);
   background: none;
