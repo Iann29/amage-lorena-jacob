@@ -1,28 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import styles from "./styles.module.css";
 
-export default function RecuperarSenhaPage() {
+// Componente separado para lidar com parâmetros da URL
+function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => void }) {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
+  
+  useEffect(() => {
+    onEmailRead(emailParam);
+  }, [emailParam, onEmailRead]);
+  
+  return null;
+}
 
-  const [email, setEmail] = useState(emailParam);
+export default function RecuperarSenhaPage() {
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [senhaRedefinida, setSenhaRedefinida] = useState(false);
   const [erro, setErro] = useState("");
+  
+  // Função para atualizar o email do parâmetro da URL
+  const handleEmailRead = (emailFromParam: string) => {
+    setEmail(emailFromParam);
+  };
 
   // Verificar se temos o email necessário para prosseguir
   useEffect(() => {
-    if (!emailParam) {
+    if (!email) {
       setErro("Email não fornecido. Por favor, inicie o processo de recuperação de senha novamente.");
     }
-  }, [emailParam]);
+  }, [email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +75,11 @@ export default function RecuperarSenhaPage() {
 
   return (
     <div className={styles.container}>
+      {/* Componente para ler o email da URL dentro de Suspense */}
+      <Suspense fallback={null}>
+        <EmailParamReader onEmailRead={handleEmailRead} />
+      </Suspense>
+      
       {/* Botão para voltar */}
       <Link 
         href="/login" 
