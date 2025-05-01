@@ -19,11 +19,13 @@ function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => voi
 }
 
 export default function RecuperarSenhaPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState<string>("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [senhaRedefinida, setSenhaRedefinida] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [erro, setErro] = useState("");
   
   // Função para atualizar o email do parâmetro da URL
@@ -80,7 +82,6 @@ export default function RecuperarSenhaPage() {
         <EmailParamReader onEmailRead={handleEmailRead} />
       </Suspense>
       
-      {/* Botão para voltar */}
       <Link 
         href="/login" 
         className={styles.backButton}
@@ -90,116 +91,95 @@ export default function RecuperarSenhaPage() {
         </svg>
         Voltar para o login
       </Link>
-      
-      <div className={styles.contentWrapper}>
-        <div className={styles.logoContainer}>
-          <Image
-            src="/logos/logo1.webp"
-            alt="Logo Lorena Jacob"
-            width={280}
-            height={90}
-            className={styles.logo}
-            priority
-          />
+
+      <div className={styles.logoContainer}>
+        <Image 
+          src="/logos/logo1.webp" 
+          alt="Logo Lorena Jacob" 
+          width={320} 
+          height={90}
+          className={styles.logo}
+          priority
+        />
+      </div>
+
+      <div className={styles.mainContent}>
+        <div className={styles.textCenter}>
+          <h1 className={styles.title}>Redefinir Senha</h1>
         </div>
-
-        <div className={styles.mainContent}>
-          <div className={styles.textCenter}>
-            <h1 className={styles.title}>
-              {!senhaRedefinida ? "Criar Nova Senha" : "Senha Redefinida!"}
-            </h1>
-            {!senhaRedefinida && (
-              <p className={styles.subtitle}>
-                Crie uma nova senha segura para sua conta
-              </p>
-            )}
-          </div>
+        
+        <div className={styles.content}>
+          {erro && (
+            <div className={styles.errorAlert}>
+              <p>{erro}</p>
+            </div>
+          )}
           
-          <div className={styles.content}>
-            <div className={styles.formSection}>
-              {erro && (
-                <div className={styles.errorAlert}>
-                  <p>{erro}</p>
-                </div>
-              )}
+          {!senhaRedefinida ? (
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="senha" className={styles.label}>Nova Senha</label>
+                <input
+                  type="password"
+                  id="senha"
+                  placeholder="Digite sua nova senha"
+                  className={styles.input}
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                />
+              </div>
               
-              {!senhaRedefinida ? (
-                <form onSubmit={handleSubmit} className={styles.form}>
-                  {email && (
-                    <div className={styles.emailInfo}>
-                      <p>Redefinindo senha para:</p>
-                      <p className={styles.emailDisplay}>{email}</p>
-                    </div>
-                  )}
-                  
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="senha" className={styles.label}>
-                      Nova Senha
-                    </label>
-                    <input
-                      type="password"
-                      id="senha"
-                      placeholder="Digite sua nova senha"
-                      className={styles.input}
-                      value={senha}
-                      onChange={(e) => setSenha(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="confirmarSenha" className={styles.label}>
-                      Confirmar Senha
-                    </label>
-                    <input
-                      type="password"
-                      id="confirmarSenha"
-                      placeholder="Confirme sua nova senha"
-                      className={styles.input}
-                      value={confirmarSenha}
-                      onChange={(e) => setConfirmarSenha(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
+              <div className={styles.inputGroup}>
+                <label htmlFor="confirmarSenha" className={styles.label}>Confirmar Senha</label>
+                <div className={styles.passwordInputContainer}>
+                  <input
+                    type={mostrarConfirmarSenha ? "text" : "password"}
+                    id="confirmarSenha"
+                    placeholder="Confirme sua nova senha"
+                    className={styles.input}
+                    value={confirmarSenha}
+                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                    required
+                  />
                   <button 
-                    type="submit" 
-                    className={styles.submitButton}
-                    disabled={isSaving}
+                    type="button" 
+                    className={styles.eyeButton}
+                    onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
                   >
-                    {isSaving ? "Salvando..." : "Redefinir Senha"}
-                  </button>
-                </form>
-              ) : (
-                <div className={styles.successMessage}>
-                  <div className={styles.checkIcon}>
-                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="24" cy="24" r="22" stroke="#4CAF50" strokeWidth="4"/>
-                      <path d="M16 24L22 30L32 18" stroke="#4CAF50" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
-                  </div>
-                  <p className={styles.successText}>
-                    Sua senha foi redefinida com sucesso! Agora você pode entrar na sua conta utilizando a nova senha.
-                  </p>
-                  
-                  <Link href="/login" className={styles.continueButton}>
-                    Ir para o Login
-                  </Link>
+                  </button>
                 </div>
-              )}
+              </div>
+              
+              <button 
+                type="submit" 
+                className={styles.submitButton}
+                disabled={isSaving}
+              >
+                {isSaving ? "Salvando..." : "Redefinir"}
+              </button>
+            </form>
+          ) : (
+            <div className={styles.successMessage}>
+              <div className={styles.checkIcon}>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="24" cy="24" r="22" stroke="#4CAF50" strokeWidth="4"/>
+                  <path d="M16 24L22 30L32 18" stroke="#4CAF50" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <p className={styles.successText}>
+                Sua senha foi redefinida com sucesso! Agora você pode entrar na sua conta utilizando a nova senha.
+              </p>
+              
+              <Link href="/login" className={styles.continueButton}>
+                Ir para o Login
+              </Link>
             </div>
-
-            <div className={styles.imageContainer}>
-              <Image
-                src="/assets/nova-senha.png"
-                alt="Ilustração de segurança"
-                width={315}
-                height={315}
-                className={styles.image}
-                priority
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

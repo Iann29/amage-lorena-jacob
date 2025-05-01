@@ -3,10 +3,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background-color: #F8F7FB;
-  position: relative;
+  justify-content: flex-start;
+  background-color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   padding: 2rem 1rem;
+  overflow-y: auto;
 }
 
 .backButton {
@@ -38,22 +44,21 @@
 
 .contentWrapper {
   width: 100%;
-  max-width: 960px;
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  margin-top: 2rem;
+  max-width: 550px;
+  padding: 1rem;
+  margin-top: 1rem;
 }
 
 .logoContainer {
   display: flex;
   justify-content: center;
-  padding: 2rem 0 1rem;
+  margin-bottom: 2.5rem;
+  margin-top: 2rem;
 }
 
 .logo {
   height: auto;
+  width: 180px;
   object-fit: contain;
 }
 
@@ -67,11 +72,13 @@
 }
 
 .title {
-  color: #26578C;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2.5rem;
+  color: #3068AD;
   font-family: var(--font-museo-sans);
+  line-height: 1.2;
+  text-align: center;
 }
 
 .subtitle {
@@ -84,14 +91,11 @@
 
 .content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.formSection {
-  flex: 1;
-  max-width: 460px;
+  width: 100%;
+  max-width: 450px;
+  margin-top: 2rem;
 }
 
 .form {
@@ -118,20 +122,22 @@
 
 .label {
   display: block;
-  color: #555;
+  color: #666;
   font-weight: 500;
   margin-bottom: 0.5rem;
   font-family: var(--font-museo-sans);
+  font-size: 0.9rem;
 }
 
 .input {
   width: 100%;
   padding: 0.85rem 1rem;
-  border: 1.5px solid #E0E0E0;
+  border: 1px solid #E0E0E0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #333;
   transition: all 0.2s ease;
+  background-color: #fff;
 }
 
 .input:focus {
@@ -141,17 +147,20 @@
 }
 
 .submitButton {
-  width: 100%;
-  padding: 1rem;
+  width: 50%;
+  padding: 0.85rem;
   background-color: #3068AD;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 1rem;
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
 }
 
 .submitButton:hover {
