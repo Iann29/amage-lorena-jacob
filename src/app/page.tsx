@@ -17,11 +17,13 @@ export default function Home() {
         {/* Background Image - Desktop */}
         <div className="w-screen hidden md:block relative" style={{ height: 'auto' }}>
           <Image 
-            src="/Backgroud.webp" 
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/Backgroud.webp" 
             alt="Fundo Desktop" 
-            width={3000}
-            height={3000}
+            width={1920}
+            height={1080}
             priority
+            sizes="100vw"
+            quality={85}
             className="w-full h-auto"
             style={{ display: 'block' }}
           />
@@ -30,11 +32,13 @@ export default function Home() {
         {/* Background Image - Mobile */}
         <div className="w-screen md:hidden relative" style={{ height: 'auto' }}>
           <Image 
-            src="/Backgroud2mob.png" 
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/Backgroud2mob.webp" 
             alt="Fundo Mobile" 
-            width={2000}
-            height={2000}
+            width={750}
+            height={1334}
             priority
+            sizes="100vw"
+            quality={85}
             className="w-full h-auto"
             style={{ display: 'block' }}
           />
