@@ -147,20 +147,21 @@
 }
 
 .submitButton {
-  width: 50%;
+  width: 30%;
   padding: 0.85rem;
   background-color: #3068AD;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 2rem;
   margin-left: auto;
   margin-right: auto;
   display: block;
+  box-shadow: 0 4px 8px rgba(48, 104, 173, 0.3);
 }
 
 .submitButton:hover {

@@ -132,27 +132,15 @@ export default function RecuperarSenhaPage() {
               
               <div className={styles.inputGroup}>
                 <label htmlFor="confirmarSenha" className={styles.label}>Confirmar Senha</label>
-                <div className={styles.passwordInputContainer}>
-                  <input
-                    type={mostrarConfirmarSenha ? "text" : "password"}
-                    id="confirmarSenha"
-                    placeholder="Confirme sua nova senha"
-                    className={styles.input}
-                    value={confirmarSenha}
-                    onChange={(e) => setConfirmarSenha(e.target.value)}
-                    required
-                  />
-                  <button 
-                    type="button" 
-                    className={styles.eyeButton}
-                    onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  </button>
-                </div>
+                <input
+                  type="password"
+                  id="confirmarSenha"
+                  placeholder="Confirme sua nova senha"
+                  className={styles.input}
+                  value={confirmarSenha}
+                  onChange={(e) => setConfirmarSenha(e.target.value)}
+                  required
+                />
               </div>
               
               <button 
