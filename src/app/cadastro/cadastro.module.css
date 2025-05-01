@@ -8,7 +8,7 @@
   align-items: center;
 }
 
-.backgroundImage {
+.backgroundImage, .backgroundWrapper {
   position: absolute;
   left: 0;
   top: 0;

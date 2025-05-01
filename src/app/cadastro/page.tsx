@@ -57,12 +57,19 @@ export default function CadastroPage() {
         </svg>
         Voltar para o site
       </Link>
-      <Image 
-        src="/backgroundcadastro.png" 
-        alt="Background" 
-        fill
-        className={styles.backgroundImage}
-        priority
+      <div className={styles.backgroundWrapper}
+        style={{
+          backgroundImage: `url(https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//backgroundcadastro.webp)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0.2,
+          zIndex: 0
+        }}
       />
       
       <div className={styles.formContainer}>
