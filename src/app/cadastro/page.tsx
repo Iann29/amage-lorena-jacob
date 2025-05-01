@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import styles from './cadastro.module.css';
 
 export default function CadastroPage() {
   const [formData, setFormData] = useState({
@@ -10,6 +12,12 @@ export default function CadastroPage() {
     senha: '',
     confirmarSenha: ''
   });
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [dataCollectionChecked, setDataCollectionChecked] = useState(false);
+  const [notificationsChecked, setNotificationsChecked] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,20 +31,50 @@ export default function CadastroPage() {
     e.preventDefault();
     // Aqui será implementada a integração com Supabase Auth
     console.log('Cadastro enviado:', formData);
-    alert('Cadastro realizado com sucesso!');
+    
+    if (!termsChecked || !dataCollectionChecked) {
+      alert('Você precisa aceitar os termos e a política de privacidade para continuar.');
+      return;
+    }
+    
     // Futuramente redirecionaremos para a página de minha-conta após o cadastro bem-sucedido
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold text-purple-800 mb-6 text-center">
-          Criar uma conta
-        </h1>
+    <div className={styles.cadastroContainer}>
+      <Image 
+        src="/backgroundcadastro.png" 
+        alt="Background" 
+        fill
+        className={styles.backgroundImage}
+        priority
+      />
+      
+      <div className={styles.formContainer}>
+        <Image 
+          src="/logos/logobranca.webp" 
+          alt="Lorena Jacob - Terapeuta Infantil" 
+          width={220} 
+          height={60} 
+          className={styles.logo}
+        />
         
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome Completo</label>
+        <div className={styles.title}>
+          <span className={styles.titleCrie}>Crie </span>
+          <span className={styles.titleSuaConta}>sua conta</span>
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+          <div className={styles.formGroup}>
+            <label htmlFor="nome" className={styles.label}>Nome Completo: *</label>
             <input
               type="text"
               id="nome"
@@ -44,13 +82,13 @@ export default function CadastroPage() {
               value={formData.nome}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Seu nome completo"
+              className={styles.input}
+              placeholder="Ex: Sabrina Meireles dos Santos"
             />
           </div>
           
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-1">E-mail</label>
+          <div className={styles.formGroup}>
+            <label htmlFor="email" className={styles.label}>E-mail: *</label>
             <input
               type="email"
               id="email"
@@ -58,92 +96,138 @@ export default function CadastroPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="seu.email@exemplo.com"
+              className={styles.input}
+              placeholder="Ex: sabrinamei@gmail.com"
             />
           </div>
           
-          <div className="mb-4">
-            <label htmlFor="senha" className="block text-gray-700 font-medium mb-1">Senha</label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              value={formData.senha}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="********"
-            />
-            <p className="mt-1 text-xs text-gray-500">Mínimo 8 caracteres, com pelo menos uma letra maiúscula e um número</p>
+          <div className={styles.formGroup}>
+            <label htmlFor="senha" className={styles.label}>Senha: *</label>
+            <div className={styles.passwordContainer}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="senha"
+                name="senha"
+                value={formData.senha}
+                onChange={handleChange}
+                required
+                className={styles.input}
+                placeholder="Insira sua senha"
+              />
+              <button 
+                type="button" 
+                onClick={togglePasswordVisibility} 
+                className={styles.passwordToggle}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5C5.63636 5 2 12 2 12C2 12 5.63636 19 12 19C18.3636 19 22 12 22 12C22 12 18.3636 5 12 5Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 2L22 22" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6.71277 6.7226C3.66479 8.79527 2 12 2 12C2 12 5.63636 19 12 19C14.0503 19 15.8174 18.2734 17.2711 17.2884M11 5.05822C11.3254 5.02013 11.6588 5 12 5C18.3636 5 22 12 22 12C22 12 21.3082 13.3317 20 14.8335" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 12C14 12.5304 13.7893 13.0391 13.4142 13.4142C13.0391 13.7893 12.5304 14 12 14C11.4696 14 10.9609 13.7893 10.5858 13.4142C10.2107 13.0391 10 12.5304 10 12C10 11.4696 10.2107 10.9609 10.5858 10.5858C10.9609 10.2107 11.4696 10 12 10C12.5304 10 13.0391 10.2107 13.4142 10.5858C13.7893 10.9609 14 11.4696 14 12Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
           
-          <div className="mb-6">
-            <label htmlFor="confirmarSenha" className="block text-gray-700 font-medium mb-1">Confirmar Senha</label>
-            <input
-              type="password"
-              id="confirmarSenha"
-              name="confirmarSenha"
-              value={formData.confirmarSenha}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="********"
-            />
+          <div className={styles.formGroup}>
+            <label htmlFor="confirmarSenha" className={styles.label}>Confirmar Senha: *</label>
+            <div className={styles.passwordContainer}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmarSenha"
+                name="confirmarSenha"
+                value={formData.confirmarSenha}
+                onChange={handleChange}
+                required
+                className={styles.input}
+                placeholder="Confirme sua senha"
+              />
+              <button 
+                type="button" 
+                onClick={toggleConfirmPasswordVisibility} 
+                className={styles.passwordToggle}
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5C5.63636 5 2 12 2 12C2 12 5.63636 19 12 19C18.3636 19 22 12 22 12C22 12 18.3636 5 12 5Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 2L22 22" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6.71277 6.7226C3.66479 8.79527 2 12 2 12C2 12 5.63636 19 12 19C14.0503 19 15.8174 18.2734 17.2711 17.2884M11 5.05822C11.3254 5.02013 11.6588 5 12 5C18.3636 5 22 12 22 12C22 12 21.3082 13.3317 20 14.8335" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 12C14 12.5304 13.7893 13.0391 13.4142 13.4142C13.0391 13.7893 12.5304 14 12 14C11.4696 14 10.9609 13.7893 10.5858 13.4142C10.2107 13.0391 10 12.5304 10 12C10 11.4696 10.2107 10.9609 10.5858 10.5858C10.9609 10.2107 11.4696 10 12 10C12.5304 10 13.0391 10.2107 13.4142 10.5858C13.7893 10.9609 14 11.4696 14 12Z" stroke="#979797" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
           
-          <button
-            type="submit"
-            className="w-full bg-purple-700 text-white py-3 rounded-md font-medium hover:bg-purple-800 transition mb-4"
-          >
-            Cadastrar
+          <div className={styles.divider}></div>
+          
+          <div className={styles.orText}>ou</div>
+          
+          <button type="button" className={styles.googleButton}>
+            <Image 
+              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" 
+              alt="Google" 
+              width={18} 
+              height={18} 
+              className={styles.googleIcon}
+            />
+            Conecte-se com a Conta Google
           </button>
           
-          <div className="text-center">
-            <Link href="/login" className="text-purple-700 hover:underline">
-              Já tem uma conta? Faça login
-            </Link>
-          </div>
-        </form>
-        
-        <div className="mt-8">
-          <div className="relative flex items-center">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-600">ou cadastre-se com</span>
-            <div className="flex-grow border-t border-gray-300"></div>
-          </div>
+          <label className={styles.checkboxGroup}>
+            <input 
+              type="checkbox" 
+              checked={termsChecked}
+              onChange={() => setTermsChecked(!termsChecked)}
+              className={styles.checkbox}
+              required
+            />
+            <span className={styles.checkboxLabel}>
+              Li e estou de acordo com os Termos de Uso e a Política de Privacidade. *
+            </span>
+          </label>
           
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-google" viewBox="0 0 16 16">
-                <path d="M15.545 6.558a9.42 9.42 0 0 1 .139 1.626c0 2.434-.87 4.492-2.384 5.885h.002C11.978 15.292 10.158 16 8 16A8 8 0 1 1 8 0a7.689 7.689 0 0 1 5.352 2.082l-2.284 2.284A4.347 4.347 0 0 0 8 3.166c-2.087 0-3.86 1.408-4.492 3.304a4.792 4.792 0 0 0 0 3.063h.003c.635 1.893 2.405 3.301 4.492 3.301 1.078 0 2.004-.276 2.722-.764h-.003a3.702 3.702 0 0 0 1.599-2.431H8v-3.08h7.545z"/>
-              </svg>
-              <span>Google</span>
-            </button>
-            
-            <button
-              type="button"
-              className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-facebook" viewBox="0 0 16 16">
-                <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
-              </svg>
-              <span>Facebook</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex justify-center mt-4">
-        <Link href="/autenticacao" className="text-purple-700 hover:underline flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Voltar para opções de autenticação
-        </Link>
+          <label className={styles.checkboxGroup}>
+            <input 
+              type="checkbox" 
+              checked={dataCollectionChecked}
+              onChange={() => setDataCollectionChecked(!dataCollectionChecked)}
+              className={styles.checkbox}
+              required
+            />
+            <span className={styles.checkboxLabel}>
+              Autorizo este site a coletar e armazenar os dados fornecidos neste formulário. *
+            </span>
+          </label>
+          
+          <label className={styles.checkboxGroup}>
+            <input 
+              type="checkbox" 
+              checked={notificationsChecked}
+              onChange={() => setNotificationsChecked(!notificationsChecked)}
+              className={styles.checkbox}
+            />
+            <span className={styles.checkboxLabel}>
+              Desejo receber atualizações e notificações por e-mail.
+            </span>
+          </label>
+          
+          <button type="submit" className={styles.button}>
+            Registrar-se
+          </button>
+        </form>
       </div>
     </div>
   );

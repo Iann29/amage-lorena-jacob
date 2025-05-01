@@ -1,0 +1,199 @@
+.cadastroContainer {
+  display: flex;
+  background-color: #6FB1CE;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.backgroundImage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.2;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.logo {
+  margin-bottom: 2rem;
+  width: 220px;
+  height: auto;
+}
+
+.title {
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.titleCrie {
+  font-family: var(--font-museo-sans);
+  font-weight: 300;
+  font-size: 2.5rem;
+  color: #FEFFE8;
+}
+
+.titleSuaConta {
+  font-family: var(--font-museo-sans);
+  font-weight: 900;
+  font-size: 2.5rem;
+  color: #FEFFE8;
+}
+
+.formGroup {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: white;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Estilos para os placeholders */
+.input::placeholder {
+  color: #555;
+  opacity: 1;
+}
+
+/* Para Firefox */
+.input::-moz-placeholder {
+  color: #555;
+  opacity: 1;
+}
+
+/* Para Edge */
+.input:-ms-input-placeholder {
+  color: #555;
+}
+
+/* Para Chrome, Safari e Opera */
+.input::-webkit-input-placeholder {
+  color: #555;
+}
+
+.passwordContainer {
+  position: relative;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: white;
+  margin: 2rem 0;
+}
+
+.orText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 1rem 0;
+}
+
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: white;
+  border-radius: 4px;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.googleIcon {
+  margin-right: 0.5rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+
+.checkbox {
+  margin-right: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.checkboxLabel {
+  color: white;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #FEFFE8;
+  color: #3DAEDF;
+  border: none;
+  border-radius: 33px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .formContainer {
+    padding: 1.5rem;
+  }
+  
+  .logo {
+    width: 180px;
+  }
+  
+  .titleCrie, .titleSuaConta {
+    font-size: 2rem;
+  }
+}
