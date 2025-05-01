@@ -81,7 +81,7 @@ export default function CadastroPage() {
         
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <div className={styles.formGroup}>
-            <label htmlFor="nome" className={styles.label}>Nome Completo: *</label>
+            <label htmlFor="nome" className={styles.label}>Nome Completo: <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="text"
               id="nome"
@@ -91,11 +91,12 @@ export default function CadastroPage() {
               required
               className={styles.input}
               placeholder="Ex: Sabrina Meireles dos Santos"
+              autoComplete="name"
             />
           </div>
           
           <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>E-mail: *</label>
+            <label htmlFor="email" className={styles.label}>E-mail: <span className={styles.requiredAsterisk}>*</span></label>
             <input
               type="email"
               id="email"
@@ -105,11 +106,12 @@ export default function CadastroPage() {
               required
               className={styles.input}
               placeholder="Ex: sabrinamei@gmail.com"
+              autoComplete="email"
             />
           </div>
           
           <div className={styles.formGroup}>
-            <label htmlFor="senha" className={styles.label}>Senha: *</label>
+            <label htmlFor="senha" className={styles.label}>Senha: <span className={styles.requiredAsterisk}>*</span></label>
             <div className={styles.passwordContainer}>
               <input
                 type={showPassword ? "text" : "password"}
@@ -144,7 +146,7 @@ export default function CadastroPage() {
           </div>
           
           <div className={styles.formGroup}>
-            <label htmlFor="confirmarSenha" className={styles.label}>Confirmar Senha: *</label>
+            <label htmlFor="confirmarSenha" className={styles.label}>Confirmar Senha: <span className={styles.requiredAsterisk}>*</span></label>
             <div className={styles.passwordContainer}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -231,9 +233,11 @@ export default function CadastroPage() {
             </span>
           </label>
           
-          <button type="submit" className={styles.button}>
-            Registrar-se
-          </button>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <button type="submit" className={styles.button}>
+              Registrar-se
+            </button>
+          </div>
         </form>
       </div>
     </div>
