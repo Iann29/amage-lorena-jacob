@@ -88,9 +88,11 @@
   width: 100%;
 }
 
-/* Estilos para os campos de senha - mais estreitos */
+/* Estilos para os campos de senha - estreitos, alinhados à esquerda */
 .passwordContainer .input {
-  width: 75%;
+  width: 60%;
+  margin-right: auto;
+  margin-left: 0;
 }
 
 /* Estilos para os placeholders */
