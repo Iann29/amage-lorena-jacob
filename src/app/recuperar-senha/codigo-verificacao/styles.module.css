@@ -257,6 +257,17 @@
 
 /* Para telas menores */
 @media (max-width: 768px) {
+  .backButton {
+    position: fixed;
+    top: auto;
+    bottom: 2rem;
+    left: 2rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    padding: 0.6rem 1rem;
+    z-index: 100;
+  }
+  
   .desktopBreak {
     display: none; /* Esconder a quebra de linha no mobile */
   }
