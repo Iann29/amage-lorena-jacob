@@ -115,7 +115,7 @@ export default function Home() {
             
             {/* Botão para desktop */}
             <div className="hidden md:flex pl-[32px] mt-12 justify-center">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 text-base rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: 'bold', fontSize: '1.125rem' }}>
                 Agende uma Avaliação
               </Link>
             </div>
@@ -189,8 +189,8 @@ export default function Home() {
           
           {/* O Diferencial Section */}
           <div className="md:w-1/2 md:pl-12 md:-mt-40 relative z-10">
-            <h2 className="text-5xl font-bold mb-1 text-center" style={{ color: 'white', WebkitTextStroke: '0.61px #7A674C' }}>O DIFERENCIAL</h2>
-            <h3 className="text-5xl font-bold mb-10 text-center" style={{ color: '#8B7659' }}>O DIFERENCIAL</h3>
+            <h2 className="text-5xl font-bold mb-1 text-center" style={{ color: 'white', WebkitTextStroke: '0.61px #7A674C', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h2>
+            <h3 className="text-5xl font-bold mb-10 text-center" style={{ color: '#8B7659', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h3>
             
             {/* Cards */}
             <div className="flex flex-wrap justify-center gap-6">
