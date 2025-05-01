@@ -10,14 +10,13 @@ const EbookBanner: React.FC = () => {
         <Link href="/loja/ebook-rotina-diaria">
           <div className="relative w-full" style={{ height: 'auto' }}>
             <Image 
-              src="/assets/anuncio1.jpg"
+              src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/anuncios/anuncio1.webp"
               alt="E-book Rotina Diária - Clique para comprar"
               width={1920}
               height={500}
               className="w-full h-auto object-contain"
               priority
-              unoptimized
-              quality={100}
+              quality={90}
               sizes="100vw"
               style={{ maxWidth: '100%' }}
             />
