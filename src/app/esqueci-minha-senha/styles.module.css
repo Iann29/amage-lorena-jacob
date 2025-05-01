@@ -6,6 +6,11 @@
   width: 100%;
   background: #fff;
   overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .contentWrapper {
@@ -166,6 +171,33 @@
   color: #777777;
 }
 
+/* Botão de voltar para login */
+.backButton {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3068AD;
+  background: none;
+  padding: 0.5rem;
+  font-family: var(--font-museo-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.backButton:hover {
+  color: #52A4DB;
+}
+
+.backButton:active {
+  color: #265EA2;
+}
+
 .submitButton {
   width: 50%;
   max-width: 300px;
@@ -271,5 +303,122 @@
     width: 45%;
     justify-content: flex-end;
     margin-left: auto;
+  }
+}
+
+/* Regras para dispositivos móveis */
+@media (max-width: 767px) {
+  .backButton {
+    top: 1rem;
+    left: 1rem;
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+  .container {
+    min-height: 100vh;
+    height: 100%;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  
+  .contentWrapper {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+  }
+  
+  .logoContainer {
+    margin: 1.5rem 0;
+  }
+  
+  .logo {
+    width: 180px !important;
+    height: auto !important;
+  }
+  
+  .mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+  }
+  
+  .textCenter {
+    margin-bottom: 1.5rem;
+  }
+  
+  .imageContainer {
+    display: none; /* Oculta a imagem do peixe em telas menores */
+  }
+  
+  .content {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .formSection {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .instructions {
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form {
+    width: 100%;
+    margin-top: 0;
+  }
+  
+  .label {
+    text-align: left;
+    margin-bottom: 0.5rem;
+  }
+  
+  .input {
+    min-width: unset;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  
+  .submitButton {
+    width: 70%;
+    margin-top: 0;
+    padding: 0.6rem 0;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+    margin-top: 0;
+    color: #52A4DB;
+  }
+  
+  .quoteAuthor {
+    display: none; /* Remove o "disse a Dory" em telas menores */
+  }
+  
+  .subtitleContainer {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
   }
 }
