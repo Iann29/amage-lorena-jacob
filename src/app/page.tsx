@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ServiceCard from "@/components/ui/ServiceCard";
+import { useModal } from "@/contexts/ModalContext";
 import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
@@ -10,6 +11,7 @@ import TestimonialsCarousel from "@/components/ui/TestimonialsCarousel";
 import { motion } from "framer-motion";
 
 export default function Home() {
+  const { openContatoModal } = useModal();
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -95,9 +97,14 @@ export default function Home() {
               </div>
             
               <div className="mt-3 relative pl-2">
-                <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200">
+                <a
+                  href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
+                >
                   Agende uma Avaliação
-                </Link>
+                </a>
               </div>
               
               <div className="mt-4 border-l-4 border-white pl-3 py-1">
@@ -112,16 +119,27 @@ export default function Home() {
             
             {/* Botão para tablet e desktop */}
             <div className="hidden sm:block md:hidden pl-4">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 mt-8">
+              <a
+                href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 mt-8"
+              >
                 Agende uma Avaliação
-              </Link>
+              </a>
             </div>
             
             {/* Botão para desktop */}
             <div className="hidden md:flex pl-[32px] mt-12 justify-center">
-              <Link href="/contato" className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: 'bold', fontSize: '1.125rem' }}>
+              <a
+                href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" 
+                style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: 'bold', fontSize: '1.125rem' }}
+              >
                 Agende uma Avaliação
-              </Link>
+              </a>
             </div>
 
             {/* Texto informativo para tablet */}

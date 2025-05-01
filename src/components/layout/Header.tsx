@@ -5,12 +5,13 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
+import { useModal } from "@/contexts/ModalContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // Variável comentada pois não está sendo utilizada no código
-  // const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
+  const { openContatoModal } = useModal();
   const { scrollY } = useScroll();
   
   // Valores para transformações baseadas no scroll - com transições mais suaves
@@ -131,13 +132,13 @@ const Header = () => {
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
             
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link 
-                href="/contato" 
-                className={`text-[#6E6B46] text-base ${pathname === '/contato' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
+              <button 
+                onClick={openContatoModal}
+                className={`text-[#6E6B46] text-base font-normal hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group cursor-pointer`}
               >
                 Contato
                 <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
-              </Link>
+              </button>
             </motion.div>
             
             <div className="h-4 mx-2 w-px bg-gray-300"></div>
@@ -322,12 +323,15 @@ const Header = () => {
               transition={{ delay: 0.4 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Link 
-                href="/contato" 
-                className={`text-[#6E6B46] text-xs ${pathname === '/contato' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
+              <button 
+                onClick={() => {
+                  openContatoModal();
+                  setIsMenuOpen(false);
+                }} 
+                className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none`}
               >
                 Contato
-              </Link>
+              </button>
             </motion.div>
             
             <motion.div

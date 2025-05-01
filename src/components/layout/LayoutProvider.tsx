@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { ModalProvider } from '@/contexts/ModalContext';
 
 // Componente responsável por decidir quais elementos de layout mostrar
 export default function LayoutProvider({
@@ -24,7 +25,7 @@ export default function LayoutProvider({
   const isAuthPage = authPages.some(page => pathname === page);
   
   return (
-    <>
+    <ModalProvider>
       {/* Renderização condicional do Header, mas mantendo o mesmo no DOM */}
       {!isAuthPage && <Header />}
       
@@ -35,6 +36,6 @@ export default function LayoutProvider({
       
       {/* Renderização condicional do Footer, mas mantendo o mesmo no DOM */}
       {!isAuthPage && <Footer />}
-    </>
+    </ModalProvider>
   );
 }
