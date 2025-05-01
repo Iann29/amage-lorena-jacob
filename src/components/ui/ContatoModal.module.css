@@ -43,7 +43,7 @@
 
 .title {
   font-size: 2.2rem;
-  font-weight: 600;
+  font-weight: 900;
   color: #2cd155;
   margin-bottom: 1.5rem;
   text-align: center;
@@ -69,11 +69,12 @@
 
 .whatsappText {
   font-size: 1rem;
-  color: #333;
+  color: #717171;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   text-align: center;
   font-family: var(--font-museo-sans);
+  font-weight: 500;
 }
 
 .whatsappButton, 
@@ -83,14 +84,15 @@
   justify-content: center;
   padding: 0.85rem 1.7rem;
   border-radius: 12px;
-  font-weight: 500;
-  font-size: 1.1rem;
+  font-weight: 900;
+  font-size: 1.3rem;
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
   margin-bottom: 1rem;
   width: 100%;
   max-width: 340px;
+  font-family: var(--font-museo-sans);
 }
 
 .whatsappButton {
@@ -136,6 +138,7 @@
   font-size: 1rem;
   color: #333;
   font-family: var(--font-museo-sans);
+  font-weight: 500;
 }
 
 .divider {

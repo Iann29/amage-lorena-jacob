@@ -89,7 +89,7 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
         </a>
         
         <a 
-          href="https://instagram.com/lorenajacob" 
+          href="https://instagram.com/lorenajacob.st" 
           target="_blank" 
           rel="noopener noreferrer" 
           className={styles.instagramButton}
