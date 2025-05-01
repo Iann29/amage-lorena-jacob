@@ -120,9 +120,12 @@ export default function CodigoVerificacaoPage() {
 
       <div className={styles.mainContent}>
         <div className={styles.textCenter}>
-          <h1 className={styles.title}>Verificação de Código</h1>
+          <h1 className={styles.title}>
+            <span className={styles.titleBlue}>Acabamos de enviar um</span><br />
+            <span className={styles.titleLightBlue}>código para o seu e-mail.</span>
+          </h1>
           <p className={styles.subtitle}>
-            Digite o código de 4 dígitos enviado para o seu e-mail
+            Insira no campo abaixo o código de verificação de 4 dígitos enviado para o seu e-mail
           </p>
         </div>
         
@@ -154,7 +157,7 @@ export default function CodigoVerificacaoPage() {
                   disabled={isVerificando}
                   onClick={verificarCodigo}
                 >
-                  {isVerificando ? "Verificando..." : "Verificar Código"}
+                  {isVerificando ? "Verificando..." : "Enviar"}
                 </button>
                 
                 <div className={styles.helpLinks}>
@@ -163,11 +166,8 @@ export default function CodigoVerificacaoPage() {
                     className={styles.textButton}
                     onClick={resetarCodigo}
                   >
-                    Limpar código
+                    Reenviar código
                   </button>
-                  <Link href="/esqueci-minha-senha" className={styles.textButton}>
-                    Solicitar novo código
-                  </Link>
                 </div>
               </>
             ) : (
