@@ -27,18 +27,18 @@
 
 .closeButton {
   position: absolute;
-  top: -20px;
-  right: -20px;
+  top: -10px;
+  right: -10px;
   background: transparent;
   border: none;
   cursor: pointer;
   z-index: 1001;
   transition: transform 0.2s ease;
-  transform: scale(1.2);
+  transform: scale(1.5);
 }
 
 .closeButton:hover {
-  transform: scale(1.1);
+  transform: scale(1.4);
 }
 
 .title {
