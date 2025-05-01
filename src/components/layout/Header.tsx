@@ -49,9 +49,9 @@ const Header = () => {
         height: headerHeight,
         opacity: headerOpacity,
       }}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      initial={{ y: 0, opacity: 1 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.1 }}
     >
       <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
         {/* Logo à esquerda - animado */}
