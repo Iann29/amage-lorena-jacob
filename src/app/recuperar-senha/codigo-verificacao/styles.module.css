@@ -1,0 +1,257 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #F8F7FB;
+  position: relative;
+  padding: 2rem 1rem;
+}
+
+.backButton {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #3068AD;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-family: var(--font-museo-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  border: 1px solid rgba(48, 104, 173, 0.08);
+}
+
+.backButton:hover {
+  color: #52A4DB;
+  box-shadow: 0 3px 6px rgba(82, 164, 219, 0.15);
+  transform: translateY(-1px);
+}
+
+.contentWrapper {
+  width: 100%;
+  max-width: 960px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 1rem;
+}
+
+.logo {
+  height: auto;
+  object-fit: contain;
+}
+
+.mainContent {
+  padding: 1rem 2rem 3rem;
+}
+
+.textCenter {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  color: #26578C;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-museo-sans);
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: var(--font-museo-sans);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.formSection {
+  flex: 1;
+  max-width: 460px;
+}
+
+.codigoContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.digitInput {
+  width: 60px;
+  height: 70px;
+  border: 2px solid #DDD;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #3068AD;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.digitInput:focus {
+  border-color: #3068AD;
+  box-shadow: 0 0 0 3px rgba(48, 104, 173, 0.15);
+  outline: none;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem;
+  background-color: #3068AD;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.submitButton:hover {
+  background-color: #205293;
+}
+
+.submitButton:disabled {
+  background-color: #a0b8d8;
+  cursor: not-allowed;
+}
+
+.helpLinks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.textButton {
+  color: #3068AD;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.textButton:hover {
+  color: #52A4DB;
+}
+
+.errorMessage {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.imageContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image {
+  max-width: 100%;
+  height: auto;
+}
+
+.successMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.checkIcon {
+  margin-bottom: 1.5rem;
+}
+
+.successTitle {
+  color: #4CAF50;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-family: var(--font-museo-sans);
+}
+
+.successText {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  max-width: 350px;
+}
+
+.continueButton {
+  padding: 1rem 2rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.continueButton:hover {
+  background-color: #388E3C;
+}
+
+/* Para telas menores */
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column-reverse;
+  }
+  
+  .imageContainer {
+    margin-bottom: 2rem;
+  }
+  
+  .image {
+    max-width: 240px;
+  }
+  
+  .mainContent {
+    padding: 1rem 1.5rem 2rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .digitInput {
+    width: 50px;
+    height: 60px;
+    font-size: 1.75rem;
+  }
+}

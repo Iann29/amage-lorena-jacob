@@ -20,7 +20,10 @@ export default function EsqueciMinhaSenha() {
       // Aqui será implementada a lógica de backend para enviar o e-mail de recuperação
       // Por enquanto, apenas simulamos o envio
       await new Promise(resolve => setTimeout(resolve, 1500));
-      setEmailEnviado(true);
+      
+      // Depois que o email for enviado, redirecionar para a página de código de verificação
+      // Na implementação real, você pode querer passar o email como query param ou usar Context API
+      window.location.href = `/recuperar-senha/codigo-verificacao?email=${encodeURIComponent(email)}`;
     } catch (error) {
       console.error("Erro ao enviar e-mail de recuperação:", error);
     } finally {

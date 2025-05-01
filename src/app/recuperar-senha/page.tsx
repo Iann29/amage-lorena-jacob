@@ -1,87 +1,187 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import styles from "./styles.module.css";
 
 export default function RecuperarSenhaPage() {
-  const [email, setEmail] = useState('');
-  const [enviado, setEnviado] = useState(false);
+  const searchParams = useSearchParams();
+  const emailParam = searchParams.get("email") || "";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState(emailParam);
+  const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [senhaRedefinida, setSenhaRedefinida] = useState(false);
+  const [erro, setErro] = useState("");
+
+  // Verificar se temos o email necessário para prosseguir
+  useEffect(() => {
+    if (!emailParam) {
+      setErro("Email não fornecido. Por favor, inicie o processo de recuperação de senha novamente.");
+    }
+  }, [emailParam]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui será implementada a integração com Supabase Auth para recuperação de senha
-    console.log('Solicitação de recuperação enviada para:', email);
-    setEnviado(true);
+    
+    // Validações básicas
+    if (!senha) {
+      setErro("Por favor, digite uma senha.");
+      return;
+    }
+    
+    if (senha.length < 6) {
+      setErro("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    
+    if (senha !== confirmarSenha) {
+      setErro("As senhas não coincidem.");
+      return;
+    }
+    
+    setErro("");
+    setIsSaving(true);
+    
+    try {
+      // Aqui será implementada a lógica de backend para redefinir a senha
+      // Por enquanto, apenas simulamos o processo
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSenhaRedefinida(true);
+    } catch (error) {
+      console.error("Erro ao redefinir senha:", error);
+      setErro("Ocorreu um erro ao redefinir sua senha. Por favor, tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-bold text-purple-800 mb-6 text-center">
-          {!enviado ? 'Recuperar Senha' : 'E-mail Enviado'}
-        </h1>
-        
-        {!enviado ? (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-gray-700 font-medium mb-1">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                placeholder="seu.email@exemplo.com"
-              />
-              <p className="mt-2 text-sm text-gray-600">
-                Digite o e-mail associado à sua conta para receber um link de recuperação de senha.
-              </p>
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-purple-700 text-white py-3 rounded-md font-medium hover:bg-purple-800 transition mb-4"
-            >
-              Enviar link de recuperação
-            </button>
-          </form>
-        ) : (
-          <div className="text-center py-4">
-            <div className="mb-6 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p className="text-lg text-gray-700 mb-4">
-              Enviamos um e-mail para <span className="font-medium">{email}</span> com instruções para redefinir sua senha.
-            </p>
-            <p className="text-sm text-gray-600 mb-6">
-              Por favor, verifique sua caixa de entrada e siga as instruções no e-mail. Se não encontrar o e-mail, verifique sua pasta de spam.
-            </p>
-            <button
-              onClick={() => setEnviado(false)}
-              className="text-purple-700 underline font-medium"
-            >
-              Tentar com outro e-mail
-            </button>
-          </div>
-        )}
-        
-        <div className="mt-6 text-center">
-          <Link href="/login" className="text-purple-700 hover:underline">
-            Voltar para o login
-          </Link>
-        </div>
-      </div>
+    <div className={styles.container}>
+      {/* Botão para voltar */}
+      <Link 
+        href="/login" 
+        className={styles.backButton}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 8H1M1 8L8 15M1 8L8 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Voltar para o login
+      </Link>
       
-      <div className="flex justify-center mt-4">
-        <Link href="/autenticacao" className="text-purple-700 hover:underline flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Voltar para opções de autenticação
-        </Link>
+      <div className={styles.contentWrapper}>
+        <div className={styles.logoContainer}>
+          <Image
+            src="/logos/logo1.webp"
+            alt="Logo Lorena Jacob"
+            width={280}
+            height={90}
+            className={styles.logo}
+            priority
+          />
+        </div>
+
+        <div className={styles.mainContent}>
+          <div className={styles.textCenter}>
+            <h1 className={styles.title}>
+              {!senhaRedefinida ? "Criar Nova Senha" : "Senha Redefinida!"}
+            </h1>
+            {!senhaRedefinida && (
+              <p className={styles.subtitle}>
+                Crie uma nova senha segura para sua conta
+              </p>
+            )}
+          </div>
+          
+          <div className={styles.content}>
+            <div className={styles.formSection}>
+              {erro && (
+                <div className={styles.errorAlert}>
+                  <p>{erro}</p>
+                </div>
+              )}
+              
+              {!senhaRedefinida ? (
+                <form onSubmit={handleSubmit} className={styles.form}>
+                  {email && (
+                    <div className={styles.emailInfo}>
+                      <p>Redefinindo senha para:</p>
+                      <p className={styles.emailDisplay}>{email}</p>
+                    </div>
+                  )}
+                  
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="senha" className={styles.label}>
+                      Nova Senha
+                    </label>
+                    <input
+                      type="password"
+                      id="senha"
+                      placeholder="Digite sua nova senha"
+                      className={styles.input}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="confirmarSenha" className={styles.label}>
+                      Confirmar Senha
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmarSenha"
+                      placeholder="Confirme sua nova senha"
+                      className={styles.input}
+                      value={confirmarSenha}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    className={styles.submitButton}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Salvando..." : "Redefinir Senha"}
+                  </button>
+                </form>
+              ) : (
+                <div className={styles.successMessage}>
+                  <div className={styles.checkIcon}>
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="24" cy="24" r="22" stroke="#4CAF50" strokeWidth="4"/>
+                      <path d="M16 24L22 30L32 18" stroke="#4CAF50" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className={styles.successText}>
+                    Sua senha foi redefinida com sucesso! Agora você pode entrar na sua conta utilizando a nova senha.
+                  </p>
+                  
+                  <Link href="/login" className={styles.continueButton}>
+                    Ir para o Login
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.imageContainer}>
+              <Image
+                src="/assets/nova-senha.png"
+                alt="Ilustração de segurança"
+                width={315}
+                height={315}
+                className={styles.image}
+                priority
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
