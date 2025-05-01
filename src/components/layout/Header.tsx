@@ -174,7 +174,7 @@ const Header = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link href="/minha-conta" className="flex flex-col items-center">
+            <Link href="/autenticacao" className="flex flex-col items-center">
               <motion.div
                 whileHover={{ y: -2 }}
                 transition={{ type: "spring", stiffness: 400 }}
@@ -379,7 +379,7 @@ const Header = () => {
               </div>
               
               {/* Minha Conta (mobile - adaptado para o novo estilo) */}
-              <Link href="/minha-conta" className="flex flex-col items-center">
+              <Link href="/autenticacao" className="flex flex-col items-center">
                 <Image 
                   src="/assets/perfilIcon.png" 
                   alt="Minha Conta" 
