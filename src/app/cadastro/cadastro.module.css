@@ -67,6 +67,8 @@
   color: white;
   margin-bottom: 0.25rem;
   font-size: 0.85rem;
+  font-family: var(--font-museo-sans);
+  font-weight: 300;
 }
 
 .input {
@@ -77,28 +79,30 @@
   background-color: white;
   font-size: 0.85rem;
   color: #333;
+  font-family: var(--font-museo-sans);
+  font-weight: 500;
 }
 
 /* Estilos para os placeholders */
 .input::placeholder {
-  color: #555;
+  color: #888;
   opacity: 1;
 }
 
 /* Para Firefox */
 .input::-moz-placeholder {
-  color: #555;
+  color: #888;
   opacity: 1;
 }
 
 /* Para Edge */
 .input:-ms-input-placeholder {
-  color: #555;
+  color: #888;
 }
 
 /* Para Chrome, Safari e Opera */
 .input::-webkit-input-placeholder {
-  color: #555;
+  color: #888;
 }
 
 .passwordContainer {
@@ -129,6 +133,8 @@
   justify-content: center;
   color: white;
   margin: 1rem 0;
+  font-family: var(--font-museo-sans);
+  font-weight: 300;
 }
 
 .googleButton {
@@ -142,8 +148,9 @@
   border: none;
   color: #333;
   cursor: pointer;
-  font-weight: 500;
   margin-bottom: 1.5rem;
+  font-family: var(--font-museo-sans);
+  font-weight: 300;
 }
 
 .googleIcon {
@@ -209,6 +216,12 @@
   padding-left: 28px;
   display: block;
   position: relative;
+  font-family: var(--font-museo-sans);
+  font-weight: 300;
+}
+
+.destacado {
+  font-weight: 900;
 }
 
 .highlightedTerms {
@@ -223,13 +236,14 @@
   color: #3DAEDF;
   border: none;
   border-radius: 10px;
-  font-weight: 700;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.25rem;
   margin-top: 1rem;
   transition: background-color 0.2s;
   max-width: 280px;
-  margin: 1.25rem auto 0;
+  margin: 0.625rem auto 0;
+  font-family: var(--font-museo-sans);
+  font-weight: 900;
 }
 
 .button:hover {

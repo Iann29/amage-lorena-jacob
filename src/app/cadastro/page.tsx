@@ -204,7 +204,7 @@ export default function CadastroPage() {
               required
             />
             <span className={styles.checkboxLabel}>
-              Li e estou de acordo com <span className={styles.highlightedTerms}>os Termos de Uso e a Política de Privacidade. *</span>
+              Li e estou de acordo com <span className={styles.highlightedTerms}>os Termos de Uso e a Política de Privacidade. <span className={styles.requiredAsterisk}>*</span></span>
             </span>
           </label>
           
@@ -217,7 +217,7 @@ export default function CadastroPage() {
               required
             />
             <span className={styles.checkboxLabel}>
-              Autorizo este site a coletar e armazenar os dados fornecidos neste formulário. *
+              <span className={styles.destacado}>Autorizo este site</span> a coletar e armazenar os dados fornecidos neste formulário. <span className={styles.requiredAsterisk}>*</span>
             </span>
           </label>
           
@@ -229,7 +229,7 @@ export default function CadastroPage() {
               className={styles.checkbox}
             />
             <span className={styles.checkboxLabel}>
-              Desejo receber atualizações e notificações por e-mail.
+              <span className={styles.destacado}>Desejo receber</span> atualizações e notificações por e-mail.
             </span>
           </label>
           
