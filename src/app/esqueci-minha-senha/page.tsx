@@ -31,8 +31,41 @@ export default function EsqueciMinhaSenha() {
   return (
     <div className={styles.container}>
       {/* Botão para voltar para a página de login */}
-      <Link href="/login" className={styles.backButton}>
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <Link 
+        href="/login" 
+        className={styles.backButton}
+        style={{
+          position: "absolute",
+          top: "1.5rem",
+          left: "1.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.4rem",
+          color: "#3068AD",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          padding: "0.4rem 0.8rem",
+          borderRadius: "6px",
+          fontFamily: "var(--font-museo-sans)",
+          fontSize: "0.85rem",
+          fontWeight: 500,
+          textDecoration: "none",
+          zIndex: 10,
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
+          transition: "all 0.25s ease",
+          border: "1px solid rgba(48, 104, 173, 0.08)"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = "#52A4DB";
+          e.currentTarget.style.boxShadow = "0 3px 6px rgba(82, 164, 219, 0.15)";
+          e.currentTarget.style.transform = "translateY(-1px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = "#3068AD";
+          e.currentTarget.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.08)";
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 8H1M1 8L8 15M1 8L8 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         Voltar
