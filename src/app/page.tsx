@@ -46,48 +46,48 @@ export default function Home() {
             {/* Banner para Desktop */}
             <div className="hidden md:block">
               <div className="w-[600px] relative left-[32px] justify-center">
-                <h1 className="text-white text-8xl lg:text-9xl font-bold font-[var(--font-museo-sans)] leading-none">SUPORTE</h1>
+                <h1 className="text-white text-8xl lg:text-9xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>SUPORTE</h1>
               </div>
               
               <div className="w-[650px] relative left-[16px] justify-center -mt-1">
-                <h2 className="text-white text-6xl lg:text-7xl font-bold font-[var(--font-museo-sans)] leading-none">PERSONALIZADO</h2>
+                <h2 className="text-white text-6xl lg:text-7xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PERSONALIZADO</h2>
               </div>
               
               <div className="w-[650px] relative left-[24px] justify-center mt-1">
-                <span className="text-white text-4xl lg:text-5xl font-bold font-[var(--font-museo-sans)] leading-none">PARA O </span>
-                <span className="text-[#FFFCB3] text-4xl lg:text-5xl font-bold font-[var(--font-museo-sans)] leading-none">DESENVOLVIMENTO</span>
+                <span className="text-white text-4xl lg:text-5xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PARA O </span>
+                <span className="text-[#FFFCB3] text-4xl lg:text-5xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>DESENVOLVIMENTO</span>
               </div>
               
               <div className="w-[650px] relative left-[32px] justify-center mt-1">
-                <h2 className="text-[#FFFCB3] text-7xl lg:text-9xl font-bold font-[var(--font-museo-sans)] leading-none">INFANTIL</h2>
+                <h2 className="text-[#FFFCB3] text-7xl lg:text-9xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>INFANTIL</h2>
               </div>
             </div>
             
             {/* Banner para Tablets */}
             <div className="hidden sm:block md:hidden">
-              <h1 className="text-white text-5xl font-bold font-[var(--font-museo-sans)] leading-none">SUPORTE</h1>
-              <h2 className="text-white text-4xl font-bold font-[var(--font-museo-sans)] leading-none -mt-1">PERSONALIZADO</h2>
+              <h1 className="text-white text-5xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>SUPORTE</h1>
+              <h2 className="text-white text-4xl font-bold leading-none -mt-1" style={{ fontFamily: 'var(--font-museo-sans)' }}>PERSONALIZADO</h2>
               <div className="mt-1">
-                <span className="text-white text-xl font-bold font-[var(--font-museo-sans)] leading-none">PARA O </span>
-                <span className="text-[#FFFCB3] text-xl font-bold font-[var(--font-museo-sans)] leading-none">DESENVOLVIMENTO</span>
+                <span className="text-white text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PARA O </span>
+                <span className="text-[#FFFCB3] text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>DESENVOLVIMENTO</span>
               </div>
-              <h2 className="text-[#FFFCB3] text-5xl font-bold font-[var(--font-museo-sans)] leading-none mt-1">INFANTIL</h2>
+              <h2 className="text-[#FFFCB3] text-5xl font-bold leading-none mt-1" style={{ fontFamily: 'var(--font-museo-sans)' }}>INFANTIL</h2>
             </div>
             
             {/* Banner para Mobile */}
             <div className="sm:hidden pl-4">
               <div className="relative left-[8px]">
-                <h1 className="text-white text-xl font-bold font-[var(--font-museo-sans)] leading-none">SUPORTE</h1>
+                <h1 className="text-white text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>SUPORTE</h1>
               </div>
               <div className="relative -mt-0.5">
-                <h2 className="text-white text-lg font-bold font-[var(--font-museo-sans)] leading-none">PERSONALIZADO</h2>
+                <h2 className="text-white text-lg font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PERSONALIZADO</h2>
               </div>
               <div className="mt-0.5 relative left-[2px]">
-                <span className="text-white text-xs font-bold font-[var(--font-museo-sans)] leading-none">PARA O </span>
-                <span className="text-[#FFFCB3] text-xs font-bold font-[var(--font-museo-sans)] leading-none">DESENVOLVIMENTO</span>
+                <span className="text-white text-xs font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PARA O </span>
+                <span className="text-[#FFFCB3] text-xs font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>DESENVOLVIMENTO</span>
               </div>
               <div className="relative left-[8px] -mt-0.5">
-                <h2 className="text-[#FFFCB3] text-xl font-bold font-[var(--font-museo-sans)] leading-none">INFANTIL</h2>
+                <h2 className="text-[#FFFCB3] text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>INFANTIL</h2>
               </div>
             
               <div className="mt-3 relative pl-2">
@@ -290,7 +290,7 @@ export default function Home() {
           {/* Título */}
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-[var(--font-museo-sans)] mb-2" style={{ color: '#806D52', fontWeight: 900, fontSize: 'calc(1.25rem + 1.5vw)' }}>Os temas que você vai</h2>
-            <h2 className="text-4xl md:text-5xl italic" style={{ color: '#806D52', fontFamily: 'Mogila', fontWeight: 'bold' }}>encontrar no blog</h2>
+            <h2 className="text-4xl md:text-5xl italic font-bold" style={{ color: '#806D52', fontFamily: 'var(--font-mogila)' }}>encontrar no blog</h2>
           </div>
           
           {/* Cards do Blog - Carrossel */}
