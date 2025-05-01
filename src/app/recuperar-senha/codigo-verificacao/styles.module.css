@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
   width: 100%;
   background: #fff;
@@ -12,11 +12,12 @@
   left: 0;
   right: 0;
   bottom: 0;
+  padding-top: 1.5rem;
 }
 
 .backButton {
   position: absolute;
-  top: 1.5rem;
+  top: 1rem;
   left: 1.5rem;
   display: flex;
   align-items: center;
@@ -85,9 +86,9 @@
 
 .subtitle {
   color: #333;
-  font-size: 1rem;
-  max-width: 600px;
-  margin: 0 auto 2rem;
+  font-size: 0.9rem;
+  max-width: 450px;
+  margin: 0 0 1.5rem;
   font-family: var(--font-museo-sans);
   line-height: 1.5;
   text-align: left;
@@ -111,7 +112,7 @@
   display: flex;
   justify-content: center;
   gap: 1.2rem;
-  margin: 2rem 0;
+  margin: 0.5rem 0 2rem;
 }
 
 .digitInput {

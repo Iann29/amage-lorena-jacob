@@ -124,15 +124,16 @@ export default function CodigoVerificacaoPage() {
             <span className={styles.titleBlue}>Acabamos de enviar um</span><br />
             <span className={styles.titleLightBlue}>código para o seu e-mail.</span>
           </h1>
-          <p className={styles.subtitle}>
-            Insira no campo abaixo o código de verificação de 4 dígitos enviado para o seu e-mail
-          </p>
         </div>
         
         <div className={styles.content}>
           <div className={styles.formSection}>
             {!codigoVerificado ? (
               <>
+                <p className={styles.subtitle}>
+                  Insira no campo abaixo o código de verificação de 4 dígitos enviado para o seu e-mail
+                </p>
+                
                 <div className={styles.codigoContainer}>
                   {codigo.map((digito, index) => (
                     <input
