@@ -121,7 +121,7 @@ export default function CodigoVerificacaoPage() {
       <div className={styles.mainContent}>
         <div className={styles.textCenter}>
           <h1 className={styles.title}>
-            <span className={styles.titleBlue}>Acabamos de enviar um</span><br />
+            <span className={styles.titleBlue}>Acabamos de enviar um</span><br className={styles.desktopBreak} />
             <span className={styles.titleLightBlue}>código para o seu e-mail.</span>
           </h1>
         </div>
