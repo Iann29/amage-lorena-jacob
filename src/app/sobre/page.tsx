@@ -106,13 +106,13 @@ export default function SobrePage() {
           </div>
           
           {/* Primeira seção de conteúdo - altura mínima */}
-          <div className="min-h-screen md:min-h-[80vh] lg:min-h-[80vh]"></div>
+          <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]"></div>
         </div>
         
         {/* Lado direito - Fundo branco */}
         <div className="w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16" style={{ position: 'relative', zIndex: 5 }}>
           {/* Primeira seção de conteúdo - altura mínima */}
-          <div className="min-h-screen md:min-h-[80vh] lg:min-h-[80vh]"></div>
+          <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]"></div>
         </div>
       </div>
       
