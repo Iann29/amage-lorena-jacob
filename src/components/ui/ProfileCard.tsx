@@ -29,6 +29,7 @@ export default function ProfileCard({
   return (
     <div
       className={`bg-[#F4F1E2] rounded-3xl shadow-lg overflow-hidden w-[450px] ${className}`}
+      style={{ position: 'relative', zIndex: 100 }}
     >
       {/* -------- topo -------- */}
       <div className="flex flex-col items-center py-8 px-16">
