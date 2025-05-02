@@ -55,26 +55,27 @@ export default function SobrePage() {
       </div>
       
       {/* Texto à direita do card */}
-      <div className="hidden md:block absolute" style={{ top: '180px', left: '58%', zIndex: 10, maxWidth: '40%' }}>
-        <div className="mb-8">
-          <h2 className="font-normal text-xl md:text-2xl mb-1 lg:leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            <span className="font-medium">Eu sou</span> <span className="text-[#7A674C] font-medium">Lorena Jacob</span>, Terapeuta Infantil,
-          </h2>
-          <p className="text-gray-800 text-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            especialista em autismo e comorbidades.
-          </p>
+      <div className="hidden md:block absolute" style={{ top: '180px', left: '58%', zIndex: 10, maxWidth: '25%' }}>
+        <div className="mb-6">
+          <div className="flex items-baseline flex-wrap">
+            <span className="text-stone-700 text-xl md:text-2xl font-semibold font-['Fredoka'] leading-tight mr-2">Eu sou</span>
+            <span className="text-stone-700 text-lg md:text-xl font-semibold font-['Poppins'] leading-tight">Lorena Jacob,</span>
+          </div>
+          
+          <div>
+            <span className="text-stone-700 text-sm md:text-base font-normal font-['Poppins'] leading-normal">Terapeuta Infantil, especialista em autismo e comorbidades.</span>
+          </div>
         </div>
         
-        <div className="mb-10">
-          <h3 className="font-medium text-lg md:text-xl mb-3" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            Há mais de 10 anos atuo com crianças autistas,
-          </h3>
-          <p className="text-gray-800 leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
-            ajudando famílias a construírem caminhos mais leves, funcionais e efetivos
-            no desenvolvimento infantil. <span className="font-medium">Estou me formando como Terapeuta Ocupacional</span> e
-            possuo diversas especializações na área, o que me permite unir técnica, experiência e
-            sensibilidade em cada atendimento.
-          </p>
+        <div className="mt-6">
+          <div>
+            <div>
+              <span className="text-stone-700 text-sm md:text-base font-bold font-['Poppins'] leading-normal">Há mais de 10 anos atuo com crianças autistas,</span>
+              <span className="text-stone-700 text-sm md:text-base font-normal font-['Poppins'] leading-normal"> ajudando famílias a construírem caminhos mais leves, funcionais e efetivos no desenvolvimento infantil. </span>
+              <span className="text-stone-700 text-sm md:text-base font-semibold font-['Poppins'] leading-normal">Estou me formando como Terapeuta Ocupacional</span>
+              <span className="text-stone-700 text-sm md:text-base font-normal font-['Poppins'] leading-normal"> e possuo diversas especializações na área, o que me permite unir técnica, experiência e sensibilidade em cada atendimento.</span>
+            </div>
+          </div>
         </div>
       </div>
       
