@@ -67,10 +67,10 @@ export default function SobrePage() {
         <div className="mt-6">
           <div>
             <div>
-              <span className="text-stone-700 text-base md:text-lg font-bold font-['Poppins'] leading-normal">Há mais de 10 anos atuo com crianças autistas,</span>
-              <span className="text-stone-700 text-base md:text-lg font-normal font-['Poppins'] leading-normal"> ajudando famílias a construírem caminhos mais leves, funcionais e efetivos no desenvolvimento infantil. </span>
-              <span className="text-stone-700 text-base md:text-lg font-semibold font-['Poppins'] leading-normal">Estou me formando como Terapeuta Ocupacional</span>
-              <span className="text-stone-700 text-base md:text-lg font-normal font-['Poppins'] leading-normal"> e possuo diversas especializações na área, o que me permite unir técnica, experiência e sensibilidade em cada atendimento.</span>
+              <span className="text-black text-base md:text-lg font-bold font-['Poppins'] leading-normal">Há mais de 10 anos atuo com crianças autistas,</span>
+              <span className="text-black text-base md:text-lg font-normal font-['Poppins'] leading-normal"> ajudando famílias a construírem caminhos mais leves, funcionais e efetivos no desenvolvimento infantil. </span>
+              <span className="text-black text-base md:text-lg font-semibold font-['Poppins'] leading-normal">Estou me formando como Terapeuta Ocupacional</span>
+              <span className="text-black text-base md:text-lg font-normal font-['Poppins'] leading-normal"> e possuo diversas especializações na área, o que me permite unir técnica, experiência e sensibilidade em cada atendimento.</span>
             </div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function SobrePage() {
       </div>
       
       {/* Seção retangular com cor #FFFDF2 - A visão de mãe */}
-      <div className="w-full bg-[#FFFDF2] py-3 px-4 relative">
+      <div className="w-full bg-[#FFFDF2] py-5 px-5 md:py-10 md:px-6 relative">
         {/* Foto posicionada absolutamente para vazar para fora da seção */}
         <div className="absolute left-[-80px] md:left-[0%] lg:left-[5%] top-[-70px] md:top-[-90px] transform rotate-[-5deg]" style={{ zIndex: 2, maxWidth: '640px', width: '100%' }}>
           <Image
@@ -130,14 +130,13 @@ export default function SobrePage() {
           />
         </div>
         
-        {/* Seta da foto para o texto */}
-        <div className="hidden md:block absolute left-[42%] top-[25%]">
+        {/* Seta posicionada abaixo do texto */}
+        <div className="hidden md:block absolute left-[48%] top-[80%]">
           <Image 
             src="/assets/arrow.png" 
             alt="Seta conectando a foto ao texto" 
-            width={150} 
-            height={50} 
-            style={{ transform: 'rotate(15deg)' }} 
+            width={250} 
+            height={83} 
           />
         </div>
         
@@ -149,15 +148,17 @@ export default function SobrePage() {
             </div>
             
             {/* Lado direito - Texto "A visão de mãe" */}
-            <div className="w-full md:w-1/2 pl-0 md:pl-8 lg:pl-16">
-              <h2 className="text-[#1CADD9] text-4xl md:text-5xl font-bold mb-6" style={{ fontFamily: '"Fredoka", sans-serif' }}>
+            <div className="w-full md:w-2/5 pl-0 md:pl-16 lg:pl-24 mr-0 md:mr-52">
+              <h2 className="text-[#1CADD9] text-5xl md:text-6xl font-bold mb-4" style={{ fontFamily: '"Fredoka", sans-serif' }}>
                 A visão de mãe
               </h2>
-              <p className="text-stone-700 text-base mb-6" style={{ fontFamily: '"Poppins", sans-serif' }}>
+              <p className="text-black text-base mb-3" style={{ fontFamily: '"Poppins", sans-serif' }}>
                 Sou mãe de duas crianças autistas, e essa vivência me permite enxergar o desenvolvimento infantil sob uma perspectiva completa — técnica, prática e emocional.
               </p>
-              <p className="text-stone-700 text-base mb-2" style={{ fontFamily: '"Poppins", sans-serif' }}>
-                <span className="font-bold">Eu sei, na prática, o que funciona, o que precisa ser ajustado</span> e como conduzir cada família com empatia, escuta e conhecimento.
+              <p className="text-black text-base mb-2" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                <span className="text-black font-bold">Eu sei, na prática, o que funciona, o que precisa ser</span><br />
+                <span className="text-black font-bold">ajustado</span> e como conduzir cada família com empatia,<br />
+                escuta e conhecimento.
               </p>
             </div>
           </div>

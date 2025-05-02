@@ -34,7 +34,7 @@ export default function ProfileCard({
       {/* -------- topo -------- */}
       <div className="flex flex-col items-center py-8 px-16">
         {/* foto */}
-        <div className="mb-6 rounded-full overflow-hidden">
+        <div className="mb-3 rounded-full overflow-hidden">
           <Image
             src={imageUrl}
             alt={`${firstName} ${lastName}`}
@@ -47,9 +47,9 @@ export default function ProfileCard({
 
         {/* nome */}
         <h2
-          className="text-[#5B472B] text-4xl leading-tight mb-4 text-center font-poppins"
+          className="text-[#5B472B] text-4xl leading-none mb-4 text-center font-poppins"
         >
-          <span className="block font-bold">{firstName}</span>
+          <span className="block font-bold -mb-1">{firstName}</span>
           <span className="block font-medium">{lastName}</span>
         </h2>
 
