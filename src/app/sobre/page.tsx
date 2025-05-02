@@ -116,20 +116,50 @@ export default function SobrePage() {
         </div>
       </div>
       
-      {/* Seção retangular com cor #FFFDF2 */}
-      <div className="w-full bg-[#FFFDF2] py-32 px-4">
+      {/* Seção retangular com cor #FFFDF2 - A visão de mãe */}
+      <div className="w-full bg-[#FFFDF2] py-3 px-4 relative">
+        {/* Foto posicionada absolutamente para vazar para fora da seção */}
+        <div className="absolute left-[-80px] md:left-[0%] lg:left-[5%] top-[-70px] md:top-[-90px] transform rotate-[-5deg]" style={{ zIndex: 2, maxWidth: '640px', width: '100%' }}>
+          <Image
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//familia.png"
+            alt="Lorena com seus filhos"
+            width={540}
+            height={540}
+            style={{ objectFit: 'contain' }}
+            className="w-full"
+          />
+        </div>
+        
+        {/* Seta da foto para o texto */}
+        <div className="hidden md:block absolute left-[42%] top-[25%]">
+          <Image 
+            src="/assets/arrow.png" 
+            alt="Seta conectando a foto ao texto" 
+            width={150} 
+            height={50} 
+            style={{ transform: 'rotate(15deg)' }} 
+          />
+        </div>
+        
         <div className="container mx-auto">
-          <div className="text-center max-w-4xl mx-auto mb-20">
-            <h3 className="font-medium text-xl md:text-2xl mb-6 text-stone-700" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Área de Destaque
-            </h3>
-            <p className="text-stone-700 mb-8" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Esta seção tem o fundo #FFFDF2 e fica entre as áreas coloridas.
-            </p>
-          </div>
-          
-          <div className="py-20">
-            {/* Espaço adicional para aumentar a altura */}
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            {/* Espaço reservado para a imagem (para manter o layout) */}
+            <div className="w-full md:w-1/2 relative mb-12 md:mb-0 opacity-0">
+              <div className="h-[300px] md:h-[400px]"></div>
+            </div>
+            
+            {/* Lado direito - Texto "A visão de mãe" */}
+            <div className="w-full md:w-1/2 pl-0 md:pl-8 lg:pl-16">
+              <h2 className="text-[#1CADD9] text-4xl md:text-5xl font-bold mb-6" style={{ fontFamily: '"Fredoka", sans-serif' }}>
+                A visão de mãe
+              </h2>
+              <p className="text-stone-700 text-base mb-6" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                Sou mãe de duas crianças autistas, e essa vivência me permite enxergar o desenvolvimento infantil sob uma perspectiva completa — técnica, prática e emocional.
+              </p>
+              <p className="text-stone-700 text-base mb-2" style={{ fontFamily: '"Poppins", sans-serif' }}>
+                <span className="font-bold">Eu sei, na prática, o que funciona, o que precisa ser ajustado</span> e como conduzir cada família com empatia, escuta e conhecimento.
+              </p>
+            </div>
           </div>
         </div>
       </div>
