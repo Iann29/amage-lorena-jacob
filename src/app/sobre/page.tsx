@@ -57,10 +57,10 @@ export default function SobrePage() {
         {/* Lado esquerdo - Fundo azul */}
         <div className="w-full md:w-1/2 bg-[#ADD4E4] relative overflow-hidden min-h-screen md:min-h-[120vh] lg:min-h-[130vh]">
           {/* Texto vertical "Lorena Jacob" */}
-          <div className="hidden md:block absolute -left-24 top-1/4 -rotate-90 select-none" style={{ transformOrigin: 'center', zIndex: 0 }}>
+          <div className="hidden md:block absolute -left-40 top-65 -rotate-90 select-none" style={{ transformOrigin: 'center', zIndex: 0 }}>
             <div className="flex flex-col items-center space-y-0">
-              <span className="tracking-wide text-[#C0E5F4]" style={{ fontFamily: '"Fredoka One", sans-serif', fontSize: '10rem', lineHeight: '0.9' }}>Lorena</span>
-              <span className="tracking-wide text-[#9CCDE1] -mt-16" style={{ fontFamily: '"Fredoka", sans-serif', fontWeight: 500, fontSize: '12rem', lineHeight: '0.8' }}>Jacob</span>
+              <span className="tracking-wide text-[#C0E5F4]" style={{ fontFamily: '"Fredoka One", sans-serif', fontSize: '12rem', lineHeight: '0.9' }}>Lorena</span>
+              <span className="tracking-wide text-[#9CCDE1] -mt-16" style={{ fontFamily: '"Fredoka", sans-serif', fontWeight: 500, fontSize: '14.5rem', lineHeight: '0.8' }}>Jacob</span>
             </div>
           </div>
           
