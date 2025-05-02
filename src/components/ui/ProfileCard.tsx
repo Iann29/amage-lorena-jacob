@@ -28,43 +28,43 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   return (
     <div
-      className={`bg-[#FFFAEB] rounded-2xl shadow-md overflow-hidden max-w-xs ${className}`}
+      className={`bg-[#F4F1E2] rounded-3xl shadow-lg overflow-hidden w-[450px] ${className}`}
     >
       {/* -------- topo -------- */}
-      <div className="flex flex-col items-center py-8 px-6">
+      <div className="flex flex-col items-center py-8 px-16">
         {/* foto */}
         <div className="mb-6 rounded-full overflow-hidden">
           <Image
             src={imageUrl}
             alt={`${firstName} ${lastName}`}
-            width={160}
-            height={160}
-            className="object-cover w-40 h-40"
+            width={220}
+            height={220}
+            className="object-cover w-56 h-56"
             priority
           />
         </div>
 
         {/* nome */}
         <h2
-          className="text-[#7A6D49] text-3xl leading-tight mb-3 text-center font-poppins"
+          className="text-[#5B472B] text-4xl leading-tight mb-4 text-center font-poppins"
         >
           <span className="block font-bold">{firstName}</span>
           <span className="block font-medium">{lastName}</span>
         </h2>
 
         {/* sublinhado */}
-        <div className="h-1 w-16 bg-[#00D3C7] mb-6" />
+        <div className="h-1.5 w-28 bg-[#00D3C7] mb-4" />
 
         {/* título */}
         <p
-          className="uppercase text-[#7A6D49] text-sm tracking-[0.36em] mb-1 text-center font-poppins"
+          className="uppercase text-[#7A6D49] text-base tracking-[0.36em] mb-0 text-center font-poppins"
         >
           {title}
         </p>
       </div>
 
       {/* -------- rodapé -------- */}
-      <div className="bg-white w-full flex items-center justify-center space-x-2 py-4 border-t border-gray-100">
+      <div className="bg-white w-full flex items-center justify-center space-x-3 py-4 border-t border-gray-100 mt-0">
         {socialLinks.facebook && (
           <a
             href={socialLinks.facebook}
