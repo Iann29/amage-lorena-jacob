@@ -53,6 +53,31 @@ export default function SobrePage() {
           }}
         />
       </div>
+      
+      {/* Texto à direita do card */}
+      <div className="hidden md:block absolute" style={{ top: '180px', left: '58%', zIndex: 10, maxWidth: '40%' }}>
+        <div className="mb-8">
+          <h2 className="font-normal text-xl md:text-2xl mb-1 lg:leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            <span className="font-medium">Eu sou</span> <span className="text-[#7A674C] font-medium">Lorena Jacob</span>, Terapeuta Infantil,
+          </h2>
+          <p className="text-gray-800 text-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            especialista em autismo e comorbidades.
+          </p>
+        </div>
+        
+        <div className="mb-10">
+          <h3 className="font-medium text-lg md:text-xl mb-3" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            Há mais de 10 anos atuo com crianças autistas,
+          </h3>
+          <p className="text-gray-800 leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
+            ajudando famílias a construírem caminhos mais leves, funcionais e efetivos
+            no desenvolvimento infantil. <span className="font-medium">Estou me formando como Terapeuta Ocupacional</span> e
+            possuo diversas especializações na área, o que me permite unir técnica, experiência e
+            sensibilidade em cada atendimento.
+          </p>
+        </div>
+      </div>
+      
       <div className="flex flex-col md:flex-row w-full">
         {/* Lado esquerdo - Fundo azul */}
         <div className="w-full md:w-1/2 bg-[#ADD4E4] relative overflow-hidden min-h-screen md:min-h-[120vh] lg:min-h-[130vh]">
@@ -86,30 +111,10 @@ export default function SobrePage() {
         
         {/* Lado direito - Fundo branco */}
         <div className="w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16 min-h-screen md:min-h-[120vh] lg:min-h-[130vh]" style={{ position: 'relative', zIndex: 5 }}>
-          {/* Header "Eu sou Lorena Jacob..." */}
-          <div className="mb-8 md:mb-10">
-            <h2 className="font-normal text-xl md:text-2xl mb-1 lg:leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              <span className="font-medium">Eu sou</span> <span className="text-[#7A674C] font-medium">Lorena Jacob</span>, Terapeuta Infantil,
-            </h2>
-            <p className="text-gray-800 text-lg" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              especialista em autismo e comorbidades.
-            </p>
-          </div>
-          
-          {/* Segundo parágrafo */}
-          <div className="mb-10 md:mb-14">
-            <h3 className="font-medium text-lg md:text-xl mb-3" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              Há mais de 10 anos atuo com crianças autistas,
-            </h3>
-            <p className="text-gray-800 leading-relaxed" style={{ fontFamily: '"Poppins", sans-serif' }}>
-              ajudando famílias a construírem caminhos mais leves, funcionais e efetivos
-              no desenvolvimento infantil. <span className="font-medium">Estou me formando como Terapeuta Ocupacional</span> e
-              possuo diversas especializações na área, o que me permite unir técnica, experiência e
-              sensibilidade em cada atendimento.
-            </p>
-          </div>
-          
           {/* Espaço para conteúdo adicional no futuro */}
+          <div className="md:pt-80">
+            {/* Área reservada para conteúdo futuro */}
+          </div>
         </div>
       </div>
     </div>
