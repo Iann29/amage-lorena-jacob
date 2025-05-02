@@ -211,8 +211,8 @@ export default function Home() {
           
           {/* O Diferencial Section */}
           <div className="md:w-1/2 md:pl-12 md:-mt-40 relative z-10">
-            <h2 className="text-5xl font-bold mb-1 text-center" style={{ color: 'white', WebkitTextStroke: '0.61px #7A674C', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h2>
-            <h3 className="text-5xl font-bold mb-10 text-center" style={{ color: '#8B7659', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h3>
+            <h2 className="text-5xl lg:text-6xl font-bold mb-1 text-center" style={{ color: 'white', WebkitTextStroke: '0.61px #7A674C', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h2>
+            <h3 className="text-5xl lg:text-6xl font-bold mb-10 text-center" style={{ color: '#8B7659', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h3>
             
             {/* Cards */}
             <div className="flex flex-wrap justify-center gap-6">

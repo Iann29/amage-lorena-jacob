@@ -50,17 +50,10 @@ const Header = () => {
         height: headerHeight,
         opacity: headerOpacity,
       }}
-      initial={{ y: 0, opacity: 1 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.1 }}
     >
       <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
         {/* Logo à esquerda - animado */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div>
           <Link href="/" className="flex items-center">
             <motion.div 
               style={{ 
@@ -86,9 +79,6 @@ const Header = () => {
         {/* Menu de navegação centralizado - desktop */}
         <motion.nav 
           className="hidden lg:flex items-center justify-center flex-[0.7]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
           style={{ 
             translateY: useTransform(scrollY, [0, 100], [0, -2]),
             scale: useTransform(scrollY, [0, 100], [1, 0.95]) 
@@ -162,9 +152,6 @@ const Header = () => {
         {/* Área direita - desktop */}
         <motion.div 
           className="hidden lg:flex items-center flex-[0.3]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
         >
           <div className="flex-1"></div> {/* Espaçador para empurrar conteúdo para direita */}
           
@@ -196,9 +183,6 @@ const Header = () => {
           {/* Área de "Siga-me nas redes sociais" */}
           <motion.div 
             className="flex flex-col items-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6, duration: 0.3 }}
           >
             <div className="text-[10px] font-['Poppins'] mb-1 text-center">
               <span className="text-[#52A4DB] font-bold">Siga-me</span>
@@ -269,16 +253,11 @@ const Header = () => {
         {isMenuOpen && (
           <motion.div 
             className="lg:hidden mt-1 py-2 border-t border-gray-200 px-4"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
           <nav className="flex flex-col space-y-2">
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
               whileTap={{ scale: 0.95 }}
             >
               <Link 
@@ -290,9 +269,6 @@ const Header = () => {
             </motion.div>
             
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
               whileTap={{ scale: 0.95 }}
             >
               <Link 
@@ -304,9 +280,6 @@ const Header = () => {
             </motion.div>
             
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
               whileTap={{ scale: 0.95 }}
             >
               <Link 
@@ -318,9 +291,6 @@ const Header = () => {
             </motion.div>
             
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
               whileTap={{ scale: 0.95 }}
             >
               <button 
@@ -335,9 +305,6 @@ const Header = () => {
             </motion.div>
             
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
