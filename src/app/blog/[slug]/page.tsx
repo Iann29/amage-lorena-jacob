@@ -198,7 +198,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         </div>
 
         <div className={styles.commentsList}>
-          <h3 className="text-xl font-bold text-[#9772FB] mb-6">Comentários</h3>
+          <h3 className="text-2xl font-bold text-[#9772FB] mb-6">Comentários</h3>
           
           {/* Lista de comentários mockados */}
           {comments.map((comment) => (
@@ -206,8 +206,8 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               <Image 
                 src={comment.user.avatar_url || '/assets/avatar-default.png'}
                 alt={comment.user.nome}
-                width={50}
-                height={50}
+                width={60}
+                height={60}
                 className={styles.commentAvatar}
               />
               <div className={styles.commentContent}>
