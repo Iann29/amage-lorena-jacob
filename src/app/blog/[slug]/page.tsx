@@ -90,9 +90,15 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-8">
             <div className="container mx-auto max-w-4xl">
-              <h1 className="text-white text-4xl md:text-5xl font-bold font-mogila mb-4">
+              <h1 className={styles.postTitle}>
                 {post.titulo}
               </h1>
+              
+              {post.resumo && (
+                <p className={styles.postSubtitle}>
+                  {post.resumo}
+                </p>
+              )}
               
               <div className="flex flex-wrap items-center text-white gap-x-6 gap-y-2">
                 <div className="flex items-center gap-2">

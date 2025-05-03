@@ -20,12 +20,37 @@
   font-style: italic;
   transform: rotate(-2deg);
   letter-spacing: 0.05em;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   position: absolute;
   top: 3.5rem;
   left: 0;
   right: 0;
   z-index: 10;
+}
+
+.postTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  color: white;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.2;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.postSubtitle {
+  text-align: center;
+  font-size: 1.25rem;
+  color: white;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
