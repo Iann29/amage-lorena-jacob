@@ -4,10 +4,31 @@ import Image from "next/image";
 import { useEffect } from "react";
 import ProfileCard from "@/components/ui/ProfileCard";
 import InfoCard from "@/components/ui/InfoCard";
+import PortfolioCard from "@/components/ui/PortfolioCard";
 
 export default function SobrePage() {
-  // Garantir que as fontes Fredoka e Poppins estejam carregadas
+  // Garantir que as fontes estejam carregadas
   useEffect(() => {
+    document.body.classList.add('font-poppins');
+    
+    // Carregar fonte Ms Madi do Google Fonts
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    
+    // Adicionar estilo para a fonte Mogila Display
+    const style = document.createElement('style');
+    style.textContent = `
+      @font-face {
+        font-family: 'Mogila Display';
+        src: url('/src/assets/fonts/Mogila Bold.otf') format('opentype');
+        font-weight: 400;
+        font-style: normal;
+      }
+    `;
+    document.head.appendChild(style);
+    
     const linkFredokaOne = document.createElement('link');
     linkFredokaOne.href = 'https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap';
     linkFredokaOne.rel = 'stylesheet';
@@ -240,6 +261,86 @@ export default function SobrePage() {
                   </>
                 }
               />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Seção de Portfólio */}
+      <div className="flex flex-col md:flex-row w-full py-12 md:py-24 relative">
+        {/* Fundo dividido mantido */}
+        <div className="absolute inset-0 flex w-full h-full">
+          <div className="w-full md:w-1/2 bg-[#ADD4E4]"></div>
+          <div className="w-full md:w-3/5 bg-white" style={{ position: 'relative', zIndex: 5 }}></div>
+        </div>
+        
+        {/* Container principal com fundo marrom */}
+        <div className="container mx-auto px-4 z-10 relative">
+          <div 
+            className="bg-[#9B8669] rounded-3xl py-16 px-6 md:py-20 md:px-12 lg:px-16 relative overflow-hidden"
+            style={{
+              backgroundImage: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundBlendMode: 'soft-light'
+            }}
+          >
+            
+            {/* Logo Lorena Jacob */}
+            <div className="flex justify-center mb-10">
+              <Image 
+                src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
+                alt="Lorena Jacob - Terapeuta Infantil"
+                width={240}
+                height={70}
+                className="object-contain"
+              />
+            </div>
+            
+            {/* Título da seção */}
+            <div className="text-center mb-16">
+              <h3 className="text-[#FFF8E0] text-4xl md:text-5xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
+              <h2 className="text-white text-5xl md:text-6xl lg:text-7xl font-normal -mt-3" style={{ fontFamily: 'Mogila Display, sans-serif' }}>Portfólio</h2>
+            </div>
+            
+            {/* Grid de cards de portfólio */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+              {/* Acompanhamento Personalizado */}
+              <div className="aspect-[4/3] md:aspect-square">
+                <PortfolioCard 
+                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
+                  title="Personalizado"
+                  subtitle="Acompanhamento"
+                />
+              </div>
+              
+              {/* Orientação para Pais e Cuidadores */}
+              <div className="aspect-[4/3] md:aspect-square">
+                <PortfolioCard 
+                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//orientacao-para-pais.webp"
+                  title="Pais e Cuidadores"
+                  subtitle="Orientação para"
+                />
+              </div>
+              
+              {/* Implementação e Treinamento com PECS */}
+              <div className="aspect-[4/3] md:aspect-square">
+                <PortfolioCard 
+                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
+                  title="Treinamento com PECS"
+                  subtitle="Implementação e"
+                />
+              </div>
+              
+              {/* Atividades Recreativas Terapêuticas */}
+              <div className="aspect-[4/3] md:aspect-square">
+                <PortfolioCard 
+                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
+                  title="Terapêuticas"
+                  subtitle="Atividades Recreativas"
+                />
+              </div>
             </div>
           </div>
         </div>
