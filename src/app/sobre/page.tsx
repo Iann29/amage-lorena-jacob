@@ -304,9 +304,11 @@ export default function SobrePage() {
             {/* Conteúdo posicionado sobre o overlay */}
             <div className="relative z-10">
               {/* Título da seção */}
-              <div className="text-center mb-6">
-                <h3 className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
-                <h2 className="text-[#FFFBE2] text-6xl md:text-8xl lg:text-9xl italic font-normal -mt-3" style={{ fontFamily: 'var(--font-mogila)', fontWeight: 400 }}>Portfólio</h2>
+              <div className="pt-24 md:pt-32 lg:pt-40 mb-10 text-center relative">
+                <div>
+                  <h3 className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal absolute left-1/4 md:left-1/3 top-16 md:top-14 lg:top-12" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
+                  <h2 className="text-[#FFFBE2] text-6xl md:text-8xl lg:text-9xl italic font-normal" style={{ fontFamily: 'var(--font-mogila)', fontWeight: 400 }}>Portfólio</h2>
+                </div>
               </div>
               
               {/* Logo Lorena Jacob */}
