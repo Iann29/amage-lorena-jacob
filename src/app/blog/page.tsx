@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { blogPosts, blogCategorias, getPopularPosts } from '@/lib/mockData';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import BlogFilter from '@/components/blog/BlogFilter';
-import Pagination from '@/components/blog/Pagination';
 import styles from './blog.module.css';
 
 export default function BlogPage() {
@@ -132,19 +131,16 @@ export default function BlogPage() {
               ))}
             </div>
             
-            {/* Paginação */}
-            <Pagination 
-              currentPage={currentPage} 
-              totalPages={totalPages} 
-              baseUrl="/blog/pagina"
-            />
-            
-            {/* Link Ver Mais */}
-            <div className="text-center mt-4">
-              <a href="#" className="text-[#715B3F] hover:underline font-medium">
-                VER MAIS
-              </a>
-            </div>
+            {/* Botão Ver Mais */}
+            <button 
+              onClick={() => {
+                // Aqui viria a lógica para carregar mais posts
+                console.log('Carregar mais posts');
+              }} 
+              className={styles.verMaisButton}
+            >
+              <span>VER MAIS</span>
+            </button>
           </div>
         </div>
       </div>
