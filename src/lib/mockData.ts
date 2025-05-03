@@ -29,11 +29,14 @@ export const blogPosts = [
     titulo: 'A importância de dizer não',
     slug: 'a-importancia-de-dizer-nao',
     resumo: 'Educação positiva não é permitir tudo',
-    tema: {
-      corTitulo: '#000000',
-      corSubtitulo: '#000000',
-      corFundo: '#FFFFFF',
-      corUltimoTitulo: '#8651B4'
+    cores: {
+      textoPadrao: '#000000',   // Cor do texto normal
+      tituloPrincipal: '#000000', // Cor do título do post
+      titulosH2: [             // Cores para cada título H2, na ordem em que aparecem
+        '#000000',             // Primeiro título (O papel do "não")
+        '#000000',             // Segundo título (Educação positiva)
+        '#8651B4'              // Terceiro título (Conclusão) - Roxo
+      ]
     },
     conteudo: `<p>A busca por criar um ambiente amoroso para nossos filhos muitas vezes é confundida com permissividade. Chamamos isso de educação positiva. No entanto, muitas vezes ela é mal interpretada como permissividade – como se educar com respeito significasse permitir tudo. Mas a verdade é que educar de forma positiva não exclui o "não". Pelo contrário, saber colocá-lo é fundamental para o desenvolvimento saudável da criança.</p>
 

@@ -29,11 +29,11 @@ export default function PostPage({ params }: { params: { slug: string } }) {
   const comments = post ? getCommentsByPostId(post.id) : [];
   const postsPopulares = getPopularPosts();
   
-  // Cores padrão caso o post não tenha definido um tema personalizado
-  const temaPost = post?.tema || {
-    corTitulo: '#715B3F',
-    corSubtitulo: '#8A7559',
-    corFundo: '#FFFFFF'
+  // Obter as cores definidas para o post ou usar cores padrão
+  const coresPost = post?.cores || {
+    textoPadrao: '#715B3F',   // Cor padrão para texto
+    tituloPrincipal: '#715B3F', // Cor para o título principal
+    titulosH2: ['#715B3F', '#715B3F', '#715B3F'] // Cores padrão para os títulos H2
   };
   
   // Se o post não existir, mostrar mensagem de erro
@@ -123,7 +123,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           {/* Título Principal do Post com cor personalizada */}
           <h1 
             className={styles.contentTitle}
-            style={{ color: temaPost.corTitulo }}
+            style={{ color: coresPost.tituloPrincipal }}
           >
             {post.titulo}
           </h1>
@@ -132,9 +132,10 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           <div 
             className={styles.postContent}
             style={{ 
-              '--heading-color': temaPost.corTitulo,
-              '--subheading-color': temaPost.corSubtitulo,
-              '--background-color': temaPost.corFundo,
+              '--texto-cor': coresPost.textoPadrao,
+              '--titulo1-cor': coresPost.titulosH2[0] || coresPost.textoPadrao,
+              '--titulo2-cor': coresPost.titulosH2[1] || coresPost.textoPadrao,
+              '--titulo3-cor': coresPost.titulosH2[2] || coresPost.textoPadrao,
             } as React.CSSProperties}
           >
             <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
