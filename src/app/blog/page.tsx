@@ -56,7 +56,14 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFFF9] relative">
+    <main 
+      className="min-h-screen relative" 
+      style={{
+        background: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//backgroundBlog.webp') no-repeat center top / cover,
+                    #FFFFF9`,
+        backgroundBlendMode: 'multiply'
+      }}
+    >
       
       <div className="container mx-auto px-4 pt-36 pb-12">
         {/* Cabeçalho do Blog */}
