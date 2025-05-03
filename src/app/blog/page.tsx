@@ -68,7 +68,7 @@ export default function BlogPage() {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 pt-36 pb-12">
         {/* Cabeçalho do Blog */}
         <h1 className={styles.blogTitle}>Blog</h1>
         
