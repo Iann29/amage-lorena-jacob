@@ -81,7 +81,7 @@
   padding: 1.5rem;
   margin-right: 2rem;
   opacity: 1;
-  max-height: 500px;
+  max-height: 600px;
   height: auto;
 }
 
@@ -206,6 +206,12 @@
   background-color: #A5C4DD;
   border-radius: 2px;
   display: block;
+}
+
+.filterLogo {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
 }
 
 .mainGrid {

@@ -74,6 +74,17 @@ export default function BlogFilter({
           </div>
         ))}
       </div>
+
+      {/* Logo */}
+      <div className={styles.filterLogo}>
+        <Image 
+          src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logo1.webp" 
+          alt="Lorena Jacob - Terapeuta Infantil" 
+          width={140} 
+          height={70}
+          className="mt-3"
+        />
+      </div>
     </div>
   );
 }
