@@ -427,15 +427,15 @@ export default function SobrePage() {
               {/* base (mais altos) */}
               <PortfolioCard
                 className="h-full w-full md:row-span-3"
-                imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
-                subtitle="Implementação e"
-                title="Treinamento com PECS"
-              />
-              <PortfolioCard
-                className="h-full w-full md:row-span-2"
                 imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
                 subtitle="Atividades Recreativas"
                 title="Terapêuticas"
+              />
+              <PortfolioCard
+                className="h-full w-full md:row-span-2"
+                imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
+                subtitle="Implementação e"
+                title="Treinamento com PECS"
               />
             </div>
           </div>

@@ -35,12 +35,7 @@ const PortfolioCard = ({
         />
       </div>
       
-      {/* Overlay escuro para melhorar leitura do texto */}
-      <div 
-        className={`absolute inset-0 bg-black transition-opacity duration-300 ${
-          isHovered ? 'opacity-40' : 'opacity-50'
-        }`}
-      ></div>
+      {/* Overlay removido conforme solicitado */}
       
       {/* Conteúdo */}
       <div className="relative z-10 h-full flex flex-col justify-end p-6">
