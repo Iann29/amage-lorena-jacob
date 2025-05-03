@@ -166,6 +166,15 @@ export default function SobrePage() {
         </div>
       </div>
       
+      {/* Espaçador com background dividido */}
+      <div className="flex flex-col md:flex-row w-full relative h-32 md:h-48 lg:h-64">
+        {/* Fundo dividido do espaçador */}
+        <div className="absolute inset-0 flex w-full h-full">
+          <div className="w-full md:w-1/2 bg-[#ADD4E4]"></div>
+          <div className="w-full md:w-3/5 bg-white" style={{ position: 'relative', zIndex: 5 }}></div>
+        </div>
+      </div>
+      
       {/* Seção de cards informativos com background dividido */}
       <div className="flex flex-col md:flex-row w-full py-12 md:py-20 relative">
         {/* Fundo dividido */}
