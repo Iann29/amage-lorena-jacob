@@ -32,9 +32,9 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
   const [likes, setLikes] = useState(post.like_count);
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    <article className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
       <Link href={`/blog/${post.slug}`}>
-        <div className="relative h-56 w-full">
+        <div className="relative h-56 w-full rounded-2xl overflow-hidden mb-5">
           {post.imagem_destaque_url ? (
             <Image 
               src={post.imagem_destaque_url} 
@@ -51,7 +51,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
         </div>
       </Link>
       
-      <div className="p-6">
+      <div>
         <h2 className="text-2xl font-bold mb-3 text-[#6397C3]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
           <Link href={`/blog/${post.slug}`} className="hover:opacity-80 transition">
             {post.titulo}

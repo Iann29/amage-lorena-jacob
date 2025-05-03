@@ -46,7 +46,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
       aria-label={isLiked ? "Remover curtida" : "Curtir"}
     >
       <Image
-        src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
+        src={isLiked ? "/assets/like.svg" : "/assets/likeVazio.svg"}
         alt={isLiked ? "Curtido" : "Curtir"}
         width={26}
         height={26}
