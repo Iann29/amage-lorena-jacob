@@ -74,7 +74,7 @@ export default function BlogPage() {
         <h1 className={styles.blogTitle}>Blog</h1>
         
         {/* Barra de pesquisa */}
-        <div className="max-w-2xl mx-auto mb-10">
+        <div className="max-w-2xl mx-auto mb-4 mt-10">
           <div className={styles.searchBar}>
             <div className={styles.searchIcon}>
               <Image 
@@ -103,11 +103,11 @@ export default function BlogPage() {
               />
             </div>
           </div>
-        </div>
-        
-        {/* Contador de posts e total */}
-        <div className="flex justify-end mb-4 text-gray-500">
-          TODOS ({posts.length})
+          
+          {/* Contador de posts e total */}
+          <div className="flex justify-center mt-3 mb-16 text-gray-600 font-medium">
+            TODOS ({posts.length})
+          </div>
         </div>
         
 
