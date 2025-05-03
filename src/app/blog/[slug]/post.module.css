@@ -10,6 +10,24 @@
   letter-spacing: 0.05em;
 }
 
+.blogHeaderTitle {
+  font-family: var(--font-mogila), serif;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  transform: rotate(-2deg);
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 3.5rem;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
 @media (max-width: 768px) {
   .blogTitle {
     font-size: 3.5rem;

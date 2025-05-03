@@ -4,6 +4,7 @@ import { getPostBySlug, getCommentsByPostId, getPopularPosts, blogCategorias } f
 import LikeButton from '@/components/blog/LikeButton';
 import CommentSection from '@/components/blog/CommentSection';
 import BlogSidebar from '@/components/blog/BlogSidebar';
+import styles from './post.module.css';
 
 // Metadados dinâmicos baseados no slug
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -70,6 +71,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
       
       {/* Header do Post */}
       <header className="w-full relative">
+        <h1 className={styles.blogHeaderTitle}>Blog</h1>
         <div className="relative h-[60vh] w-full max-h-[500px]">
           {post.imagem_destaque_url ? (
             <Image 
