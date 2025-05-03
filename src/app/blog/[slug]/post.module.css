@@ -309,6 +309,7 @@
   font-family: var(--font-museo-sans);
   font-weight: 600;
   margin-bottom: 0.5rem;
+  color: #000;
 }
 
 .commentDate {
@@ -320,6 +321,7 @@
 .commentText {
   font-family: var(--font-museo-sans);
   line-height: 1.6;
+  color: #000;
 }
 
 .commentActions {
