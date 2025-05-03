@@ -105,7 +105,7 @@ export default function BlogPage() {
           </div>
           
           {/* Contador de posts e total */}
-          <div className="flex justify-center mt-3 mb-16 text-gray-600 font-medium">
+          <div className="flex justify-center mt-12 mb-16 text-[#A6A6A6] font-medium">
             TODOS ({posts.length})
           </div>
         </div>
