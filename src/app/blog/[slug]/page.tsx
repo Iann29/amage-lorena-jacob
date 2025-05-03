@@ -228,6 +228,41 @@ export default function PostPage({ params }: { params: { slug: string } }) {
                     initialLikeCount={comment.like_count || 0}
                   />
                 </div>
+                
+                {/* Respostas do comentário */}
+                {comment.respostas && comment.respostas.length > 0 && (
+                  <div className={styles.commentReplies}>
+                    {comment.respostas.map(resposta => (
+                      <div key={resposta.id} className={styles.replyItem}>
+                        <Image 
+                          src={resposta.user.avatar_url || '/assets/avatar-default.png'}
+                          alt={resposta.user.nome}
+                          width={40}
+                          height={40}
+                          className={styles.replyAvatar}
+                        />
+                        <div className={styles.replyContent}>
+                          <div className={styles.replyAuthor}>{resposta.user.nome}</div>
+                          <div className={styles.replyDate}>
+                            Comentado em: {new Date(resposta.created_at).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </div>
+                          <div className={styles.replyText}>{resposta.conteudo}</div>
+                          <div className={styles.replyActions}>
+                            <LikeButton 
+                              itemId={resposta.id}
+                              itemType="comment"
+                              initialLikeCount={resposta.like_count || 0}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

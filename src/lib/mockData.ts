@@ -18,7 +18,7 @@ export const usuarios = [
     avatar_url: 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//profile-photo.webp',
     role: 'admin' 
   },
-  { id: 2, nome: 'Ana Luiza Perez', avatar_url: null, role: 'user' },
+  { id: 2, nome: 'Ana Luiza Perez', avatar_url: 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/profile-pic/test.jpg', role: 'user' },
   { id: 3, nome: 'Marcio Mendes', avatar_url: null, role: 'user' },
 ];
 
@@ -336,7 +336,18 @@ export const blogComments = [
     user: usuarios[1],
     conteudo: 'Uauuuuu! Que conteúdo incrível. Muito enriquecedor e necessário. Obrigada Lorena!',
     created_at: '2025-04-22T10:15:00Z',
-    like_count: 3
+    like_count: 3,
+    respostas: [
+      {
+        id: 101,
+        comment_id: 1,
+        user_id: 1,
+        user: usuarios[0], // Lorena Jacob
+        conteudo: 'Fico muito feliz que tenha gostado, Ana! Compartilhe com outras mães que possam se beneficiar desse conteúdo. Abraços!',
+        created_at: '2025-04-22T11:30:00Z',
+        like_count: 2
+      }
+    ]
   },
   {
     id: 2,
@@ -345,7 +356,27 @@ export const blogComments = [
     user: usuarios[2],
     conteudo: 'Temos criado uma geração de filhos mimados pela falta de limites e uma geração de pais mimados. Essa é a verdade. Os pais hoje em dia se chateiam quando alguém diz NÃO FAÇA ISSO COM SEUS FILHOS. Excelente Lorena!',
     created_at: '2025-04-24T15:30:00Z',
-    like_count: 5
+    like_count: 5,
+    respostas: [
+      {
+        id: 102,
+        comment_id: 2,
+        user_id: 1,
+        user: usuarios[0], // Lorena Jacob
+        conteudo: 'Obrigada pelo comentário, Márcio! Realmente precisamos resgatar a importância dos limites na educação das crianças. Às vezes dizer "não" é um ato de amor e cuidado.',
+        created_at: '2025-04-24T16:45:00Z',
+        like_count: 3
+      },
+      {
+        id: 103,
+        comment_id: 2,
+        user_id: 2,
+        user: usuarios[1], // Ana Luiza
+        conteudo: 'Concordo totalmente! Criar filhos com limites é prepará-los para o mundo real.',
+        created_at: '2025-04-24T17:30:00Z',
+        like_count: 1
+      }
+    ]
   },
   {
     id: 3,
