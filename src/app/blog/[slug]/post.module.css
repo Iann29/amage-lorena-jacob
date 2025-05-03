@@ -1,0 +1,17 @@
+.blogTitle {
+  font-family: var(--font-mogila), serif;
+  color: #715B3F;
+  text-align: center;
+  font-size: 5.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  font-style: italic;
+  transform: rotate(-2deg);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .blogTitle {
+    font-size: 3.5rem;
+  }
+}
