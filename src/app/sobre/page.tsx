@@ -284,7 +284,7 @@ export default function SobrePage() {
           >
             {/* Imagem de fundo com máscara */}
             <div 
-              className="absolute inset-0 opacity-100"
+              className="absolute inset-0 opacity-100 rounded-t-[500px]"
               style={{
                 backgroundImage: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')`,
                 backgroundSize: '100% 100%',
@@ -293,7 +293,9 @@ export default function SobrePage() {
                 backgroundBlendMode: 'normal',
                 filter: 'brightness(1.4) contrast(1.2)',
                 maskImage: 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)'
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)',
+                borderTopLeftRadius: '500px',
+                borderTopRightRadius: '500px'
               }}
             ></div>
             
