@@ -52,7 +52,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
       </Link>
       
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-3 text-[#7AC5E3]">
+        <h2 className="text-2xl font-bold mb-3 text-[#6397C3]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
           <Link href={`/blog/${post.slug}`} className="hover:opacity-80 transition">
             {post.titulo}
           </Link>

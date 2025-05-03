@@ -42,13 +42,14 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
     <button
       onClick={handleLike}
       disabled={isLoading}
-      className="flex items-center gap-1 transition-all hover:scale-110"
+      className="flex items-center justify-center gap-1 transition-all hover:scale-110 p-1.5"
+      aria-label={isLiked ? "Remover curtida" : "Curtir"}
     >
       <Image
         src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
         alt={isLiked ? "Curtido" : "Curtir"}
-        width={20}
-        height={20}
+        width={26}
+        height={26}
         className="transition-all"
       />
     </button>
