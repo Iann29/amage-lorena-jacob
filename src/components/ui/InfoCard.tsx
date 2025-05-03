@@ -47,13 +47,13 @@ export default function InfoCard({
           className={`flex flex-col rounded-2xl overflow-hidden ${getBgColor()} ${getTextColor()} h-full`}
         >
           {/* Ícone no topo */}
-          <div className="absolute -top-6 left-[50%] transform -translate-x-1/2 z-10">
-            <div className={`p-3 rounded-xl ${getIconBgColor()} border-4 border-white shadow-md flex items-center justify-center`} style={{width: '70px', height: '70px'}}>
+          <div className="absolute -top-8 left-[50%] transform -translate-x-1/2 z-10">
+            <div className={`p-3 rounded-xl ${getIconBgColor()} border-4 border-white shadow-md flex items-center justify-center`} style={{width: '90px', height: '90px'}}>
               <Image 
                 src={iconSrc} 
                 alt={title} 
-                width={40}
-                height={40}
+                width={55}
+                height={55}
                 className="object-contain"
               />
             </div>
