@@ -50,7 +50,7 @@ export const blogPosts = [
 
     <h2>Conclusão</h2>
     <p>Dizer "não" é uma das formas mais importantes de amar e proteger uma criança. A verdadeira educação positiva não confunde o equilíbrio com permissividade, nem amar com dar acesso ao mundo sem limites. Colocar limites com respeito é preparar nossos filhos para a vida, para o convívio com o outro e para o mundo real – onde nem tudo será como eles querem e tudo bem.</p>`,
-    imagem_destaque_url: '/public/assets/blog-post-1.jpg',
+    imagem_destaque_url: 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/blog-post/a-importancia-de-dizer-nao.png',
     created_at: '2025-04-20T14:30:00Z',
     updated_at: '2025-04-20T14:30:00Z',
     like_count: 24,
