@@ -6,6 +6,7 @@ interface BlogPostData {
   id?: string | number; // id será importante para buscar dados específicos do post
   title: string;
   summary: string;
+  content?: string; // Conteúdo HTML completo do post para extrair o texto inicial
   imageUrl: string;
   postUrl: string;
   viewCount?: number; // Opcional pois poderá ser buscado separadamente
@@ -31,10 +32,32 @@ interface PostStats {
  * Componente de cartão de post do blog
  * No futuro, pode buscar automaticamente estatísticas de visualizações e comentários do Supabase
  */
+/**
+ * Extrai o texto puro de uma string HTML e retorna um trecho com o tamanho especificado
+ */
+const extractTextFromHtml = (htmlContent: string | undefined, maxLength: number = 200): string => {
+  if (!htmlContent) return "";
+  
+  // Remove todas as tags HTML deixando apenas o texto
+  const plainText = htmlContent.replace(/<\/?[^>]+(>|$)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  
+  // Retorna um trecho do texto com o tamanho especificado
+  if (plainText.length <= maxLength) return plainText;
+  
+  // Corta no espaço mais próximo para não quebrar palavras
+  const truncated = plainText.substring(0, maxLength);
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+  
+  return truncated.substring(0, lastSpaceIndex) + "...";
+};
+
 const BlogPostCard: React.FC<BlogPostCardProps> = ({
   id,
   title,
   summary,
+  content,
   imageUrl,
   postUrl,
   viewCount: initialViewCount,
@@ -106,7 +129,10 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
       </div>
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="text-2xl font-bold text-[#52A4DB] mb-2" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
-        <p className="text-sm text-[#555555] mb-5 leading-tight">{summary}</p>
+        {/* Exibe o resumo se está disponível, ou um trecho do conteúdo se estiver disponível */}
+        <p className="text-sm text-[#555555] mb-5 leading-tight">
+          {content ? extractTextFromHtml(content, 150) : summary}
+        </p>
         <div className="mt-auto">
           <a 
             href={postUrl} 

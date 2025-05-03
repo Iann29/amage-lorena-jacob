@@ -5,12 +5,32 @@ import Link from 'next/link';
 import { useState } from 'react';
 import LikeButton from './LikeButton';
 
+/**
+ * Extrai o texto puro de uma string HTML e retorna um trecho com o tamanho especificado
+ */
+const extractTextFromHtml = (htmlContent: string, maxLength: number = 200): string => {
+  // Remove todas as tags HTML deixando apenas o texto
+  const plainText = htmlContent.replace(/<\/?[^>]+(>|$)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  
+  // Retorna um trecho do texto com o tamanho especificado
+  if (plainText.length <= maxLength) return plainText;
+  
+  // Corta no espaço mais próximo para não quebrar palavras
+  const truncated = plainText.substring(0, maxLength);
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+  
+  return truncated.substring(0, lastSpaceIndex) + "...";
+};
+
 interface BlogPostCardProps {
   post: {
     id: number;
     titulo: string;
     slug: string;
     resumo: string;
+    conteudo?: string;  // Adicionando o campo conteúdo
     imagem_destaque_url: string;
     created_at: string;
     like_count: number;
@@ -59,7 +79,9 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
         </h2>
         
         <p className="text-gray-700 mb-6 text-base leading-relaxed">
-          {post.resumo}
+          {post.conteudo 
+            ? extractTextFromHtml(post.conteudo, 180) 
+            : post.resumo}
         </p>
         
         <div className="flex justify-between items-center pt-4 border-t-4 border-gray-200">
