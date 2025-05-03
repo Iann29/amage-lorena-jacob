@@ -203,13 +203,15 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           {/* Lista de comentários mockados */}
           {comments.map((comment) => (
             <div key={comment.id} className={styles.commentItem}>
-              <Image 
-                src={comment.user.avatar_url || '/assets/avatar-default.png'}
-                alt={comment.user.nome}
-                width={60}
-                height={60}
-                className={styles.commentAvatar}
-              />
+              <div className={styles.avatarContainer}>
+                <Image 
+                  src={comment.user.avatar_url || '/assets/avatar-default.png'}
+                  alt={comment.user.nome}
+                  width={60}
+                  height={60}
+                  className={styles.commentAvatar}
+                />
+              </div>
               <div className={styles.commentContent}>
                 <div className={styles.commentAuthor}>{comment.user.nome}</div>
                 <div className={styles.commentDate}>
@@ -234,13 +236,15 @@ export default function PostPage({ params }: { params: { slug: string } }) {
                   <div className={styles.commentReplies}>
                     {comment.respostas.map(resposta => (
                       <div key={resposta.id} className={styles.replyItem}>
-                        <Image 
-                          src={resposta.user.avatar_url || '/assets/avatar-default.png'}
-                          alt={resposta.user.nome}
-                          width={40}
-                          height={40}
-                          className={styles.replyAvatar}
-                        />
+                        <div className={styles.replyAvatarContainer}>
+                          <Image 
+                            src={resposta.user.avatar_url || '/assets/avatar-default.png'}
+                            alt={resposta.user.nome}
+                            width={40}
+                            height={40}
+                            className={styles.replyAvatar}
+                          />
+                        </div>
                         <div className={styles.replyContent}>
                           <div className={styles.replyAuthor}>{resposta.user.nome}</div>
                           <div className={styles.replyDate}>
