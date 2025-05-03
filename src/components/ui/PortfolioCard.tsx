@@ -40,11 +40,11 @@ const PortfolioCard = ({
       {/* Conteúdo */}
       <div className="relative z-10 h-full flex flex-col justify-end items-center text-center px-6 pt-6 pb-3">
         {subtitle && (
-          <h3 className="text-white text-lg md:text-xl font-normal mb-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
+          <h3 className="text-white text-xl md:text-2xl font-normal mb-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
             {subtitle}
           </h3>
         )}
-        <h2 className="text-white text-xl md:text-2xl font-bold" style={{ fontFamily: '"Poppins", sans-serif' }}>
+        <h2 className="text-white text-2xl md:text-3xl font-bold" style={{ fontFamily: '"Poppins", sans-serif' }}>
           {title}
         </h2>
         
