@@ -306,7 +306,7 @@ export default function SobrePage() {
               {/* Título da seção */}
               <div className="text-center mb-6">
                 <h3 className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
-                <h2 className="text-[#FFFBE2] text-6xl md:text-7xl lg:text-8xl italic font-normal -mt-3" style={{ fontFamily: 'var(--font-mogila)', fontWeight: 400 }}>Portfólio</h2>
+                <h2 className="text-[#FFFBE2] text-6xl md:text-8xl lg:text-9xl italic font-normal -mt-3" style={{ fontFamily: 'var(--font-mogila)', fontWeight: 400 }}>Portfólio</h2>
               </div>
               
               {/* Logo Lorena Jacob */}
