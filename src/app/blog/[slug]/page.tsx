@@ -113,13 +113,13 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <span>por {post.author.nome}</span>
           </div>
           
-          {/* Título e Subtítulo no Conteúdo */}
+          {/* Título Principal do Post */}
           <h1 className={styles.contentTitle}>{post.titulo}</h1>
           
-          {/* Conteúdo do Post */}
-          <article className="prose prose-lg max-w-none prose-headings:text-[#715B3F] prose-a:text-blue-600">
+          {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}
+          <div className={styles.postContent}>
             <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
-          </article>
+          </div>
           
           {/* Seção de Rodapé */}
           <div className={styles.footerActions}>
