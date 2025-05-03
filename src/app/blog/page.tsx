@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { blogPosts, blogCategorias, getPopularPosts } from '@/lib/mockData';
 import BlogPostCard from '@/components/blog/BlogPostCard';
+import BlogFilter from '@/components/blog/BlogFilter';
 import Pagination from '@/components/blog/Pagination';
 import styles from './blog.module.css';
 
@@ -104,72 +105,27 @@ export default function BlogPage() {
           </div>
         </div>
         
-        {/* Painel de Filtros */}
-        <div className={`${styles.filterOverlay} ${filterPanelOpen ? styles.filterOverlayOpen : ''}`} onClick={toggleFilterPanel}></div>
-        <div className={`${styles.filterPanel} ${filterPanelOpen ? styles.filterPanelOpen : ''}`}>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-[#715B3F]">Filtrar</h3>
-            <button 
-              onClick={toggleFilterPanel}
-              className="text-gray-500 hover:text-gray-700"
-              aria-label="Fechar painel de filtros"
-            >
-              ✕
-            </button>
-          </div>
-          
-          {/* Temas */}
-          <div className="mb-6">
-            <h4 className="text-blue-600 font-medium mb-3">Temas</h4>
-            <div className="space-y-2">
-              {temas.map((tema, index) => (
-                <div key={index} className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id={`tema-${index}`} 
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                    checked={selectedTemas.includes(tema)}
-                    onChange={() => handleTemaChange(tema)}
-                  />
-                  <label htmlFor={`tema-${index}`} className="text-sm text-gray-700">
-                    {tema}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Categorias */}
-          <div>
-            <h4 className="text-blue-600 font-medium mb-3">Categoria</h4>
-            <div className="space-y-2">
-              {categorias.map((categoria) => (
-                <div key={categoria.id} className="flex items-center">
-                  <input 
-                    type="checkbox" 
-                    id={`cat-${categoria.id}`} 
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                    checked={selectedCategories.includes(categoria.id)}
-                    onChange={() => handleCategoryChange(categoria.id)}
-                  />
-                  <label htmlFor={`cat-${categoria.id}`} className="text-sm text-gray-700">
-                    {categoria.nome}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* Contador de posts */}
-        <div className="text-center mb-8 text-gray-500">
+        {/* Contador de posts e total */}
+        <div className="flex justify-end mb-4 text-gray-500">
           TODOS ({posts.length})
         </div>
         
-        {/* Grid principal */}
-        <div className="flex flex-col gap-8">
+
+        
+        {/* Grid principal com filtro e posts */}
+        <div className={styles.mainGrid}>
+          {/* Painel de Filtros */}
+          <BlogFilter 
+            isOpen={filterPanelOpen}
+            categorias={categorias}
+            selectedCategories={selectedCategories}
+            onCategoryChange={handleCategoryChange}
+            selectedTemas={selectedTemas}
+            onTemaChange={handleTemaChange}
+          />
+          
           {/* Lista de Posts */}
-          <div className="w-full">
+          <div className={styles.postsContainer}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
                 <BlogPostCard key={post.id} post={post} />
