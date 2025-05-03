@@ -277,69 +277,84 @@ export default function SobrePage() {
         {/* Container principal com fundo marrom */}
         <div className="container mx-auto px-4 z-10 relative">
           <div 
-            className="bg-[#9B8669] rounded-3xl py-16 px-6 md:py-20 md:px-12 lg:px-16 relative overflow-hidden"
+            className="bg-[#9B8669] rounded-3xl py-16 px-6 md:py-20 md:px-12 lg:px-16 pb-24 md:pb-32 lg:pb-40 relative overflow-hidden"
             style={{
-              backgroundImage: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              backgroundBlendMode: 'soft-light'
+              position: 'relative'
             }}
           >
+            {/* Imagem de fundo com máscara */}
+            <div 
+              className="absolute inset-0 opacity-100"
+              style={{
+                backgroundImage: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')`,
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundBlendMode: 'normal',
+                filter: 'brightness(1.4) contrast(1.2)',
+                maskImage: 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)'
+              }}
+            ></div>
             
-            {/* Logo Lorena Jacob */}
-            <div className="flex justify-center mb-10">
-              <Image 
-                src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
-                alt="Lorena Jacob - Terapeuta Infantil"
-                width={240}
-                height={70}
-                className="object-contain"
-              />
-            </div>
+            {/* Overlay removido para maximizar a visibilidade da imagem */}
             
-            {/* Título da seção */}
-            <div className="text-center mb-16">
-              <h3 className="text-[#FFF8E0] text-4xl md:text-5xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
-              <h2 className="text-white text-5xl md:text-6xl lg:text-7xl font-normal -mt-3" style={{ fontFamily: 'Mogila Display, sans-serif' }}>Portfólio</h2>
-            </div>
-            
-            {/* Grid de cards de portfólio */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-              {/* Acompanhamento Personalizado */}
-              <div className="aspect-[4/3] md:aspect-square">
-                <PortfolioCard 
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
-                  title="Personalizado"
-                  subtitle="Acompanhamento"
+            {/* Conteúdo posicionado sobre o overlay */}
+            <div className="relative z-10">
+              {/* Logo Lorena Jacob */}
+              <div className="flex justify-center mb-10">
+                <Image 
+                  src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
+                  alt="Lorena Jacob - Terapeuta Infantil"
+                  width={240}
+                  height={70}
+                  className="object-contain"
                 />
               </div>
               
-              {/* Orientação para Pais e Cuidadores */}
-              <div className="aspect-[4/3] md:aspect-square">
-                <PortfolioCard 
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//orientacao-para-pais.webp"
-                  title="Pais e Cuidadores"
-                  subtitle="Orientação para"
-                />
+              {/* Título da seção */}
+              <div className="text-center mb-16">
+                <h3 className="text-[#FFF8E0] text-4xl md:text-5xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
+                <h2 className="text-white text-5xl md:text-6xl lg:text-7xl font-normal -mt-3" style={{ fontFamily: 'Mogila Display, sans-serif' }}>Portfólio</h2>
               </div>
               
-              {/* Implementação e Treinamento com PECS */}
-              <div className="aspect-[4/3] md:aspect-square">
-                <PortfolioCard 
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
-                  title="Treinamento com PECS"
-                  subtitle="Implementação e"
-                />
-              </div>
-              
-              {/* Atividades Recreativas Terapêuticas */}
-              <div className="aspect-[4/3] md:aspect-square">
-                <PortfolioCard 
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
-                  title="Terapêuticas"
-                  subtitle="Atividades Recreativas"
-                />
+              {/* Grid de cards de portfólio */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+                {/* Acompanhamento Personalizado */}
+                <div className="aspect-[4/3] md:aspect-square">
+                  <PortfolioCard 
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
+                    title="Personalizado"
+                    subtitle="Acompanhamento"
+                  />
+                </div>
+                
+                {/* Orientação para Pais e Cuidadores */}
+                <div className="aspect-[4/3] md:aspect-square">
+                  <PortfolioCard 
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//orientacao-para-pais.webp"
+                    title="Pais e Cuidadores"
+                    subtitle="Orientação para"
+                  />
+                </div>
+                
+                {/* Implementação e Treinamento com PECS */}
+                <div className="aspect-[4/3] md:aspect-square">
+                  <PortfolioCard 
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
+                    title="Treinamento com PECS"
+                    subtitle="Implementação e"
+                  />
+                </div>
+                
+                {/* Atividades Recreativas Terapêuticas */}
+                <div className="aspect-[4/3] md:aspect-square">
+                  <PortfolioCard 
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
+                    title="Terapêuticas"
+                    subtitle="Atividades Recreativas"
+                  />
+                </div>
               </div>
             </div>
           </div>
