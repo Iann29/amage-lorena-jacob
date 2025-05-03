@@ -156,6 +156,84 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </div>
+
+      {/* Seção de Comentários */}
+      <div className={styles.commentsSection}>
+        <div className={styles.commentHeader}>
+          <div className={styles.commentTitle}>
+            <Image 
+              src="/assets/quercomentar.png"
+              alt="Ícone de comentário"
+              width={42}
+              height={42}
+              className="mr-3"
+            />
+            Quer comentar?
+          </div>
+          <div className={styles.commentSubtitle}>
+            Entre com sua conta Google ou Conecte-se
+          </div>
+          <div className={styles.commentButtons}>
+            <button className={styles.googleButton}>
+              <Image 
+                src="/assets/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+                className="mr-2"
+              />
+              Entrar com a Conta Google
+            </button>
+            <button className={styles.accountButton}>
+              <Image 
+                src="/assets/perfilIcon.png"
+                alt="Perfil"
+                width={20}
+                height={20}
+                className="mr-2"
+              />
+              Já tenho conta
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.commentsList}>
+          <h3 className="text-xl font-bold text-[#9772FB] mb-6">Comentários</h3>
+          
+          {/* Lista de comentários mockados */}
+          {comments.map((comment) => (
+            <div key={comment.id} className={styles.commentItem}>
+              <Image 
+                src={comment.user.avatar_url || '/assets/avatar-default.png'}
+                alt={comment.user.nome}
+                width={50}
+                height={50}
+                className={styles.commentAvatar}
+              />
+              <div className={styles.commentContent}>
+                <div className={styles.commentAuthor}>{comment.user.nome}</div>
+                <div className={styles.commentDate}>
+                  Comentado em: {new Date(comment.created_at).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  })}
+                </div>
+                <div className={styles.commentText}>{comment.conteudo}</div>
+                <div className={styles.commentActions}>
+                  <button className={styles.respondButton}>Responder</button>
+                  <button className={styles.likeButton}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                    </svg>
+                    <span className="ml-1">{comment.like_count || 0}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }

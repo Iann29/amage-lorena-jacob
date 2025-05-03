@@ -399,3 +399,5 @@ export function getPopularPosts(limit: number = 5) {
     .sort((a, b) => b.visualizacoes - a.visualizacoes)
     .slice(0, limit);
 }
+
+// Comentários já estão definidos acima como blogComments
