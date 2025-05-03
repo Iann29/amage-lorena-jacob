@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect } from "react";
 import ProfileCard from "@/components/ui/ProfileCard";
+import InfoCard from "@/components/ui/InfoCard";
 
 export default function SobrePage() {
   // Garantir que as fontes Fredoka e Poppins estejam carregadas
@@ -165,16 +166,73 @@ export default function SobrePage() {
         </div>
       </div>
       
-      {/* Continuação do background colorido após a seção #FFFDF2 */}
-      <div className="flex flex-col md:flex-row w-full">
-        {/* Continuação do lado esquerdo - Fundo azul */}
-        <div className="w-full md:w-1/2 bg-[#ADD4E4] relative overflow-hidden min-h-[50vh] md:min-h-[70vh]">
-          {/* Espaço reservado para conteúdo futuro */}
+      {/* Seção de cards informativos com background dividido */}
+      <div className="flex flex-col md:flex-row w-full py-12 md:py-20 relative">
+        {/* Fundo dividido */}
+        <div className="absolute inset-0 flex w-full h-full">
+          <div className="w-1/2 bg-[#ADD4E4]"></div>
+          <div className="w-1/2 bg-white"></div>
         </div>
         
-        {/* Continuação do lado direito - Fundo branco */}
-        <div className="w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16 min-h-[50vh] md:min-h-[70vh]">
-          {/* Espaço reservado para conteúdo futuro */}
+        {/* Container para os cards */}
+        <div className="container mx-auto px-4 md:px-8 lg:px-12 z-10 relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+            {/* Card 1 - O QUE FAÇO */}
+            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+              <InfoCard
+                iconSrc="/assets/oquefaco.png"
+                title="O QUE FAÇO"
+                bgColor="yellow"
+                content={
+                  <>
+                    <p>Há mais de 10 anos, <strong>ajudo famílias de crianças autistas a construírem um desenvolvimento mais leve, funcional e efetivo</strong>, com atendimentos personalizados online e presenciais em Londres.</p>
+                  </>
+                }
+              />
+            </div>
+            
+            {/* Card 2 - COMO CHEGUEI ATÉ AQUI */}
+            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+              <InfoCard
+                iconSrc="/assets/comocheguei.png"
+                title="COMO CHEGUEI ATÉ AQUI"
+                bgColor="brown"
+                content={
+                  <>
+                    <p>Sou mãe de duas crianças autistas, e essa vivência, somada à minha formação em Terapia Ocupacional e especializações na área, me deu uma visão completa — técnica, prática e emocional — sobre o desenvolvimento infantil.</p>
+                  </>
+                }
+              />
+            </div>
+            
+            {/* Card 3 - ONDE AINDA QUERO CHEGAR */}
+            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+              <InfoCard
+                iconSrc="/assets/ondeainda.png"
+                title="ONDE AINDA QUERO CHEGAR"
+                bgColor="yellow"
+                content={
+                  <>
+                    <p>Quero <strong>ampliar meu alcance</strong>, levando conhecimento e <strong>estratégias práticas para mais famílias</strong>, fortalecendo o cuidado personalizado e tornando o desenvolvimento infantil mais <strong>acessível e significativo</strong>.</p>
+                  </>
+                }
+              />
+            </div>
+            
+            {/* Card 4 - MEUS SERVIÇOS */}
+            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+              <InfoCard
+                iconSrc="/assets/meusservicos.png"
+                title="MEUS SERVIÇOS"
+                bgColor="brown"
+                content={
+                  <>
+                    <p>Experiência, conhecimento técnico e empatia, com escuta ativa e estratégias adaptadas à realidade de cada família. Também realizo palestras, consultorias, adaptação de ambientes e produzo <strong>materiais personalizados, como rotinas visuais e PECs</strong>.</p>
+                  </>
+                }
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
