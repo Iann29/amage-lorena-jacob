@@ -2,8 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getCommentsByPostId, getPopularPosts, blogCategorias } from '@/lib/mockData';
 import LikeButton from '@/components/blog/LikeButton';
-import CommentSection from '@/components/blog/CommentSection';
-import BlogSidebar from '@/components/blog/BlogSidebar';
 import styles from './post.module.css';
 
 // Metadados dinâmicos baseados no slug
@@ -64,17 +62,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFFF9] bg-opacity-90 relative">
-      {/* Background com mask */}
-      <div className="absolute inset-0 -z-10 opacity-10">
-        <Image 
-          src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//backgroundcadastro.webp"
-          alt="Background" 
-          fill
-          style={{ objectFit: 'cover' }}
-          priority
-        />
-      </div>
+    <main className="min-h-screen bg-[#FFFFFF] relative">
       
       {/* Header do Post */}
       <header className="w-full relative">
