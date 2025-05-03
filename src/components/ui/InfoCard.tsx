@@ -32,7 +32,7 @@ export default function InfoCard({
     return bgColor === "brown" ? "text-white" : "text-black";
   };
 
-  // Ícone conforme cor do card
+  // Obter a cor do ícone interno (não mais usado)
   const getIconBgColor = () => {
     return bgColor === "yellow" ? "bg-white" : "bg-[#8C785B]";
   };
@@ -42,20 +42,22 @@ export default function InfoCard({
       className={`flex flex-col h-full relative ${className}`}
     >
       {/* Card com borda branca */}
-      <div className="bg-white p-1.5 rounded-3xl shadow-lg w-full h-full">
+      <div className="bg-white p-1.5 rounded-[32px] shadow-lg w-full h-full">
         <div 
-          className={`flex flex-col rounded-2xl overflow-hidden ${getBgColor()} ${getTextColor()} h-full`}
+          className={`flex flex-col rounded-[28px] overflow-hidden ${getBgColor()} ${getTextColor()} h-full`}
         >
-          {/* Ícone no topo */}
-          <div className="absolute -top-8 left-[50%] transform -translate-x-1/2 z-10">
-            <div className={`p-3 rounded-xl ${getIconBgColor()} border-4 border-white shadow-md flex items-center justify-center`} style={{width: '90px', height: '90px'}}>
-              <Image 
-                src={iconSrc} 
-                alt={title} 
-                width={55}
-                height={55}
-                className="object-contain"
-              />
+          {/* Ícone no topo com fundo branco para todos os cards */}
+          <div className="absolute -top-10 left-[50%] transform -translate-x-1/2 z-10">
+            <div className={`p-2 rounded-[20px] ${getBgColor()} shadow-md flex items-center justify-center`} style={{width: '90px', height: '90px'}}>
+              <div className="bg-white w-[80%] h-[80%] rounded-[16px] flex items-center justify-center">
+                <Image 
+                  src={iconSrc} 
+                  alt={title} 
+                  width={55}
+                  height={55}
+                  className="object-contain"
+                />
+              </div>
             </div>
           </div>
 

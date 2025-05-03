@@ -176,9 +176,9 @@ export default function SobrePage() {
         
         {/* Container para os cards */}
         <div className="container mx-auto px-4 md:px-8 lg:px-12 z-10 relative">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-14 lg:gap-10 max-w-7xl mx-auto">
             {/* Card 1 - O QUE FAÇO */}
-            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+            <div className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto">
               <InfoCard
                 iconSrc="/assets/oquefaco.png"
                 title="O QUE FAÇO"
@@ -192,7 +192,7 @@ export default function SobrePage() {
             </div>
             
             {/* Card 2 - COMO CHEGUEI ATÉ AQUI */}
-            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+            <div className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto">
               <InfoCard
                 iconSrc="/assets/comocheguei.png"
                 title="COMO CHEGUEI ATÉ AQUI"
@@ -206,7 +206,7 @@ export default function SobrePage() {
             </div>
             
             {/* Card 3 - ONDE AINDA QUERO CHEGAR */}
-            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+            <div className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto">
               <InfoCard
                 iconSrc="/assets/ondeainda.png"
                 title="ONDE AINDA QUERO CHEGAR"
@@ -220,7 +220,7 @@ export default function SobrePage() {
             </div>
             
             {/* Card 4 - MEUS SERVIÇOS */}
-            <div className="h-full aspect-[3/3.6] md:aspect-auto">
+            <div className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto">
               <InfoCard
                 iconSrc="/assets/meusservicos.png"
                 title="MEUS SERVIÇOS"
