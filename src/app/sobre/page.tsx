@@ -205,13 +205,13 @@ export default function SobrePage() {
       >
         <div className="mb-6">
           <p>
-            <span className="text-stone-700 text-2xl md:text-3xl font-semibold font-['Fredoka'] leading-normal mr-2">
+            <span className="text-[#5B472B] text-2xl md:text-3xl font-semibold font-['Fredoka'] leading-normal mr-2">
               Eu sou
             </span>
-            <span className="text-stone-700 text-base md:text-lg font-semibold font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-semibold font-['Poppins'] leading-normal">
               Lorena Jacob,
             </span>
-            <span className="text-stone-700 text-base md:text-lg font-normal font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-normal font-['Poppins'] leading-normal">
               {" "}
               Terapeuta Infantil, especialista em autismo e comorbidades.
             </span>
@@ -224,18 +224,18 @@ export default function SobrePage() {
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <div>
-            <span className="text-black text-base md:text-lg font-bold font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-bold font-['Poppins'] leading-normal">
               Há mais de 10 anos atuo com crianças autistas,
             </span>
-            <span className="text-black text-base md:text-lg font-normal font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-normal font-['Poppins'] leading-normal">
               {" "}
               ajudando famílias a construírem caminhos mais leves, funcionais e
               efetivos no desenvolvimento infantil.{" "}
             </span>
-            <span className="text-black text-base md:text-lg font-semibold font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-semibold font-['Poppins'] leading-normal">
               Estou me formando como Terapeuta Ocupacional
             </span>
-            <span className="text-black text-base md:text-lg font-normal font-['Poppins'] leading-normal">
+            <span className="text-[#5B472B] text-base md:text-lg font-normal font-['Poppins'] leading-normal">
               {" "}
               e possuo diversas especializações na área, o que me permite unir
               técnica, experiência e sensibilidade em cada atendimento.
