@@ -38,7 +38,7 @@ const PortfolioCard = ({
       {/* Overlay removido conforme solicitado */}
       
       {/* Conteúdo */}
-      <div className="relative z-10 h-full flex flex-col justify-end p-6">
+      <div className="relative z-10 h-full flex flex-col justify-end items-center text-center px-6 pt-6 pb-3">
         {subtitle && (
           <h3 className="text-white text-lg md:text-xl font-normal mb-1" style={{ fontFamily: '"Poppins", sans-serif' }}>
             {subtitle}
