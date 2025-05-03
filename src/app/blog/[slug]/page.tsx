@@ -88,11 +88,11 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             </div>
           )}
           
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-8">
-            <div className="container mx-auto max-w-4xl">
-              <h1 className={styles.postTitle}>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-center items-center">
+            <div className="container mx-auto max-w-4xl text-center">
+              <h2 className={styles.postTitle}>
                 {post.titulo}
-              </h1>
+              </h2>
               
               {post.resumo && (
                 <p className={styles.postSubtitle}>
@@ -100,41 +100,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
                 </p>
               )}
               
-              <div className="flex flex-wrap items-center text-white gap-x-6 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300">
-                    {post.author.avatar_url ? (
-                      <Image 
-                        src={post.author.avatar_url} 
-                        alt={post.author.nome} 
-                        width={32} 
-                        height={32} 
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-600 text-xs">
-                        {post.author.nome.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <span>por {post.author.nome}</span>
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <span>{formatDate(post.created_at)}</span>
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <span>{post.visualizacoes} visualizações</span>
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <LikeButton 
-                    itemId={post.id} 
-                    itemType="post" 
-                    initialLikeCount={post.like_count} 
-                  />
-                </div>
-              </div>
+              {/* Espaço reservado para futuros elementos */}
             </div>
           </div>
         </div>

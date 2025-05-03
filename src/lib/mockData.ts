@@ -28,7 +28,7 @@ export const blogPosts = [
     id: 1,
     titulo: 'A importância de dizer não',
     slug: 'a-importancia-de-dizer-nao',
-    resumo: 'Educar com amor não é permitir tudo. Dizer "não" com empatia é essencial para formar crianças com limites saudáveis e ensinar como fazer isso de forma positiva e respeitosa.',
+    resumo: 'Educação positiva não é permitir tudo',
     conteudo: `<p>A busca por criar um ambiente amoroso para nossos filhos muitas vezes é confundida com permissividade. Chamamos isso de educação positiva. No entanto, muitas vezes ela é mal interpretada como permissividade – como se educar com respeito significasse permitir tudo. Mas a verdade é que educar de forma positiva não exclui o "não". Pelo contrário, saber colocá-lo é fundamental para o desenvolvimento saudável da criança.</p>
 
     <h2>O papel do "não" no desenvolvimento infantil</h2>
