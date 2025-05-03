@@ -47,14 +47,14 @@ export default function InfoCard({
           className={`flex flex-col rounded-[28px] overflow-hidden ${getBgColor()} ${getTextColor()} h-full`}
         >
           {/* Ícone no topo com fundo branco para todos os cards */}
-          <div className="absolute -top-10 left-[50%] transform -translate-x-1/2 z-10">
-            <div className={`p-2 rounded-[20px] ${getBgColor()} shadow-lg flex items-center justify-center`} style={{width: '90px', height: '90px', boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)'}}>
-              <div className="bg-white w-[80%] h-[80%] rounded-[16px] flex items-center justify-center">
+          <div className="absolute -top-14 left-[50%] transform -translate-x-1/2 z-10">
+            <div className={`p-3 rounded-[24px] ${getBgColor()} shadow-lg flex items-center justify-center`} style={{width: '110px', height: '110px', boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)'}}>
+              <div className="bg-white w-[85%] h-[85%] rounded-[20px] flex items-center justify-center">
                 <Image 
                   src={iconSrc} 
                   alt={title} 
-                  width={55}
-                  height={55}
+                  width={75}
+                  height={65}
                   className="object-contain"
                 />
               </div>

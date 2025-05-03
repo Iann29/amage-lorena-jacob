@@ -170,8 +170,8 @@ export default function SobrePage() {
       <div className="flex flex-col md:flex-row w-full py-12 md:py-20 relative">
         {/* Fundo dividido */}
         <div className="absolute inset-0 flex w-full h-full">
-          <div className="w-1/2 bg-[#ADD4E4]"></div>
-          <div className="w-1/2 bg-white"></div>
+          <div className="w-full md:w-1/2 bg-[#ADD4E4]"></div>
+          <div className="w-full md:w-3/5 bg-white" style={{ position: 'relative', zIndex: 5 }}></div>
         </div>
         
         {/* Container para os cards */}
