@@ -27,7 +27,14 @@ export default function PostPage({ params }: { params: { slug: string } }) {
   // Em uma implementação real, esses dados viriam do Supabase
   const post = getPostBySlug(params.slug);
   const comments = post ? getCommentsByPostId(post.id) : [];
-  const postsPopulares = getPopularPosts(3);
+  const postsPopulares = getPopularPosts();
+  
+  // Cores padrão caso o post não tenha definido um tema personalizado
+  const temaPost = post?.tema || {
+    corTitulo: '#715B3F',
+    corSubtitulo: '#8A7559',
+    corFundo: '#FFFFFF'
+  };
   
   // Se o post não existir, mostrar mensagem de erro
   if (!post) {
@@ -113,11 +120,23 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <span>por {post.author.nome}</span>
           </div>
           
-          {/* Título Principal do Post */}
-          <h1 className={styles.contentTitle}>{post.titulo}</h1>
+          {/* Título Principal do Post com cor personalizada */}
+          <h1 
+            className={styles.contentTitle}
+            style={{ color: temaPost.corTitulo }}
+          >
+            {post.titulo}
+          </h1>
           
-          {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}
-          <div className={styles.postContent}>
+          {/* Conteúdo do Post com estilos aplicados pelo CSS Module e cores personalizadas */}
+          <div 
+            className={styles.postContent}
+            style={{ 
+              '--heading-color': temaPost.corTitulo,
+              '--subheading-color': temaPost.corSubtitulo,
+              '--background-color': temaPost.corFundo,
+            } as React.CSSProperties}
+          >
             <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
           </div>
           

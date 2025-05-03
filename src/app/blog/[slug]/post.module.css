@@ -88,7 +88,7 @@
   font-family: var(--font-museo-sans);
   font-weight: 700;
   font-size: 2.2rem;
-  color: #715B3F;
+  color: var(--heading-color, #715B3F);
   margin: 2rem 0 1.2rem;
   line-height: 1.3;
 }
@@ -97,7 +97,7 @@
   font-family: var(--font-museo-sans);
   font-weight: 600;
   font-size: 1.8rem;
-  color: #715B3F;
+  color: var(--heading-color, #715B3F);
   margin: 1.8rem 0 1rem;
   line-height: 1.3;
 }
@@ -106,7 +106,7 @@
   font-family: var(--font-museo-sans);
   font-weight: 600;
   font-size: 1.5rem;
-  color: #715B3F;
+  color: var(--subheading-color, #8A7559);
   margin: 1.5rem 0 0.8rem;
   line-height: 1.3;
 }
@@ -115,7 +115,7 @@
   font-family: var(--font-museo-sans);
   font-weight: 600;
   font-size: 1.25rem;
-  color: #715B3F;
+  color: var(--subheading-color, #8A7559);
   margin: 1.5rem 0 0.8rem;
   line-height: 1.3;
 }
