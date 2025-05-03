@@ -287,8 +287,8 @@ export default function SobrePage() {
               className="absolute inset-0 opacity-100"
               style={{
                 backgroundImage: `url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')`,
-                backgroundSize: 'contain',
-                backgroundPosition: 'center',
+                backgroundSize: '100% 100%',
+                backgroundPosition: 'center center',
                 backgroundRepeat: 'no-repeat',
                 backgroundBlendMode: 'normal',
                 filter: 'brightness(1.4) contrast(1.2)',
