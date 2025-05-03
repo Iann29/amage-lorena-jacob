@@ -164,9 +164,9 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <Image 
               src="/assets/quercomentar.png"
               alt="Ícone de comentário"
-              width={42}
-              height={42}
-              className="mr-3"
+              width={54}
+              height={54}
+              className="mr-2"
             />
             Quer comentar?
           </div>
@@ -178,8 +178,8 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               <Image 
                 src="/assets/google.svg"
                 alt="Google"
-                width={20}
-                height={20}
+                width={24}
+                height={24}
                 className="mr-2"
               />
               Entrar com a Conta Google
@@ -188,9 +188,9 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               <Image 
                 src="/assets/perfilIcon.png"
                 alt="Perfil"
-                width={20}
-                height={20}
-                className="mr-2"
+                width={32}
+                height={32}
+                className="mr-3"
               />
               Já tenho conta
             </button>

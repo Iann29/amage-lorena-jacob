@@ -196,21 +196,21 @@
 /* Estilos para a seção de comentários */
 .commentsSection {
   width: 100%;
-  max-width: 800px;
-  margin: 3rem auto 0;
-  padding: 2rem 0;
+  margin: 3rem 0 0;
+  padding: 0;
 }
 
 .commentHeader {
   background-color: #6FB1CE;
-  border-radius: 8px 8px 0 0;
-  padding: 1.5rem;
+  border-radius: 0;
+  padding: 3rem 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   color: white;
   text-align: center;
+  width: 100%;
 }
 
 .commentTitle {
@@ -218,9 +218,9 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-museo-sans);
-  font-weight: 700;
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-weight: 600;
+  font-size: 3.2rem;
+  margin-bottom: 0.5rem;
 }
 
 .commentSubtitle {
@@ -231,22 +231,27 @@
 
 .commentButtons {
   display: flex;
-  justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .googleButton {
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.8rem;
   background-color: white;
+  color: #333;
   border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
+  border-radius: 30px;
   font-family: var(--font-museo-sans);
+  font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 280px;
 }
 
 .googleButton:hover {
@@ -256,15 +261,18 @@
 .accountButton {
   display: flex;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid white;
-  color: white;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
+  justify-content: center;
+  padding: 0.9rem 1.8rem;
+  background-color: #FFFEEC;
+  color: #378DB2;
+  border: none;
+  border-radius: 12px;
   font-family: var(--font-museo-sans);
-  font-weight: 500;
+  font-size: 1.6rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 280px;
 }
 
 .accountButton:hover {
@@ -272,9 +280,12 @@
 }
 
 .commentsList {
-  background-color: white;
-  border-radius: 0 0 8px 8px;
+  background-color: #FFFFFF;
+  border-radius: 0;
   padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .commentItem {
