@@ -303,8 +303,14 @@ export default function SobrePage() {
             
             {/* Conteúdo posicionado sobre o overlay */}
             <div className="relative z-10">
+              {/* Título da seção */}
+              <div className="text-center mb-6">
+                <h3 className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
+                <h2 className="text-[#FFFBE2] text-6xl md:text-7xl lg:text-8xl italic font-normal -mt-3" style={{ fontFamily: 'var(--font-mogila)', fontWeight: 400 }}>Portfólio</h2>
+              </div>
+              
               {/* Logo Lorena Jacob */}
-              <div className="flex justify-center mb-10">
+              <div className="flex justify-center mb-16">
                 <Image 
                   src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
                   alt="Lorena Jacob - Terapeuta Infantil"
@@ -312,12 +318,6 @@ export default function SobrePage() {
                   height={70}
                   className="object-contain"
                 />
-              </div>
-              
-              {/* Título da seção */}
-              <div className="text-center mb-16">
-                <h3 className="text-[#FFF8E0] text-4xl md:text-5xl font-normal" style={{ fontFamily: '"Ms Madi", cursive' }}>Meu</h3>
-                <h2 className="text-white text-5xl md:text-6xl lg:text-7xl font-normal -mt-3" style={{ fontFamily: 'Mogila Display, sans-serif' }}>Portfólio</h2>
               </div>
               
               {/* Grid de cards de portfólio */}
