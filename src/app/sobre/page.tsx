@@ -6,39 +6,128 @@ import ProfileCard from "@/components/ui/ProfileCard";
 import InfoCard from "@/components/ui/InfoCard";
 import PortfolioCard from "@/components/ui/PortfolioCard";
 
+// Configurações de Fontes
+const FONT_URLS = {
+  msMadi: "https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap",
+  fredokaOne: "https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap",
+  fredoka: "https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap",
+  poppins: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap",
+};
+
+const MOGILA_FONT_STYLE = `
+  @font-face {
+    font-family: 'Mogila Display';
+    src: url('/src/assets/fonts/Mogila Bold.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+  }`;
+
+// Dados do Perfil
+const PROFILE_DATA = {
+  imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//lorenaperfil1.png",
+  firstName: "Lorena",
+  lastName: "Jacob",
+  title: "TERAPEUTA INFANTIL",
+  socialLinks: {
+    facebook: "https://facebook.com/lorenajacob.st",
+    instagram: "https://instagram.com/lorenajacob.st",
+    handle: "@lorenajacob.st",
+  },
+};
+
+// Estilos Inline
+const STYLES = {
+  desktopProfileCard: {
+    position: "absolute" as const,
+    left: "50%",
+    transform: "translateX(-71%)",
+    top: "220px",
+    zIndex: 10,
+    pointerEvents: "auto" as const,
+  },
+  desktopTextSection: {
+    top: "330px",
+    left: "64%", 
+    zIndex: 10, 
+    maxWidth: "25%",
+  },
+  verticalText: {
+    transformOrigin: "center",
+    zIndex: 0,
+  },
+  verticalLorena: {
+    fontFamily: '"Fredoka One", sans-serif',
+    fontSize: "12rem",
+    lineHeight: "0.9",
+  },
+  verticalJacob: {
+    fontFamily: '"Fredoka", sans-serif',
+    fontWeight: 500,
+    fontSize: "14.5rem",
+    lineHeight: "0.8",
+  },
+  rightSection: {
+    position: "relative" as const,
+    zIndex: 5,
+  },
+  familyPhoto: {
+    zIndex: 2,
+    maxWidth: "640px",
+    width: "100%",
+  },
+  visionTitle: {
+    fontFamily: '"Fredoka", sans-serif',
+  },
+  poppinsText: {
+    fontFamily: '"Poppins", sans-serif',
+  },
+  portfolioBackground: {
+    backgroundImage: "url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')",
+    backgroundSize: "100% 100%",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    filter: "brightness(1.4) contrast(1.2)",
+    WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
+    maskImage: "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
+    borderTopLeftRadius: "500px",
+    borderTopRightRadius: "500px",
+  },
+  portfolioMyText: {
+    fontFamily: '"Ms Madi", cursive',
+  },
+  portfolioTitle: {
+    fontFamily: "var(--font-mogila)",
+  },
+};
+
 export default function SobrePage() {
-  /* --------------------------------------------------------------
-     1. CARREGAR FONTES (mantido do seu código)
-  -------------------------------------------------------------- */
+  // Carregar Fontes
   useEffect(() => {
     document.body.classList.add("font-poppins");
 
+    // Ms Madi Font
     const linkMsMadi = document.createElement("link");
-    linkMsMadi.href =
-      "https://fonts.googleapis.com/css2?family=Ms+Madi&display=swap";
+    linkMsMadi.href = FONT_URLS.msMadi;
     linkMsMadi.rel = "stylesheet";
     document.head.appendChild(linkMsMadi);
 
+    // Mogila Font
     const styleMogila = document.createElement("style");
-    styleMogila.textContent = `
-      @font-face {
-        font-family: 'Mogila Display';
-        src: url('/src/assets/fonts/Mogila Bold.otf') format('opentype');
-        font-weight: 400;
-        font-style: normal;
-      }`;
+    styleMogila.textContent = MOGILA_FONT_STYLE;
     document.head.appendChild(styleMogila);
 
+    // Google Fonts
     const gFonts = [
-      "https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap",
-      "https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap",
-      "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap",
+      FONT_URLS.fredokaOne,
+      FONT_URLS.fredoka,
+      FONT_URLS.poppins,
     ];
+    
     gFonts.forEach((url) => {
-      const l = document.createElement("link");
-      l.href = url;
-      l.rel = "stylesheet";
-      document.head.appendChild(l);
+      const link = document.createElement("link");
+      link.href = url;
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
     });
 
     return () => {
@@ -46,43 +135,22 @@ export default function SobrePage() {
     };
   }, []);
 
-  /* --------------------------------------------------------------
-     2. PÁGINA
-  -------------------------------------------------------------- */
   return (
     <div className="w-full">
-      {/* ==========================================================
-         HERO / TÍTULO E CARD DE PERFIL
-      ========================================================== */}
-      {/* Card posicionado sobre a área azul (desktop) */}
-      <div
+      {/* HERO / TÍTULO E CARD DE PERFIL */}
+      
+      {/* Card Desktop */}
+      <div 
         className="hidden md:block"
-        style={{
-          position: "absolute",
-          left: "50%",
-          transform: "translateX(-71%)",
-          top: "220px",
-          zIndex: 10,
-          pointerEvents: "auto",
-        }}
+        style={STYLES.desktopProfileCard}
       >
-        <ProfileCard
-          imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//lorenaperfil1.png"
-          firstName="Lorena"
-          lastName="Jacob"
-          title="TERAPEUTA INFANTIL"
-          socialLinks={{
-            facebook: "https://facebook.com/lorenajacob.st",
-            instagram: "https://instagram.com/lorenajacob.st",
-            handle: "@lorenajacob.st",
-          }}
-        />
+        <ProfileCard {...PROFILE_DATA} />
       </div>
 
-      {/* Texto à direita do card (desktop) */}
+      {/* Texto Desktop */}
       <div
         className="hidden md:block absolute"
-        style={{ top: "330px", left: "64%", zIndex: 10, maxWidth: "25%" }}
+        style={STYLES.desktopTextSection}
       >
         <div className="mb-6">
           <p>
@@ -121,80 +189,56 @@ export default function SobrePage() {
         </div>
       </div>
 
-      {/* ----------------------------------------------------------
-         LAYOUT DE FUNDO: DUAS COLUNAS (AZUL / BRANCO)
-      ---------------------------------------------------------- */}
+      {/* LAYOUT DE FUNDO: DUAS COLUNAS */}
       <div className="flex flex-col md:flex-row w-full">
-        {/* lado esquerdo – azul */}
+        {/* Lado Esquerdo - Azul */}
         <div className="w-full md:w-1/2 bg-[#ADD4E4] relative overflow-hidden">
-          {/* texto vertical “Lorena Jacob” (desktop) */}
+          {/* Texto Vertical Desktop */}
           <div
             className="hidden md:block absolute -left-40 top-65 -rotate-90 select-none"
-            style={{ transformOrigin: "center", zIndex: 0 }}
+            style={STYLES.verticalText}
           >
             <div className="flex flex-col items-center space-y-0">
               <span
                 className="tracking-wide text-[#C0E5F4]"
-                style={{
-                  fontFamily: '"Fredoka One", sans-serif',
-                  fontSize: "12rem",
-                  lineHeight: "0.9",
-                }}
+                style={STYLES.verticalLorena}
               >
                 Lorena
               </span>
               <span
                 className="tracking-wide text-[#9CCDE1] -mt-16"
-                style={{
-                  fontFamily: '"Fredoka", sans-serif',
-                  fontWeight: 500,
-                  fontSize: "14.5rem",
-                  lineHeight: "0.8",
-                }}
+                style={STYLES.verticalJacob}
               >
                 Jacob
               </span>
             </div>
           </div>
 
-          {/* card de perfil (mobile) */}
+          {/* Card Mobile */}
           <div className="relative mx-auto pt-12 pb-8 block md:hidden">
             <div className="mx-4">
-              <ProfileCard
-                imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//lorenaperfil1.png"
-                firstName="Lorena"
-                lastName="Jacob"
-                title="TERAPEUTA INFANTIL"
-                socialLinks={{
-                  facebook: "https://facebook.com/lorenajacob.st",
-                  instagram: "https://instagram.com/lorenajacob.st",
-                  handle: "@lorenajacob.st",
-                }}
-              />
+              <ProfileCard {...PROFILE_DATA} />
             </div>
           </div>
 
-          {/* altura mínima da seção */}
           <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]" />
         </div>
 
-        {/* lado direito – branco */}
+        {/* Lado Direito - Branco */}
         <div
           className="w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16"
-          style={{ position: "relative", zIndex: 5 }}
+          style={STYLES.rightSection}
         >
           <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]" />
         </div>
       </div>
 
-      {/* ----------------------------------------------------------
-         SEÇÃO “A VISÃO DE MÃE”
-      ---------------------------------------------------------- */}
+      {/* SEÇÃO "A VISÃO DE MÃE" */}
       <div className="w-full bg-[#FFFDF2] py-5 px-5 md:py-10 md:px-6 relative">
-        {/* foto “vazando” */}
+        {/* Foto Vazando */}
         <div
           className="absolute left-[-80px] md:left-[0%] lg:left-[5%] top-[-70px] md:top-[-90px] rotate-[-5deg]"
-          style={{ zIndex: 2, maxWidth: "640px", width: "100%" }}
+          style={STYLES.familyPhoto}
         >
           <Image
             src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//familia.png"
@@ -205,7 +249,7 @@ export default function SobrePage() {
           />
         </div>
 
-        {/* seta */}
+        {/* Seta */}
         <div className="hidden md:block absolute left-[48%] top-[80%]">
           <Image
             src="/assets/arrow.png"
@@ -217,22 +261,22 @@ export default function SobrePage() {
 
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between">
-            {/* placeholder invisível p/ alinhar */}
+            {/* Placeholder */}
             <div className="w-full md:w-1/2 relative mb-12 md:mb-0 opacity-0">
               <div className="h-[300px] md:h-[400px]" />
             </div>
 
-            {/* texto */}
+            {/* Texto */}
             <div className="w-full md:w-2/5 pl-0 md:pl-16 lg:pl-24 mr-0 md:mr-52">
               <h2
                 className="text-[#1CADD9] text-5xl md:text-6xl font-bold mb-4"
-                style={{ fontFamily: '"Fredoka", sans-serif' }}
+                style={STYLES.visionTitle}
               >
                 A visão de mãe
               </h2>
               <p
                 className="text-black text-base mb-3"
-                style={{ fontFamily: '"Poppins", sans-serif' }}
+                style={STYLES.poppinsText}
               >
                 Sou mãe de duas crianças autistas, e essa vivência me permite
                 enxergar o desenvolvimento infantil sob uma perspectiva completa
@@ -240,9 +284,11 @@ export default function SobrePage() {
               </p>
               <p
                 className="text-black text-base mb-2"
-                style={{ fontFamily: '"Poppins", sans-serif' }}
+                style={STYLES.poppinsText}
               >
-                <span className="font-bold">Eu sei, na prática, o que funciona, o que precisa ser</span>
+                <span className="font-bold">
+                  Eu sei, na prática, o que funciona, o que precisa ser
+                </span>
                 <br />
                 <span className="font-bold">ajustado</span> e como conduzir cada família com empatia,
                 escuta e conhecimento.
@@ -252,9 +298,7 @@ export default function SobrePage() {
         </div>
       </div>
 
-      {/* ----------------------------------------------------------
-         ESPAÇADOR COM BACKGROUND DIVIDIDO
-      ---------------------------------------------------------- */}
+      {/* ESPAÇADOR COM BACKGROUND DIVIDIDO */}
       <div className="flex flex-col md:flex-row w-full relative h-32 md:h-48 lg:h-64">
         <div className="absolute inset-0 flex w-full h-full">
           <div className="w-full md:w-1/2 bg-[#ADD4E4]" />
@@ -262,9 +306,7 @@ export default function SobrePage() {
         </div>
       </div>
 
-      {/* ----------------------------------------------------------
-         SEÇÃO DE CARDS INFORMATIVOS
-      ---------------------------------------------------------- */}
+      {/* SEÇÃO DE CARDS INFORMATIVOS */}
       <div className="flex flex-col md:flex-row w-full py-12 md:py-20 relative">
         <div className="absolute inset-0 flex w-full h-full">
           <div className="w-full md:w-1/2 bg-[#ADD4E4]" />
@@ -340,56 +382,39 @@ export default function SobrePage() {
         </div>
       </div>
 
-      {/* ----------------------------------------------------------
-         SEÇÃO PORTFÓLIO  (grade ajustada)
-      ---------------------------------------------------------- */}
+      {/* SEÇÃO PORTFÓLIO */}
       <div className="flex flex-col md:flex-row w-full py-12 md:py-24 relative">
-        {/* fundo dividido */}
+        {/* Fundo Dividido */}
         <div className="absolute inset-0 flex w-full h-full">
           <div className="w-full md:w-1/2 bg-[#ADD4E4]" />
           <div className="w-full md:w-3/5 bg-white" />
         </div>
 
         <div className="container mx-auto px-4 z-10 relative">
-          <div
-            className="bg-[#9B8669] rounded-3xl py-16 px-6 md:py-20 md:px-12 lg:px-16 pb-24 md:pb-32 lg:pb-40 relative overflow-hidden"
-          >
-            {/* BG decorativo */}
+          <div className="bg-[#9B8669] rounded-3xl py-16 px-6 md:py-20 md:px-12 lg:px-16 pb-24 md:pb-32 lg:pb-40 relative overflow-hidden">
+            {/* Background Decorativo */}
             <div
               className="absolute inset-0 opacity-100 rounded-t-[500px]"
-              style={{
-                backgroundImage:
-                  "url('https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//fundosobremim.webp')",
-                backgroundSize: "100% 100%",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                filter: "brightness(1.4) contrast(1.2)",
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
-                maskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%)",
-                borderTopLeftRadius: "500px",
-                borderTopRightRadius: "500px",
-              }}
+              style={STYLES.portfolioBackground}
             />
 
-            {/* título */}
+            {/* Título */}
             <div className="relative z-10 pt-24 md:pt-32 lg:pt-40 mb-10 text-center">
               <h3
                 className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal absolute left-1/4 md:left-1/3 top-16 md:top-14 lg:top-12"
-                style={{ fontFamily: '"Ms Madi", cursive' }}
+                style={STYLES.portfolioMyText}
               >
                 Meu
               </h3>
               <h2
                 className="text-[#FFFBE2] text-6xl md:text-8xl lg:text-9xl italic"
-                style={{ fontFamily: "var(--font-mogila)" }}
+                style={STYLES.portfolioTitle}
               >
                 Portfólio
               </h2>
             </div>
 
-            {/* logo */}
+            {/* Logo */}
             <div className="relative z-10 flex justify-center mb-16">
               <Image
                 src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
@@ -400,17 +425,17 @@ export default function SobrePage() {
               />
             </div>
 
-            {/* GRADE DE CARDS */}
+            {/* Grade de Cards */}
             <div
               className="
                 relative z-10
                 grid grid-cols-1 md:grid-cols-2
                 gap-6 md:gap-8
                 max-w-5xl mx-auto
-                md:auto-rows-[12rem] lg:auto-rows-[14rem]  /* altura‑base */
+                md:auto-rows-[12rem] lg:auto-rows-[14rem]
               "
             >
-              {/* topo */}
+              {/* Topo */}
               <PortfolioCard
                 className="h-full w-full md:row-span-2"
                 imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
@@ -424,7 +449,7 @@ export default function SobrePage() {
                 title="Pais e Cuidadores"
               />
 
-              {/* base (mais altos) */}
+              {/* Base */}
               <PortfolioCard
                 className="h-full w-full md:row-span-3"
                 imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
