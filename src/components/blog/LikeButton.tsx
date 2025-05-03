@@ -1,7 +1,7 @@
 "use client";
 
-import Image from 'next/image';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface LikeButtonProps {
   itemId: number;
@@ -10,34 +10,47 @@ interface LikeButtonProps {
 }
 
 export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeButtonProps) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(initialLikeCount);
+  const [likes, setLikes] = useState(initialLikeCount);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLike = () => {
-    // Toggle o estado de liked
-    setLiked(!liked);
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-    // Atualiza a contagem de likes
-    setLikeCount(prevCount => (liked ? prevCount - 1 : prevCount + 1));
-    
-    // Aqui eventualmente irá a lógica para salvar o like no backend
-    // Por enquanto apenas mockado
-    console.log(`${liked ? 'Removeu' : 'Adicionou'} like ao ${itemType} com ID: ${itemId}`);
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/likes/${itemType}/${itemId}`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLikes(data.likeCount);
+        setIsLiked(!isLiked);
+      }
+    } catch (error) {
+      console.error('Erro ao curtir:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <button 
+    <button
       onClick={handleLike}
-      className="flex items-center gap-1 focus:outline-none"
-      aria-label={liked ? 'Remover curtida' : 'Curtir'}
+      disabled={isLoading}
+      className="flex items-center gap-1 transition-all hover:scale-110"
     >
-      <Image 
-        src={liked ? '/assets/like.png' : '/assets/likeVazio.png'} 
-        alt={liked ? 'Curtido' : 'Curtir'} 
-        width={20} 
+      <Image
+        src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
+        alt={isLiked ? "Curtido" : "Curtir"}
+        width={20}
         height={20}
+        className="transition-all"
       />
-      <span className="text-sm text-gray-600">{likeCount}</span>
     </button>
   );
 }
