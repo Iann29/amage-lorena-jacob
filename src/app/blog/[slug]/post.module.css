@@ -45,7 +45,7 @@
 
 .postSubtitle {
   text-align: center;
-  font-size: 1.75rem;
+  font-size: 1.35rem;
   color: white;
   max-width: 80%;
   margin-left: auto;
@@ -57,6 +57,7 @@
   font-weight: 500;
   position: relative;
   z-index: 20;
+  letter-spacing: 0.17em;
 }
 
 @media (max-width: 768px) {
