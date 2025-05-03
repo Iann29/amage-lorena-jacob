@@ -74,16 +74,6 @@ export default function BlogFilter({
           </div>
         ))}
       </div>
-      
-      {/* Logo no final do filtro */}
-      <div className={styles.filterLogo}>
-        <Image 
-          src="/logos/logo-lorena-jacob.png" 
-          alt="Lorena Jacob - Terapeuta Infantil" 
-          width={120} 
-          height={40}
-        />
-      </div>
     </div>
   );
 }
