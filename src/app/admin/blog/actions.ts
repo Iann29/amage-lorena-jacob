@@ -21,7 +21,7 @@ interface PostFormData {
 }
 
 async function getAuthenticatedAdmin() {
-  const supabase = createClient(); // Usa o cliente do servidor
+  const supabase = await createClient(); // Usa o cliente do servidor
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
@@ -48,7 +48,7 @@ async function getAuthenticatedAdmin() {
 }
 
 export async function createPost(formData: PostFormData) {
-  const supabase = createClient(); // Usa o cliente do servidor
+  const supabase = await createClient(); // Usa o cliente do servidor
   try {
     const adminUser = await getAuthenticatedAdmin();
     const author_id = adminUser.id;
@@ -94,7 +94,7 @@ export async function createPost(formData: PostFormData) {
 }
 
 export async function updatePost(postId: string, formData: PostFormData) {
-  const supabase = createClient(); // Usa o cliente do servidor
+  const supabase = await createClient(); // Usa o cliente do servidor
   try {
     const adminUser = await getAuthenticatedAdmin();
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
@@ -136,7 +136,7 @@ export async function updatePost(postId: string, formData: PostFormData) {
 }
 
 export async function getPostForEdit(id: string) {
-  const supabase = createClient(); // Usa o cliente do servidor
+  const supabase = await createClient(); // Usa o cliente do servidor
   try {
     await getAuthenticatedAdmin();
     const { data: post, error } = await supabase
@@ -156,7 +156,7 @@ export async function getPostForEdit(id: string) {
 }
 
 export async function getBlogCategories() {
-  const supabase = createClient(); // Usa o cliente do servidor
+  const supabase = await createClient(); // Usa o cliente do servidor
   try {
     const { data, error } = await supabase
       .from('blog_categories')
