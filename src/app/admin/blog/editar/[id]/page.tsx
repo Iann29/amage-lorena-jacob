@@ -1,21 +1,29 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { blogPosts, blogCategorias, getPostBySlug } from '@/lib/mockData';
+import SimpleBlogEditor from '@/components/admin/SimpleBlogEditor';
 
 // Interface para o parâmetro de rota
 interface EditarPostParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
+}
+
+// Interface para parâmetros desempacotados
+interface UnwrappedParams {
+  id: string;
 }
 
 export default function EditarBlogPostPage({ params }: EditarPostParams) {
   const router = useRouter();
-  const postId = parseInt(params.id);
+  const unwrappedParams = use(params) as UnwrappedParams;
+  const postId = parseInt(unwrappedParams.id);
   
   const [formData, setFormData] = useState({
     titulo: '',
@@ -228,24 +236,24 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Editar Post</h1>
+        <h1 className="text-2xl font-bold text-gray-900 bg-white px-4 py-2 rounded-md shadow-sm border border-gray-300">Editar Post</h1>
         <Link
           href="/admin/blog"
-          className="text-gray-600 hover:text-gray-900 font-medium"
+          className="text-purple-600 hover:text-purple-800 font-medium underline"
         >
           Cancelar e voltar
         </Link>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white rounded-lg shadow divide-y divide-gray-200">
+        <div className="bg-white rounded-lg shadow-md divide-y divide-gray-300">
           {/* Informações básicas */}
           <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Informações Básicas</h2>
+            <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Informações Básicas</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               {/* Título */}
               <div className="sm:col-span-4">
-                <label htmlFor="titulo" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="titulo" className="block text-sm font-medium text-gray-800">
                   Título
                 </label>
                 <div className="mt-1">
@@ -255,7 +263,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     id="titulo"
                     value={formData.titulo}
                     onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.titulo ? 'border-red-300' : ''}`}
+                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.titulo ? 'border-red-300' : ''}`}
                   />
                   {errors.titulo && (
                     <p className="mt-1 text-sm text-red-600">{errors.titulo}</p>
@@ -265,7 +273,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
               
               {/* Slug */}
               <div className="sm:col-span-4">
-                <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-800">
                   Slug
                 </label>
                 <div className="mt-1">
@@ -275,20 +283,20 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     id="slug"
                     value={formData.slug}
                     onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.slug ? 'border-red-300' : ''}`}
+                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`}
                   />
                   {errors.slug && (
                     <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-600 font-medium">
                   URL amigável do post (não recomendado alterar após publicação).
                 </p>
               </div>
               
               {/* Resumo */}
               <div className="sm:col-span-6">
-                <label htmlFor="resumo" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="resumo" className="block text-sm font-medium text-gray-800">
                   Resumo
                 </label>
                 <div className="mt-1">
@@ -298,20 +306,20 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     rows={3}
                     value={formData.resumo}
                     onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.resumo ? 'border-red-300' : ''}`}
+                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.resumo ? 'border-red-300' : ''}`}
                   />
                   {errors.resumo && (
                     <p className="mt-1 text-sm text-red-600">{errors.resumo}</p>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-600 font-medium">
                   Breve descrição do post que aparecerá nos cards e nas previews.
                 </p>
               </div>
               
               {/* Categorias */}
               <div className="sm:col-span-4">
-                <label htmlFor="categorias" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="categorias" className="block text-sm font-medium text-gray-800">
                   Categorias
                 </label>
                 <div className="mt-1">
@@ -321,7 +329,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     multiple
                     value={formData.categorias.map(String)}
                     onChange={handleCategoryChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.categorias ? 'border-red-300' : ''}`}
+                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.categorias ? 'border-red-300' : ''}`}
                     size={5}
                   >
                     {blogCategorias.map(categoria => (
@@ -334,7 +342,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     <p className="mt-1 text-sm text-red-600">{errors.categorias}</p>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-600 font-medium">
                   Segure CTRL (ou Command no Mac) para selecionar múltiplas categorias.
                 </p>
               </div>
@@ -343,10 +351,10 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           
           {/* Imagem de destaque */}
           <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Imagem de Destaque</h2>
+            <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Imagem de Destaque</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-6">
-                <label className="block text-sm font-medium text-gray-700">Imagem</label>
+                <label className="block text-sm font-medium text-gray-800">Imagem</label>
                 <div className="mt-1 flex items-center">
                   {previewUrl ? (
                     <div className="relative">
@@ -398,7 +406,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                 {errors.imagem_destaque_url && (
                   <p className="mt-1 text-sm text-red-600">{errors.imagem_destaque_url}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-600 font-medium">
                   Recomendado: imagem de 1200 x 630 pixels para melhor visualização.
                 </p>
               </div>
@@ -407,28 +415,36 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           
           {/* Conteúdo do post */}
           <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Conteúdo do Post</h2>
+            <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo do Post</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-6">
-                <label htmlFor="conteudo" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="conteudo" className="block text-sm font-medium text-gray-800">
                   Conteúdo
                 </label>
                 <div className="mt-1">
-                  <textarea
-                    id="conteudo"
-                    name="conteudo"
-                    rows={15}
-                    value={formData.conteudo}
-                    onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md ${errors.conteudo ? 'border-red-300' : ''}`}
-                    placeholder="Conteúdo em HTML. Você pode usar tags como <p>, <h2>, <ul>, <li>, etc."
+                  <SimpleBlogEditor
+                    initialValue={formData.conteudo}
+                    onChange={(content) => {
+                      setFormData({
+                        ...formData,
+                        conteudo: content
+                      });
+                      
+                      // Limpar erro de conteúdo se existir
+                      if (errors.conteudo) {
+                        setErrors({
+                          ...errors,
+                          conteudo: ''
+                        });
+                      }
+                    }}
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  Suporte a HTML. Use tags como &lt;p&gt; para parágrafos, &lt;h2&gt; para títulos, &lt;ul&gt; e &lt;li&gt; para listas.
+                <p className="mt-1 text-sm text-gray-600 font-medium">
+                  Use os botões do editor para formatar seu texto facilmente. Você também pode inserir HTML diretamente se preferir.
                 </p>
               </div>
             </div>
@@ -439,7 +455,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
         <div className="flex justify-end space-x-4">
           <Link
             href="/admin/blog"
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
             Cancelar
           </Link>

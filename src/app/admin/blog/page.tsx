@@ -55,7 +55,7 @@ export default function AdminBlogPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Gerenciamento de Blog</h1>
+        <h1 className="text-2xl font-bold text-gray-900 bg-white px-4 py-2 rounded-md shadow-sm border border-gray-300">Gerenciamento de Blog</h1>
         <Link 
           href="/admin/blog/novo" 
           className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
@@ -65,7 +65,7 @@ export default function AdminBlogPage() {
       </div>
       
       {/* Filtros e busca */}
-      <div className="bg-white rounded-lg shadow p-5 space-y-4">
+      <div className="bg-white rounded-lg shadow-md border border-gray-300 p-5 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -76,7 +76,7 @@ export default function AdminBlogPage() {
             <input
               type="text"
               placeholder="Buscar posts..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2 border border-gray-400 rounded-md w-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -84,7 +84,7 @@ export default function AdminBlogPage() {
           
           <div className="sm:w-64">
             <select
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={selectedCategory || ''}
               onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
             >
@@ -100,15 +100,15 @@ export default function AdminBlogPage() {
         
         {/* Ações em lote */}
         {selectedPosts.length > 0 && (
-          <div className="bg-gray-50 p-3 rounded-md flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-700">
+          <div className="bg-gray-100 p-3 rounded-md border border-gray-300 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-800 font-medium">
               {selectedPosts.length} post(s) selecionado(s)
             </span>
             <div className="flex-1"></div>
             <div className="relative">
               <button
                 onClick={() => setIsBulkActionsOpen(!isBulkActionsOpen)}
-                className="bg-white border border-gray-300 rounded-md px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="bg-white border border-gray-400 rounded-md px-3 py-1 text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
                 Ações em lote
                 <svg
@@ -144,7 +144,7 @@ export default function AdminBlogPage() {
             </div>
             <button
               onClick={() => setSelectedPosts([])}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="text-sm text-purple-600 hover:text-purple-800 font-medium"
             >
               Limpar seleção
             </button>
@@ -153,10 +153,10 @@ export default function AdminBlogPage() {
       </div>
       
       {/* Tabela de posts */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-100">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left">
                   <div className="flex items-center">
@@ -168,22 +168,22 @@ export default function AdminBlogPage() {
                     />
                   </div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Título
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Autor
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Categorias
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Data
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Visualizações
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
@@ -220,7 +220,7 @@ export default function AdminBlogPage() {
                           <div className="text-sm font-medium text-gray-900 line-clamp-1">
                             {post.titulo}
                           </div>
-                          <div className="text-sm text-gray-500 line-clamp-1">
+                          <div className="text-sm text-gray-600 line-clamp-1">
                             {post.resumo}
                           </div>
                         </div>
@@ -271,7 +271,7 @@ export default function AdminBlogPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600 font-medium">
                     Nenhum post encontrado.
                   </td>
                 </tr>
@@ -284,7 +284,7 @@ export default function AdminBlogPage() {
         <nav className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-800 font-medium">
                 Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{filteredPosts.length}</span> resultados
               </p>
             </div>
@@ -292,13 +292,13 @@ export default function AdminBlogPage() {
               <div className="flex items-center space-x-2">
                 <button
                   disabled
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100"
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-400 text-sm font-medium rounded-md text-gray-500 bg-gray-100"
                 >
                   Anterior
                 </button>
                 <button
                   disabled
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100"
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-400 text-sm font-medium rounded-md text-gray-500 bg-gray-100"
                 >
                   Próximo
                 </button>
