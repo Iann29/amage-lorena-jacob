@@ -15,23 +15,44 @@ export default function AdminBlogPage() {
   const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]); // IDs são strings
 
   useEffect(() => {
+    // Controle para evitar múltiplas chamadas desnecessárias
+    let isMounted = true;
+    let hasRun = false;
+    
     async function fetchData() {
+      // Se já executou ou o componente não está mais montado, não faz nada
+      if (hasRun || !isMounted) return;
+      hasRun = true;
+      
       setIsLoading(true);
       try {
         const [fetchedPosts, fetchedCategories] = await Promise.all([
           getAdminBlogPosts(),
           getBlogCategories()
         ]);
+        
+        // Verificar novamente se o componente ainda está montado
+        if (!isMounted) return;
+        
         setPosts(fetchedPosts);
         setAllCategories(fetchedCategories);
       } catch (error) {
+        if (!isMounted) return;
         console.error("Erro ao carregar dados da página de blog admin:", error);
         // Tratar erro, talvez mostrar uma mensagem para o usuário
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
+    
     fetchData();
+    
+    // Função de limpeza para evitar memory leaks
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredPosts = posts.filter(post => {
