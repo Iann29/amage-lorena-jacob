@@ -5,7 +5,7 @@ import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // --- Barra de Ferramentas ---
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
@@ -13,78 +13,70 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     return null;
   }
 
+  // Pega a cor atual do texto selecionado/cursor, ou preto como padrão
+  const currentColor = editor.getAttributes('textStyle').color || '#000000';
+
   return (
-    <div className="bg-gray-100 border-b border-gray-300 p-2 flex flex-wrap gap-1 items-center">
-      {/* Botões de formatação básica */}
+    <div className="bg-gray-100 border-b border-gray-300 p-2 flex flex-wrap gap-x-2 gap-y-1 items-center sticky top-0 z-10">
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editor.can().chain().focus().toggleBold().run()}
-        className={`p-1.5 rounded ${editor.isActive('bold') ? 'bg-purple-200 text-purple-800' : 'hover:bg-purple-100 text-gray-700 hover:text-purple-700'}`}
+        className={`px-2 py-1 rounded text-sm font-semibold ${editor.isActive('bold') ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
         title="Negrito (Ctrl+B)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 10.293a1 1 0 011.414 0L10 11.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z" clipRule="evenodd" /><path fillRule="evenodd" d="M5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" /></svg> B
+        B
       </button>
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
-        className={`p-1.5 rounded ${editor.isActive('italic') ? 'bg-purple-200 text-purple-800' : 'hover:bg-purple-100 text-gray-700 hover:text-purple-700'}`}
+        className={`px-2 py-1 rounded text-sm italic ${editor.isActive('italic') ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
         title="Itálico (Ctrl+I)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.98 9.097c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg> I
+        I
       </button>
       <button
         type="button"
         onClick={() => editor.chain().focus().setParagraph().run()}
-        className={`p-1.5 rounded ${editor.isActive('paragraph') ? 'bg-purple-200 text-purple-800' : 'hover:bg-purple-100 text-gray-700 hover:text-purple-700'}`}
+        className={`px-2 py-1 rounded text-sm ${editor.isActive('paragraph') ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
         title="Parágrafo"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg> P
+        P
       </button>
-
-       {/* Botões de Título */}
        <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`p-1.5 rounded ${editor.isActive('heading', { level: 2 }) ? 'bg-purple-200 text-purple-800' : 'hover:bg-purple-100 text-gray-700 hover:text-purple-700'}`}
+        className={`px-2 py-1 rounded text-sm font-semibold ${editor.isActive('heading', { level: 2 }) ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
         title="Título Nível 2"
       >
-        <span className="font-bold text-sm">H2</span>
+        H2
       </button>
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={`p-1.5 rounded ${editor.isActive('heading', { level: 3 }) ? 'bg-purple-200 text-purple-800' : 'hover:bg-purple-100 text-gray-700 hover:text-purple-700'}`}
+        className={`px-2 py-1 rounded text-sm font-semibold ${editor.isActive('heading', { level: 3 }) ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
         title="Título Nível 3"
       >
-        <span className="font-bold text-xs">H3</span>
+        H3
       </button>
-
-       {/* Separador */}
-       <div className="h-5 w-px bg-gray-300 mx-1"></div>
-
-      {/* Seleção de Cor */}
+       <div className="h-5 w-px bg-gray-400"></div>
       <input
         type="color"
         onInput={event => editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()}
-        value={editor.getAttributes('textStyle').color || '#000000'} // Pega a cor atual ou preto
-        className="w-8 h-8 p-0 border-none cursor-pointer rounded bg-transparent"
+        value={currentColor} // Atualizado para refletir a cor da seleção
+        className="w-7 h-7 p-0.5 border border-gray-300 rounded cursor-pointer bg-transparent"
         title="Escolher cor do texto"
-        data-testid="setColor"
       />
        <button
         type="button"
         onClick={() => editor.chain().focus().unsetColor().run()}
-        disabled={!editor.getAttributes('textStyle').color}
-        className="p-1.5 rounded hover:bg-purple-100 text-gray-700 hover:text-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={!editor.getAttributes('textStyle').color} // Desabilita se nenhuma cor estiver aplicada
+        className="px-2 py-1 rounded text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50"
         title="Remover cor"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Cor
+        Limpar Cor
       </button>
-
-      {/* Adicione outros botões aqui (lista, link, imagem etc.) conforme necessário */}
-
     </div>
   );
 };
@@ -99,11 +91,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // Você pode desabilitar extensões do StarterKit aqui se não precisar delas
-        // Ex: heading: false,
+        // Você pode configurar ou desabilitar partes do StarterKit se necessário
+        // Ex: heading: { levels: [2, 3] } para permitir apenas H2 e H3
       }),
-      TextStyle, // Necessário para Color funcionar
-      Color,
+      TextStyle, // Fundamental para `style` inline
+      Color.configure({
+        types: ['textStyle'], // Garante que 'Color' funcione com 'TextStyle' para aplicar styles inline
+      }),
     ],
     content: initialContent,
     onUpdate: ({ editor }) => {
@@ -111,53 +105,65 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
     },
     editorProps: {
       attributes: {
-        // Adiciona classes Tailwind ao editor
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none p-4 min-h-[300px] border border-gray-300 rounded-b-md',
+        // Aplicamos 'prose' para uma estilização base, mas ela não deve sobrescrever cores inline
+        // A chave é como os estilos inline (style="color:...") são mais específicos que os seletores do prose
+        // para o atributo 'color'.
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none p-4 min-h-[400px] bg-white text-gray-700 border-t-0 rounded-b-md',
       },
     },
   });
 
+  useEffect(() => {
+    if (editor && initialContent !== editor.getHTML()) {
+      editor.commands.setContent(initialContent, false);
+    }
+  }, [initialContent, editor]);
+
+  if (!editor) {
+    return <div className="p-4 border rounded-md min-h-[436px] bg-gray-50 flex items-center justify-center text-gray-400">Carregando editor...</div>;
+  }
+
   return (
-    <div className="border border-gray-300 rounded-md">
+    // O contêiner principal agora tem a borda, e o ProseMirror não terá borda superior
+    <div className="border border-gray-300 rounded-md shadow-sm bg-white">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
-       {/* Adicionar estilos para o editor TipTap se necessário (ou usar plugin typography do Tailwind) */}
-       <style jsx global>{`
-        .ProseMirror {
-          min-height: 250px; /* Ou a altura desejada */
+       {/* Adicionando estilos CSS para garantir que as cores inline tenham prioridade
+           e para melhorar a aparência dos títulos dentro do editor. */}
+      <style jsx>{`
+        :global(.ProseMirror) {
+          min-height: 400px; /* Ou a altura desejada */
           padding: 1rem;
-          border: 1px solid #ccc;
-          border-radius: 0 0 4px 4px; /* Apenas cantos inferiores */
-          border-top: none; /* Remove a borda superior que já existe no container */
           outline: none;
         }
-        .ProseMirror:focus {
-          border-color: #a35bc4; /* Cor roxa para foco */
-          box-shadow: 0 0 0 1px #a35bc4;
+        :global(.ProseMirror:focus) {
+          /* Estilo de foco sutil, já que a borda está no wrapper */
         }
-        .ProseMirror h2 {
-          font-size: 1.5em;
-          font-weight: bold;
-          margin-top: 1.5em;
-          margin-bottom: 0.5em;
+
+        /* Garantir que os estilos de cor inline do TipTap (em spans) tenham prioridade */
+        :global(.ProseMirror span[style*="color"]) {
+          /* Não precisa de !important se o seletor for específico o suficiente */
+          /* Se ainda houver problemas, pode ser necessário adicionar !important com cautela */
         }
-        .ProseMirror h3 {
-          font-size: 1.25em;
-          font-weight: bold;
-          margin-top: 1.2em;
-          margin-bottom: 0.4em;
+
+        /* Ajustar cores padrão de elementos dentro do prose para DENTRO DO EDITOR,
+           se os padrões do Tailwind Typography estiverem muito fortes e
+           atrapalhando a visualização das cores aplicadas.
+           A ideia é que o editor reflita o mais fielmente possível o resultado final.
+        */
+        :global(.ProseMirror h1),
+        :global(.ProseMirror h2),
+        :global(.ProseMirror h3),
+        :global(.ProseMirror h4),
+        :global(.ProseMirror h5),
+        :global(.ProseMirror h6) {
+          /* Se a cor do prose estiver sobrescrevendo, você pode forçar a herança aqui
+             para que o style inline do span (se houver) funcione, ou definir uma cor base.
+             Exemplo: color: inherit; ou uma cor base do editor */
+          /* Se você aplicou uma cor via TipTap, ela estará num <span style="color:..."> DENTRO do h2,
+             então o h2 em si pode ter uma cor base. */
         }
-        .ProseMirror p {
-          margin-bottom: 1em;
-          line-height: 1.6;
-        }
-        .ProseMirror ul, .ProseMirror ol {
-          margin-left: 1.5rem;
-          margin-bottom: 1rem;
-        }
-        .ProseMirror li > p {
-           margin-bottom: 0.2em; /* Reduz margem em parágrafos dentro de listas */
-        }
+        /* Você pode adicionar mais overrides aqui se necessário */
       `}</style>
     </div>
   );
