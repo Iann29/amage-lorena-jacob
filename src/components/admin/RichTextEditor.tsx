@@ -5,17 +5,14 @@ import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react'; // Adicionado useState
 
-// --- Barra de Ferramentas ---
+// --- MenuBar (mantenha a sua versão funcional) ---
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
     return null;
   }
-
-  // Pega a cor atual do texto selecionado/cursor, ou preto como padrão
   const currentColor = editor.getAttributes('textStyle').color || '#000000';
-
   return (
     <div className="bg-gray-100 border-b border-gray-300 p-2 flex flex-wrap gap-x-2 gap-y-1 items-center sticky top-0 z-10">
       <button
@@ -64,14 +61,14 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       <input
         type="color"
         onInput={event => editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()}
-        value={currentColor} // Atualizado para refletir a cor da seleção
+        value={currentColor}
         className="w-7 h-7 p-0.5 border border-gray-300 rounded cursor-pointer bg-transparent"
         title="Escolher cor do texto"
       />
        <button
         type="button"
         onClick={() => editor.chain().focus().unsetColor().run()}
-        disabled={!editor.getAttributes('textStyle').color} // Desabilita se nenhuma cor estiver aplicada
+        disabled={!editor.getAttributes('textStyle').color}
         className="px-2 py-1 rounded text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 disabled:opacity-50"
         title="Remover cor"
       >
@@ -81,6 +78,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
+
 // --- Editor Principal ---
 interface RichTextEditorProps {
   initialContent: string;
@@ -88,93 +86,118 @@ interface RichTextEditorProps {
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChange }) => {
+  const [isClient, setIsClient] = useState(false); // Estado para controlar se estamos no cliente
+
+  // Efeito para rodar SOMENTE no cliente
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        // Você pode configurar ou desabilitar partes do StarterKit se necessário
-        // Ex: heading: { levels: [2, 3] } para permitir apenas H2 e H3
-      }),
-      TextStyle, // Fundamental para `style` inline
+      StarterKit.configure({}),
+      TextStyle,
       Color.configure({
-        types: ['textStyle'], // Garante que 'Color' funcione com 'TextStyle' para aplicar styles inline
+        types: ['textStyle'],
       }),
     ],
-    content: initialContent,
+    content: initialContent, // Conteúdo inicial é passado, mas o editor só será totalmente funcional no cliente
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        // Aplicamos 'prose' para uma estilização base, mas ela não deve sobrescrever cores inline
-        // A chave é como os estilos inline (style="color:...") são mais específicos que os seletores do prose
-        // para o atributo 'color'.
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none focus:outline-none p-4 min-h-[400px] bg-white text-gray-700 border-t-0 rounded-b-md',
+        class: 'focus:outline-none p-4 min-h-[400px] bg-white text-gray-800',
       },
     },
-  });
+    // Adicionando esta opção para resolver os avisos de hidratação
+    immediatelyRender: false,
+  }, [initialContent]); // Recriar o editor se initialContent mudar (importante para edição)
 
+  // Atualizar conteúdo do editor se o initialContent mudar e o editor já estiver pronto
   useEffect(() => {
-    if (editor && initialContent !== editor.getHTML()) {
-      editor.commands.setContent(initialContent, false);
+    if (isClient && editor && initialContent && initialContent !== editor.getHTML()) {
+      // Usar setTimeout para dar tempo ao editor de inicializar completamente no cliente
+      // antes de tentar definir o conteúdo, especialmente se initialContent vem de props/estado
+      const timer = setTimeout(() => {
+        if (editor && !editor.isDestroyed) { // Checar se o editor não foi destruído
+             editor.commands.setContent(initialContent, false);
+        }
+      }, 100); // Um pequeno delay pode ajudar
+      return () => clearTimeout(timer);
     }
-  }, [initialContent, editor]);
+  }, [initialContent, editor, isClient]);
 
-  if (!editor) {
-    return <div className="p-4 border rounded-md min-h-[436px] bg-gray-50 flex items-center justify-center text-gray-400">Carregando editor...</div>;
+
+  // Não renderizar nada no servidor ou antes da hidratação no cliente
+  if (!isClient || !editor) {
+    // Pode retornar um placeholder mais robusto se quiser, mas para o editor em si,
+    // é melhor renderizá-lo apenas quando estiver pronto no cliente.
+    return <div className="p-4 border border-gray-300 rounded-md shadow-sm bg-white min-h-[478px] animate-pulse">
+             <div className="bg-gray-100 border-b border-gray-300 p-2 h-[46px]"></div>
+             <div className="p-4 min-h-[400px] bg-gray-50"></div>
+           </div>;
   }
 
   return (
-    // O contêiner principal agora tem a borda, e o ProseMirror não terá borda superior
     <div className="border border-gray-300 rounded-md shadow-sm bg-white">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
-       {/* Adicionando estilos CSS para garantir que as cores inline tenham prioridade
-           e para melhorar a aparência dos títulos dentro do editor. */}
+      {/* Os estilos JSX que tínhamos podem ser mantidos aqui se necessário */}
       <style jsx>{`
-        /* Estilos para o container do editor TipTap */
         :global(.ProseMirror) {
           min-height: 400px;
           padding: 1rem;
           outline: none;
-          /* Vamos deixar a cor do texto base ser herdada ou definida pelo Tailwind no wrapper */
-          /* A classe 'prose' já define uma cor base para parágrafos */
+          line-height: 1.6;
+          font-family: var(--font-poppins), sans-serif;
+          color: #374151; 
         }
-
-        /* FORÇAR cores inline a terem prioridade sobre o prose DENTRO DO EDITOR */
-        /* Para qualquer elemento dentro do editor que tenha um style inline com 'color' */
-        :global(.ProseMirror [style*="color"]) {
-          /* Esta é uma tentativa de forçar a cor. Pode não ser sempre ideal usar !important,
-             mas para o editor, onde queremos fidelidade visual, pode ser necessário. */
-          color: inherit; /* Tenta herdar primeiro */
+        :global(.ProseMirror p) {
+          margin-bottom: 1em;
         }
-        /* Se o inherit não for suficiente, você pode tentar ser mais específico ou, em último caso, !important
-           Exemplo (com cautela):
-           :global(.ProseMirror p span[style*="color"]),
-           :global(.ProseMirror h2 span[style*="color"]) {
-             color: var(--custom-color, inherit) !important; // Isso é mais complexo e pode não ser necessário
-           }
-        */
-
-        /* Para os títulos (h1, h2, h3 etc.) dentro do editor:
-           Queremos que a cor base deles seja a cor do texto geral do editor,
-           permitindo que spans coloridos DENTRO deles se destaquem. */
         :global(.ProseMirror h1),
         :global(.ProseMirror h2),
         :global(.ProseMirror h3),
         :global(.ProseMirror h4),
         :global(.ProseMirror h5),
         :global(.ProseMirror h6) {
-          /* Remove a cor específica que o 'prose' pode estar aplicando aos títulos DENTRO DO EDITOR,
-             para que a cor venha do span colorido, se houver, ou da cor do texto pai. */
-          /* color: inherit; // Isso pode fazer com que eles peguem a cor do text-gray-700 do wrapper.
-                             // Se você aplicou uma cor ao H2 como <h2 style="color:blue">Texto</h2>, ela já deve pegar.
-                             // Se for <h2><span style="color:blue">Texto</span></h2>, o span já tem a cor.
-                             // O 'prose' geralmente colore o H2 diretamente. */
+          font-family: var(--font-museo-sans), sans-serif;
+          font-weight: bold;
+          margin-top: 1.2em;
+          margin-bottom: 0.6em;
+          line-height: 1.3;
+          color: #1f2937; 
         }
-
-        /* Para parágrafos dentro do editor, também garantir que spans coloridos se sobressaiam */
-        :global(.ProseMirror p) {
-          /* color: inherit; // Mesma lógica dos títulos. */
+        :global(.ProseMirror h2) {
+          font-size: 1.5em;
+        }
+        :global(.ProseMirror h3) {
+          font-size: 1.25em;
+        }
+        :global(.ProseMirror strong) {
+          font-weight: bold;
+        }
+        :global(.ProseMirror em) {
+          font-style: italic;
+        }
+        :global(.ProseMirror ul),
+        :global(.ProseMirror ol) {
+          padding-left: 1.5rem; 
+          margin-bottom: 1em; 
+          list-style-position: outside; 
+        }
+        :global(.ProseMirror ul) {
+          list-style-type: disc; 
+        }
+        :global(.ProseMirror ol) {
+          list-style-type: decimal; 
+        }
+        :global(.ProseMirror li > p) {
+           margin-bottom: 0.2em;
+        }
+        :global(.ProseMirror [style*="color"]) {
+          -webkit-text-fill-color: currentColor; 
         }
       `}</style>
     </div>
