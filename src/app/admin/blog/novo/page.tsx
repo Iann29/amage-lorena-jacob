@@ -1,11 +1,18 @@
+// src/app/admin/blog/novo/page.tsx
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react'; // Adicionado useEffect
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { blogCategorias } from '@/lib/mockData';
+// REMOVA: import { blogCategorias } from '@/lib/mockData';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import { createPost, getBlogCategories } from '../actions'; // Importar a Server Action e a de buscar categorias
+
+interface CategoryOption {
+  id: string; // IDs do Supabase (UUIDs) são strings
+  nome: string;
+}
 
 export default function NovoBlogPostPage() {
   const router = useRouter();
@@ -13,164 +20,120 @@ export default function NovoBlogPostPage() {
     titulo: '',
     slug: '',
     resumo: '',
-    conteudo: '',
-    categorias: [] as number[],
-    imagem_destaque_url: ''
+    conteudo: '', // Vai receber HTML do RichTextEditor
+    categorias: [] as string[], // Agora será um array de strings (UUIDs das categorias)
+    imagem_destaque_url: '' // Por enquanto, pode ser URL base64 ou vazia
   });
+  const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<CategoryOption[]>([]); // Estado para as opções de categoria
   const [previewUrl, setPreviewUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [serverMessage, setServerMessage] = useState<{type: 'success' | 'error', text: string} | null>(null); // Para feedback
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Função para gerar slug a partir do título
+  // Buscar categorias quando o componente montar
+  useEffect(() => {
+    async function loadCategories() {
+      const categories = await getBlogCategories();
+      // @ts-ignore TODO: Ajustar tipo se getBlogCategories retornar algo diferente
+      setBlogCategoriesOptions(categories || []);
+    }
+    loadCategories();
+  }, []);
+
   const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/--+/g, '-')
-      .trim();
+    return title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
   };
 
-  // Função para lidar com a mudança de valores no formulário
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    // Se o campo modificado for o título, gerar slug automaticamente
     if (name === 'titulo') {
-      setFormData({
-        ...formData,
-        titulo: value,
-        slug: generateSlug(value)
-      });
+      setFormData({ ...formData, titulo: value, slug: generateSlug(value) });
     } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+      setFormData({ ...formData, [name]: value });
     }
-    
-    // Limpar erro específico ao editar o campo
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
   };
 
-  // Função para lidar com seleção de categorias (múltipla)
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
-    setFormData({
-      ...formData,
-      categorias: selectedOptions
-    });
-    
-    // Limpar erro de categorias
-    if (errors.categorias) {
-      setErrors({
-        ...errors,
-        categorias: ''
-      });
-    }
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value); // Os values serão os IDs (strings)
+    setFormData({ ...formData, categorias: selectedOptions });
+    if (errors.categorias) setErrors({ ...errors, categorias: '' });
   };
 
-  // Função para lidar com upload de imagem
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Em produção, aqui teríamos o upload para o Supabase Storage
-    // Por enquanto, vamos apenas criar uma URL local para o arquivo
+    // Simples preview com base64. O upload real para o Supabase Storage será feito separadamente.
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
       setPreviewUrl(result);
-      setFormData({
-        ...formData,
-        imagem_destaque_url: result
-      });
+      // Por enquanto, podemos salvar a URL base64 se quisermos, ou apenas usar para preview
+      // e ter um campo separado para a URL final do Supabase Storage.
+      // Para simplificar agora, vamos assumir que imagem_destaque_url pode ser essa base64
+      // mas o ideal é que seja a URL do Storage.
+      setFormData({ ...formData, imagem_destaque_url: result }); 
     };
     reader.readAsDataURL(file);
     
-    // Limpar erro de imagem
-    if (errors.imagem_destaque_url) {
-      setErrors({
-        ...errors,
-        imagem_destaque_url: ''
-      });
-    }
+    if (errors.imagem_destaque_url) setErrors({ ...errors, imagem_destaque_url: '' });
   };
 
-  // Função para remover a imagem selecionada
   const handleRemoveImage = () => {
     setPreviewUrl('');
-    setFormData({
-      ...formData,
-      imagem_destaque_url: ''
-    });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    setFormData({ ...formData, imagem_destaque_url: '' });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Função para validar o formulário
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
-    
-    // Validar campos obrigatórios
-    if (!formData.titulo.trim()) {
-      newErrors.titulo = 'O título é obrigatório';
-    }
-    
-    if (!formData.slug.trim()) {
-      newErrors.slug = 'O slug é obrigatório';
-    }
-    
-    if (!formData.resumo.trim()) {
-      newErrors.resumo = 'O resumo é obrigatório';
-    }
-    
-    if (!formData.conteudo.trim()) {
-      newErrors.conteudo = 'O conteúdo é obrigatório';
-    }
-    
-    if (formData.categorias.length === 0) {
-      newErrors.categorias = 'Selecione pelo menos uma categoria';
-    }
-    
+    if (!formData.titulo.trim()) newErrors.titulo = 'O título é obrigatório';
+    if (!formData.slug.trim()) newErrors.slug = 'O slug é obrigatório';
+    if (!formData.resumo.trim()) newErrors.resumo = 'O resumo é obrigatório';
+    if (!formData.conteudo.trim()) newErrors.conteudo = 'O conteúdo é obrigatório';
+    if (formData.categorias.length === 0) newErrors.categorias = 'Selecione pelo menos uma categoria';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para enviar o formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validar o formulário
+    setServerMessage(null);
     if (!validateForm()) {
       return;
     }
     
     setIsLoading(true);
     
+    // Prepara o payload para a Server Action
+    // A action `createPost` espera que `categorias` seja um array de IDs.
+    // Nossos values do select já são os IDs (strings).
+    // Se a action esperasse números, precisaríamos converter com .map(id => parseInt(id))
+    const payload = {
+        ...formData,
+        // imagem_destaque_url: será a URL do Supabase Storage no futuro. Por agora, pode ser a base64 ou vazia.
+    };
+
     try {
-      // Em produção, aqui teríamos o envio para o Supabase
-      // Por enquanto, vamos apenas simular o envio
-      console.log('Dados do post a serem enviados:', formData);
-      
-      // Simular um atraso de rede
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Redirecionar para a lista de posts
-      router.push('/admin/blog');
-    } catch (error) {
-      console.error('Erro ao criar post:', error);
-      alert('Ocorreu um erro ao criar o post. Tente novamente.');
+      const result = await createPost(payload); // Chama a Server Action
+
+      if (result.success) {
+        setServerMessage({type: 'success', text: result.message || "Post criado com sucesso!"});
+        // alert(result.message || "Post criado com sucesso!"); // Ou usar um toast
+        setTimeout(() => {
+          router.push('/admin/blog'); // Redireciona para a lista de posts
+        }, 1500); // Dá tempo para o usuário ver a mensagem de sucesso
+      } else {
+        setServerMessage({type: 'error', text: result.message || "Falha ao criar o post."});
+        // alert(result.message || "Falha ao criar o post.");
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar post (catch no handleSubmit):', error);
+      setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao criar o post."});
+      // alert('Ocorreu um erro inesperado ao criar o post.');
     } finally {
       setIsLoading(false);
     }
@@ -180,13 +143,16 @@ export default function NovoBlogPostPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 bg-white px-4 py-2 rounded-md shadow-sm border border-gray-300">Novo Post</h1>
-        <Link
-          href="/admin/blog"
-          className="text-purple-600 hover:text-purple-800 font-medium underline"
-        >
+        <Link href="/admin/blog" className="text-purple-600 hover:text-purple-800 font-medium underline">
           Cancelar e voltar
         </Link>
       </div>
+
+      {serverMessage && (
+        <div className={`p-3 my-4 rounded-md text-sm ${serverMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          {serverMessage.text}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="bg-white rounded-lg shadow-md divide-y divide-gray-300">
@@ -196,98 +162,56 @@ export default function NovoBlogPostPage() {
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               {/* Título */}
               <div className="sm:col-span-4">
-                <label htmlFor="titulo" className="block text-sm font-medium text-gray-800">
-                  Título
-                </label>
+                <label htmlFor="titulo" className="block text-sm font-medium text-gray-800">Título</label>
                 <div className="mt-1">
-                  <input
-                    type="text"
-                    name="titulo"
-                    id="titulo"
-                    value={formData.titulo}
-                    onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.titulo ? 'border-red-300' : ''}`}
-                  />
-                  {errors.titulo && (
-                    <p className="mt-1 text-sm text-red-600">{errors.titulo}</p>
-                  )}
+                  <input type="text" name="titulo" id="titulo" value={formData.titulo} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.titulo ? 'border-red-300' : ''}`} />
+                  {errors.titulo && (<p className="mt-1 text-sm text-red-600">{errors.titulo}</p>)}
                 </div>
               </div>
               
               {/* Slug */}
               <div className="sm:col-span-4">
-                <label htmlFor="slug" className="block text-sm font-medium text-gray-800">
-                  Slug
-                </label>
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-800">Slug</label>
                 <div className="mt-1">
-                  <input
-                    type="text"
-                    name="slug"
-                    id="slug"
-                    value={formData.slug}
-                    onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`}
-                  />
-                  {errors.slug && (
-                    <p className="mt-1 text-sm text-red-600">{errors.slug}</p>
-                  )}
+                  <input type="text" name="slug" id="slug" value={formData.slug} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`} />
+                  {errors.slug && (<p className="mt-1 text-sm text-red-600">{errors.slug}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">
-                  URL amigável do post. Será gerada automaticamente a partir do título, mas pode ser editada.
-                </p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">URL amigável do post. Será gerada automaticamente a partir do título, mas pode ser editada.</p>
               </div>
               
               {/* Resumo */}
               <div className="sm:col-span-6">
-                <label htmlFor="resumo" className="block text-sm font-medium text-gray-800">
-                  Resumo
-                </label>
+                <label htmlFor="resumo" className="block text-sm font-medium text-gray-800">Resumo</label>
                 <div className="mt-1">
-                  <textarea
-                    id="resumo"
-                    name="resumo"
-                    rows={3}
-                    value={formData.resumo}
-                    onChange={handleChange}
-                    className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.resumo ? 'border-red-300' : ''}`}
-                  />
-                  {errors.resumo && (
-                    <p className="mt-1 text-sm text-red-600">{errors.resumo}</p>
-                  )}
+                  <textarea id="resumo" name="resumo" rows={3} value={formData.resumo} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.resumo ? 'border-red-300' : ''}`} />
+                  {errors.resumo && (<p className="mt-1 text-sm text-red-600">{errors.resumo}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">
-                  Breve descrição do post que aparecerá nos cards e nas previews.
-                </p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">Breve descrição do post que aparecerá nos cards e nas previews.</p>
               </div>
               
               {/* Categorias */}
               <div className="sm:col-span-4">
-                <label htmlFor="categorias" className="block text-sm font-medium text-gray-800">
-                  Categorias
-                </label>
+                <label htmlFor="categorias" className="block text-sm font-medium text-gray-800">Categorias</label>
                 <div className="mt-1">
                   <select
                     id="categorias"
                     name="categorias"
                     multiple
-                    value={formData.categorias.map(String)}
+                    value={formData.categorias} // value é um array de strings (IDs)
                     onChange={handleCategoryChange}
                     className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.categorias ? 'border-red-300' : ''}`}
                     size={5}
                   >
-                    {blogCategorias.map(categoria => (
-                      <option key={categoria.id} value={categoria.id}>
+                    {blogCategoriesOptions.length === 0 && <option disabled>Carregando categorias...</option>}
+                    {blogCategoriesOptions.map(categoria => (
+                      <option key={categoria.id} value={categoria.id}> {/* value deve ser o ID da categoria (string UUID) */}
                         {categoria.nome}
                       </option>
                     ))}
                   </select>
-                  {errors.categorias && (
-                    <p className="mt-1 text-sm text-red-600">{errors.categorias}</p>
-                  )}
+                  {errors.categorias && (<p className="mt-1 text-sm text-red-600">{errors.categorias}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">
-                  Segure CTRL (ou Command no Mac) para selecionar múltiplas categorias.
-                </p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">Segure CTRL (ou Command no Mac) para selecionar múltiplas categorias.</p>
               </div>
             </div>
           </div>
@@ -296,92 +220,49 @@ export default function NovoBlogPostPage() {
           <div className="p-6">
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Imagem de Destaque</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <div className="sm:col-span-6">
+                {/* ... (código do input de imagem, pode manter como estava) ... */}
+                <div className="sm:col-span-6">
                 <label className="block text-sm font-medium text-gray-800">Imagem</label>
                 <div className="mt-1 flex items-center">
                   {previewUrl ? (
                     <div className="relative">
                       <div className="w-40 h-40 rounded-md overflow-hidden bg-gray-100">
-                        <Image
-                          src={previewUrl}
-                          alt="Preview da imagem"
-                          width={160}
-                          height={160}
-                          className="w-full h-full object-cover"
-                        />
+                        <Image src={previewUrl} alt="Preview da imagem" width={160} height={160} className="w-full h-full object-cover"/>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 focus:outline-none"
-                        title="Remover imagem"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                      <button type="button" onClick={handleRemoveImage} className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 focus:outline-none" title="Remover imagem">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-4">
                       <div className="w-40 h-40 flex justify-center items-center rounded-md border-2 border-dashed border-gray-300 bg-gray-50">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       </div>
-                      
                       <div>
-                        <label htmlFor="image-upload" className="cursor-pointer bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                          Selecionar imagem
-                        </label>
-                        <input 
-                          id="image-upload" 
-                          name="image-upload" 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          ref={fileInputRef}
-                          className="sr-only" 
-                        />
+                        <label htmlFor="image-upload" className="cursor-pointer bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">Selecionar imagem</label>
+                        <input id="image-upload" name="image-upload" type="file" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} className="sr-only" />
                       </div>
                     </div>
                   )}
                 </div>
-                {errors.imagem_destaque_url && (
-                  <p className="mt-1 text-sm text-red-600">{errors.imagem_destaque_url}</p>
-                )}
-                <p className="mt-1 text-sm text-gray-600 font-medium">
-                  Recomendado: imagem de 1200 x 630 pixels para melhor visualização.
-                </p>
+                {errors.imagem_destaque_url && (<p className="mt-1 text-sm text-red-600">{errors.imagem_destaque_url}</p>)}
+                <p className="mt-1 text-sm text-gray-600 font-medium">Recomendado: imagem de 1200 x 630 pixels para melhor visualização.</p>
               </div>
             </div>
           </div>
           
           {/* Conteúdo do post */}
           <div className="p-6 bg-gray-50">
-            <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo e Estilo</h2>
-
-
+            <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-6">
-                <label htmlFor="conteudo" className="block text-sm font-medium text-gray-800">
-                  Conteúdo
-                </label>
+                {/* <label htmlFor="conteudo" className="block text-sm font-medium text-gray-800">Conteúdo</label> */}
                 <div className="mt-1">
                   <RichTextEditor
-                    initialContent={formData.conteudo} // Passa o conteúdo HTML atual
-                    onChange={(html) => { // Recebe o HTML atualizado do editor
-                      setFormData({
-                        ...formData,
-                        conteudo: html // Atualiza o estado com o HTML
-                      });
-
-                      // Limpar erro de conteúdo se existir
-                      if (errors.conteudo) {
-                        setErrors({
-                          ...errors,
-                          conteudo: ''
-                        });
-                      }
+                    initialContent={formData.conteudo}
+                    onChange={(html) => {
+                      setFormData({...formData, conteudo: html });
+                      if (errors.conteudo) setErrors({...errors, conteudo: ''});
                     }}
                   />
                   {errors.conteudo && (
@@ -397,7 +278,7 @@ export default function NovoBlogPostPage() {
         </div>
         
         {/* Botões de ação */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-5"> {/* Adicionado pt-5 para espaçamento */}
           <Link
             href="/admin/blog"
             className="px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
@@ -408,7 +289,7 @@ export default function NovoBlogPostPage() {
             type="submit"
             disabled={isLoading}
             className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              isLoading ? 'bg-purple-400' : 'bg-purple-600 hover:bg-purple-700'
+              isLoading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
             } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
           >
             {isLoading ? (
@@ -417,7 +298,7 @@ export default function NovoBlogPostPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Salvando...</span>
+                <span>Publicando...</span>
               </div>
             ) : (
               'Publicar Post'
