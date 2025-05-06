@@ -131,39 +131,51 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
        {/* Adicionando estilos CSS para garantir que as cores inline tenham prioridade
            e para melhorar a aparência dos títulos dentro do editor. */}
       <style jsx>{`
+        /* Estilos para o container do editor TipTap */
         :global(.ProseMirror) {
-          min-height: 400px; /* Ou a altura desejada */
+          min-height: 400px;
           padding: 1rem;
           outline: none;
-        }
-        :global(.ProseMirror:focus) {
-          /* Estilo de foco sutil, já que a borda está no wrapper */
-        }
-
-        /* Garantir que os estilos de cor inline do TipTap (em spans) tenham prioridade */
-        :global(.ProseMirror span[style*="color"]) {
-          /* Não precisa de !important se o seletor for específico o suficiente */
-          /* Se ainda houver problemas, pode ser necessário adicionar !important com cautela */
+          /* Vamos deixar a cor do texto base ser herdada ou definida pelo Tailwind no wrapper */
+          /* A classe 'prose' já define uma cor base para parágrafos */
         }
 
-        /* Ajustar cores padrão de elementos dentro do prose para DENTRO DO EDITOR,
-           se os padrões do Tailwind Typography estiverem muito fortes e
-           atrapalhando a visualização das cores aplicadas.
-           A ideia é que o editor reflita o mais fielmente possível o resultado final.
+        /* FORÇAR cores inline a terem prioridade sobre o prose DENTRO DO EDITOR */
+        /* Para qualquer elemento dentro do editor que tenha um style inline com 'color' */
+        :global(.ProseMirror [style*="color"]) {
+          /* Esta é uma tentativa de forçar a cor. Pode não ser sempre ideal usar !important,
+             mas para o editor, onde queremos fidelidade visual, pode ser necessário. */
+          color: inherit; /* Tenta herdar primeiro */
+        }
+        /* Se o inherit não for suficiente, você pode tentar ser mais específico ou, em último caso, !important
+           Exemplo (com cautela):
+           :global(.ProseMirror p span[style*="color"]),
+           :global(.ProseMirror h2 span[style*="color"]) {
+             color: var(--custom-color, inherit) !important; // Isso é mais complexo e pode não ser necessário
+           }
         */
+
+        /* Para os títulos (h1, h2, h3 etc.) dentro do editor:
+           Queremos que a cor base deles seja a cor do texto geral do editor,
+           permitindo que spans coloridos DENTRO deles se destaquem. */
         :global(.ProseMirror h1),
         :global(.ProseMirror h2),
         :global(.ProseMirror h3),
         :global(.ProseMirror h4),
         :global(.ProseMirror h5),
         :global(.ProseMirror h6) {
-          /* Se a cor do prose estiver sobrescrevendo, você pode forçar a herança aqui
-             para que o style inline do span (se houver) funcione, ou definir uma cor base.
-             Exemplo: color: inherit; ou uma cor base do editor */
-          /* Se você aplicou uma cor via TipTap, ela estará num <span style="color:..."> DENTRO do h2,
-             então o h2 em si pode ter uma cor base. */
+          /* Remove a cor específica que o 'prose' pode estar aplicando aos títulos DENTRO DO EDITOR,
+             para que a cor venha do span colorido, se houver, ou da cor do texto pai. */
+          /* color: inherit; // Isso pode fazer com que eles peguem a cor do text-gray-700 do wrapper.
+                             // Se você aplicou uma cor ao H2 como <h2 style="color:blue">Texto</h2>, ela já deve pegar.
+                             // Se for <h2><span style="color:blue">Texto</span></h2>, o span já tem a cor.
+                             // O 'prose' geralmente colore o H2 diretamente. */
         }
-        /* Você pode adicionar mais overrides aqui se necessário */
+
+        /* Para parágrafos dentro do editor, também garantir que spans coloridos se sobressaiam */
+        :global(.ProseMirror p) {
+          /* color: inherit; // Mesma lógica dos títulos. */
+        }
       `}</style>
     </div>
   );
