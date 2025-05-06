@@ -1,46 +1,52 @@
+// src/app/admin/login/page.tsx
 "use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient'; // Importar o cliente Supabase
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errorMsg, setErrorMsg] = useState(''); // Renomeado para errorMsg para clareza
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrorMsg('');
     setIsLoading(true);
 
     try {
-      // Em uma implementação real, aqui teríamos a autenticação com Supabase
-      // Por enquanto, vamos usar uma validação simples com mockdata
-      if (email === 'admin@lorenajacob.com.br' && password === 'senha123') {
-        // Simular um atraso de rede
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Registrar o login bem-sucedido (mock)
-        localStorage.setItem('admin_authenticated', 'true');
-        localStorage.setItem('admin_user', JSON.stringify({
-          id: 1,
-          nome: 'Lorena Jacob',
-          email: 'admin@lorenajacob.com.br',
-          role: 'admin'
-        }));
-        
-        // Redirecionar para o dashboard
-        router.push('/admin');
-      } else {
-        setError('Email ou senha inválidos. Tente novamente.');
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (signInError) {
+        console.error('Supabase Sign In Error:', signInError);
+        if (signInError.message === "Invalid login credentials") {
+          setErrorMsg('Email ou senha inválidos. Tente novamente.');
+        } else {
+          setErrorMsg(signInError.message || 'Ocorreu um erro ao tentar fazer login.');
+        }
+        setIsLoading(false);
+        return;
       }
-    } catch (error) {
-      setError('Ocorreu um erro ao tentar fazer login. Tente novamente.');
-      console.error('Erro de login:', error);
+
+      // Login bem-sucedido! O Supabase Auth gerencia a sessão.
+      // Não precisamos mais do localStorage.setItem('admin_authenticated', 'true');
+
+      // O AuthCheck cuidará do redirecionamento após o estado de autenticação mudar.
+      // No entanto, podemos dar um "empurrãozinho" aqui.
+      router.push('/admin'); 
+      // router.refresh(); // Pode ser útil para forçar o AuthCheck a reavaliar
+
+    } catch (catchedError: any) {
+      console.error('Erro de login (catch):', catchedError);
+      setErrorMsg('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -52,11 +58,12 @@ export default function AdminLoginPage() {
         <div>
           <div className="flex justify-center">
             <Image
-              src="/assets/logo-lorena.png"
+              src="/logos/logo1.webp" // Atualizado para o caminho da sua logo, se necessário
               alt="Logo Lorena Jacob"
-              width={200}
-              height={60}
-              className="h-12 w-auto"
+              width={200} // Ajuste conforme necessário
+              height={60} // Ajuste conforme necessário
+              className="h-auto w-auto max-w-[200px]"
+              priority
             />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -68,6 +75,7 @@ export default function AdminLoginPage() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* ... (inputs de email e senha - podem ser mantidos como estão) ... */}
           <input type="hidden" name="remember" defaultValue="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -104,7 +112,7 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          {error && (
+          {errorMsg && ( // Atualizado para errorMsg
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -123,7 +131,7 @@ export default function AdminLoginPage() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  <h3 className="text-sm font-medium text-red-800">{errorMsg}</h3>
                 </div>
               </div>
             </div>
@@ -143,7 +151,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="text-sm">
-              <Link href="/admin/esqueci-senha" className="font-medium text-purple-600 hover:text-purple-500">
+              <Link href="/esqueci-minha-senha" className="font-medium text-purple-600 hover:text-purple-500"> 
                 Esqueceu sua senha?
               </Link>
             </div>
@@ -154,15 +162,15 @@ export default function AdminLoginPage() {
               type="submit"
               disabled={isLoading}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
-                isLoading ? 'bg-purple-400' : 'bg-purple-600 hover:bg-purple-700'
+                isLoading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
               } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
             >
-              {isLoading ? (
+              {isLoading && (
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-              ) : null}
+              )}
               {isLoading ? 'Processando...' : 'Entrar'}
             </button>
           </div>
