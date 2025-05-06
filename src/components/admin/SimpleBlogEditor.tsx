@@ -8,6 +8,67 @@ interface SimpleBlogEditorProps {
   onChange: (content: string) => void;
 }
 
+// Adicionando estilos CSS embutidos para o preview 
+const previewStyles = `
+  .post-content-preview {
+    font-family: system-ui, sans-serif;
+    color: #333333;
+    line-height: 1.8;
+    font-size: 1.1rem;
+  }
+  
+  .post-content-preview h1 {
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: var(--texto-cor, #715B3F);
+    margin: 2rem 0 1.2rem;
+    line-height: 1.3;
+  }
+  
+  .post-content-preview h2 {
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--titulo-cor, #715B3F);
+    margin: 1.8rem 0 1rem;
+    line-height: 1.3;
+  }
+  
+  .post-content-preview h3 {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: var(--titulo-cor, #8A7559);
+    margin: 1.5rem 0 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .post-content-preview p {
+    margin-bottom: 1.2rem;
+  }
+  
+  .post-content-preview ul, .post-content-preview ol {
+    margin-bottom: 1.2rem;
+    padding-left: 1.5rem;
+  }
+  
+  .post-content-preview li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .post-content-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 1.5rem 0;
+  }
+  
+  .preview-container {
+    background-color: #f7f7f7;
+    min-height: 400px;
+    max-height: 600px;
+    padding-bottom: 2rem;
+  }
+`;
+
 export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogEditorProps) {
   const [content, setContent] = useState(initialValue);
   const [previewMode, setPreviewMode] = useState(false);
@@ -140,6 +201,8 @@ export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogE
 
   return (
     <div className="border border-gray-400 rounded-md overflow-hidden shadow-sm">
+      {/* Estilos para o modo preview */}
+      <style dangerouslySetInnerHTML={{ __html: previewStyles }} />
       {/* Barra de ferramentas */}
       <div className="bg-gray-100 border-b border-gray-400 p-2 flex flex-wrap gap-1">
         <button 
@@ -250,19 +313,57 @@ export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogE
         <button 
           type="button"
           onClick={() => setPreviewMode(!previewMode)}
-          className={`p-1.5 rounded font-medium ${previewMode ? 'bg-purple-100 text-purple-700' : 'bg-gray-200 text-gray-700 hover:bg-purple-100 hover:text-purple-700'}`}
-          title={previewMode ? "Editar" : "Visualizar"}
+          className={`px-3 py-1.5 rounded font-medium ${previewMode ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-purple-100 hover:text-purple-700'}`}
+          title={previewMode ? "Editar" : "Visualizar como leitor verá"}
         >
-          {previewMode ? 'Modo Edição' : 'Visualizar'}
+          {previewMode ? 'Voltar para Edição' : 'Visualizar no blog'}
         </button>
       </div>
       
       {/* Editor / Preview */}
       {previewMode ? (
-        <div 
-          className="p-4 min-h-[400px] bg-white"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        <div className="preview-container overflow-y-auto">
+          {/* Simula o header do post com banner */}
+          <div className="w-full relative bg-gray-800 h-[200px] flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-center items-center">
+              <div className="container mx-auto max-w-4xl text-center">
+                <h2 className="text-3xl font-bold text-white mt-5 mb-2">
+                  Visualização do Post
+                </h2>
+              </div>
+            </div>
+          </div>
+          
+          {/* Conteúdo do post em um layout similar ao real */}
+          <div className="bg-white rounded-lg shadow-lg max-w-[800px] mx-auto mt-8 p-8 relative z-10">
+            <div className="font-sans text-gray-700">
+              {/* Identificação do autor */}
+              <div className="text-sm text-gray-500 mb-4">
+                por <span className="font-medium">Lorena Jacob</span>
+              </div>
+              
+              {/* Conteúdo principal */}
+              <div 
+                className="post-content-preview"
+                style={{ 
+                  '--texto-cor': '#715B3F',
+                  '--titulo-cor': '#715B3F'
+                } as React.CSSProperties}
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            </div>
+          </div>
+          
+          <div className="my-4 max-w-[800px] mx-auto bg-gray-200 p-3 rounded-md text-center text-gray-600 text-sm">
+            Esta é apenas uma visualização. O formato final pode variar ligeiramente.
+            <button 
+              onClick={() => setPreviewMode(false)}
+              className="ml-3 text-purple-600 hover:text-purple-800 font-medium"
+            >
+              Voltar à edição
+            </button>
+          </div>
+        </div>
       ) : (
         <textarea
           id="content-editor"
