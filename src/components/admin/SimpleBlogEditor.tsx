@@ -10,18 +10,45 @@ interface SimpleBlogEditorProps {
   postSubtitle?: string;
   postImageUrl?: string;
   authorName?: string;
+  postColors?: {
+    textoPadrao?: string;
+    titulosH2?: string[];
+  };
 }
 
 // Adicionando estilos CSS embutidos para o preview 
 const previewStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+  
+  .preview-container {
+    background-color: #f7f7f7;
+    min-height: 400px;
+    max-height: 600px;
+    padding-bottom: 2rem;
+  }
+
+  .preview-title {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  
+  .preview-subtitle {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.17em;
+  }
+  
   .post-content-preview {
-    font-family: system-ui, sans-serif;
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
     color: #333333;
     line-height: 1.8;
     font-size: 1.1rem;
   }
   
   .post-content-preview h1 {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
     font-weight: 700;
     font-size: 2.2rem;
     color: var(--texto-cor, #715B3F);
@@ -29,18 +56,49 @@ const previewStyles = `
     line-height: 1.3;
   }
   
-  .post-content-preview h2 {
+  /* Estilização dos títulos específicos por posição */
+  .post-content-preview h2:nth-of-type(1) {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
     font-weight: 600;
     font-size: 1.8rem;
-    color: var(--titulo-cor, #715B3F);
+    color: var(--titulo1-cor, #000000);
+    margin: 1.8rem 0 1rem;
+    line-height: 1.3;
+  }
+  
+  .post-content-preview h2:nth-of-type(2) {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--titulo2-cor, #000000);
+    margin: 1.8rem 0 1rem;
+    line-height: 1.3;
+  }
+  
+  .post-content-preview h2:nth-of-type(3) {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--titulo3-cor, #8651B4);
+    margin: 1.8rem 0 1rem;
+    line-height: 1.3;
+  }
+  
+  /* Estilo padrão para outros títulos */
+  .post-content-preview h2 {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--texto-cor, #715B3F);
     margin: 1.8rem 0 1rem;
     line-height: 1.3;
   }
   
   .post-content-preview h3 {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
     font-weight: 600;
     font-size: 1.5rem;
-    color: var(--titulo-cor, #8A7559);
+    color: var(--texto-cor, #8A7559);
     margin: 1.5rem 0 0.8rem;
     line-height: 1.3;
   }
@@ -65,11 +123,11 @@ const previewStyles = `
     margin: 1.5rem 0;
   }
   
-  .preview-container {
-    background-color: #f7f7f7;
-    min-height: 400px;
-    max-height: 600px;
-    padding-bottom: 2rem;
+  .author-line {
+    font-family: var(--font-museo-sans, 'Segoe UI', sans-serif);
+    font-size: 0.95rem;
+    color: #777777;
+    margin-bottom: 1.5rem;
   }
 `;
 
@@ -79,7 +137,11 @@ export default function SimpleBlogEditor({
   postTitle = 'Título do Post', 
   postSubtitle = 'Breve descrição do post que aparecerá nos cards e nas previews.', 
   postImageUrl = '', 
-  authorName = 'Lorena Jacob' 
+  authorName = 'Lorena Jacob',
+  postColors = {
+    textoPadrao: '#715B3F',
+    titulosH2: ['#715B3F', '#715B3F', '#8651B4']
+  }
 }: SimpleBlogEditorProps) {
   const [content, setContent] = useState(initialValue);
   const [previewMode, setPreviewMode] = useState(false);
@@ -347,11 +409,11 @@ export default function SimpleBlogEditor({
             ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end items-center pb-8">
               <div className="container mx-auto max-w-4xl text-center px-4">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
+                <h2 className="preview-title text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
                   {postTitle}
                 </h2>
                 {postSubtitle && (
-                  <p className="text-xl text-white opacity-90 max-w-3xl mx-auto">
+                  <p className="preview-subtitle text-xl text-white opacity-90 max-w-3xl mx-auto">
                     {postSubtitle}
                   </p>
                 )}
@@ -363,7 +425,7 @@ export default function SimpleBlogEditor({
           <div className="bg-white rounded-lg shadow-lg max-w-[800px] mx-auto mt-8 p-8 relative z-10">
             <div className="font-sans text-gray-700">
               {/* Identificação do autor */}
-              <div className="text-sm text-gray-500 mb-4">
+              <div className="author-line text-sm text-gray-500 mb-4">
                 por <span className="font-medium">{authorName}</span>
               </div>
               
@@ -371,8 +433,10 @@ export default function SimpleBlogEditor({
               <div 
                 className="post-content-preview"
                 style={{ 
-                  '--texto-cor': '#715B3F',
-                  '--titulo-cor': '#715B3F'
+                  '--texto-cor': postColors.textoPadrao,
+                  '--titulo1-cor': postColors.titulosH2?.[0] || postColors.textoPadrao,
+                  '--titulo2-cor': postColors.titulosH2?.[1] || postColors.textoPadrao,
+                  '--titulo3-cor': postColors.titulosH2?.[2] || '#8651B4'
                 } as React.CSSProperties}
                 dangerouslySetInnerHTML={{ __html: content }}
               />
