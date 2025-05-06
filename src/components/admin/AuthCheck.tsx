@@ -4,7 +4,7 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { User } from '@supabase/supabase-js'; // Para tipagem do usuário
+import { User, Session } from '@supabase/supabase-js';
 
 interface AuthCheckProps {
   children: ReactNode;
@@ -14,64 +14,54 @@ export default function AuthCheck({ children }: AuthCheckProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null); // Estado para o usuário
 
   useEffect(() => {
-    let isMounted = true; // Para evitar atualizações de estado em componente desmontado
+    let isMounted = true;
 
-    const checkSessionAndRedirect = (sessionUser: User | null) => {
+    // Função para lidar com a sessão e redirecionamentos
+    const handleAuthSession = (session: Session | null) => {
       if (!isMounted) return;
+
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setIsLoading(false); // Importante: definir isLoading como false após obter a sessão
 
       const isLoginPage = pathname === '/admin/login';
 
-      if (!sessionUser && !isLoginPage) {
+      if (!currentUser && !isLoginPage) {
         router.push('/admin/login');
-      } else if (sessionUser && isLoginPage) {
+      } else if (currentUser && isLoginPage) {
         router.push('/admin');
       }
-      setIsLoading(false);
     };
 
     // Verifica a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted) {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        checkSessionAndRedirect(currentUser);
-      }
+      handleAuthSession(session);
     }).catch(error => {
-        if(isMounted) {
-            console.error("AuthCheck: Erro ao obter sessão inicial", error);
-            setIsLoading(false);
-            if (pathname !== '/admin/login') router.push('/admin/login');
-        }
+      if (isMounted) {
+        console.error("AuthCheck: Erro ao obter sessão inicial", error);
+        setIsLoading(false);
+        if (pathname !== '/admin/login') router.push('/admin/login');
+      }
     });
 
     // Ouve mudanças no estado de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (isMounted) {
-          const currentUser = session?.user ?? null;
-          setUser(currentUser);
-          // Não precisa chamar checkSessionAndRedirect aqui sempre,
-          // pois o router.push no login/logout já fará o trabalho.
-          // Mas, se quiser forçar um recheck, poderia.
-          // A verificação de rota dentro do listener é mais precisa para eventos específicos:
-          if (_event === 'SIGNED_IN' && pathname === '/admin/login') {
-              router.push('/admin');
-          }
-          if (_event === 'SIGNED_OUT' && pathname !== '/admin/login') {
-              router.push('/admin/login');
-          }
+          // Atualiza o usuário e lida com redirecionamentos baseado no novo estado da sessão
+          handleAuthSession(session);
         }
       }
     );
-    
+
     return () => {
       isMounted = false;
       authListener?.subscription.unsubscribe();
     };
-  }, [pathname, router]);
+  }, [pathname, router]); // pathname e router como dependências
 
   if (isLoading) {
     return (
@@ -81,16 +71,16 @@ export default function AuthCheck({ children }: AuthCheckProps) {
     );
   }
 
-  // Permite renderizar a página de login OU se o usuário estiver autenticado para outras páginas admin
-  if (pathname === '/admin/login' || user) {
+  // Se não está carregando e o usuário está definido (logado), OU se estamos na página de login, renderiza children
+  if (user || pathname === '/admin/login') {
     return <>{children}</>;
   }
-
-  // Se não estiver carregando, não for página de login e não houver usuário,
-  // o redirecionamento já deve ter ocorrido. Retornar null ou um loader aqui é uma segurança.
+  
+  // Se chegou aqui, significa que não está carregando, não tem usuário e não é a página de login.
+  // O useEffect já deveria ter redirecionado. Retornar o loader é uma segurança para evitar flash de conteúdo.
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
     </div>
-  ); // Ou simplesmente null se o redirecionamento for confiável
+  );
 }
