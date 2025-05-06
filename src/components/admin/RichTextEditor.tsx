@@ -5,10 +5,11 @@ import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import React, { useEffect, useState } from 'react'; // Adicionado useState
+import React, { useEffect, useState, useCallback } from 'react'; // Adicionado useCallback
 
-// --- MenuBar (mantenha a sua versão funcional) ---
+// --- MenuBar (sem alterações) ---
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  // ... (seu código do MenuBar permanece o mesmo) ...
   if (!editor) {
     return null;
   }
@@ -78,20 +79,23 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
-
-// --- Editor Principal ---
 interface RichTextEditorProps {
   initialContent: string;
   onChange: (htmlContent: string) => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChange }) => {
-  const [isClient, setIsClient] = useState(false); // Estado para controlar se estamos no cliente
+  const [isClient, setIsClient] = useState(false);
 
-  // Efeito para rodar SOMENTE no cliente
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // MODIFICAÇÃO 1: Memoizar a função onChange
+  // Se a função `onChange` passada como prop for recriada a cada renderização do componente pai,
+  // isso pode fazer o `useEditor` recriar o editor. Usar `useCallback` no componente pai
+  // para a função que atualiza `formData.conteudo` é a melhor abordagem.
+  // Aqui, assumimos que o `onChange` passado já pode ser estável.
 
   const editor = useEditor({
     extensions: [
@@ -101,7 +105,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
         types: ['textStyle'],
       }),
     ],
-    content: initialContent, // Conteúdo inicial é passado, mas o editor só será totalmente funcional no cliente
+    // MODIFICAÇÃO 2: Definir o conteúdo inicial APENAS UMA VEZ ou quando explicitamente necessário.
+    // A dependência de `initialContent` no array de dependências do `useEditor` pode ser problemática
+    // se `initialContent` mudar frequentemente de uma forma que não seja a intenção de recarregar o editor.
+    // Vamos controlar o conteúdo inicial de forma mais granular.
+    content: '', // Começar com conteúdo vazio e preencher no useEffect
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -110,29 +118,31 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
         class: 'focus:outline-none p-4 min-h-[400px] bg-white text-gray-800',
       },
     },
-    // Adicionando esta opção para resolver os avisos de hidratação
     immediatelyRender: false,
-  }, [initialContent]); // Recriar o editor se initialContent mudar (importante para edição)
+  }, [onChange]); // Removido initialContent daqui, será tratado no useEffect abaixo
 
-  // Atualizar conteúdo do editor se o initialContent mudar e o editor já estiver pronto
+  // MODIFICAÇÃO 3: Efeito para definir o conteúdo inicial e lidar com mudanças externas.
   useEffect(() => {
-    if (isClient && editor && initialContent && initialContent !== editor.getHTML()) {
-      // Usar setTimeout para dar tempo ao editor de inicializar completamente no cliente
-      // antes de tentar definir o conteúdo, especialmente se initialContent vem de props/estado
-      const timer = setTimeout(() => {
-        if (editor && !editor.isDestroyed) { // Checar se o editor não foi destruído
-             editor.commands.setContent(initialContent, false);
-        }
-      }, 100); // Um pequeno delay pode ajudar
-      return () => clearTimeout(timer);
+    if (isClient && editor && !editor.isDestroyed) {
+      // Define o conteúdo inicial SOMENTE se o editor estiver vazio E initialContent tiver valor.
+      // Isso evita sobrescrever o conteúdo do editor a cada renderização se initialContent não mudou significativamente.
+      if (editor.isEmpty && initialContent) {
+        editor.commands.setContent(initialContent, false);
+      }
+      // Se você precisar que `initialContent` (vindo de props, por exemplo, ao carregar um post para edição)
+      // ATUALIZE o conteúdo do editor DEPOIS da montagem inicial, você pode adicionar uma lógica aqui.
+      // Mas cuidado para não fazer isso a cada keystroke.
+      // Exemplo:
+      // else if (initialContent !== editor.getHTML()) {
+      //    // Apenas atualize se o initialContent de fora for realmente diferente
+      //    // e se não for uma atualização causada pelo próprio editor.
+      //    // Esta parte é delicada e depende de como você gerencia o estado `initialContent` no pai.
+      //    // Por agora, focaremos em fazer a digitação funcionar.
+      // }
     }
-  }, [initialContent, editor, isClient]);
+  }, [initialContent, editor, isClient]); // Adicionar initialContent aqui é crucial para carregar o conteúdo na edição
 
-
-  // Não renderizar nada no servidor ou antes da hidratação no cliente
   if (!isClient || !editor) {
-    // Pode retornar um placeholder mais robusto se quiser, mas para o editor em si,
-    // é melhor renderizá-lo apenas quando estiver pronto no cliente.
     return <div className="p-4 border border-gray-300 rounded-md shadow-sm bg-white min-h-[478px] animate-pulse">
              <div className="bg-gray-100 border-b border-gray-300 p-2 h-[46px]"></div>
              <div className="p-4 min-h-[400px] bg-gray-50"></div>
@@ -143,8 +153,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
     <div className="border border-gray-300 rounded-md shadow-sm bg-white">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
-      {/* Os estilos JSX que tínhamos podem ser mantidos aqui se necessário */}
       <style jsx>{`
+        /* ... (seu CSS in-place permanece o mesmo) ... */
         :global(.ProseMirror) {
           min-height: 400px;
           padding: 1rem;

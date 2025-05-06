@@ -1,56 +1,106 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { blogPosts, blogCategorias } from '@/lib/mockData';
+import { getAdminBlogPosts, getBlogCategories, deletePost, type BlogPostFromDB, type BlogCategoryFromDB } from './actions'; // Importar as actions
 
 export default function AdminBlogPage() {
-  const [posts, setPosts] = useState(blogPosts);
+  const [posts, setPosts] = useState<BlogPostFromDB[]>([]);
+  const [allCategories, setAllCategories] = useState<BlogCategoryFromDB[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null); // ID da categoria é string (UUID)
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
-  const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
+  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]); // IDs são strings
 
-  // Filtrar posts baseado no termo de busca e categoria selecionada
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const [fetchedPosts, fetchedCategories] = await Promise.all([
+          getAdminBlogPosts(),
+          getBlogCategories()
+        ]);
+        setPosts(fetchedPosts);
+        setAllCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Erro ao carregar dados da página de blog admin:", error);
+        // Tratar erro, talvez mostrar uma mensagem para o usuário
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   const filteredPosts = posts.filter(post => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       post.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.resumo?.toLowerCase().includes(searchTerm.toLowerCase());
+      (post.resumo && post.resumo.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCategory = selectedCategory === null || 
-      post.categorias.some(cat => cat.id === selectedCategory);
-    
+    const matchesCategory = selectedCategoryId === null ||
+      post.blog_post_categories.some(bpc => bpc.blog_categories?.id === selectedCategoryId);
+      
     return matchesSearch && matchesCategory;
   });
 
-  // Função para lidar com a seleção de posts para ações em lote
-  const togglePostSelection = (postId: number) => {
-    if (selectedPosts.includes(postId)) {
-      setSelectedPosts(prev => prev.filter(id => id !== postId));
-    } else {
-      setSelectedPosts(prev => [...prev, postId]);
-    }
+  const togglePostSelection = (postId: string) => {
+    setSelectedPostIds(prev =>
+      prev.includes(postId) ? prev.filter(id => id !== postId) : [...prev, postId]
+    );
   };
 
-  // Função para selecionar/deselecionar todos os posts
   const toggleSelectAll = () => {
-    if (selectedPosts.length === filteredPosts.length) {
-      setSelectedPosts([]);
+    if (selectedPostIds.length === filteredPosts.length && filteredPosts.length > 0) {
+      setSelectedPostIds([]);
     } else {
-      setSelectedPosts(filteredPosts.map(post => post.id));
+      setSelectedPostIds(filteredPosts.map(post => post.id));
     }
   };
 
-  // Função simulada para exclusão de posts
-  const handleDeletePosts = () => {
-    if (selectedPosts.length === 0) return;
-    
-    if (window.confirm(`Tem certeza que deseja excluir ${selectedPosts.length} post(s)?`)) {
-      setPosts(prev => prev.filter(post => !selectedPosts.includes(post.id)));
-      setSelectedPosts([]);
+  const handleDeleteSinglePost = async (postId: string, postTitle: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o post "${postTitle}"?`)) {
+      const result = await deletePost(postId);
+      if (result.success) {
+        setPosts(prev => prev.filter(p => p.id !== postId));
+        alert(result.message);
+      } else {
+        alert(`Erro: ${result.message}`);
+      }
     }
   };
+
+  const handleDeleteSelectedPosts = async () => {
+    if (selectedPostIds.length === 0) return;
+    
+    if (window.confirm(`Tem certeza que deseja excluir ${selectedPostIds.length} post(s)?`)) {
+      // Aqui você pode otimizar para deletar em lote se sua action suportar,
+      // ou iterar e chamar deletePost para cada um.
+      // Por simplicidade, vamos iterar por enquanto.
+      let successCount = 0;
+      for (const postId of selectedPostIds) {
+        const result = await deletePost(postId);
+        if (result.success) {
+          successCount++;
+        } else {
+          alert(`Erro ao excluir post ${postId}: ${result.message}`);
+        }
+      }
+      setPosts(prev => prev.filter(post => !selectedPostIds.includes(post.id)));
+      setSelectedPostIds([]);
+      alert(`${successCount} post(s) excluído(s) com sucesso.`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            <p className="ml-3 text-purple-700">Carregando posts...</p>
+        </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,7 +114,6 @@ export default function AdminBlogPage() {
         </Link>
       </div>
       
-      {/* Filtros e busca */}
       <div className="bg-white rounded-lg shadow-md border border-gray-300 p-5 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
@@ -85,11 +134,11 @@ export default function AdminBlogPage() {
           <div className="sm:w-64">
             <select
               className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              value={selectedCategory || ''}
-              onChange={(e) => setSelectedCategory(e.target.value ? Number(e.target.value) : null)}
+              value={selectedCategoryId || ''}
+              onChange={(e) => setSelectedCategoryId(e.target.value || null)}
             >
               <option value="">Todas as categorias</option>
-              {blogCategorias.map(category => (
+              {allCategories.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.nome}
                 </option>
@@ -98,11 +147,10 @@ export default function AdminBlogPage() {
           </div>
         </div>
         
-        {/* Ações em lote */}
-        {selectedPosts.length > 0 && (
+        {selectedPostIds.length > 0 && (
           <div className="bg-gray-100 p-3 rounded-md border border-gray-300 flex flex-wrap items-center gap-2">
             <span className="text-sm text-gray-800 font-medium">
-              {selectedPosts.length} post(s) selecionado(s)
+              {selectedPostIds.length} post(s) selecionado(s)
             </span>
             <div className="flex-1"></div>
             <div className="relative">
@@ -124,11 +172,12 @@ export default function AdminBlogPage() {
               {isBulkActionsOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1">
                   <button
-                    onClick={handleDeletePosts}
+                    onClick={handleDeleteSelectedPosts}
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Excluir selecionados
                   </button>
+                  {/* TODO: Implementar ações de publicar/despublicar em lote */}
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
@@ -143,7 +192,7 @@ export default function AdminBlogPage() {
               )}
             </div>
             <button
-              onClick={() => setSelectedPosts([])}
+              onClick={() => setSelectedPostIds([])}
               className="text-sm text-purple-600 hover:text-purple-800 font-medium"
             >
               Limpar seleção
@@ -152,7 +201,6 @@ export default function AdminBlogPage() {
         )}
       </div>
       
-      {/* Tabela de posts */}
       <div className="bg-white rounded-lg shadow-md border border-gray-300 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -163,8 +211,9 @@ export default function AdminBlogPage() {
                     <input
                       type="checkbox"
                       className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                      checked={selectedPosts.length === filteredPosts.length && filteredPosts.length > 0}
+                      checked={selectedPostIds.length === filteredPosts.length && filteredPosts.length > 0}
                       onChange={toggleSelectAll}
+                      disabled={filteredPosts.length === 0}
                     />
                   </div>
                 </th>
@@ -180,8 +229,8 @@ export default function AdminBlogPage() {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Data
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Visualizações
+                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  Status
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Ações
@@ -196,13 +245,13 @@ export default function AdminBlogPage() {
                       <input
                         type="checkbox"
                         className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                        checked={selectedPosts.includes(post.id)}
+                        checked={selectedPostIds.includes(post.id)}
                         onChange={() => togglePostSelection(post.id)}
                       />
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        {post.imagem_destaque_url && (
+                        {post.imagem_destaque_url ? (
                           <div className="flex-shrink-0 h-10 w-10 mr-3">
                             <div className="h-10 w-10 rounded overflow-hidden bg-gray-100 relative">
                               <Image
@@ -215,37 +264,52 @@ export default function AdminBlogPage() {
                               />
                             </div>
                           </div>
+                        ) : (
+                           <div className="flex-shrink-0 h-10 w-10 mr-3 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sem Img</div>
                         )}
-                        <div className="ml-4">
+                        <div>
                           <div className="text-sm font-medium text-gray-900 line-clamp-1">
                             {post.titulo}
                           </div>
                           <div className="text-sm text-gray-600 line-clamp-1">
-                            {post.resumo}
+                            {post.resumo || 'Sem resumo'}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{post.author?.nome || 'Sem autor'}</div>
+                      <div className="text-sm text-gray-900">{post.user_profiles?.nome || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-1">
-                        {post.categorias.map((cat) => (
-                          <span
-                            key={cat.id}
-                            className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800"
-                          >
-                            {cat.nome}
-                          </span>
+                        {post.blog_post_categories?.map((bpc) => (
+                           bpc.blog_categories && (
+                            <span
+                                key={bpc.blog_categories.id}
+                                className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800"
+                            >
+                                {bpc.blog_categories.nome}
+                            </span>
+                           )
                         ))}
+                        {(!post.blog_post_categories || post.blog_post_categories.length === 0) && (
+                            <span className="text-xs text-gray-500">Nenhuma</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(post.created_at).toLocaleDateString('pt-BR')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {post.visualizacoes || 0}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      {post.is_published ? (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          Publicado
+                        </span>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                          Rascunho
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
@@ -256,11 +320,7 @@ export default function AdminBlogPage() {
                           Editar
                         </Link>
                         <button
-                          onClick={() => {
-                            if (window.confirm('Tem certeza que deseja excluir este post?')) {
-                              setPosts(prev => prev.filter(p => p.id !== post.id));
-                            }
-                          }}
+                          onClick={() => handleDeleteSinglePost(post.id, post.titulo)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Excluir
@@ -280,30 +340,15 @@ export default function AdminBlogPage() {
           </table>
         </div>
         
-        {/* Paginação mockada */}
+        {/* Paginação (pode ser implementada no futuro) */}
         <nav className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-800 font-medium">
-                Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{filteredPosts.length}</span> resultados
+                Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{posts.length}</span> resultados
               </p>
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <button
-                  disabled
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-400 text-sm font-medium rounded-md text-gray-500 bg-gray-100"
-                >
-                  Anterior
-                </button>
-                <button
-                  disabled
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-400 text-sm font-medium rounded-md text-gray-500 bg-gray-100"
-                >
-                  Próximo
-                </button>
-              </div>
-            </div>
+            {/* Paginação real será necessária aqui se houver muitos posts */}
           </div>
         </nav>
       </div>

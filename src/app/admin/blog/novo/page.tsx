@@ -1,16 +1,15 @@
 // src/app/admin/blog/novo/page.tsx
 "use client";
 
-import { useState, useRef, useEffect } from 'react'; // Adicionado useEffect
+import { useState, useRef, useEffect, useCallback } from 'react'; // Importado useCallback
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-// REMOVA: import { blogCategorias } from '@/lib/mockData';
 import RichTextEditor from '@/components/admin/RichTextEditor';
-import { createPost, getBlogCategories } from '../actions'; // Importar a Server Action e a de buscar categorias
+import { createPost, getBlogCategories } from '../actions';
 
 interface CategoryOption {
-  id: string; // IDs do Supabase (UUIDs) são strings
+  id: string;
   nome: string;
 }
 
@@ -20,23 +19,21 @@ export default function NovoBlogPostPage() {
     titulo: '',
     slug: '',
     resumo: '',
-    conteudo: '', // Vai receber HTML do RichTextEditor
-    categorias: [] as string[], // Agora será um array de strings (UUIDs das categorias)
-    imagem_destaque_url: '' // Por enquanto, pode ser URL base64 ou vazia
+    conteudo: '', // Conteúdo inicial para o RichTextEditor
+    categorias: [] as string[],
+    imagem_destaque_url: ''
   });
-  const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<CategoryOption[]>([]); // Estado para as opções de categoria
+  const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<CategoryOption[]>([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [serverMessage, setServerMessage] = useState<{type: 'success' | 'error', text: string} | null>(null); // Para feedback
+  const [serverMessage, setServerMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Buscar categorias quando o componente montar
   useEffect(() => {
     async function loadCategories() {
       const categories = await getBlogCategories();
-      // @ts-ignore TODO: Ajustar tipo se getBlogCategories retornar algo diferente
       setBlogCategoriesOptions(categories || []);
     }
     loadCategories();
@@ -49,42 +46,52 @@ export default function NovoBlogPostPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === 'titulo') {
-      setFormData({ ...formData, titulo: value, slug: generateSlug(value) });
+      setFormData(prev => ({ ...prev, titulo: value, slug: generateSlug(value) }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-    if (errors[name]) setErrors({ ...errors, [name]: '' });
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
+  // Envolver handleContentChange com useCallback
+  const handleContentChange = useCallback((htmlContent: string) => {
+    setFormData(prevFormData => ({
+      ...prevFormData,
+      conteudo: htmlContent
+    }));
+    // Limpar erro de conteúdo se existir e se a função de erro precisar ser estável
+    if (errors.conteudo) {
+      setErrors(prevErrors => ({
+        ...prevErrors,
+        conteudo: ''
+      }));
+    }
+  }, [errors.conteudo]); // Adicionar errors.conteudo como dependência se setErrors for chamado aqui
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value); // Os values serão os IDs (strings)
-    setFormData({ ...formData, categorias: selectedOptions });
-    if (errors.categorias) setErrors({ ...errors, categorias: '' });
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData(prev => ({ ...prev, categorias: selectedOptions }));
+    if (errors.categorias) setErrors(prev => ({ ...prev, categorias: '' }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Simples preview com base64. O upload real para o Supabase Storage será feito separadamente.
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
       setPreviewUrl(result);
-      // Por enquanto, podemos salvar a URL base64 se quisermos, ou apenas usar para preview
-      // e ter um campo separado para a URL final do Supabase Storage.
-      // Para simplificar agora, vamos assumir que imagem_destaque_url pode ser essa base64
-      // mas o ideal é que seja a URL do Storage.
-      setFormData({ ...formData, imagem_destaque_url: result }); 
+      setFormData(prev => ({ ...prev, imagem_destaque_url: result })); 
     };
     reader.readAsDataURL(file);
     
-    if (errors.imagem_destaque_url) setErrors({ ...errors, imagem_destaque_url: '' });
+    if (errors.imagem_destaque_url) setErrors(prev => ({ ...prev, imagem_destaque_url: '' }));
   };
 
   const handleRemoveImage = () => {
     setPreviewUrl('');
-    setFormData({ ...formData, imagem_destaque_url: '' });
+    setFormData(prev => ({ ...prev, imagem_destaque_url: '' }));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -93,7 +100,9 @@ export default function NovoBlogPostPage() {
     if (!formData.titulo.trim()) newErrors.titulo = 'O título é obrigatório';
     if (!formData.slug.trim()) newErrors.slug = 'O slug é obrigatório';
     if (!formData.resumo.trim()) newErrors.resumo = 'O resumo é obrigatório';
-    if (!formData.conteudo.trim()) newErrors.conteudo = 'O conteúdo é obrigatório';
+    // Verifica se o conteúdo HTML (após remover tags para uma checagem simples de texto) está vazio
+    const plainTextContent = formData.conteudo.replace(/<[^>]*>?/gm, '').trim();
+    if (!plainTextContent) newErrors.conteudo = 'O conteúdo é obrigatório';
     if (formData.categorias.length === 0) newErrors.categorias = 'Selecione pelo menos uma categoria';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -108,32 +117,24 @@ export default function NovoBlogPostPage() {
     
     setIsLoading(true);
     
-    // Prepara o payload para a Server Action
-    // A action `createPost` espera que `categorias` seja um array de IDs.
-    // Nossos values do select já são os IDs (strings).
-    // Se a action esperasse números, precisaríamos converter com .map(id => parseInt(id))
     const payload = {
         ...formData,
-        // imagem_destaque_url: será a URL do Supabase Storage no futuro. Por agora, pode ser a base64 ou vazia.
     };
 
     try {
-      const result = await createPost(payload); // Chama a Server Action
+      const result = await createPost(payload); 
 
       if (result.success) {
         setServerMessage({type: 'success', text: result.message || "Post criado com sucesso!"});
-        // alert(result.message || "Post criado com sucesso!"); // Ou usar um toast
         setTimeout(() => {
-          router.push('/admin/blog'); // Redireciona para a lista de posts
-        }, 1500); // Dá tempo para o usuário ver a mensagem de sucesso
+          router.push('/admin/blog'); 
+        }, 1500); 
       } else {
         setServerMessage({type: 'error', text: result.message || "Falha ao criar o post."});
-        // alert(result.message || "Falha ao criar o post.");
       }
     } catch (error: any) {
       console.error('Erro ao criar post (catch no handleSubmit):', error);
       setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao criar o post."});
-      // alert('Ocorreu um erro inesperado ao criar o post.');
     } finally {
       setIsLoading(false);
     }
@@ -197,14 +198,14 @@ export default function NovoBlogPostPage() {
                     id="categorias"
                     name="categorias"
                     multiple
-                    value={formData.categorias} // value é um array de strings (IDs)
+                    value={formData.categorias}
                     onChange={handleCategoryChange}
                     className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.categorias ? 'border-red-300' : ''}`}
                     size={5}
                   >
                     {blogCategoriesOptions.length === 0 && <option disabled>Carregando categorias...</option>}
                     {blogCategoriesOptions.map(categoria => (
-                      <option key={categoria.id} value={categoria.id}> {/* value deve ser o ID da categoria (string UUID) */}
+                      <option key={categoria.id} value={categoria.id}>
                         {categoria.nome}
                       </option>
                     ))}
@@ -220,7 +221,6 @@ export default function NovoBlogPostPage() {
           <div className="p-6">
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Imagem de Destaque</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {/* ... (código do input de imagem, pode manter como estava) ... */}
                 <div className="sm:col-span-6">
                 <label className="block text-sm font-medium text-gray-800">Imagem</label>
                 <div className="mt-1 flex items-center">
@@ -256,14 +256,10 @@ export default function NovoBlogPostPage() {
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo</h2>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-6">
-                {/* <label htmlFor="conteudo" className="block text-sm font-medium text-gray-800">Conteúdo</label> */}
                 <div className="mt-1">
                   <RichTextEditor
-                    initialContent={formData.conteudo}
-                    onChange={(html) => {
-                      setFormData({...formData, conteudo: html });
-                      if (errors.conteudo) setErrors({...errors, conteudo: ''});
-                    }}
+                    initialContent={formData.conteudo} // Passando o estado atual
+                    onChange={handleContentChange}     // Passando a função memoizada
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
@@ -278,7 +274,7 @@ export default function NovoBlogPostPage() {
         </div>
         
         {/* Botões de ação */}
-        <div className="flex justify-end space-x-4 pt-5"> {/* Adicionado pt-5 para espaçamento */}
+        <div className="flex justify-end space-x-4 pt-5">
           <Link
             href="/admin/blog"
             className="px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
