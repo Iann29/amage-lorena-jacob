@@ -27,12 +27,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
   const comments = post ? getCommentsByPostId(post.id) : [];
   const postsPopulares = getPopularPosts();
   
-  // Obter as cores definidas para o post ou usar cores padrão
-  const coresPost = post?.cores || {
-    textoPadrao: '#715B3F',   // Cor padrão para texto
-    tituloPrincipal: '#715B3F', // Cor para o título principal
-    titulosH2: ['#715B3F', '#715B3F', '#715B3F'] // Cores padrão para os títulos H2
-  };
+  // As cores agora são definidas diretamente no HTML do conteúdo
   
   // Se o post não existir, mostrar mensagem de erro
   if (!post) {
@@ -108,16 +103,8 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <span>por {post.author.nome}</span>
           </div>
           
-          {/* Conteúdo do Post com estilos aplicados pelo CSS Module e cores personalizadas */}
-          <div 
-            className={styles.postContent}
-            style={{ 
-              '--texto-cor': coresPost.textoPadrao,
-              '--titulo1-cor': coresPost.titulosH2[0] || coresPost.textoPadrao,
-              '--titulo2-cor': coresPost.titulosH2[1] || coresPost.textoPadrao,
-              '--titulo3-cor': coresPost.titulosH2[2] || coresPost.textoPadrao,
-            } as React.CSSProperties}
-          >
+          {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}
+          <div className={styles.postContent}>
             <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
           </div>
           

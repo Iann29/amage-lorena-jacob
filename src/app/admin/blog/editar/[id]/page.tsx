@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { blogPosts, blogCategorias, getPostBySlug } from '@/lib/mockData';
-import SimpleBlogEditor from '@/components/admin/SimpleBlogEditor';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 // Interface para o parâmetro de rota
 interface EditarPostParams {
@@ -31,11 +31,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
     resumo: '',
     conteudo: '',
     categorias: [] as number[],
-    imagem_destaque_url: '',
-    cores: {
-      textoPadrao: '#715B3F',
-      titulosH2: ['#715B3F', '#715B3F', '#8651B4']
-    }
+    imagem_destaque_url: ''
   });
   const [previewUrl, setPreviewUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -57,11 +53,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
         resumo: post.resumo || '',
         conteudo: post.conteudo,
         categorias: post.categorias.map(cat => cat.id),
-        imagem_destaque_url: post.imagem_destaque_url || '',
-        cores: post.cores || {
-          textoPadrao: '#715B3F',
-          titulosH2: ['#715B3F', '#715B3F', '#8651B4']
-        }
+        imagem_destaque_url: post.imagem_destaque_url || ''
       });
       
       if (post.imagem_destaque_url) {
@@ -425,85 +417,21 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           <div className="p-6 bg-gray-50">
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo e Estilo</h2>
 
-            {/* Seleção de cores */}
-            <div className="mb-6 border-b border-gray-200 pb-6">
-              <h3 className="text-md font-medium text-gray-800 mb-3">Personalização de Cores</h3>
-              
-              <div className="mb-4">
-                <div>
-                  <label htmlFor="corTextoPadrao" className="block text-sm font-medium text-gray-800 mb-1">
-                    Cor do Texto Principal
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      type="color"
-                      id="corTextoPadrao"
-                      value={formData.cores.textoPadrao}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        cores: {
-                          ...formData.cores,
-                          textoPadrao: e.target.value
-                        }
-                      })}
-                      className="h-10 w-16 border border-gray-300 rounded cursor-pointer"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">{formData.cores.textoPadrao}</span>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Esta cor será usada para o texto principal do artigo.
-                  </p>
-                </div>
-              </div>
 
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-800 mb-1">
-                  Cores dos Subtítulos (H2)
-                </label>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {[0, 1, 2].map((index) => (
-                    <div key={index} className="flex items-center">
-                      <input
-                        type="color"
-                        id={`corTituloH2-${index}`}
-                        value={formData.cores.titulosH2[index] || '#715B3F'}
-                        onChange={(e) => {
-                          const novasCores = [...formData.cores.titulosH2];
-                          novasCores[index] = e.target.value;
-                          setFormData({
-                            ...formData,
-                            cores: {
-                              ...formData.cores,
-                              titulosH2: novasCores
-                            }
-                          });
-                        }}
-                        className="h-10 w-16 border border-gray-300 rounded cursor-pointer"
-                      />
-                      <span className="ml-2 text-sm text-gray-600">H2 Nível {index + 1}: {formData.cores.titulosH2[index] || '#715B3F'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="mt-4 text-sm text-gray-600 bg-gray-100 p-3 rounded">
-                <p> <strong>Dica:</strong> Personalize as cores de seu post para combinar com o tema ou destacar elementos importantes.</p>
-              </div>
-            </div>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-6">
                 <label htmlFor="conteudo" className="block text-sm font-medium text-gray-800">
                   Conteúdo
                 </label>
                 <div className="mt-1">
-                  <SimpleBlogEditor
-                    initialValue={formData.conteudo}
-                    onChange={(content) => {
+                  <RichTextEditor
+                    initialContent={formData.conteudo} // Passa o conteúdo HTML atual
+                    onChange={(html) => { // Recebe o HTML atualizado do editor
                       setFormData({
                         ...formData,
-                        conteudo: content
+                        conteudo: html // Atualiza o estado com o HTML
                       });
-                      
+
                       // Limpar erro de conteúdo se existir
                       if (errors.conteudo) {
                         setErrors({
@@ -512,18 +440,13 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                         });
                       }
                     }}
-                    postTitle={formData.titulo}
-                    postSubtitle={formData.resumo}
-                    postImageUrl={previewUrl || formData.imagem_destaque_url}
-                    authorName="Lorena Jacob"
-                    postColors={formData.cores}
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-gray-600 font-medium">
-                  Use os botões do editor para formatar seu texto facilmente. Você também pode inserir HTML diretamente se preferir.
+                  Use a barra de ferramentas para formatar o texto e adicionar cores.
                 </p>
               </div>
             </div>

@@ -28,18 +28,9 @@ export const blogPosts = [
     titulo: 'A importância de dizer não',
     slug: 'a-importancia-de-dizer-nao',
     resumo: 'Educação positiva não é permitir tudo',
-    cores: {
-      textoPadrao: '#000000',   // Cor do texto normal
-      tituloPrincipal: '#000000', // Cor do título do post
-      titulosH2: [             // Cores para cada título H2, na ordem em que aparecem
-        '#000000',             // Primeiro título (O papel do "não")
-        '#000000',             // Segundo título (Educação positiva)
-        '#8651B4'              // Terceiro título (Conclusão) - Roxo
-      ]
-    },
-    conteudo: `<p>A busca por criar um ambiente amoroso para nossos filhos muitas vezes é confundida com permissividade. Chamamos isso de educação positiva. No entanto, muitas vezes ela é mal interpretada como permissividade – como se educar com respeito significasse permitir tudo. Mas a verdade é que educar de forma positiva não exclui o "não". Pelo contrário, saber colocá-lo é fundamental para o desenvolvimento saudável da criança.</p>
+    conteudo: `<p>A busca por criar um ambiente amoroso para nossos filhos muitas vezes é confundida com permissividade. Chamamos isso de <strong style="color: #52A4DB;">educação positiva</strong>. No entanto, muitas vezes ela é mal interpretada como permissividade – como se educar com respeito significasse permitir tudo. Mas a verdade é que educar de forma positiva não exclui o <em style="color: #8651B4;">"não"</em>. Pelo contrário, saber colocá-lo é fundamental para o desenvolvimento saudável da criança.</p>
 
-    <h2>O papel do "não" no desenvolvimento infantil</h2>
+    <h2><span style="color: #0B5394;">O papel do "não" no desenvolvimento infantil</span></h2>
     <p>Ouvir um "não" pode gerar frustração momentânea, mas é exatamente essa experiência que ensina a criança a lidar com os limites da vida. É através do "não" que ela aprende sobre respeito, empatia, paciência e responsabilidade.</p>
     <p>Crianças que crescem sem limites claros podem se tornar ansiosas, inseguras e com dificuldades para lidar com a palavra "não" no futuro – seja em uma amizade, no trabalho ou em um relacionamento amoroso. São adultos que ficam mais expostos a frustrações e têm menos recursos emocionais para enfrentá-las.</p>
 
@@ -47,8 +38,9 @@ export const blogPosts = [
     <p>Educar de forma positiva é, sim, exercer autoridade – mas uma autoridade baseada no respeito, não no medo. Explicar em vez de simplesmente impor. Um "não" pode e deve ser dito com afeto, explicação e diálogo. Um "não" pode e deve ser dito com calma e respeito. Você não precisa gritar ou ameaçar seu filho para estabelecer um limite.</p>
     <p>Por exemplo, ao invés de simplesmente dizer "Não pode mexer aí!", você pode dizer "Eu sei que você está curioso, mas isso pode machucar. Vamos brincar com algo mais seguro?". "Eu sei que você está cansado, mas temos que escovar os dentes." Dessa forma, você valida o sentimento da criança se sente ouvida, mesmo diante da frustração.</p>
 
-    <h2>Conclusão</h2>
-    <p>Dizer "não" é uma das formas mais importantes de amar e proteger uma criança. A verdadeira educação positiva não confunde o equilíbrio com permissividade, nem amar com dar acesso ao mundo sem limites. Colocar limites com respeito é preparar nossos filhos para a vida, para o convívio com o outro e para o mundo real – onde nem tudo será como eles querem e tudo bem.</p>`,
+    <h2><span style="color: #8651B4;">Conclusão</span></h2>
+    <p>Dizer "não" é uma das formas mais importantes de amar e proteger uma criança. A verdadeira educação positiva não confunde o equilíbrio com permissividade, nem amar com dar acesso ao mundo sem limites. Colocar limites com respeito é preparar nossos filhos para a vida, para o convívio com o outro e para o mundo real – onde nem tudo será como eles querem e tudo bem.</p>
+    <p><em>Este é um texto de exemplo com <strong style="color: red;">cores</strong> aplicadas.</em></p>`,
     imagem_destaque_url: 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/blog-post/a-importancia-de-dizer-nao.png',
     created_at: '2025-04-20T14:30:00Z',
     updated_at: '2025-04-20T14:30:00Z',
