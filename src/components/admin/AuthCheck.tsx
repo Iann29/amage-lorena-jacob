@@ -3,7 +3,7 @@
 
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 
 interface AuthCheckProps {
@@ -11,6 +11,7 @@ interface AuthCheckProps {
 }
 
 export default function AuthCheck({ children }: AuthCheckProps) {
+  const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);

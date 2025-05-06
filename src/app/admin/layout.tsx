@@ -7,13 +7,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation'; // Adicionar useRouter
 import Image from 'next/image';
 import AuthCheck from '@/components/admin/AuthCheck';
-import { supabase } from '@/lib/supabaseClient'; // Importar supabase
+import { createClient } from '@/utils/supabase/client'; // Importar client do Supabase
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: LayoutProps) {
+  const supabase = createClient();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // Estado para o dropdown
   const pathname = usePathname();

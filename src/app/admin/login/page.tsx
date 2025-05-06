@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
 
 // Ícones de olho (SVG simples)
 const EyeIcon = () => (
@@ -22,6 +22,7 @@ const EyeSlashIcon = () => (
 );
 
 export default function AdminLoginPage() {
+  const supabase = createClient();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
