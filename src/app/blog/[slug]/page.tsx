@@ -108,14 +108,6 @@ export default function PostPage({ params }: { params: { slug: string } }) {
             <span>por {post.author.nome}</span>
           </div>
           
-          {/* Título Principal do Post com cor personalizada */}
-          <h1 
-            className={styles.contentTitle}
-            style={{ color: coresPost.tituloPrincipal }}
-          >
-            {post.titulo}
-          </h1>
-          
           {/* Conteúdo do Post com estilos aplicados pelo CSS Module e cores personalizadas */}
           <div 
             className={styles.postContent}
