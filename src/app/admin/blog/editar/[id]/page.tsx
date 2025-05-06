@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -9,14 +10,16 @@ import { getPostForEdit, updatePost, getBlogCategories, type BlogCategoryFromDB 
 
 // Interface para o parâmetro de rota
 interface EditarPostParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditarBlogPostPage({ params }: EditarPostParams) {
   const router = useRouter();
-  const postId = params.id;
+  // Desempacotar os parâmetros usando React.use() conforme recomendado pelo Next.js
+  const unwrappedParams = use(params);
+  const postId = unwrappedParams.id;
   
   const [formData, setFormData] = useState({
     titulo: '',
@@ -36,9 +39,17 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Carregar os dados do post a ser editado
+  // Carregar os dados do post a ser editado (com controle para evitar chamadas duplicadas)
   useEffect(() => {
+    // Evitar chamadas múltiplas na montagem/remontagem do componente
+    let isMounted = true;
+    let hasRun = false;
+    
     async function fetchData() {
+      // Se já executou ou não está montado, não faz nada
+      if (hasRun || !isMounted) return;
+      hasRun = true;
+      
       try {
         // Carregar categorias e post simultaneamente
         const [categories, post] = await Promise.all([
@@ -46,6 +57,10 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           getPostForEdit(postId)
         ]);
         
+        // Verificar novamente se o componente ainda está montado
+        if (!isMounted) return;
+        
+        console.log('Carregando dados do post para edição (apenas uma vez)');        
         setBlogCategoriesOptions(categories || []);
         
         if (post) {
@@ -68,15 +83,25 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           router.push('/admin/blog');
         }
       } catch (error) {
+        // Verificar novamente se o componente ainda está montado
+        if (!isMounted) return;
+        
         console.error('Erro ao carregar dados para edição:', error);
         alert('Erro ao carregar dados do post. Tente novamente.');
       } finally {
-        setIsFetching(false);
+        if (isMounted) {
+          setIsFetching(false);
+        }
       }
     }
     
     fetchData();
-  }, [postId, router]);
+    
+    // Cleanup function para evitar memory leaks e atualizações em componentes desmontados
+    return () => {
+      isMounted = false;
+    };
+  }, [postId]); // Removida a dependência do router para evitar reexecuções
 
   // Função para gerar slug a partir do título
   const generateSlug = (title: string) => {
