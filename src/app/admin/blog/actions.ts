@@ -36,7 +36,6 @@ export interface BlogPostFromDB {
   user_profiles: { nome: string; sobrenome: string; } | null; // Para nome do autor
   blog_post_categories: { blog_categories: { id: string; nome: string; } }[]; // Para categorias
   like_count?: number; // Se você tiver
-  view_count?: number; // Se você tiver
 }
 
 export interface BlogCategoryFromDB {
@@ -217,30 +216,10 @@ export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
   try {
     await getAuthenticatedAdminId(); 
 
-    // Consulta modificada para incluir author_id e fazer join com user_profiles
+    // Abordagem simplificada: buscar apenas os posts básicos sem tentar fazer joins complexos
     const { data: posts, error } = await supabase
       .from('blog_posts')
-      .select(`
-        id,
-        titulo,
-        slug,
-        resumo,
-        imagem_destaque_url,
-        created_at,
-        is_published,
-        view_count, 
-        like_count,
-        author_id,
-        user_profiles!inner ( user_id, nome, sobrenome ),
-        blog_post_categories (
-          blog_categories ( id, nome )
-        )
-      `)
-      // Filtro para garantir que estamos unindo corretamente se author_id não for nulo
-      // Esta parte pode não ser estritamente necessária se a RLS já garante que
-      // apenas posts com autores válidos (para o admin) são retornados,
-      // mas é uma boa prática para joins explícitos.
-      // .not('author_id', 'is', null) // Descomente se tiver posts sem author_id e quiser filtrá-los
+      .select()
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -248,22 +227,33 @@ export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
       throw error;
     }
 
-    // Se a consulta acima não funcionar com o join implícito via author_id -> user_profiles(user_id)
-    // podemos precisar mapear manualmente, mas vamos tentar a forma mais idiomática do Supabase primeiro.
-    // O Supabase deveria conseguir relacionar blog_posts.author_id com user_profiles.user_id
-    // porque ambos são essencialmente o auth.uid().
+    if (!posts || posts.length === 0) {
+      console.log("Nenhum post encontrado no banco de dados");
+      return [];
+    }
 
-    // Se user_profiles retornar null para alguns posts, pode ser que o author_id
-    // não tenha um perfil correspondente ou a RLS ainda está bloqueando de alguma forma.
+    console.log(`Encontrados ${posts.length} posts no banco`);
+    
+    // Transformar para o formato esperado pela interface
+    const formattedPosts: BlogPostFromDB[] = posts.map(post => ({
+      id: post.id,
+      titulo: post.titulo,
+      slug: post.slug,
+      resumo: post.resumo,
+      conteudo: post.conteudo || '',
+      imagem_destaque_url: post.imagem_destaque_url,
+      author_id: post.author_id,
+      is_published: post.is_published || false,
+      published_at: post.published_at,
+      created_at: post.created_at,
+      updated_at: post.updated_at,
+      like_count: post.like_count || 0,
+      // Dados vazios para os relacionamentos
+      user_profiles: null,
+      blog_post_categories: []
+    }));
 
-    // Verificação e ajuste manual se necessário (Alternativa menos ideal, mas funciona):
-    // O ideal é que a query acima já traga os dados corretamente.
-    // Se a query aninhada não funcionar como esperado, você teria que fazer duas queries:
-    // 1. Buscar os posts.
-    // 2. Para cada post, buscar o perfil do autor usando author_id.
-    // Mas a sintaxe do Supabase com !inner ou !fk_column_name deveria funcionar.
-
-    return posts || [];
+    return formattedPosts;
   } catch (error: any) {
     console.error("Exceção ao buscar posts para admin:", error.message);
     return [];

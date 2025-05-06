@@ -1,71 +1,81 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { use } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { blogPosts, blogCategorias, getPostBySlug } from '@/lib/mockData';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import { getPostForEdit, updatePost, getBlogCategories, type BlogCategoryFromDB } from '../../actions';
 
 // Interface para o parâmetro de rota
 interface EditarPostParams {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
-}
-
-// Interface para parâmetros desempacotados
-interface UnwrappedParams {
-  id: string;
+  };
 }
 
 export default function EditarBlogPostPage({ params }: EditarPostParams) {
   const router = useRouter();
-  const unwrappedParams = use(params) as UnwrappedParams;
-  const postId = parseInt(unwrappedParams.id);
+  const postId = params.id;
   
   const [formData, setFormData] = useState({
     titulo: '',
     slug: '',
     resumo: '',
     conteudo: '',
-    categorias: [] as number[],
-    imagem_destaque_url: ''
+    categorias: [] as string[],
+    imagem_destaque_url: '',
+    is_published: false
   });
+  const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<BlogCategoryFromDB[]>([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [isFetching, setIsFetching] = useState(true);
+  const [serverMessage, setServerMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Carregar os dados do post a ser editado
   useEffect(() => {
-    // Em produção, buscaríamos o post do Supabase
-    // Por enquanto, vamos usar os dados mockados
-    const post = blogPosts.find(p => p.id === postId);
-    
-    if (post) {
-      setFormData({
-        titulo: post.titulo,
-        slug: post.slug,
-        resumo: post.resumo || '',
-        conteudo: post.conteudo,
-        categorias: post.categorias.map(cat => cat.id),
-        imagem_destaque_url: post.imagem_destaque_url || ''
-      });
-      
-      if (post.imagem_destaque_url) {
-        setPreviewUrl(post.imagem_destaque_url);
+    async function fetchData() {
+      try {
+        // Carregar categorias e post simultaneamente
+        const [categories, post] = await Promise.all([
+          getBlogCategories(),
+          getPostForEdit(postId)
+        ]);
+        
+        setBlogCategoriesOptions(categories || []);
+        
+        if (post) {
+          setFormData({
+            titulo: post.titulo,
+            slug: post.slug,
+            resumo: post.resumo || '',
+            conteudo: post.conteudo,
+            categorias: post.categorias || [],
+            imagem_destaque_url: post.imagem_destaque_url || '',
+            is_published: post.is_published || false
+          });
+          
+          if (post.imagem_destaque_url) {
+            setPreviewUrl(post.imagem_destaque_url);
+          }
+        } else {
+          // Post não encontrado, redirecionar para a lista
+          alert('Post não encontrado');
+          router.push('/admin/blog');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados para edição:', error);
+        alert('Erro ao carregar dados do post. Tente novamente.');
+      } finally {
+        setIsFetching(false);
       }
-    } else {
-      // Post não encontrado, redirecionar para a lista
-      alert('Post não encontrado');
-      router.push('/admin/blog');
     }
     
-    setIsFetching(false);
+    fetchData();
   }, [postId, router]);
 
   // Função para gerar slug a partir do título
@@ -109,7 +119,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
 
   // Função para lidar com seleção de categorias (múltipla)
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     setFormData({
       ...formData,
       categorias: selectedOptions
@@ -195,6 +205,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
   // Função para enviar o formulário
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerMessage(null);
     
     // Validar o formulário
     if (!validateForm()) {
@@ -204,21 +215,19 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
     setIsLoading(true);
     
     try {
-      // Em produção, aqui teríamos o envio para o Supabase
-      // Por enquanto, vamos apenas simular o envio
-      console.log('Dados do post a serem atualizados:', {
-        id: postId,
-        ...formData
-      });
+      const result = await updatePost(postId, formData);
       
-      // Simular um atraso de rede
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Redirecionar para a lista de posts
-      router.push('/admin/blog');
-    } catch (error) {
+      if (result.success) {
+        setServerMessage({type: 'success', text: result.message || "Post atualizado com sucesso!"});
+        setTimeout(() => {
+          router.push('/admin/blog');
+        }, 1500);
+      } else {
+        setServerMessage({type: 'error', text: result.message || "Falha ao atualizar o post."});
+      }
+    } catch (error: any) {
       console.error('Erro ao atualizar post:', error);
-      alert('Ocorreu um erro ao atualizar o post. Tente novamente.');
+      setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao atualizar o post."});
     } finally {
       setIsLoading(false);
     }
@@ -327,12 +336,12 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                     id="categorias"
                     name="categorias"
                     multiple
-                    value={formData.categorias.map(String)}
+                    value={formData.categorias}
                     onChange={handleCategoryChange}
                     className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.categorias ? 'border-red-300' : ''}`}
                     size={5}
                   >
-                    {blogCategorias.map(categoria => (
+                    {blogCategoriesOptions.map((categoria: BlogCategoryFromDB) => (
                       <option key={categoria.id} value={categoria.id}>
                         {categoria.nome}
                       </option>
