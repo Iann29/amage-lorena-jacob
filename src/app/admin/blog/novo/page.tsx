@@ -381,6 +381,10 @@ export default function NovoBlogPostPage() {
                         });
                       }
                     }}
+                    postTitle={formData.titulo}
+                    postSubtitle={formData.resumo}
+                    postImageUrl={previewUrl}
+                    authorName="Lorena Jacob"
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>

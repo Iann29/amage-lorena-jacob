@@ -6,6 +6,10 @@ import Image from 'next/image';
 interface SimpleBlogEditorProps {
   initialValue: string;
   onChange: (content: string) => void;
+  postTitle?: string;
+  postSubtitle?: string;
+  postImageUrl?: string;
+  authorName?: string;
 }
 
 // Adicionando estilos CSS embutidos para o preview 
@@ -69,7 +73,14 @@ const previewStyles = `
   }
 `;
 
-export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogEditorProps) {
+export default function SimpleBlogEditor({ 
+  initialValue, 
+  onChange, 
+  postTitle = 'Título do Post', 
+  postSubtitle = 'Breve descrição do post que aparecerá nos cards e nas previews.', 
+  postImageUrl = '', 
+  authorName = 'Lorena Jacob' 
+}: SimpleBlogEditorProps) {
   const [content, setContent] = useState(initialValue);
   const [previewMode, setPreviewMode] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -324,12 +335,26 @@ export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogE
       {previewMode ? (
         <div className="preview-container overflow-y-auto">
           {/* Simula o header do post com banner */}
-          <div className="w-full relative bg-gray-800 h-[200px] flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-center items-center">
-              <div className="container mx-auto max-w-4xl text-center">
-                <h2 className="text-3xl font-bold text-white mt-5 mb-2">
-                  Visualização do Post
+          <div className="w-full relative bg-gray-800 h-[250px] flex items-center justify-center">
+            {postImageUrl ? (
+              <div className="absolute inset-0 w-full h-full">
+                <img 
+                  src={postImageUrl} 
+                  alt={postTitle} 
+                  className="w-full h-full object-cover brightness-90" 
+                />
+              </div>
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end items-center pb-8">
+              <div className="container mx-auto max-w-4xl text-center px-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
+                  {postTitle}
                 </h2>
+                {postSubtitle && (
+                  <p className="text-xl text-white opacity-90 max-w-3xl mx-auto">
+                    {postSubtitle}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -339,7 +364,7 @@ export default function SimpleBlogEditor({ initialValue, onChange }: SimpleBlogE
             <div className="font-sans text-gray-700">
               {/* Identificação do autor */}
               <div className="text-sm text-gray-500 mb-4">
-                por <span className="font-medium">Lorena Jacob</span>
+                por <span className="font-medium">{authorName}</span>
               </div>
               
               {/* Conteúdo principal */}

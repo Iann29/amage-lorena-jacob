@@ -438,6 +438,10 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                         });
                       }
                     }}
+                    postTitle={formData.titulo}
+                    postSubtitle={formData.resumo}
+                    postImageUrl={previewUrl || formData.imagem_destaque_url}
+                    authorName="Lorena Jacob"
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
