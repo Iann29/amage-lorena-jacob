@@ -22,12 +22,15 @@ export default function LayoutProvider({
     '/recuperar-senha',
     '/recuperar-senha/codigo-verificacao'
   ];
+  
+  // Verificar se é uma página de autenticação ou painel de administração
   const isAuthPage = authPages.some(page => pathname === page);
+  const isAdminPage = pathname.startsWith('/admin');
   
   return (
     <ModalProvider>
       {/* Renderização condicional do Header, mas mantendo o mesmo no DOM */}
-      {!isAuthPage && <Header />}
+      {!isAuthPage && !isAdminPage && <Header />}
       
       {/* Conteúdo principal */}
       <main className="flex-grow">
@@ -35,7 +38,7 @@ export default function LayoutProvider({
       </main>
       
       {/* Renderização condicional do Footer, mas mantendo o mesmo no DOM */}
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && !isAdminPage && <Footer />}
     </ModalProvider>
   );
 }
