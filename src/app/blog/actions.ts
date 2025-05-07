@@ -39,7 +39,7 @@ export interface BlogCategoryPublic {
 export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
   const supabase = await createClient();
   try {
-    // Buscar apenas posts publicados
+    // Buscar apenas posts publicados com view_count
     const { data: posts, error } = await supabase
       .from('blog_posts')
       .select(`
@@ -53,6 +53,7 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
         created_at,
         published_at,
         like_count,
+        view_count,
         blog_post_categories (
           blog_categories ( id, nome )
         )
@@ -65,8 +66,8 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
       return [];
     }
 
-    // Formatar os dados para o formato esperado pelo componente BlogPostCard
-    const formattedPosts = posts.map(post => {
+    // Formatar os dados e obter contagens de comentários
+    const formattedPosts = await Promise.all(posts.map(async (post) => {
       // Extrair as categorias para o formato esperado pelo componente
       const categorias = post.blog_post_categories
         ? post.blog_post_categories
@@ -80,15 +81,25 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
       
       // Formatar nome do autor com valor padrão
       const author = { nome: 'Lorena', sobrenome: 'Jacob' };
+      
+      // Obter contagem de comentários para este post
+      const { count: comment_count, error: countError } = await supabase
+        .from('blog_comments')
+        .select('id', { count: 'exact', head: true })
+        .eq('post_id', post.id)
+        .eq('is_approved', true);
+      
+      if (countError) {
+        console.error(`Erro ao contar comentários para o post ${post.id}:`, countError.message);
+      }
 
       return {
         ...post,
         author,
         categorias,
-        view_count: 0, // Valor padrão
-        comment_count: 0 // Valor padrão
+        comment_count: comment_count || 0
       } as BlogPostPublic;
-    });
+    }));
 
     return formattedPosts;
   } catch (error: any) {
@@ -129,6 +140,7 @@ export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
 export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | null> {
   const supabase = await createClient();
   try {
+    // Buscar o post com view_count incluído
     const { data: post, error } = await supabase
       .from('blog_posts')
       .select(`
@@ -142,6 +154,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
         created_at,
         published_at,
         like_count,
+        view_count,
         blog_post_categories (
           blog_categories ( id, nome )
         )
@@ -176,13 +189,33 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
     
     // Formatar nome do autor com valor padrão (igual a getPublishedBlogPosts)
     const author = { nome: 'Lorena', sobrenome: 'Jacob' };
-
+    
+    // Contar os comentários associados ao post
+    const { count: comment_count, error: countError } = await supabase
+      .from('blog_comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', post.id)
+      .eq('is_approved', true);
+    
+    if (countError) {
+      console.error(`Erro ao contar comentários para o post ${post.id}:`, countError.message);
+    }
+    
+    // Incrementar contador de visualizações a cada acesso
+    const { error: updateError } = await supabase
+      .from('blog_posts')
+      .update({ view_count: (post.view_count || 0) + 1 })
+      .eq('id', post.id);
+    
+    if (updateError) {
+      console.error(`Erro ao incrementar view_count para o post ${post.id}:`, updateError.message);
+    }
+    
     return {
       ...post,
       author,
       categorias,
-      view_count: 0, // Valor padrão, pode ser incrementado ou buscado separadamente
-      comment_count: 0 // Valor padrão, pode ser buscado separadamente
+      comment_count: comment_count || 0
     } as BlogPostPublic;
 
   } catch (error: any) {

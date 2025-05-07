@@ -86,8 +86,12 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
         
         <div className="flex justify-between items-center pt-4 border-t-4 border-gray-200">
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span>{post.view_count || '2'} visualizações</span>
-            <span>{post.comment_count || '1'} comentário</span>
+            <span>
+              {post.view_count || 0} {post.view_count === 1 ? 'visualização' : 'visualizações'}
+            </span>
+            <span>
+              {post.comment_count || 0} {post.comment_count === 1 ? 'comentário' : 'comentários'}
+            </span>
           </div>
           
           <LikeButton 
