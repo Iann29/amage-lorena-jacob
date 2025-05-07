@@ -1,26 +1,25 @@
+// src/app/admin/blog/page.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getAdminBlogPosts, getBlogCategories, deletePost, type BlogPostFromDB, type BlogCategoryFromDB } from './actions'; // Importar as actions
+import { getAdminBlogPosts, getBlogCategories, deletePost, type BlogPostFromDB, type BlogCategoryFromDB } from './actions';
 
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPostFromDB[]>([]);
   const [allCategories, setAllCategories] = useState<BlogCategoryFromDB[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null); // ID da categoria é string (UUID)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
-  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]); // IDs são strings
+  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
 
   useEffect(() => {
-    // Controle para evitar múltiplas chamadas desnecessárias
     let isMounted = true;
     let hasRun = false;
     
     async function fetchData() {
-      // Se já executou ou o componente não está mais montado, não faz nada
       if (hasRun || !isMounted) return;
       hasRun = true;
       
@@ -31,7 +30,6 @@ export default function AdminBlogPage() {
           getBlogCategories()
         ]);
         
-        // Verificar novamente se o componente ainda está montado
         if (!isMounted) return;
         
         setPosts(fetchedPosts);
@@ -39,7 +37,6 @@ export default function AdminBlogPage() {
       } catch (error) {
         if (!isMounted) return;
         console.error("Erro ao carregar dados da página de blog admin:", error);
-        // Tratar erro, talvez mostrar uma mensagem para o usuário
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -49,7 +46,6 @@ export default function AdminBlogPage() {
     
     fetchData();
     
-    // Função de limpeza para evitar memory leaks
     return () => {
       isMounted = false;
     };
@@ -58,10 +54,12 @@ export default function AdminBlogPage() {
   const filteredPosts = posts.filter(post => {
     const matchesSearch = searchTerm === '' ||
       post.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (post.resumo && post.resumo.toLowerCase().includes(searchTerm.toLowerCase()));
+      (post.resumo && post.resumo.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (post.user_profiles && `${post.user_profiles.nome} ${post.user_profiles.sobrenome}`.toLowerCase().includes(searchTerm.toLowerCase()));
     
+    // Ajuste para a nova estrutura de blog_post_categories
     const matchesCategory = selectedCategoryId === null ||
-      post.blog_post_categories.some(bpc => bpc.blog_categories?.id === selectedCategoryId);
+      (post.blog_post_categories && post.blog_post_categories.some(bpc => bpc.blog_categories?.id === selectedCategoryId));
       
     return matchesSearch && matchesCategory;
   });
@@ -96,9 +94,6 @@ export default function AdminBlogPage() {
     if (selectedPostIds.length === 0) return;
     
     if (window.confirm(`Tem certeza que deseja excluir ${selectedPostIds.length} post(s)?`)) {
-      // Aqui você pode otimizar para deletar em lote se sua action suportar,
-      // ou iterar e chamar deletePost para cada um.
-      // Por simplicidade, vamos iterar por enquanto.
       let successCount = 0;
       for (const postId of selectedPostIds) {
         const result = await deletePost(postId);
@@ -145,7 +140,7 @@ export default function AdminBlogPage() {
             </div>
             <input
               type="text"
-              placeholder="Buscar posts..."
+              placeholder="Buscar posts, autores..."
               className="pl-10 pr-4 py-2 border border-gray-400 rounded-md w-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -199,16 +194,6 @@ export default function AdminBlogPage() {
                     Excluir selecionados
                   </button>
                   {/* TODO: Implementar ações de publicar/despublicar em lote */}
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Publicar selecionados
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Despublicar selecionados
-                  </button>
                 </div>
               )}
             </div>
@@ -299,7 +284,9 @@ export default function AdminBlogPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{post.user_profiles?.nome || 'N/A'}</div>
+                      <div className="text-sm text-gray-900">
+                        {post.user_profiles ? `${post.user_profiles.nome} ${post.user_profiles.sobrenome}` : 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-1">
@@ -361,15 +348,13 @@ export default function AdminBlogPage() {
           </table>
         </div>
         
-        {/* Paginação (pode ser implementada no futuro) */}
         <nav className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-800 font-medium">
-                Mostrando <span className="font-medium">1</span> a <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{posts.length}</span> resultados
+                Mostrando <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{posts.length}</span> resultados
               </p>
             </div>
-            {/* Paginação real será necessária aqui se houver muitos posts */}
           </div>
         </nav>
       </div>

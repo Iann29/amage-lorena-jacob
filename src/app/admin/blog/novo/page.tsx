@@ -1,7 +1,7 @@
 // src/app/admin/blog/novo/page.tsx
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react'; // Importado useCallback
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,9 +19,10 @@ export default function NovoBlogPostPage() {
     titulo: '',
     slug: '',
     resumo: '',
-    conteudo: '', // Conteúdo inicial para o RichTextEditor
+    conteudo: '', 
     categorias: [] as string[],
-    imagem_destaque_url: ''
+    imagem_destaque_url: '',
+    is_published: false, // Novo campo
   });
   const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<CategoryOption[]>([]);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -44,29 +45,33 @@ export default function NovoBlogPostPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    if (name === 'titulo') {
-      setFormData(prev => ({ ...prev, titulo: value, slug: generateSlug(value) }));
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const { checked } = e.target as HTMLInputElement;
+      setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      if (name === 'titulo') {
+        setFormData(prev => ({ ...prev, titulo: value, slug: generateSlug(value) }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  // Envolver handleContentChange com useCallback
   const handleContentChange = useCallback((htmlContent: string) => {
     setFormData(prevFormData => ({
       ...prevFormData,
       conteudo: htmlContent
     }));
-    // Limpar erro de conteúdo se existir e se a função de erro precisar ser estável
     if (errors.conteudo) {
       setErrors(prevErrors => ({
         ...prevErrors,
         conteudo: ''
       }));
     }
-  }, [errors.conteudo]); // Adicionar errors.conteudo como dependência se setErrors for chamado aqui
+  }, [errors.conteudo]); 
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
@@ -82,6 +87,7 @@ export default function NovoBlogPostPage() {
     reader.onload = () => {
       const result = reader.result as string;
       setPreviewUrl(result);
+      // Idealmente, você faria o upload para o Supabase Storage aqui e usaria a URL retornada
       setFormData(prev => ({ ...prev, imagem_destaque_url: result })); 
     };
     reader.readAsDataURL(file);
@@ -100,7 +106,6 @@ export default function NovoBlogPostPage() {
     if (!formData.titulo.trim()) newErrors.titulo = 'O título é obrigatório';
     if (!formData.slug.trim()) newErrors.slug = 'O slug é obrigatório';
     if (!formData.resumo.trim()) newErrors.resumo = 'O resumo é obrigatório';
-    // Verifica se o conteúdo HTML (após remover tags para uma checagem simples de texto) está vazio
     const plainTextContent = formData.conteudo.replace(/<[^>]*>?/gm, '').trim();
     if (!plainTextContent) newErrors.conteudo = 'O conteúdo é obrigatório';
     if (formData.categorias.length === 0) newErrors.categorias = 'Selecione pelo menos uma categoria';
@@ -117,9 +122,7 @@ export default function NovoBlogPostPage() {
     
     setIsLoading(true);
     
-    const payload = {
-        ...formData,
-    };
+    const payload = { ...formData }; // Já inclui is_published
 
     try {
       const result = await createPost(payload); 
@@ -177,7 +180,7 @@ export default function NovoBlogPostPage() {
                   <input type="text" name="slug" id="slug" value={formData.slug} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`} />
                   {errors.slug && (<p className="mt-1 text-sm text-red-600">{errors.slug}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">URL amigável do post. Será gerada automaticamente a partir do título, mas pode ser editada.</p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">URL amigável do post.</p>
               </div>
               
               {/* Resumo */}
@@ -187,7 +190,7 @@ export default function NovoBlogPostPage() {
                   <textarea id="resumo" name="resumo" rows={3} value={formData.resumo} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.resumo ? 'border-red-300' : ''}`} />
                   {errors.resumo && (<p className="mt-1 text-sm text-red-600">{errors.resumo}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">Breve descrição do post que aparecerá nos cards e nas previews.</p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">Breve descrição do post.</p>
               </div>
               
               {/* Categorias */}
@@ -212,7 +215,24 @@ export default function NovoBlogPostPage() {
                   </select>
                   {errors.categorias && (<p className="mt-1 text-sm text-red-600">{errors.categorias}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">Segure CTRL (ou Command no Mac) para selecionar múltiplas categorias.</p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">Segure CTRL (ou Command) para selecionar múltiplas.</p>
+              </div>
+
+              {/* Status de Publicação */}
+              <div className="sm:col-span-2 flex items-end">
+                <div className="flex items-center h-full">
+                  <input
+                    id="is_published"
+                    name="is_published"
+                    type="checkbox"
+                    checked={formData.is_published}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="is_published" className="ml-2 block text-sm font-medium text-gray-800">
+                    Publicar Post
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -246,7 +266,7 @@ export default function NovoBlogPostPage() {
                   )}
                 </div>
                 {errors.imagem_destaque_url && (<p className="mt-1 text-sm text-red-600">{errors.imagem_destaque_url}</p>)}
-                <p className="mt-1 text-sm text-gray-600 font-medium">Recomendado: imagem de 1200 x 630 pixels para melhor visualização.</p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">Recomendado: 1200 x 630 pixels.</p>
               </div>
             </div>
           </div>
@@ -258,22 +278,21 @@ export default function NovoBlogPostPage() {
               <div className="sm:col-span-6">
                 <div className="mt-1">
                   <RichTextEditor
-                    initialContent={formData.conteudo} // Passando o estado atual
-                    onChange={handleContentChange}     // Passando a função memoizada
+                    initialContent={formData.conteudo} 
+                    onChange={handleContentChange}     
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-gray-600 font-medium">
-                  Use a barra de ferramentas para formatar o texto e adicionar cores.
+                  Use a barra de ferramentas para formatar o texto.
                 </p>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Botões de ação */}
         <div className="flex justify-end space-x-4 pt-5">
           <Link
             href="/admin/blog"
@@ -294,10 +313,10 @@ export default function NovoBlogPostPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Publicando...</span>
+                <span>Salvando...</span>
               </div>
             ) : (
-              'Publicar Post'
+              formData.is_published ? 'Publicar Post' : 'Salvar Rascunho'
             )}
           </button>
         </div>
