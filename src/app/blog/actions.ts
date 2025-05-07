@@ -11,6 +11,8 @@ export interface BlogPostPublic {
   conteudo?: string;
   imagem_destaque_url: string | null;
   author_id: string | null; // UUID
+  author_nome?: string; // Nome do autor (novo campo desnormalizado)
+  author_sobrenome?: string; // Sobrenome do autor (novo campo desnormalizado)
   published_at: string;
   created_at: string;
   like_count: number;
@@ -50,6 +52,8 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
         conteudo,
         imagem_destaque_url,
         author_id,
+        author_nome,
+        author_sobrenome,
         created_at,
         published_at,
         like_count,
@@ -72,31 +76,6 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
     
     // 2. Coletar todos os IDs de posts para buscar contagens de comentários em lote
     const postIds = posts.map(post => post.id);
-    
-    // 3. Buscar perfis de autores em lote - apenas uma consulta para todos os autores
-    const authorIds = [...new Set(posts.map(p => p.author_id).filter(id => id !== null))] as string[];
-    const userProfilesMap: Map<string, {nome: string; sobrenome: string}> = new Map();
-    
-    // Carregar autores apenas se houver IDs válidos
-    if (authorIds.length > 0) {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('user_profiles')
-        .select('user_id, nome, sobrenome')
-        .in('user_id', authorIds);
-      
-      if (!profilesError && profilesData) {
-        profilesData.forEach(profile => {
-          if (profile.user_id) {
-            userProfilesMap.set(profile.user_id, { 
-              nome: profile.nome, 
-              sobrenome: profile.sobrenome || ''
-            });
-          }
-        });
-      } else if (profilesError) {
-        console.error("Erro ao buscar perfis de usuários:", profilesError.message);
-      }
-    }
     
     // 4. Buscar contagens de comentários para todos os posts em uma única consulta
     const commentCountMap: Map<string, number> = new Map();
@@ -140,10 +119,11 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
         }
       }
       
-      // Obter informações do autor do mapa ou usar valor padrão
-      const author = post.author_id && userProfilesMap.has(post.author_id)
-        ? userProfilesMap.get(post.author_id)!
-        : { nome: 'Lorena', sobrenome: 'Jacob' };
+      // Usar os campos author_nome e author_sobrenome diretamente da tabela blog_posts
+      const author = {
+        nome: (post as any).author_nome || 'Lorena',
+        sobrenome: (post as any).author_sobrenome || 'Jacob'
+      };
       
       // Obter a contagem de comentários do mapa preenchido anteriormente
       const comment_count = commentCountMap.get(post.id) || 0;
@@ -206,6 +186,8 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
         conteudo,
         imagem_destaque_url,
         author_id,
+        author_nome,
+        author_sobrenome,
         created_at,
         published_at,
         like_count,
@@ -242,26 +224,11 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
           }))
       : [];
     
-    // Buscar informações do autor na tabela user_profiles
-    let author = { nome: 'Lorena', sobrenome: 'Jacob' }; // Valor padrão
-    
-    if (post.author_id) {
-      const { data: userProfile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('nome, sobrenome')
-        .eq('user_id', post.author_id)
-        .single();
-      
-      if (!profileError && userProfile) {
-        author = {
-          nome: userProfile.nome,
-          sobrenome: userProfile.sobrenome || ''
-        };
-      } else if (profileError && profileError.code !== 'PGRST116') {
-        // PGRST116 = not found, outros erros são reportados
-        console.error(`Erro ao buscar perfil do autor ${post.author_id}:`, profileError.message);
-      }
-    }
+    // Usar os dados de autor desnormalizados diretamente da tabela blog_posts
+    const author = {
+      nome: (post as any).author_nome || 'Lorena', 
+      sobrenome: (post as any).author_sobrenome || 'Jacob'
+    };
     
     // Contar os comentários associados ao post
     const { count: comment_count, error: countError } = await supabase

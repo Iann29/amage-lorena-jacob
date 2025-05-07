@@ -97,6 +97,25 @@ export async function createPost(formData: PostFormData) {
     // Obter ID do usuário autenticado (autor do post)
     const author_id = await getAuthenticatedAdminId();
     
+    // Buscar nome e sobrenome do autor para armazenar diretamente no post
+    let author_nome = "Lorena";
+    let author_sobrenome = "Jacob";
+    
+    if (author_id) {
+      const { data: authorProfile, error: authorError } = await supabase
+        .from('user_profiles')
+        .select('nome, sobrenome')
+        .eq('user_id', author_id)
+        .single();
+      
+      if (!authorError && authorProfile) {
+        author_nome = authorProfile.nome || author_nome;
+        author_sobrenome = authorProfile.sobrenome || author_sobrenome;
+      } else if (authorError) {
+        console.warn(`Não foi possível buscar dados do autor (ID: ${author_id}):`, authorError.message);
+      }
+    }
+    
     // Sanitizar o conteúdo HTML para segurança
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
 
@@ -111,6 +130,8 @@ export async function createPost(formData: PostFormData) {
           conteudo: sanitizedContent,
           imagem_destaque_url: formData.imagem_destaque_url || null,
           author_id: author_id,
+          author_nome: author_nome,
+          author_sobrenome: author_sobrenome,
           is_published: formData.is_published,
           published_at: formData.is_published ? new Date().toISOString() : null,
           view_count: 0, // Inicializar contador de visualizações
@@ -172,10 +193,29 @@ export async function updatePost(postId: string, formData: PostFormData) {
   const supabase = await createClient();
   try {
     // Verificar se o usuário é admin
-    await getAuthenticatedAdminId();
+    const author_id = await getAuthenticatedAdminId();
     
     // Sanitizar o conteúdo HTML para segurança
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
+    
+    // Buscar nome e sobrenome do autor para armazenar diretamente no post
+    let author_nome = "Lorena";
+    let author_sobrenome = "Jacob";
+    
+    if (author_id) {
+      const { data: authorProfile, error: authorError } = await supabase
+        .from('user_profiles')
+        .select('nome, sobrenome')
+        .eq('user_id', author_id)
+        .single();
+      
+      if (!authorError && authorProfile) {
+        author_nome = authorProfile.nome || author_nome;
+        author_sobrenome = authorProfile.sobrenome || author_sobrenome;
+      } else if (authorError) {
+        console.warn(`Não foi possível buscar dados do autor (ID: ${author_id}):`, authorError.message);
+      }
+    }
 
     // Buscar post existente para comparar mudanças
     const { data: existingPost, error: fetchError } = await supabase
@@ -196,6 +236,8 @@ export async function updatePost(postId: string, formData: PostFormData) {
         resumo: formData.resumo,
         conteudo: sanitizedContent,
         imagem_destaque_url: formData.imagem_destaque_url || null,
+        author_nome: author_nome,
+        author_sobrenome: author_sobrenome,
         updated_at: new Date().toISOString(),
         is_published: formData.is_published,
         // Lógica para definir published_at com base no status anterior e atual
