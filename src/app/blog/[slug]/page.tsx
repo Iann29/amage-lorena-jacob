@@ -109,7 +109,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
           {/* Identificação do Autor */}
           {/* Identificação do Autor */}
           <div className={styles.authorLine}>
-            <span>por {post.author.nome}</span>
+            <span>por {post.author.nome} {post.author.sobrenome}</span>
           </div>
           
           {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}

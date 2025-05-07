@@ -66,6 +66,33 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
       return [];
     }
 
+    // Obter IDs de todos os autores para buscar seus perfis em uma única consulta
+    const authorIds = [...new Set(posts.map(p => p.author_id).filter(id => id !== null))] as string[];
+    
+    // Mapa para armazenar informações dos autores
+    let userProfilesMap: Map<string, {nome: string; sobrenome: string}> = new Map();
+    
+    // Buscar perfis de usuários se houver IDs de autores
+    if (authorIds.length > 0) {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('user_id, nome, sobrenome')
+        .in('user_id', authorIds);
+      
+      if (profilesError) {
+        console.error("Erro ao buscar perfis de usuários:", profilesError.message);
+      } else if (profilesData) {
+        profilesData.forEach(profile => {
+          if (profile.user_id) {
+            userProfilesMap.set(profile.user_id, { 
+              nome: profile.nome, 
+              sobrenome: profile.sobrenome || ''
+            });
+          }
+        });
+      }
+    }
+    
     // Formatar os dados e obter contagens de comentários
     const formattedPosts = await Promise.all(posts.map(async (post) => {
       // Extrair as categorias para o formato esperado pelo componente
@@ -79,8 +106,10 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
             }))
         : [];
       
-      // Formatar nome do autor com valor padrão
-      const author = { nome: 'Lorena', sobrenome: 'Jacob' };
+      // Obter informações do autor do mapa ou usar valor padrão
+      const author = post.author_id && userProfilesMap.has(post.author_id)
+        ? userProfilesMap.get(post.author_id)!
+        : { nome: 'Lorena', sobrenome: 'Jacob' };
       
       // Obter contagem de comentários para este post
       const { count: comment_count, error: countError } = await supabase
@@ -187,8 +216,26 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
           }))
       : [];
     
-    // Formatar nome do autor com valor padrão (igual a getPublishedBlogPosts)
-    const author = { nome: 'Lorena', sobrenome: 'Jacob' };
+    // Buscar informações do autor na tabela user_profiles
+    let author = { nome: 'Lorena', sobrenome: 'Jacob' }; // Valor padrão
+    
+    if (post.author_id) {
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('nome, sobrenome')
+        .eq('user_id', post.author_id)
+        .single();
+      
+      if (!profileError && userProfile) {
+        author = {
+          nome: userProfile.nome,
+          sobrenome: userProfile.sobrenome || ''
+        };
+      } else if (profileError && profileError.code !== 'PGRST116') {
+        // PGRST116 = not found, outros erros são reportados
+        console.error(`Erro ao buscar perfil do autor ${post.author_id}:`, profileError.message);
+      }
+    }
     
     // Contar os comentários associados ao post
     const { count: comment_count, error: countError } = await supabase
