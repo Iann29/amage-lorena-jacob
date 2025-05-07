@@ -77,7 +77,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
               alt={post.titulo} 
               fill
               style={{ objectFit: 'cover' }}
-              className="brightness-90"
+              className="brightness-90 blur-sm"
               priority
             />
           ) : (
