@@ -125,6 +125,72 @@ export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
   }
 }
 
+// Buscar um post específico pelo slug para a página pública
+export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | null> {
+  const supabase = await createClient();
+  try {
+    const { data: post, error } = await supabase
+      .from('blog_posts')
+      .select(`
+        id,
+        titulo,
+        slug,
+        resumo,
+        conteudo,
+        imagem_destaque_url,
+        author_id,
+        created_at,
+        published_at,
+        like_count,
+        blog_post_categories (
+          blog_categories ( id, nome )
+        )
+      `)
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') { // PostgREST code for 'No rows found'
+        console.warn(`Post com slug "${slug}" não encontrado ou não publicado.`);
+        return null;
+      }
+      console.error(`Erro ao buscar post com slug "${slug}":`, error.message);
+      return null;
+    }
+
+    if (!post) {
+      return null;
+    }
+
+    // Formatar os dados para o formato esperado
+    const categorias = post.blog_post_categories
+      ? post.blog_post_categories
+          .flatMap(cat => cat.blog_categories || [])
+          .map(cat => ({
+            id: cat.id,
+            nome: cat.nome,
+            slug: cat.nome.toLowerCase().replace(/\s+/g, '-')
+          }))
+      : [];
+    
+    // Formatar nome do autor com valor padrão (igual a getPublishedBlogPosts)
+    const author = { nome: 'Lorena', sobrenome: 'Jacob' };
+
+    return {
+      ...post,
+      author,
+      categorias,
+      view_count: 0, // Valor padrão, pode ser incrementado ou buscado separadamente
+      comment_count: 0 // Valor padrão, pode ser buscado separadamente
+    } as BlogPostPublic;
+
+  } catch (error: any) {
+    console.error(`Exceção ao buscar post com slug "${slug}":`, error.message);
+    return null;
+  }
+}
+
 // Buscar posts populares (com mais likes)
 export async function getPopularBlogPosts(limit: number = 3): Promise<BlogPostPublic[]> {
   const supabase = await createClient();

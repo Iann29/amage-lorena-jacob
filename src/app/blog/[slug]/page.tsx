@@ -1,12 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getPostBySlug, getCommentsByPostId, getPopularPosts, blogCategorias } from '@/lib/mockData';
+import { getBlogPostBySlug, getPopularBlogPosts } from '../actions';
+import type { BlogPostPublic } from '../actions'; 
 import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
 
 // Metadados dinâmicos baseados no slug
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const post = getPostBySlug(params.slug);
+  // Garantir que params seja aguardado antes de acessar suas propriedades
+  const resolvedParams = await Promise.resolve(params);
+  const slug = resolvedParams.slug;
+  const post = await getBlogPostBySlug(slug);
   
   if (!post) {
     return {
@@ -21,14 +25,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function PostPage({ params }: { params: { slug: string } }) {
-  // Em uma implementação real, esses dados viriam do Supabase
-  const post = getPostBySlug(params.slug);
-  const comments = post ? getCommentsByPostId(post.id) : [];
-  const postsPopulares = getPopularPosts();
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  // Garantir que params seja aguardado antes de acessar suas propriedades
+  const resolvedParams = await Promise.resolve(params);
+  const slug = resolvedParams.slug;
+  // Buscar o post pelo slug usando o Supabase
+  const post = await getBlogPostBySlug(slug);
+  // Buscar posts populares para exibir como sugestões
+  const postsPopulares = await getPopularBlogPosts(3);
   
-  // As cores agora são definidas diretamente no HTML do conteúdo
-  
+  // Define comentários como array vazio temporariamente, até implementação futura
+  const comments: any[] = [];
+
   // Se o post não existir, mostrar mensagem de erro
   if (!post) {
     return (
@@ -99,19 +107,24 @@ export default function PostPage({ params }: { params: { slug: string } }) {
       <div className={styles.paperContainer}>
         <div className={styles.contentWrapper}>
           {/* Identificação do Autor */}
+          {/* Identificação do Autor */}
           <div className={styles.authorLine}>
             <span>por {post.author.nome}</span>
           </div>
           
           {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}
           <div className={styles.postContent}>
-            <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
+            {post.conteudo ? (
+              <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
+            ) : (
+              <p className="text-gray-600">Conteúdo não disponível.</p>
+            )}
           </div>
           
           {/* Seção de Rodapé */}
           <div className={styles.footerActions}>
             <div className={styles.stats}>
-              {post.visualizacoes} visualizações • {new Date(post.created_at).toLocaleDateString('pt-BR')}
+              {post.view_count || 0} visualizações • {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR')}
             </div>
             
             <div className={styles.actionButtons}>
@@ -122,7 +135,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
                   src="/assets/compartilharIcon.svg" 
                   alt="Compartilhar" 
                   width={22} 
-                  height={22}
+                  height={22} 
                 />
               </button>
               
@@ -133,6 +146,24 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               />
             </div>
           </div>
+
+          {/* Tags/Categorias do Post */}
+          {post.categorias && post.categorias.length > 0 && (
+            <div className="mt-8">
+              <h4 className="font-semibold text-lg text-[#715B3F] mb-2">Categorias:</h4>
+              <div className="flex flex-wrap gap-2">
+                {post.categorias.map(categoria => (
+                  <Link 
+                    href={`/blog/categoria/${categoria.slug || categoria.nome.toLowerCase().replace(/\s+/g, '-')}`} 
+                    key={categoria.id}
+                    className={styles.tagLink}
+                  >
+                    {categoria.nome}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -179,76 +210,43 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         <div className={styles.commentsList}>
           <h3 className="text-2xl font-bold text-[#9772FB] mb-6">Comentários</h3>
           
-          {/* Lista de comentários mockados */}
-          {comments.map((comment) => (
-            <div key={comment.id} className={styles.commentItem}>
-              <div className={styles.avatarContainer}>
-                <Image 
-                  src={comment.user.avatar_url || '/assets/avatar-default.png'}
-                  alt={comment.user.nome}
-                  width={60}
-                  height={60}
-                  className={styles.commentAvatar}
-                />
-              </div>
-              <div className={styles.commentContent}>
-                <div className={styles.commentAuthor}>{comment.user.nome}</div>
-                <div className={styles.commentDate}>
-                  Comentado em: {new Date(comment.created_at).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </div>
-                <div className={styles.commentText}>{comment.conteudo}</div>
-                <div className={styles.commentActions}>
-                  <button className={styles.respondButton}>Responder</button>
-                  <LikeButton 
-                    itemId={comment.id}
-                    itemType="comment"
-                    initialLikeCount={comment.like_count || 0}
+          {/* Lista de comentários - Será implementada no futuro */}
+          {comments.length > 0 ? (
+            comments.map((comment: any) => (
+              <div key={comment.id} className={styles.commentItem}>
+                <div className={styles.avatarContainer}>
+                  <Image 
+                    src={comment.user?.avatar_url || '/assets/avatar-default.png'}
+                    alt={comment.user?.nome || 'Usuário'}
+                    width={60}
+                    height={60}
+                    className={styles.commentAvatar}
                   />
                 </div>
-                
-                {/* Respostas do comentário */}
-                {comment.respostas && comment.respostas.length > 0 && (
-                  <div className={styles.commentReplies}>
-                    {comment.respostas.map(resposta => (
-                      <div key={resposta.id} className={styles.replyItem}>
-                        <div className={styles.replyAvatarContainer}>
-                          <Image 
-                            src={resposta.user.avatar_url || '/assets/avatar-default.png'}
-                            alt={resposta.user.nome}
-                            width={40}
-                            height={40}
-                            className={styles.replyAvatar}
-                          />
-                        </div>
-                        <div className={styles.replyContent}>
-                          <div className={styles.replyAuthor}>{resposta.user.nome}</div>
-                          <div className={styles.replyDate}>
-                            Comentado em: {new Date(resposta.created_at).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </div>
-                          <div className={styles.replyText}>{resposta.conteudo}</div>
-                          <div className={styles.replyActions}>
-                            <LikeButton 
-                              itemId={resposta.id}
-                              itemType="comment"
-                              initialLikeCount={resposta.like_count || 0}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                <div className={styles.commentContent}>
+                  <div className={styles.commentAuthor}>{comment.user?.nome || 'Usuário'}</div>
+                  <div className={styles.commentDate}>
+                    Comentado em: {new Date(comment.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
                   </div>
-                )}
+                  <div className={styles.commentText}>{comment.conteudo}</div>
+                  <div className={styles.commentActions}>
+                    <button className={styles.respondButton}>Responder</button>
+                    <LikeButton 
+                      itemId={comment.id}
+                      itemType="comment"
+                      initialLikeCount={comment.like_count || 0}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600 mb-8">Seja o primeiro a comentar neste post!</p>
+          )}
         </div>
       </div>
     </main>
