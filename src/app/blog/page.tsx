@@ -145,7 +145,17 @@ export default function BlogPage() {
           
           {/* Contador de posts e total */}
           <div className="flex justify-center mt-12 mb-16 text-[#A6A6A6] font-medium">
-            TODOS ({posts.length})
+            {selectedCategories.length > 0 ? (
+              <>
+                FILTRADOS ({posts.filter(post => 
+                  post.categorias?.some(categoria => 
+                    selectedCategories.includes(categoria.id)
+                  )
+                ).length}) DE {posts.length} POSTS
+              </>
+            ) : (
+              <>TODOS ({posts.length})</>  
+            )}
           </div>
         </div>
         
@@ -166,10 +176,39 @@ export default function BlogPage() {
           {/* Lista de Posts */}
           <div className={styles.postsContainer}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mx-auto">
-              {posts.map((post) => (
-                <BlogPostCard key={post.id} post={post} />
-              ))}
+              {/* Filtrar os posts com base nas categorias selecionadas */}
+              {posts
+                .filter(post => {
+                  // Se não há categorias selecionadas, mostrar todos os posts
+                  if (selectedCategories.length === 0) return true;
+                  
+                  // Verificar se o post tem pelo menos uma das categorias selecionadas
+                  return post.categorias?.some(categoria => 
+                    selectedCategories.includes(categoria.id)
+                  );
+                })
+                .map((post) => (
+                  <BlogPostCard key={post.id} post={post} />
+                ))}
             </div>
+            
+            {/* Mensagem quando não houver posts correspondentes ao filtro */}
+            {posts.filter(post => {
+              if (selectedCategories.length === 0) return true;
+              return post.categorias?.some(categoria => 
+                selectedCategories.includes(categoria.id)
+              );
+            }).length === 0 && (
+              <div className="text-center my-12">
+                <p className="text-xl text-gray-600">Nenhum post encontrado com as categorias selecionadas.</p>
+                <button 
+                  onClick={() => setSelectedCategories([])} 
+                  className="mt-4 px-4 py-2 bg-[#FFA458] text-white rounded-md hover:bg-[#FF9240] transition-colors"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            )}
             
             {/* Botão Ver Mais */}
             <button 
