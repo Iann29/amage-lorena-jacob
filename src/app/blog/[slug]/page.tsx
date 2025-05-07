@@ -147,23 +147,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
             </div>
           </div>
 
-          {/* Tags/Categorias do Post */}
-          {post.categorias && post.categorias.length > 0 && (
-            <div className="mt-8">
-              <h4 className="font-semibold text-lg text-[#715B3F] mb-2">Categorias:</h4>
-              <div className="flex flex-wrap gap-2">
-                {post.categorias.map(categoria => (
-                  <Link 
-                    href={`/blog/categoria/${categoria.slug || categoria.nome.toLowerCase().replace(/\s+/g, '-')}`} 
-                    key={categoria.id}
-                    className={styles.tagLink}
-                  >
-                    {categoria.nome}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Categorias foram removidas desta seção conforme solicitado */}
         </div>
       </div>
 
