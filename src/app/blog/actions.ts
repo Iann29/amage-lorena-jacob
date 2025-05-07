@@ -39,7 +39,7 @@ export interface BlogCategoryPublic {
 export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
   const supabase = await createClient();
   try {
-    // Buscar apenas posts publicados com view_count
+    // 1. Buscar apenas posts publicados com todos os dados necessários em uma única consulta eficiente
     const { data: posts, error } = await supabase
       .from('blog_posts')
       .select(`
@@ -66,22 +66,25 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
       return [];
     }
 
-    // Obter IDs de todos os autores para buscar seus perfis em uma única consulta
+    if (!posts || posts.length === 0) {
+      return [];
+    }
+    
+    // 2. Coletar todos os IDs de posts para buscar contagens de comentários em lote
+    const postIds = posts.map(post => post.id);
+    
+    // 3. Buscar perfis de autores em lote - apenas uma consulta para todos os autores
     const authorIds = [...new Set(posts.map(p => p.author_id).filter(id => id !== null))] as string[];
+    const userProfilesMap: Map<string, {nome: string; sobrenome: string}> = new Map();
     
-    // Mapa para armazenar informações dos autores
-    let userProfilesMap: Map<string, {nome: string; sobrenome: string}> = new Map();
-    
-    // Buscar perfis de usuários se houver IDs de autores
+    // Carregar autores apenas se houver IDs válidos
     if (authorIds.length > 0) {
       const { data: profilesData, error: profilesError } = await supabase
         .from('user_profiles')
         .select('user_id, nome, sobrenome')
         .in('user_id', authorIds);
       
-      if (profilesError) {
-        console.error("Erro ao buscar perfis de usuários:", profilesError.message);
-      } else if (profilesData) {
+      if (!profilesError && profilesData) {
         profilesData.forEach(profile => {
           if (profile.user_id) {
             userProfilesMap.set(profile.user_id, { 
@@ -90,45 +93,68 @@ export async function getPublishedBlogPosts(): Promise<BlogPostPublic[]> {
             });
           }
         });
+      } else if (profilesError) {
+        console.error("Erro ao buscar perfis de usuários:", profilesError.message);
       }
     }
     
-    // Formatar os dados e obter contagens de comentários
-    const formattedPosts = await Promise.all(posts.map(async (post) => {
-      // Extrair as categorias para o formato esperado pelo componente
-      const categorias = post.blog_post_categories
-        ? post.blog_post_categories
-            .flatMap(cat => cat.blog_categories || [])
-            .map(cat => ({
-              id: cat.id,
-              nome: cat.nome,
-              slug: cat.nome.toLowerCase().replace(/\s+/g, '-')
-            }))
-        : [];
+    // 4. Buscar contagens de comentários para todos os posts em uma única consulta
+    const commentCountMap: Map<string, number> = new Map();
+    
+    // Buscar contagens apenas se houver posts
+    if (postIds.length > 0) {
+      const { data: commentCounts, error: countError } = await supabase
+        .from('blog_comments')
+        .select('post_id, id')
+        .in('post_id', postIds)
+        .eq('is_approved', true);
+      
+      if (!countError && commentCounts) {
+        // Contar comentários por post_id
+        commentCounts.forEach(comment => {
+          if (comment.post_id) {
+            const currentCount = commentCountMap.get(comment.post_id) || 0;
+            commentCountMap.set(comment.post_id, currentCount + 1);
+          }
+        });
+      } else if (countError) {
+        console.error(`Erro ao contar comentários para os posts:`, countError.message);
+      }
+    }
+    
+    // 5. Processar todos os posts sem consultas adicionais ao banco de dados
+    const formattedPosts: BlogPostPublic[] = posts.map(post => {
+      // Extrair categorias com segurança de tipos
+      const categorias: Array<{id: string; nome: string; slug: string}> = [];
+      if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
+        for (const categoryRelation of post.blog_post_categories) {
+          // Usar any temporariamente para resolver problemas de tipagem
+          const catInfo: any = categoryRelation;
+          if (catInfo.blog_categories && typeof catInfo.blog_categories === 'object') {
+            categorias.push({
+              id: catInfo.blog_categories.id,
+              nome: catInfo.blog_categories.nome,
+              slug: catInfo.blog_categories.nome.toLowerCase().replace(/\s+/g, '-')
+            });
+          }
+        }
+      }
       
       // Obter informações do autor do mapa ou usar valor padrão
       const author = post.author_id && userProfilesMap.has(post.author_id)
         ? userProfilesMap.get(post.author_id)!
         : { nome: 'Lorena', sobrenome: 'Jacob' };
       
-      // Obter contagem de comentários para este post
-      const { count: comment_count, error: countError } = await supabase
-        .from('blog_comments')
-        .select('id', { count: 'exact', head: true })
-        .eq('post_id', post.id)
-        .eq('is_approved', true);
-      
-      if (countError) {
-        console.error(`Erro ao contar comentários para o post ${post.id}:`, countError.message);
-      }
+      // Obter a contagem de comentários do mapa preenchido anteriormente
+      const comment_count = commentCountMap.get(post.id) || 0;
 
       return {
         ...post,
         author,
         categorias,
-        comment_count: comment_count || 0
+        comment_count
       } as BlogPostPublic;
-    }));
+    });
 
     return formattedPosts;
   } catch (error: any) {
