@@ -38,9 +38,19 @@ export interface BlogPostFromDB {
   created_at: string;
   updated_at: string | null;
   user_profiles: UserProfileInfo | null; // Armazenará { nome, sobrenome }
-  blog_post_categories: { blog_categories: { id: string; nome: string; } }[];
+  // A estrutura retornada pelo Supabase para relaciones aninhadas
+  blog_post_categories: { 
+    category_id?: string;
+    blog_categories?: { 
+      id: string; 
+      nome: string; 
+    } 
+  }[];
   like_count: number;
-  view_count: number; // Presumindo que você adicionará ou já tem este campo
+  view_count: number;
+  // Campos adicionais para uso na UI
+  categorias: string[]; // Lista de IDs de categorias para uso no formulário
+  categoriasInfo?: { id: string; nome: string; }[]; // Informações completas das categorias
 }
 
 export interface BlogCategoryFromDB {
@@ -76,12 +86,21 @@ async function getAuthenticatedAdminId() {
   return user.id; // Retorna o user.id da tabela auth.users
 }
 
+/**
+ * Cria um novo post de blog, incluindo a associação com categorias
+ * @param formData Dados do formulário de criação do post
+ * @returns Objeto indicando sucesso ou falha da operação
+ */
 export async function createPost(formData: PostFormData) {
   const supabase = await createClient();
   try {
-    const author_id = await getAuthenticatedAdminId(); // Este é o user.id
+    // Obter ID do usuário autenticado (autor do post)
+    const author_id = await getAuthenticatedAdminId();
+    
+    // Sanitizar o conteúdo HTML para segurança
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
 
+    // Inserir o post no banco de dados
     const { data: postData, error: postError } = await supabase
       .from('blog_posts')
       .insert([
@@ -91,9 +110,11 @@ export async function createPost(formData: PostFormData) {
           resumo: formData.resumo,
           conteudo: sanitizedContent,
           imagem_destaque_url: formData.imagem_destaque_url || null,
-          author_id: author_id, // Salva o user.id do Supabase Auth
-          is_published: formData.is_published, // Usa o valor booleano diretamente
+          author_id: author_id,
+          is_published: formData.is_published,
           published_at: formData.is_published ? new Date().toISOString() : null,
+          view_count: 0, // Inicializar contador de visualizações
+          like_count: 0, // Inicializar contador de likes
         }
       ])
       .select('id, slug')
@@ -102,42 +123,71 @@ export async function createPost(formData: PostFormData) {
     if (postError) throw postError;
     if (!postData) throw new Error("Falha ao criar o post.");
 
+    // Associar o post às categorias selecionadas (relação muitos-para-muitos)
     if (formData.categorias && formData.categorias.length > 0) {
+      // Criar entries na tabela de junção para cada categoria
       const postCategories = formData.categorias.map(catId => ({
         post_id: postData.id,
         category_id: catId,
       }));
-      const { error: catError } = await supabase.from('blog_post_categories').insert(postCategories);
+      
+      // Inserir na tabela de junção blog_post_categories
+      const { error: catError } = await supabase
+        .from('blog_post_categories')
+        .insert(postCategories);
+      
       if (catError) {
-        console.error("Erro ao associar categorias:", catError.message);
+        console.error("Erro ao associar categorias ao post:", catError.message);
+        // Não lançamos o erro para não invalidar a criação do post que já ocorreu
+        // Mas no futuro, pode ser interessante oferecer uma opção de tentar novamente
       }
     }
 
+    // Revalidar o cache das páginas afetadas
     revalidatePath('/admin/blog');
     if (formData.is_published) {
       revalidatePath(`/blog/${postData.slug}`);
     }
-    return { success: true, message: "Post criado com sucesso!", postId: postData.id };
+    
+    return { 
+      success: true, 
+      message: "Post criado com sucesso!", 
+      postId: postData.id 
+    };
   } catch (error: any) {
-    return { success: false, message: error.message || "Falha ao criar post." };
+    return { 
+      success: false, 
+      message: error.message || "Falha ao criar post." 
+    };
   }
 }
 
+/**
+ * Atualiza um post existente, incluindo seus relacionamentos com categorias
+ * @param postId ID do post a ser atualizado
+ * @param formData Dados do formulário
+ * @returns Objeto indicando sucesso ou falha da operação
+ */
 export async function updatePost(postId: string, formData: PostFormData) {
   const supabase = await createClient();
   try {
+    // Verificar se o usuário é admin
     await getAuthenticatedAdminId();
+    
+    // Sanitizar o conteúdo HTML para segurança
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
 
+    // Buscar post existente para comparar mudanças
     const { data: existingPost, error: fetchError } = await supabase
       .from('blog_posts')
-      .select('published_at, is_published, slug') // Adicionado slug para revalidação correta
+      .select('published_at, is_published, slug') // Slug para revalidação de cache
       .eq('id', postId)
       .single();
 
     if (fetchError) throw fetchError;
     if (!existingPost) throw new Error("Post não encontrado para atualização.");
 
+    // Atualizar os dados principais do post
     const { data, error: postError } = await supabase
       .from('blog_posts')
       .update({
@@ -148,11 +198,12 @@ export async function updatePost(postId: string, formData: PostFormData) {
         imagem_destaque_url: formData.imagem_destaque_url || null,
         updated_at: new Date().toISOString(),
         is_published: formData.is_published,
+        // Lógica para definir published_at com base no status anterior e atual
         published_at: (formData.is_published && !existingPost.published_at)
-                        ? new Date().toISOString()
+                        ? new Date().toISOString() // Se publicando pela primeira vez
                         : (!formData.is_published && existingPost.published_at)
-                          ? null
-                          : existingPost.published_at,
+                          ? null // Se despublicando
+                          : existingPost.published_at, // Mantém o valor existente
       })
       .eq('id', postId)
       .select('id, slug') // Selecionar slug para revalidação
@@ -161,43 +212,74 @@ export async function updatePost(postId: string, formData: PostFormData) {
     if (postError) throw postError;
     if (!data) throw new Error("Falha ao atualizar o post.");
 
-    await supabase.from('blog_post_categories').delete().eq('post_id', postId);
+    // Atualizar associações de categorias - primeiro remover todas as existentes
+    const { error: deleteError } = await supabase
+      .from('blog_post_categories')
+      .delete()
+      .eq('post_id', postId);
+    
+    if (deleteError) {
+      console.error("Erro ao remover associações de categorias existentes:", deleteError.message);
+      // Não lançamos error aqui para não invalidar a atualização do post que já ocorreu
+    }
+    
+    // Inserir novas associações de categorias se existirem
     if (formData.categorias && formData.categorias.length > 0) {
       const postCategories = formData.categorias.map(catId => ({
         post_id: postId,
         category_id: catId,
       }));
-      const { error: catError } = await supabase.from('blog_post_categories').insert(postCategories);
-       if (catError) {
+      
+      const { error: catError } = await supabase
+        .from('blog_post_categories')
+        .insert(postCategories);
+        
+      if (catError) {
         console.error("Erro ao atualizar associação de categorias:", catError.message);
+        // Não lançamos error para não invalidar a atualização do post que já ocorreu
       }
     }
 
+    // Revalidar caches para atualizar a interface
     revalidatePath('/admin/blog');
-    // Revalidar o slug antigo e o novo slug se mudou, e se estava ou vai ser publicado
+    
+    // Revalidar URLs do frontend se o post estiver publicado
     if (existingPost.slug !== data.slug) {
-        if (existingPost.is_published) revalidatePath(`/blog/${existingPost.slug}`);
+      // Se o slug mudou, revalidar também a URL antiga
+      if (existingPost.is_published) revalidatePath(`/blog/${existingPost.slug}`);
     }
     if (formData.is_published) revalidatePath(`/blog/${data.slug}`);
     
+    // Revalidar a página de edição do post
     revalidatePath(`/admin/blog/editar/${postId}`);
+    
     return { success: true, message: "Post atualizado com sucesso!", post: data };
   } catch (error: any) {
     return { success: false, message: error.message || "Falha ao atualizar post." };
   }
 }
 
-// Ajustado o tipo de retorno para corresponder ao BlogPostFromDB
+/**
+ * Busca um post do blog para edição, incluindo suas categorias associadas
+ * @param id ID do post a ser editado
+ * @returns Dados do post formatados para o formulário de edição
+ */
 export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 'user_profiles' | 'blog_post_categories'> & { user_profiles: UserProfileInfo | null; categorias: string[] }) | null> {
   const supabase = await createClient();
   try {
+    // Verificar se o usuário é admin
     await getAuthenticatedAdminId();
+    
+    // Buscar post com suas categorias associadas (sem !inner para permitir posts sem categorias)
     const { data: post, error } = await supabase
       .from('blog_posts')
       .select(`
         id, titulo, slug, resumo, conteudo, imagem_destaque_url, author_id, 
         is_published, published_at, created_at, updated_at, like_count, view_count,
-        blog_post_categories(category_id)
+        blog_post_categories(
+          category_id,
+          blog_categories(id, nome)
+        )
       `)
       .eq('id', id)
       .single();
@@ -205,12 +287,13 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
     if (error) throw error;
     if (!post) return null;
 
+    // Buscar informações do autor se existir
     let userProfileData: UserProfileInfo | null = null;
     if (post.author_id) {
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('nome, sobrenome')
-        .eq('user_id', post.author_id) // Assumindo que author_id é o user_id
+        .eq('user_id', post.author_id)
         .single();
       
       if (profileError) {
@@ -220,17 +303,34 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
       }
     }
     
-    const categories = post.blog_post_categories ? (post.blog_post_categories as any[]).map(pc => pc.category_id) : [];
+    // Processamento das categorias para o formulário de edição
+    const categoryIds: string[] = [];
     
-    // Remove blog_post_categories do post antes de espalhar, pois já processamos
+    if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
+      for (const pc of post.blog_post_categories) {
+        // Usar tipo any para evitar erros de tipagem
+        const catInfo: any = pc;
+        
+        // Verificar se temos dados completos da categoria
+        if (catInfo.blog_categories && typeof catInfo.blog_categories === 'object' && !Array.isArray(catInfo.blog_categories)) {
+          categoryIds.push(catInfo.blog_categories.id);
+        } 
+        // Fallback para caso tenhamos apenas o category_id
+        else if (catInfo.category_id) {
+          categoryIds.push(catInfo.category_id);
+        }
+      }
+    }
+    
+    // Remove blog_post_categories do objeto post pois já processamos essa informação
     const { blog_post_categories, ...restOfPost } = post;
 
     return { 
       ...restOfPost, 
       like_count: post.like_count ?? 0,
-      view_count: post.view_count ?? 0, // Certifique-se que view_count existe na sua tabela ou defina um padrão
+      view_count: post.view_count ?? 0,
       user_profiles: userProfileData, // Anexa os dados do perfil buscados
-      categorias: categories as string[] // Nomes das categorias já processados
+      categorias: categoryIds // IDs das categorias para uso no formulário
     };
   } catch (error: any) {
     console.error(`Erro ao buscar post ${id} para edição:`, error.message);
@@ -261,12 +361,16 @@ export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
   try {
     await getAuthenticatedAdminId(); 
 
+    // Buscar posts com suas categorias (sem o !inner para permitir posts sem categorias)
     const { data: postsData, error: postsError } = await supabase
       .from('blog_posts')
       .select(`
         id, titulo, slug, resumo, conteudo, imagem_destaque_url, author_id, 
         is_published, published_at, created_at, updated_at, like_count, view_count,
-        blog_post_categories ( blog_categories ( id, nome ) )
+        blog_post_categories ( 
+          category_id,
+          blog_categories ( id, nome )
+        )
       `)
       .order('created_at', { ascending: false });
 
@@ -302,20 +406,56 @@ export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
       }
     }
     
-    const formattedPosts: BlogPostFromDB[] = postsData.map(post => ({
-      ...post,
-      conteudo: post.conteudo || '', 
-      is_published: post.is_published || false,
-      like_count: post.like_count ?? 0,
-      view_count: post.view_count ?? 0,
-      user_profiles: post.author_id ? userProfilesMap.get(post.author_id) || null : null,
-      blog_post_categories: post.blog_post_categories || [],
-    }));
-
-    return formattedPosts;
+    // Processar os posts
+    const result: BlogPostFromDB[] = [];
+    
+    for (const post of postsData) {
+      // Extrair as categorias e seus IDs
+      const categoryIds: string[] = [];
+      let postCategories: any[] = [];
+      
+      if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
+        postCategories = post.blog_post_categories;
+        
+        // Extrair IDs para o formulário
+        for (const pc of post.blog_post_categories) {
+          // Usar tipo any para evitar erros de tipagem
+          const catInfo: any = pc;
+          
+          if (catInfo && catInfo.blog_categories && typeof catInfo.blog_categories === 'object' && !Array.isArray(catInfo.blog_categories)) {
+            categoryIds.push(catInfo.blog_categories.id);
+          }
+        }
+      }
+      
+      // Criar o objeto com tipagem compatível
+      result.push({
+        id: post.id,
+        titulo: post.titulo,
+        slug: post.slug,
+        resumo: post.resumo,
+        conteudo: post.conteudo || '',
+        imagem_destaque_url: post.imagem_destaque_url,
+        author_id: post.author_id,
+        is_published: post.is_published || false,
+        published_at: post.published_at,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        like_count: post.like_count ?? 0,
+        view_count: post.view_count ?? 0,
+        user_profiles: post.author_id ? userProfilesMap.get(post.author_id) || null : null,
+        // Preservar o formato original para a exibição correta na UI
+        blog_post_categories: postCategories,
+        // Lista de IDs para uso no formulário
+        categorias: categoryIds
+      });
+    }
+    
+    return result;
+    
   } catch (error: any) {
     console.error("Exceção ao buscar posts para admin:", error.message);
-    return []; // Retorna array vazio em caso de exceção não tratada
+    return [];
   }
 }
 
