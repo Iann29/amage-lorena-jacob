@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import { createPost, getBlogCategories } from '../actions';
+import { createClient } from '@/utils/supabase/client'; // Importar cliente Supabase
 
 interface CategoryOption {
   id: string;
@@ -15,22 +16,26 @@ interface CategoryOption {
 
 export default function NovoBlogPostPage() {
   const router = useRouter();
+  const supabase = createClient(); // Instanciar cliente
   const [formData, setFormData] = useState({
     titulo: '',
     slug: '',
     resumo: '',
-    conteudo: '', 
+    conteudo: '',
     categorias: [] as string[],
-    imagem_destaque_url: '',
-    is_published: false, // Novo campo
+    imagem_destaque_url: '', // Guarda a URL final vinda do storage
+    is_published: false,
   });
   const [blogCategoriesOptions, setBlogCategoriesOptions] = useState<CategoryOption[]>([]);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null); // Para preview local via ObjectURL
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null); // Estado para o arquivo selecionado
+  const [isUploading, setIsUploading] = useState(false); // Estado para feedback de upload
+  const [isLoading, setIsLoading] = useState(false); // Loading geral do submit
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [serverMessage, setServerMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null); // Ref para gerenciar ObjectURL
 
   useEffect(() => {
     async function loadCategories() {
@@ -38,6 +43,13 @@ export default function NovoBlogPostPage() {
       setBlogCategoriesOptions(categories || []);
     }
     loadCategories();
+
+    // Limpar URL de objeto ao desmontar o componente
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
   }, []);
 
   const generateSlug = (title: string) => {
@@ -46,12 +58,13 @@ export default function NovoBlogPostPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const { checked } = e.target as HTMLInputElement;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       if (name === 'titulo') {
+        // Gera slug automaticamente apenas se o campo slug estiver vazio ou for igual ao slug anterior do título
         setFormData(prev => ({ ...prev, titulo: value, slug: generateSlug(value) }));
       } else {
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -66,12 +79,9 @@ export default function NovoBlogPostPage() {
       conteudo: htmlContent
     }));
     if (errors.conteudo) {
-      setErrors(prevErrors => ({
-        ...prevErrors,
-        conteudo: ''
-      }));
+      setErrors(prevErrors => ({ ...prevErrors, conteudo: '' }));
     }
-  }, [errors.conteudo]); 
+  }, [errors.conteudo]);
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
@@ -81,22 +91,40 @@ export default function NovoBlogPostPage() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setPreviewUrl(result);
-      // Idealmente, você faria o upload para o Supabase Storage aqui e usaria a URL retornada
-      setFormData(prev => ({ ...prev, imagem_destaque_url: result })); 
-    };
-    reader.readAsDataURL(file);
-    
+    if (!file) {
+      setSelectedImageFile(null);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+      setPreviewUrl(null);
+      return;
+    }
+
+    setSelectedImageFile(file); // Guarda o ARQUIVO no estado
+
+    // Limpa URL de objeto anterior se existir
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+
+    // Gera URL local para preview e guarda a referência
+    const localPreviewUrl = URL.createObjectURL(file);
+    previewUrlRef.current = localPreviewUrl;
+    setPreviewUrl(localPreviewUrl);
+
+    // Limpa o erro da imagem, se houver
     if (errors.imagem_destaque_url) setErrors(prev => ({ ...prev, imagem_destaque_url: '' }));
   };
 
-  const handleRemoveImage = () => {
-    setPreviewUrl('');
+  const handleRemoveImage = () => { // Não precisa ser async aqui, pois não há imagem salva ainda
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current); // Limpa memória
+      previewUrlRef.current = null;
+    }
+    setPreviewUrl(null);
+    setSelectedImageFile(null);
+    // Limpa a URL no formData, embora em 'novo' ela provavelmente já esteja vazia
     setFormData(prev => ({ ...prev, imagem_destaque_url: '' }));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -109,6 +137,7 @@ export default function NovoBlogPostPage() {
     const plainTextContent = formData.conteudo.replace(/<[^>]*>?/gm, '').trim();
     if (!plainTextContent) newErrors.conteudo = 'O conteúdo é obrigatório';
     if (formData.categorias.length === 0) newErrors.categorias = 'Selecione pelo menos uma categoria';
+    // if (!selectedImageFile) newErrors.imagem_destaque_url = 'Uma imagem de destaque é obrigatória.'; // Descomente se a imagem for obrigatória
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -119,27 +148,95 @@ export default function NovoBlogPostPage() {
     if (!validateForm()) {
       return;
     }
-    
-    setIsLoading(true);
-    
-    const payload = { ...formData }; // Já inclui is_published
 
+    setIsLoading(true);
+    let finalImageUrl = ''; // Começa vazia para novo post
+
+    // 1. Fazer upload da imagem SE uma foi selecionada
+    if (selectedImageFile) {
+      setIsUploading(true);
+      const fileExtension = selectedImageFile.name.split('.').pop() || 'png'; // Default to png if no extension
+      const safeSlug = formData.slug || `post-${Date.now()}`; // Fallback slug
+      const fileName = `${safeSlug}-${Date.now()}.${fileExtension}`;
+      const filePath = `blog-post/${fileName}`; // Salva na pasta 'blog-post/'
+
+      try {
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('lorena-images-db') // <<< SEU BUCKET CORRETO
+          .upload(filePath, selectedImageFile, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('lorena-images-db') // <<< SEU BUCKET CORRETO
+          .getPublicUrl(filePath);
+
+        if (!urlData || !urlData.publicUrl) {
+           throw new Error("Não foi possível obter a URL pública da imagem após o upload.");
+        }
+
+        finalImageUrl = urlData.publicUrl;
+        setIsUploading(false);
+
+      } catch (error: any) {
+        console.error('Erro no upload da imagem:', error);
+        setServerMessage({type: 'error', text: `Erro no upload da imagem: ${error.message}`});
+        setIsUploading(false);
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // 2. Preparar o payload para a Server Action
+    const payload = {
+      ...formData,
+      imagem_destaque_url: finalImageUrl || undefined, // Envia a URL ou undefined se não houver imagem
+    };
+
+    // 3. Chamar a Server Action createPost
     try {
-      const result = await createPost(payload); 
+      const result = await createPost(payload);
 
       if (result.success) {
         setServerMessage({type: 'success', text: result.message || "Post criado com sucesso!"});
+        handleRemoveImage(); // Limpa preview e file state
+        setFormData({ // Resetar form
+          titulo: '', slug: '', resumo: '', conteudo: '', categorias: [], imagem_destaque_url: '', is_published: false
+        });
+        if (fileInputRef.current) fileInputRef.current.value = ''; // Limpa input file
         setTimeout(() => {
-          router.push('/admin/blog'); 
-        }, 1500); 
+          router.push('/admin/blog');
+        }, 1500);
       } else {
         setServerMessage({type: 'error', text: result.message || "Falha ao criar o post."});
+        // Deletar imagem recém-enviada se o save falhou
+        if (selectedImageFile && finalImageUrl) {
+          console.warn("Criação do post falhou após upload. Tentando remover imagem do storage...");
+          const pathToDelete = finalImageUrl.split('/lorena-images-db/')[1];
+          if(pathToDelete) {
+            await supabase.storage.from('lorena-images-db').remove([pathToDelete]);
+            console.log("Imagem órfã removida do storage.");
+          }
+        }
       }
     } catch (error: any) {
-      console.error('Erro ao criar post (catch no handleSubmit):', error);
-      setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao criar o post."});
+      console.error('Erro ao chamar createPost:', error);
+      setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao salvar o post."});
+       // Deletar imagem recém-enviada em caso de erro inesperado
+       if (selectedImageFile && finalImageUrl) {
+          console.warn("Erro inesperado ao salvar post após upload. Tentando remover imagem...");
+           const pathToDelete = finalImageUrl.split('/lorena-images-db/')[1];
+           if(pathToDelete) {
+             await supabase.storage.from('lorena-images-db').remove([pathToDelete]);
+             console.log("Imagem órfã removida.");
+           }
+        }
     } finally {
       setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -157,7 +254,7 @@ export default function NovoBlogPostPage() {
           {serverMessage.text}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="bg-white rounded-lg shadow-md divide-y divide-gray-300">
           {/* Informações básicas */}
@@ -172,17 +269,17 @@ export default function NovoBlogPostPage() {
                   {errors.titulo && (<p className="mt-1 text-sm text-red-600">{errors.titulo}</p>)}
                 </div>
               </div>
-              
+
               {/* Slug */}
               <div className="sm:col-span-4">
                 <label htmlFor="slug" className="block text-sm font-medium text-gray-800">Slug</label>
                 <div className="mt-1">
-                  <input type="text" name="slug" id="slug" value={formData.slug} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`} />
+                  <input type="text" name="slug" id="slug" value={formData.slug} onChange={handleChange} className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-400 rounded-md bg-white text-gray-800 ${errors.slug ? 'border-red-300' : ''}`} readOnly/> {/* Slug gerado automaticamente */}
                   {errors.slug && (<p className="mt-1 text-sm text-red-600">{errors.slug}</p>)}
                 </div>
-                <p className="mt-1 text-sm text-gray-600 font-medium">URL amigável do post.</p>
+                <p className="mt-1 text-sm text-gray-600 font-medium">URL amigável (gerada automaticamente a partir do título).</p>
               </div>
-              
+
               {/* Resumo */}
               <div className="sm:col-span-6">
                 <label htmlFor="resumo" className="block text-sm font-medium text-gray-800">Resumo</label>
@@ -192,7 +289,7 @@ export default function NovoBlogPostPage() {
                 </div>
                 <p className="mt-1 text-sm text-gray-600 font-medium">Breve descrição do post.</p>
               </div>
-              
+
               {/* Categorias */}
               <div className="sm:col-span-4">
                 <label htmlFor="categorias" className="block text-sm font-medium text-gray-800">Categorias</label>
@@ -236,7 +333,7 @@ export default function NovoBlogPostPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Imagem de destaque */}
           <div className="p-6">
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Imagem de Destaque</h2>
@@ -244,7 +341,7 @@ export default function NovoBlogPostPage() {
                 <div className="sm:col-span-6">
                 <label className="block text-sm font-medium text-gray-800">Imagem</label>
                 <div className="mt-1 flex items-center">
-                  {previewUrl ? (
+                  {previewUrl ? ( // Mostra preview local se existir
                     <div className="relative">
                       <div className="w-40 h-40 rounded-md overflow-hidden bg-gray-100">
                         <Image src={previewUrl} alt="Preview da imagem" width={160} height={160} className="w-full h-full object-cover"/>
@@ -253,7 +350,7 @@ export default function NovoBlogPostPage() {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>
-                  ) : (
+                  ) : ( // Senão, mostra placeholder e botão de upload
                     <div className="flex items-center space-x-4">
                       <div className="w-40 h-40 flex justify-center items-center rounded-md border-2 border-dashed border-gray-300 bg-gray-50">
                         <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -264,13 +361,15 @@ export default function NovoBlogPostPage() {
                       </div>
                     </div>
                   )}
+                   {/* Feedback de Upload */}
+                   {isUploading && <p className="mt-2 text-sm text-purple-600">Enviando imagem...</p>}
                 </div>
                 {errors.imagem_destaque_url && (<p className="mt-1 text-sm text-red-600">{errors.imagem_destaque_url}</p>)}
                 <p className="mt-1 text-sm text-gray-600 font-medium">Recomendado: 1200 x 630 pixels.</p>
               </div>
             </div>
           </div>
-          
+
           {/* Conteúdo do post */}
           <div className="p-6 bg-gray-50">
             <h2 className="text-lg font-semibold text-purple-800 mb-4 pb-2 border-b border-purple-200">Conteúdo</h2>
@@ -278,8 +377,8 @@ export default function NovoBlogPostPage() {
               <div className="sm:col-span-6">
                 <div className="mt-1">
                   <RichTextEditor
-                    initialContent={formData.conteudo} 
-                    onChange={handleContentChange}     
+                    initialContent={formData.conteudo}
+                    onChange={handleContentChange}
                   />
                   {errors.conteudo && (
                     <p className="mt-1 text-sm text-red-600">{errors.conteudo}</p>
@@ -292,8 +391,9 @@ export default function NovoBlogPostPage() {
             </div>
           </div>
         </div>
-        
-        <div className="flex justify-end space-x-4 pt-5">
+
+        {/* Botões */}
+         <div className="flex justify-end space-x-4 pt-5">
           <Link
             href="/admin/blog"
             className="px-4 py-2 border border-gray-400 rounded-md shadow-sm text-sm font-medium text-gray-800 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
@@ -302,18 +402,18 @@ export default function NovoBlogPostPage() {
           </Link>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || isUploading} // Desabilita se estiver carregando ou fazendo upload
             className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              isLoading ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
+              (isLoading || isUploading) ? 'bg-purple-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
             } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
           >
-            {isLoading ? (
+            {(isLoading || isUploading) ? (
               <div className="flex items-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Salvando...</span>
+                <span>{isUploading ? 'Enviando Imagem...' : 'Salvando Post...'}</span>
               </div>
             ) : (
               formData.is_published ? 'Publicar Post' : 'Salvar Rascunho'
