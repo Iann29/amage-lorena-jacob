@@ -7,13 +7,13 @@ import styles from '@/app/blog/blog.module.css';
 interface BlogFilterProps {
   isOpen: boolean;
   categorias: {
-    id: number;
+    id: string;
     nome: string;
-    slug: string;
-    quantidade: number;
+    slug?: string;
+    quantidade?: number;
   }[];
-  selectedCategories: number[];
-  onCategoryChange: (categoryId: number) => void;
+  selectedCategories: string[];
+  onCategoryChange: (categoryId: string) => void;
   selectedTemas: string[];
   onTemaChange: (tema: string) => void;
 }

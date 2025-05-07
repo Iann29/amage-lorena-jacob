@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface LikeButtonProps {
-  itemId: number;
+  itemId: string; // UUID no banco de dados
   itemType: 'post' | 'comment';
   initialLikeCount: number;
 }

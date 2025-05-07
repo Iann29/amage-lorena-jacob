@@ -26,24 +26,24 @@ const extractTextFromHtml = (htmlContent: string, maxLength: number = 200): stri
 
 interface BlogPostCardProps {
   post: {
-    id: number;
+    id: string; // UUID no banco de dados
     titulo: string;
     slug: string;
-    resumo: string;
-    conteudo?: string;  // Adicionando o campo conteúdo
-    imagem_destaque_url: string;
+    resumo: string | null; // Null permitido no banco
+    conteudo?: string;
+    imagem_destaque_url: string | null; // Null permitido no banco
     created_at: string;
     like_count: number;
-    view_count?: number;
-    comment_count?: number;
+    view_count?: number; // Campo calculado
+    comment_count?: number; // Campo calculado
     author: {
-      id: number;
       nome: string;
+      sobrenome?: string;
     };
     categorias: {
-      id: number;
+      id: string; // UUID no banco de dados
       nome: string;
-      slug: string;
+      slug?: string; // Gerado pelo código
     }[];
   };
 }
@@ -81,7 +81,7 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
         <p className="text-gray-700 mb-6 text-base leading-relaxed">
           {post.conteudo 
             ? extractTextFromHtml(post.conteudo, 180) 
-            : post.resumo}
+            : post.resumo || ""}
         </p>
         
         <div className="flex justify-between items-center pt-4 border-t-4 border-gray-200">

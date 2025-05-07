@@ -1,29 +1,30 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { blogPosts, blogCategorias, getPopularPosts } from '@/lib/mockData';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import BlogFilter from '@/components/blog/BlogFilter';
 import styles from './blog.module.css';
+import { getPublishedBlogPosts, getPublicBlogCategories, getPopularBlogPosts, type BlogPostPublic, type BlogCategoryPublic } from './actions';
 
 export default function BlogPage() {
   // Estado para controlar abertura/fechamento do painel de filtros
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTemas, setSelectedTemas] = useState<string[]>([]);
 
-  // Em uma implementação real, esses dados viriam do Supabase
-  const posts = blogPosts;
-  const categorias = blogCategorias;
-  const postsPopulares = getPopularPosts(3);
+  // Estados para armazenar os dados do Supabase
+  const [posts, setPosts] = useState<BlogPostPublic[]>([]);
+  const [categorias, setCategorias] = useState<BlogCategoryPublic[]>([]);
+  const [postsPopulares, setPostsPopulares] = useState<BlogPostPublic[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Dados de paginação
   const currentPage = 1;
-  const totalPages = 3; // Mockado, seria calculado com base no total de posts
+  const totalPages = 1; // Será calculado dinamicamente depois
   
-  // Lista de temas mockados
+  // Lista de temas temporários (no futuro podem vir do banco)
   const temas = [
     'Rotina saudável para crianças',
     'Como lidar com birras',
@@ -31,6 +32,48 @@ export default function BlogPage() {
     'A importância do brincar',
     'Terapia para dificuldades escolares'
   ];
+
+  // Carregar dados reais do Supabase
+  useEffect(() => {
+    // Controle para evitar múltiplas chamadas desnecessárias
+    let isMounted = true;
+    let hasRun = false;
+
+    async function fetchData() {
+      // Se já executou ou o componente não está mais montado, não faz nada
+      if (hasRun || !isMounted) return;
+      hasRun = true;
+
+      setIsLoading(true);
+      try {
+        // Buscar posts, categorias e posts populares simultaneamente
+        const [fetchedPosts, fetchedCategories, fetchedPopularPosts] = await Promise.all([
+          getPublishedBlogPosts(),
+          getPublicBlogCategories(),
+          getPopularBlogPosts(3)
+        ]);
+
+        if (!isMounted) return;
+
+        setPosts(fetchedPosts);
+        setCategorias(fetchedCategories);
+        setPostsPopulares(fetchedPopularPosts);
+      } catch (error) {
+        console.error("Erro ao carregar dados do blog:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    // Função de limpeza para evitar memory leaks
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   
   // Função para alternar a abertura/fechamento do painel de filtros
   const toggleFilterPanel = () => {
@@ -38,7 +81,7 @@ export default function BlogPage() {
   };
   
   // Função para lidar com a seleção de categorias
-  const handleCategoryChange = (categoryId: number) => {
+  const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories(prev => 
       prev.includes(categoryId) 
         ? prev.filter(id => id !== categoryId) 
