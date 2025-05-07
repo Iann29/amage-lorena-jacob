@@ -1,8 +1,7 @@
 // src/app/admin/layout.tsx
 "use client";
 
-import { useState, useEffect, useRef } // Adicionar useEffect e useRef
-from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation'; // Adicionar useRouter
 import Image from 'next/image';
@@ -20,6 +19,12 @@ export default function AdminLayout({ children }: LayoutProps) {
   const pathname = usePathname();
   const router = useRouter(); // Para redirecionar após logout
   const dropdownRef = useRef<HTMLDivElement>(null); // Ref para o dropdown
+  const [userInfo, setUserInfo] = useState<{
+    id: string;
+    nome: string;
+    sobrenome: string;
+    iniciais: string;
+  } | null>(null);
 
   const isLoginPage = pathname === '/admin/login';
 
@@ -39,6 +44,53 @@ export default function AdminLayout({ children }: LayoutProps) {
     }
   };
 
+  // Efeito para buscar informações do usuário logado
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Buscar o usuário atual
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !userData.user) {
+          console.error("Erro ao buscar usuário:", userError?.message);
+          return;
+        }
+        
+        // Buscar o perfil do usuário
+        const { data: profileData, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('nome, sobrenome')
+          .eq('user_id', userData.user.id)
+          .single();
+        
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError.message);
+          return;
+        }
+        
+        if (profileData) {
+          // Criar iniciais a partir do nome e sobrenome
+          const nome = profileData.nome || '';
+          const sobrenome = profileData.sobrenome || '';
+          const iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+          
+          setUserInfo({
+            id: userData.user.id,
+            nome,
+            sobrenome,
+            iniciais
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+      }
+    };
+    
+    if (!isLoginPage) {
+      fetchUserData();
+    }
+  }, [isLoginPage, supabase]);
+  
   // Efeito para fechar o dropdown ao clicar fora dele
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -167,9 +219,9 @@ export default function AdminLayout({ children }: LayoutProps) {
                   className="flex items-center space-x-2 text-gray-700 hover:text-purple-700 transition-all focus:outline-none"
                 >
                   <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium">
-                    LJ {/* Pode ser inicial do usuário logado */}
+                    {userInfo?.iniciais || '??'}
                   </div>
-                  <span>Lorena Jacob</span> {/* Pode ser nome do usuário logado */}
+                  <span>{userInfo ? `${userInfo.nome} ${userInfo.sobrenome}` : 'Carregando...'}</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`h-5 w-5 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''}`}
