@@ -14,369 +14,214 @@ interface PostFormData {
   slug: string;
   resumo: string;
   conteudo: string;
-  categorias: string[]; // Array de IDs de categoria (UUIDs)
+  categorias: string[];
   imagem_destaque_url?: string;
-  is_published: boolean; // Mantido o boolean diretamente
+  is_published: boolean;
 }
 
-// Interface para os dados do perfil do usuário que queremos
 export interface UserProfileInfo {
   nome: string;
   sobrenome: string;
 }
 
 export interface BlogPostFromDB {
-  id: string; // UUID
+  id: string;
   titulo: string;
   slug: string;
   resumo: string | null;
   conteudo: string;
   imagem_destaque_url: string | null;
-  author_id: string | null; // Este é o user_id de auth.users
+  author_id: string | null;
+  author_nome?: string | null;
+  author_sobrenome?: string | null;
   is_published: boolean;
   published_at: string | null;
   created_at: string;
   updated_at: string | null;
-  user_profiles: UserProfileInfo | null; // Armazenará { nome, sobrenome }
-  // A estrutura retornada pelo Supabase para relaciones aninhadas
-  blog_post_categories: { 
+  user_profiles?: UserProfileInfo | null;
+  blog_post_categories: {
     category_id?: string;
-    blog_categories?: { 
-      id: string; 
-      nome: string; 
-    } 
+    blog_categories?: { id: string; nome: string; }
   }[];
   like_count: number;
   view_count: number;
-  // Campos adicionais para uso na UI
-  categorias: string[]; // Lista de IDs de categorias para uso no formulário
-  categoriasInfo?: { id: string; nome: string; }[]; // Informações completas das categorias
+  categorias: string[];
+  categoriasInfo?: { id: string; nome: string; }[];
 }
 
 export interface BlogCategoryFromDB {
-  id: string; // UUID
+  id: string;
   nome: string;
+}
+
+// Função auxiliar para extrair o path do objeto da URL pública do Supabase Storage
+function getStoragePathFromUrl(url: string | null | undefined, bucketName: string): string | null {
+  if (!url) {
+    return null;
+  }
+  try {
+    const urlObject = new URL(url);
+    // Ex: /storage/v1/object/public/BUCKET_NAME/pasta/arquivo.jpg
+    const pathParts = urlObject.pathname.split('/');
+    const bucketIndex = pathParts.indexOf(bucketName);
+
+    if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+      // Pega todas as partes DEPOIS do nome do bucket e junta com '/'
+      return pathParts.slice(bucketIndex + 1).join('/');
+    }
+    console.warn(`Não foi possível encontrar o bucket '${bucketName}' no pathname: ${urlObject.pathname}`);
+    return null; // Bucket não encontrado no path da URL
+  } catch (e) {
+    console.error("Erro ao parsear a URL do storage:", url, e);
+    return null; // URL inválida
+  }
 }
 
 
 async function getAuthenticatedAdminId() {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    console.error("Erro de autenticação na Server Action:", authError?.message);
-    throw new Error("Usuário não autenticado.");
-  }
+  if (authError || !user) throw new Error("Usuário não autenticado.");
 
   const { data: profile, error: profileError } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('user_id', user.id)
-    .single();
-
-  if (profileError) {
-    console.error("Erro ao buscar perfil do usuário:", profileError.message);
-    throw new Error("Não foi possível verificar as permissões do usuário.");
-  }
-
-  if (!profile || profile.role !== 'admin') {
-    console.warn(`Tentativa de acesso não autorizada por user_id: ${user.id} com role: ${profile?.role}`);
-    throw new Error("Acesso não autorizado. Requer privilégios de administrador.");
-  }
-  return user.id; // Retorna o user.id da tabela auth.users
+    .from('user_profiles').select('role').eq('user_id', user.id).single();
+  if (profileError) throw new Error("Não foi possível verificar permissões.");
+  if (!profile || profile.role !== 'admin') throw new Error("Acesso não autorizado (admin requerido).");
+  return user.id;
 }
 
-/**
- * Cria um novo post de blog, incluindo a associação com categorias
- * @param formData Dados do formulário de criação do post
- * @returns Objeto indicando sucesso ou falha da operação
- */
 export async function createPost(formData: PostFormData) {
   const supabase = await createClient();
   try {
-    // Obter ID do usuário autenticado (autor do post)
     const author_id = await getAuthenticatedAdminId();
-    
-    // Buscar nome e sobrenome do autor para armazenar diretamente no post
-    let author_nome = "Lorena";
-    let author_sobrenome = "Jacob";
-    
-    if (author_id) {
-      const { data: authorProfile, error: authorError } = await supabase
-        .from('user_profiles')
-        .select('nome, sobrenome')
-        .eq('user_id', author_id)
-        .single();
-      
-      if (!authorError && authorProfile) {
-        author_nome = authorProfile.nome || author_nome;
-        author_sobrenome = authorProfile.sobrenome || author_sobrenome;
-      } else if (authorError) {
-        console.warn(`Não foi possível buscar dados do autor (ID: ${author_id}):`, authorError.message);
-      }
+    let author_nome = "Lorena"; let author_sobrenome = "Jacob";
+
+    const { data: authorProfile } = await supabase
+      .from('user_profiles').select('nome, sobrenome')
+      .eq('user_id', author_id).maybeSingle();
+    if (authorProfile) {
+      author_nome = authorProfile.nome || author_nome;
+      author_sobrenome = authorProfile.sobrenome || author_sobrenome;
     }
-    
-    // Sanitizar o conteúdo HTML para segurança
+
     const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
 
-    // Inserir o post no banco de dados
     const { data: postData, error: postError } = await supabase
       .from('blog_posts')
-      .insert([
-        {
-          titulo: formData.titulo,
-          slug: formData.slug,
-          resumo: formData.resumo,
-          conteudo: sanitizedContent,
-          imagem_destaque_url: formData.imagem_destaque_url || null,
-          author_id: author_id,
-          author_nome: author_nome,
-          author_sobrenome: author_sobrenome,
-          is_published: formData.is_published,
-          published_at: formData.is_published ? new Date().toISOString() : null,
-          view_count: 0, // Inicializar contador de visualizações
-          like_count: 0, // Inicializar contador de likes
-        }
-      ])
-      .select('id, slug')
-      .single();
+      .insert([{
+        titulo: formData.titulo, slug: formData.slug, resumo: formData.resumo,
+        conteudo: sanitizedContent, imagem_destaque_url: formData.imagem_destaque_url || null,
+        author_id: author_id, author_nome: author_nome, author_sobrenome: author_sobrenome,
+        is_published: formData.is_published,
+        published_at: formData.is_published ? new Date().toISOString() : null,
+        view_count: 0, like_count: 0,
+      }])
+      .select('id, slug').single();
 
     if (postError) throw postError;
-    if (!postData) throw new Error("Falha ao criar o post.");
+    if (!postData) throw new Error("Falha ao criar post (sem retorno).");
 
-    // Associar o post às categorias selecionadas (relação muitos-para-muitos)
     if (formData.categorias && formData.categorias.length > 0) {
-      // Criar entries na tabela de junção para cada categoria
-      const postCategories = formData.categorias.map(catId => ({
-        post_id: postData.id,
-        category_id: catId,
-      }));
-      
-      // Inserir na tabela de junção blog_post_categories
-      const { error: catError } = await supabase
-        .from('blog_post_categories')
-        .insert(postCategories);
-      
-      if (catError) {
-        console.error("Erro ao associar categorias ao post:", catError.message);
-        // Não lançamos o erro para não invalidar a criação do post que já ocorreu
-        // Mas no futuro, pode ser interessante oferecer uma opção de tentar novamente
-      }
+      const postCategories = formData.categorias.map(catId => ({ post_id: postData.id, category_id: catId }));
+      await supabase.from('blog_post_categories').insert(postCategories);
     }
 
-    // Revalidar o cache das páginas afetadas
     revalidatePath('/admin/blog');
     if (formData.is_published) {
-      revalidatePath(`/blog/${postData.slug}`);
+      revalidatePath('/blog'); revalidatePath(`/blog/${postData.slug}`);
     }
-    
-    return { 
-      success: true, 
-      message: "Post criado com sucesso!", 
-      postId: postData.id 
-    };
+    return { success: true, message: "Post criado!", postId: postData.id };
   } catch (error: any) {
-    return { 
-      success: false, 
-      message: error.message || "Falha ao criar post." 
-    };
+    console.error("Erro completo ao criar post:", error);
+    return { success: false, message: error.message || "Falha ao criar post." };
   }
 }
 
-/**
- * Atualiza um post existente, incluindo seus relacionamentos com categorias
- * @param postId ID do post a ser atualizado
- * @param formData Dados do formulário
- * @returns Objeto indicando sucesso ou falha da operação
- */
-export async function updatePost(postId: string, formData: PostFormData) {
+export async function updatePost(
+    postId: string,
+    formData: PostFormData,
+    oldImageUrlFromClient?: string | null
+) {
   const supabase = await createClient();
   try {
-    // Verificar se o usuário é admin
-    const author_id = await getAuthenticatedAdminId();
-    
-    // Sanitizar o conteúdo HTML para segurança
-    const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
-    
-    // Buscar nome e sobrenome do autor para armazenar diretamente no post
-    let author_nome = "Lorena";
-    let author_sobrenome = "Jacob";
-    
-    if (author_id) {
-      const { data: authorProfile, error: authorError } = await supabase
-        .from('user_profiles')
-        .select('nome, sobrenome')
-        .eq('user_id', author_id)
-        .single();
-      
-      if (!authorError && authorProfile) {
-        author_nome = authorProfile.nome || author_nome;
-        author_sobrenome = authorProfile.sobrenome || author_sobrenome;
-      } else if (authorError) {
-        console.warn(`Não foi possível buscar dados do autor (ID: ${author_id}):`, authorError.message);
+    await getAuthenticatedAdminId();
+    const newImageUrl = formData.imagem_destaque_url || null;
+
+    if (newImageUrl !== oldImageUrlFromClient && oldImageUrlFromClient) {
+      const oldPath = getStoragePathFromUrl(oldImageUrlFromClient, 'lorena-images-db'); // <<< SEU BUCKET
+      if (oldPath) {
+        try {
+          console.log("[updatePost Action] Removendo imagem antiga:", oldPath);
+          await supabase.storage.from('lorena-images-db').remove([oldPath]); // <<< SEU BUCKET
+        } catch (e: any) { console.error("Erro não fatal ao remover img antiga:", e.message); }
       }
     }
 
-    // Buscar post existente para comparar mudanças
-    const { data: existingPost, error: fetchError } = await supabase
-      .from('blog_posts')
-      .select('published_at, is_published, slug') // Slug para revalidação de cache
-      .eq('id', postId)
-      .single();
+    const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
+    const { data: existingPostData } = await supabase
+       .from('blog_posts').select('published_at, is_published, slug').eq('id', postId).single();
+    if (!existingPostData) throw new Error("Post não encontrado.");
 
-    if (fetchError) throw fetchError;
-    if (!existingPost) throw new Error("Post não encontrado para atualização.");
-
-    // Atualizar os dados principais do post
     const { data, error: postError } = await supabase
       .from('blog_posts')
       .update({
-        titulo: formData.titulo,
-        slug: formData.slug,
-        resumo: formData.resumo,
-        conteudo: sanitizedContent,
-        imagem_destaque_url: formData.imagem_destaque_url || null,
-        author_nome: author_nome,
-        author_sobrenome: author_sobrenome,
-        updated_at: new Date().toISOString(),
-        is_published: formData.is_published,
-        // Lógica para definir published_at com base no status anterior e atual
-        published_at: (formData.is_published && !existingPost.published_at)
-                        ? new Date().toISOString() // Se publicando pela primeira vez
-                        : (!formData.is_published && existingPost.published_at)
-                          ? null // Se despublicando
-                          : existingPost.published_at, // Mantém o valor existente
+        titulo: formData.titulo, slug: formData.slug, resumo: formData.resumo,
+        conteudo: sanitizedContent, imagem_destaque_url: newImageUrl,
+        updated_at: new Date().toISOString(), is_published: formData.is_published,
+        published_at: (formData.is_published && !existingPostData.published_at) ? new Date().toISOString()
+                      : (!formData.is_published && existingPostData.published_at) ? null
+                      : existingPostData.published_at,
       })
-      .eq('id', postId)
-      .select('id, slug') // Selecionar slug para revalidação
-      .single();
+      .eq('id', postId).select('id, slug').single();
 
     if (postError) throw postError;
-    if (!data) throw new Error("Falha ao atualizar o post.");
+    if (!data) throw new Error("Falha ao atualizar post.");
 
-    // Atualizar associações de categorias - primeiro remover todas as existentes
-    const { error: deleteError } = await supabase
-      .from('blog_post_categories')
-      .delete()
-      .eq('post_id', postId);
-    
-    if (deleteError) {
-      console.error("Erro ao remover associações de categorias existentes:", deleteError.message);
-      // Não lançamos error aqui para não invalidar a atualização do post que já ocorreu
-    }
-    
-    // Inserir novas associações de categorias se existirem
+    await supabase.from('blog_post_categories').delete().eq('post_id', postId);
     if (formData.categorias && formData.categorias.length > 0) {
-      const postCategories = formData.categorias.map(catId => ({
-        post_id: postId,
-        category_id: catId,
-      }));
-      
-      const { error: catError } = await supabase
-        .from('blog_post_categories')
-        .insert(postCategories);
-        
-      if (catError) {
-        console.error("Erro ao atualizar associação de categorias:", catError.message);
-        // Não lançamos error para não invalidar a atualização do post que já ocorreu
-      }
+      const postCategories = formData.categorias.map(catId => ({ post_id: postId, category_id: catId }));
+      await supabase.from('blog_post_categories').insert(postCategories);
     }
 
-    // Revalidar caches para atualizar a interface
     revalidatePath('/admin/blog');
-    
-    // Revalidar URLs do frontend se o post estiver publicado
-    if (existingPost.slug !== data.slug) {
-      // Se o slug mudou, revalidar também a URL antiga
-      if (existingPost.is_published) revalidatePath(`/blog/${existingPost.slug}`);
-    }
-    if (formData.is_published) revalidatePath(`/blog/${data.slug}`);
-    
-    // Revalidar a página de edição do post
+    if (existingPostData.slug !== data.slug && existingPostData.is_published) revalidatePath(`/blog/${existingPostData.slug}`);
+    if (formData.is_published) { revalidatePath('/blog'); revalidatePath(`/blog/${data.slug}`); }
+    else if (existingPostData.is_published) { revalidatePath('/blog'); revalidatePath(`/blog/${existingPostData.slug}`); }
     revalidatePath(`/admin/blog/editar/${postId}`);
-    
-    return { success: true, message: "Post atualizado com sucesso!", post: data };
+
+    return { success: true, message: "Post atualizado!", post: data };
   } catch (error: any) {
-    return { success: false, message: error.message || "Falha ao atualizar post." };
+    console.error("Erro completo ao atualizar post:", error);
+    return { success: false, message: error.message || "Falha ao atualizar." };
   }
 }
 
-/**
- * Busca um post do blog para edição, incluindo suas categorias associadas
- * @param id ID do post a ser editado
- * @returns Dados do post formatados para o formulário de edição
- */
 export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 'user_profiles' | 'blog_post_categories'> & { user_profiles: UserProfileInfo | null; categorias: string[] }) | null> {
   const supabase = await createClient();
   try {
-    // Verificar se o usuário é admin
     await getAuthenticatedAdminId();
-    
-    // Buscar post com suas categorias associadas (sem !inner para permitir posts sem categorias)
     const { data: post, error } = await supabase
       .from('blog_posts')
       .select(`
-        id, titulo, slug, resumo, conteudo, imagem_destaque_url, author_id, 
+        id, titulo, slug, resumo, conteudo, imagem_destaque_url, author_id, author_nome, author_sobrenome,
         is_published, published_at, created_at, updated_at, like_count, view_count,
-        blog_post_categories(
-          category_id,
-          blog_categories(id, nome)
-        )
-      `)
-      .eq('id', id)
-      .single();
+        blog_post_categories( category_id, blog_categories(id, nome) )
+      `).eq('id', id).single();
 
-    if (error) throw error;
+    if (error) { if (error.code === 'PGRST116') return null; throw error; }
     if (!post) return null;
 
-    // Buscar informações do autor se existir
-    let userProfileData: UserProfileInfo | null = null;
-    if (post.author_id) {
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('nome, sobrenome')
-        .eq('user_id', post.author_id)
-        .single();
-      
-      if (profileError) {
-        console.error(`Erro ao buscar perfil do autor ${post.author_id} para o post ${id}:`, profileError.message);
-      } else {
-        userProfileData = profile;
-      }
-    }
-    
-    // Processamento das categorias para o formulário de edição
-    const categoryIds: string[] = [];
-    
-    if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
-      for (const pc of post.blog_post_categories) {
-        // Usar tipo any para evitar erros de tipagem
-        const catInfo: any = pc;
-        
-        // Verificar se temos dados completos da categoria
-        if (catInfo.blog_categories && typeof catInfo.blog_categories === 'object' && !Array.isArray(catInfo.blog_categories)) {
-          categoryIds.push(catInfo.blog_categories.id);
-        } 
-        // Fallback para caso tenhamos apenas o category_id
-        else if (catInfo.category_id) {
-          categoryIds.push(catInfo.category_id);
-        }
-      }
-    }
-    
-    // Remove blog_post_categories do objeto post pois já processamos essa informação
-    const { blog_post_categories, ...restOfPost } = post;
+    let userProfileData: UserProfileInfo | null = { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' };
+    const categoryIds: string[] = post.blog_post_categories?.map(pc => pc.blog_categories?.id ?? pc.category_id).filter(Boolean) as string[] || [];
+    const { blog_post_categories, author_nome, author_sobrenome, ...restOfPost } = post;
 
-    return { 
-      ...restOfPost, 
-      like_count: post.like_count ?? 0,
-      view_count: post.view_count ?? 0,
-      user_profiles: userProfileData, // Anexa os dados do perfil buscados
-      categorias: categoryIds // IDs das categorias para uso no formulário
+    return {
+      ...restOfPost,
+      like_count: post.like_count ?? 0, view_count: post.view_count ?? 0,
+      user_profiles: userProfileData, categorias: categoryIds
     };
   } catch (error: any) {
-    console.error(`Erro ao buscar post ${id} para edição:`, error.message);
-    return null;
+    console.error(`Erro GERAL buscar post ${id} edit:`, error.message); return null;
   }
 }
 
@@ -384,148 +229,114 @@ export async function getBlogCategories(): Promise<BlogCategoryFromDB[]> {
   const supabase = await createClient();
   try {
     const { data, error } = await supabase
-      .from('blog_categories')
-      .select('id, nome')
-      .order('nome', { ascending: true });
-    if (error) {
-        console.error("Erro ao buscar categorias do blog (RLS pode estar faltando?):", error.message);
-        throw error;
-    };
+      .from('blog_categories').select('id, nome').order('nome', { ascending: true });
+    if (error) { console.error("Erro buscar categorias:", error.message); return []; }
     return data || [];
-  } catch (error: any) {
-    console.error("Exceção ao buscar categorias do blog:", error.message);
-    return [];
-  }
+  } catch (error: any) { console.error("Exceção buscar categorias:", error.message); return []; }
 }
 
 export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
-  const supabase = await createClient();
-  try {
-    await getAuthenticatedAdminId(); 
+    const supabase = await createClient();
+    try {
+        await getAuthenticatedAdminId();
+        const { data: postsData, error: postsError } = await supabase
+            .from('blog_posts')
+            .select(`
+                id, titulo, slug, resumo, conteudo, imagem_destaque_url,
+                author_id, author_nome, author_sobrenome,
+                is_published, published_at, created_at, updated_at, like_count, view_count,
+                blog_post_categories ( category_id, blog_categories ( id, nome ) )
+            `).order('created_at', { ascending: false });
 
-    // Buscar posts com suas categorias (sem o !inner para permitir posts sem categorias)
-    const { data: postsData, error: postsError } = await supabase
-      .from('blog_posts')
-      .select(`
-        id, titulo, slug, resumo, conteudo, imagem_destaque_url, author_id, 
-        is_published, published_at, created_at, updated_at, like_count, view_count,
-        blog_post_categories ( 
-          category_id,
-          blog_categories ( id, nome )
-        )
-      `)
-      .order('created_at', { ascending: false });
+        if (postsError) { console.error("Erro buscar posts admin:", postsError.message); throw postsError; }
+        if (!postsData) return [];
 
-    if (postsError) {
-      console.error("Erro ao buscar posts para admin:", postsError.message);
-      throw postsError; // Lança o erro para ser tratado onde a função é chamada
-    }
-
-    if (!postsData || postsData.length === 0) {
-      console.log("Nenhum post encontrado no banco de dados para admin");
-      return [];
-    }
-    
-    const authorIds = [...new Set(postsData.map(p => p.author_id).filter(id => id !== null))] as string[];
-    
-    let userProfilesMap: Map<string, UserProfileInfo> = new Map();
-
-    if (authorIds.length > 0) {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('user_profiles')
-        .select('user_id, nome, sobrenome')
-        .in('user_id', authorIds);
-
-      if (profilesError) {
-        console.error("Erro ao buscar perfis de usuários para admin:", profilesError.message);
-        // Não lançar erro aqui, apenas os posts não terão info de autor
-      } else if (profilesData) {
-        profilesData.forEach(profile => {
-          if (profile.user_id) {
-            userProfilesMap.set(profile.user_id, { nome: profile.nome, sobrenome: profile.sobrenome });
-          }
+        return postsData.map(post => {
+             const categoryIds: string[] = [];
+             const categoriesInfo: { id: string; nome: string; }[] = [];
+             let postCategoriesData: any[] = [];
+             if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
+                postCategoriesData = post.blog_post_categories;
+                for (const pc of post.blog_post_categories) {
+                     if (pc.blog_categories?.id && pc.blog_categories?.nome) {
+                        categoryIds.push(pc.blog_categories.id);
+                        categoriesInfo.push({ id: pc.blog_categories.id, nome: pc.blog_categories.nome });
+                    }
+                }
+             }
+             return {
+                 ...post, conteudo: post.conteudo || '', like_count: post.like_count ?? 0, view_count: post.view_count ?? 0,
+                 user_profiles: { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' },
+                 blog_post_categories: postCategoriesData, categorias: categoryIds, categoriasInfo: categoriesInfo
+             } as BlogPostFromDB;
         });
-      }
-    }
-    
-    // Processar os posts
-    const result: BlogPostFromDB[] = [];
-    
-    for (const post of postsData) {
-      // Extrair as categorias e seus IDs
-      const categoryIds: string[] = [];
-      let postCategories: any[] = [];
-      
-      if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
-        postCategories = post.blog_post_categories;
-        
-        // Extrair IDs para o formulário
-        for (const pc of post.blog_post_categories) {
-          // Usar tipo any para evitar erros de tipagem
-          const catInfo: any = pc;
-          
-          if (catInfo && catInfo.blog_categories && typeof catInfo.blog_categories === 'object' && !Array.isArray(catInfo.blog_categories)) {
-            categoryIds.push(catInfo.blog_categories.id);
-          }
-        }
-      }
-      
-      // Criar o objeto com tipagem compatível
-      result.push({
-        id: post.id,
-        titulo: post.titulo,
-        slug: post.slug,
-        resumo: post.resumo,
-        conteudo: post.conteudo || '',
-        imagem_destaque_url: post.imagem_destaque_url,
-        author_id: post.author_id,
-        is_published: post.is_published || false,
-        published_at: post.published_at,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-        like_count: post.like_count ?? 0,
-        view_count: post.view_count ?? 0,
-        user_profiles: post.author_id ? userProfilesMap.get(post.author_id) || null : null,
-        // Preservar o formato original para a exibição correta na UI
-        blog_post_categories: postCategories,
-        // Lista de IDs para uso no formulário
-        categorias: categoryIds
-      });
-    }
-    
-    return result;
-    
-  } catch (error: any) {
-    console.error("Exceção ao buscar posts para admin:", error.message);
-    return [];
-  }
+    } catch (error: any) { console.error("Exceção buscar posts admin:", error.message); return []; }
 }
 
+
+// === deletePost AGORA TENTA DELETAR A IMAGEM ===
 export async function deletePost(postId: string): Promise<{ success: boolean, message: string }> {
   const supabase = await createClient();
+  let imageUrlToDelete: string | null = null; // Variável para guardar a URL
+
   try {
     await getAuthenticatedAdminId();
 
-    const { error: catError } = await supabase
-      .from('blog_post_categories')
-      .delete()
-      .eq('post_id', postId);
+    // 1. Buscar a URL da imagem ANTES de deletar o post
+    const { data: postData, error: fetchError } = await supabase
+        .from('blog_posts').select('imagem_destaque_url').eq('id', postId).maybeSingle();
 
-    if (catError) {
-      console.error(`Erro ao deletar associações de categorias para o post ${postId}:`, catError.message);
+    // Se deu erro na busca (e não foi 'não encontrado'), joga o erro
+    if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error(`Erro ao buscar post ${postId} para exclusão:`, fetchError.message);
+        throw new Error("Falha ao buscar dados do post para exclusão.");
+    }
+    imageUrlToDelete = postData?.imagem_destaque_url || null; // Guarda a URL
+
+    // 2. Deletar o post do banco (CASCADE deve cuidar das categorias, etc.)
+    const { error: postError } = await supabase.from('blog_posts').delete().eq('id', postId);
+    if (postError) {
+        console.error(`Erro ao deletar post ${postId} do banco:`, postError.message);
+        throw postError; // Se não deletou o post, não adianta deletar imagem
+    }
+    console.log(`Post ${postId} deletado do banco.`);
+
+    // 3. Tentar deletar a imagem do Storage (SE existir URL)
+    if (imageUrlToDelete) {
+        const pathToDelete = getStoragePathFromUrl(imageUrlToDelete, 'lorena-images-db'); // <<< SEU BUCKET
+        console.log(`[deletePost Action] Tentando remover imagem do storage. Path: ${pathToDelete}`);
+
+        if (pathToDelete) {
+            try {
+                const { error: deleteImgError } = await supabase.storage
+                     .from('lorena-images-db') // <<< SEU BUCKET
+                     .remove([pathToDelete]);
+
+                if (deleteImgError) {
+                    // Loga o erro mas NÃO lança exceção, pois o post já foi deletado.
+                    console.error(`[deletePost Action] Erro NÃO FATAL ao remover imagem '${pathToDelete}':`, deleteImgError);
+                } else {
+                    console.log(`[deletePost Action] Imagem '${pathToDelete}' removida do storage.`);
+                }
+            } catch (e:any) {
+                console.error(`[deletePost Action] Exceção ao tentar remover imagem '${pathToDelete}':`, e.message);
+            }
+        } else {
+            console.warn(`[deletePost Action] Não foi possível extrair path válido da URL para deletar: ${imageUrlToDelete}`);
+        }
+    } else {
+        console.log(`[deletePost Action] Post ${postId} não possuía imagem para remover.`);
     }
 
-    const { error: postError } = await supabase
-      .from('blog_posts')
-      .delete()
-      .eq('id', postId);
-
-    if (postError) throw postError;
-
+    // Revalidação
     revalidatePath('/admin/blog');
-    
+    revalidatePath('/blog'); // Revalidar blog público também
+
     return { success: true, message: "Post excluído com sucesso." };
+
   } catch (error: any) {
+    // Captura erros da busca inicial ou da deleção do post no DB
+    console.error("Erro GERAL ao excluir post:", error);
     return { success: false, message: error.message || "Falha ao excluir post." };
   }
 }
