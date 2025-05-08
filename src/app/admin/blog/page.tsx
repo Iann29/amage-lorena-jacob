@@ -96,8 +96,8 @@ export default function AdminBlogPage() {
         setPosts([]);
         setTotalCount(0);
       }
-    } catch (error: any) {
-      setError(error.message || "Erro inesperado ao buscar dados.");
+    } catch (error: unknown) {
+      setError((error instanceof Error ? error.message : String(error)) || "Erro inesperado ao buscar dados.");
       setPosts([]);
       setTotalCount(0);
     } finally {
@@ -164,7 +164,7 @@ export default function AdminBlogPage() {
     if (window.confirm(`Tem certeza que deseja excluir ${selectedPostIds.length} post(s)?`)) {
       setIsLoading(true); // Mostrar loading durante a exclusão em lote
       let successCount = 0;
-      let errorMessages: string[] = [];
+      const errorMessages: string[] = [];
       for (const postId of selectedPostIds) {
         const result = await deletePost(postId);
         if (result.success) {
@@ -375,17 +375,18 @@ export default function AdminBlogPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-1">
-                        {post.blog_post_categories?.map((bpc) => (
-                           bpc.blog_categories && (
+                        {post.blog_post_categories?.map((bpc) => {
+                          const category = bpc.blog_categories?.[0];
+                          return category ? (
                             <span
-                                key={bpc.blog_categories.id}
+                                key={category.id}
                                 className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800"
                             >
-                                {bpc.blog_categories.nome}
+                                {category.nome}
                             </span>
-                           )
-                        ))}
-                        {(!post.blog_post_categories || post.blog_post_categories.length === 0) && (
+                          ) : null;
+                        })}
+                        {(!post.blog_post_categories || post.blog_post_categories.length === 0 || post.blog_post_categories.every(bpc => !bpc.blog_categories || bpc.blog_categories.length === 0)) && (
                             <span className="text-xs text-gray-500">Nenhuma</span>
                         )}
                       </div>

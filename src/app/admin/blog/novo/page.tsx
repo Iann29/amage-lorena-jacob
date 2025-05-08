@@ -161,7 +161,7 @@ export default function NovoBlogPostPage() {
       const filePath = `blog-post/${fileName}`; // Salva na pasta 'blog-post/'
 
       try {
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('lorena-images-db') // <<< SEU BUCKET CORRETO
           .upload(filePath, selectedImageFile, {
             cacheControl: '3600',
@@ -181,9 +181,9 @@ export default function NovoBlogPostPage() {
         finalImageUrl = urlData.publicUrl;
         setIsUploading(false);
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Erro no upload da imagem:', error);
-        setServerMessage({type: 'error', text: `Erro no upload da imagem: ${error.message}`});
+        setServerMessage({type: 'error', text: `Erro no upload da imagem: ${(error instanceof Error ? error.message : String(error))}`});
         setIsUploading(false);
         setIsLoading(false);
         return;
@@ -222,7 +222,7 @@ export default function NovoBlogPostPage() {
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao chamar createPost:', error);
       setServerMessage({type: 'error', text: "Ocorreu um erro inesperado ao salvar o post."});
        // Deletar imagem recém-enviada em caso de erro inesperado
