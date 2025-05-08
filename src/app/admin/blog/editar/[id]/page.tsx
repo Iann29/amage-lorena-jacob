@@ -107,10 +107,6 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
     };
   }, [postId, router]); // Dependências corretas
 
-  const generateSlug = (title: string) => {
-    return title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/--+/g, '-').trim();
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -181,9 +177,9 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
                 console.log("Imagem removida do storage ao clicar em remover.");
                 setOriginalImageUrl(null); // Atualiza o estado da URL original também
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             setIsLoading(false);
-            console.error("Erro ao remover imagem do storage:", error.message);
+            console.error("Erro ao remover imagem do storage:", error instanceof Error ? error.message : String(error));
             alert("Erro ao remover a imagem do armazenamento. A referência será removida ao salvar.");
         }
     }
@@ -232,9 +228,9 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
 
         finalImageUrl = urlData.publicUrl; // Define a nova URL
         setIsUploading(false);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Erro no upload da imagem (editar):', error);
-        setServerMessage({ type: 'error', text: `Erro no upload: ${error.message}` });
+        setServerMessage({ type: 'error', text: `Erro no upload: ${(error instanceof Error ? error.message : String(error))}` });
         setIsUploading(false);
         setIsLoading(false);
         return;
@@ -242,7 +238,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
     }
 
     // 2. Preparar payload para a Server Action
-    const { like_count, view_count, ...payloadBase } = formData; // Remove contadores
+    const { ...payloadBase } = formData; // Remove contadores like_count e view_count
     const payload = {
       ...payloadBase,
       imagem_destaque_url: finalImageUrl, // Envia a URL final (nova ou a antiga mantida)
@@ -270,7 +266,7 @@ export default function EditarBlogPostPage({ params }: EditarPostParams) {
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao chamar updatePost:', error);
       setServerMessage({ type: 'error', text: "Erro inesperado ao salvar." });
        // Deletar imagem nova em caso de erro inesperado também
