@@ -57,7 +57,10 @@ export default function AdminDashboardPage() {
     async function fetchData() {
       setIsLoading(true);
       setError(null);
+      console.log("*** TESTE: FetchData iniciado, mas buscando APENAS categorias (se necessário) ***"); // Log de teste
       try {
+        // --- TEMPORARIAMENTE COMENTADO PARA TESTE DE PERFORMANCE ---
+        /*
         // Buscar dados do Blog e Comentários em paralelo
         const [statsResult, recentPostsResult, commentsResult] = await Promise.all([
           getDashboardBlogStats(),
@@ -89,16 +92,26 @@ export default function AdminDashboardPage() {
           console.error("Erro ao buscar comentários pendentes:", commentsResult.message);
           setError(prev => (prev ? prev + "; " : "") + (commentsResult.message || "Falha: Comentários Pendentes"));
         }
+        */
+        // --- FIM DO BLOCO COMENTADO ---
+
+        // Manter apenas a busca de categorias se ela for necessária em algum lugar ou remover também
+        // Exemplo: Se allCategories fosse usado em algum lugar
+        // if (allCategories.length === 0) { // Assumindo que allCategories é um estado
+        //    const fetchedCategories = await getBlogCategories();
+        //    setAllCategories(fetchedCategories || []);
+        // }
+        console.log("*** TESTE: Busca de dados principais comentada ***");
 
       } catch (e: any) {
-        console.error("Erro geral no useEffect do AdminDashboardPage:", e);
-        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados.");
+        console.error("Erro geral no useEffect do AdminDashboardPage (TESTE):", e);
+        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados (TESTE).");
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, []);
+  }, []); // Removido dependências por enquanto, já que a busca principal está comentada
 
   // Efeito para calcular média de comentários quando os dados relevantes mudarem
   useEffect(() => {
