@@ -74,6 +74,9 @@ export default function AdminCommentsPage() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+  // Tipo para as funções de moderação
+  type ModerationAction = (commentId: string) => Promise<{ success: boolean; message?: string }>;
+
   // Função para buscar comentários
   const fetchComments = useCallback(async () => {
     setIsLoading(true);
@@ -94,8 +97,8 @@ export default function AdminCommentsPage() {
         setComments([]);
         setTotalCount(0);
       }
-    } catch (e: any) {
-      setError(e.message || "Erro inesperado ao buscar comentários.");
+    } catch (e: unknown) {
+      setError((e instanceof Error ? e.message : String(e)) || "Erro inesperado ao buscar comentários.");
       setComments([]);
       setTotalCount(0);
     } finally {
@@ -109,7 +112,7 @@ export default function AdminCommentsPage() {
   }, [fetchComments]);
 
   // Funções para executar actions de moderação
-  const handleAction = async (action: Function, commentId: string, successMessage: string) => {
+  const handleAction = async (action: ModerationAction, commentId: string, successMessage: string) => {
      if (!confirm("Tem certeza que deseja executar esta ação?")) return;
      setActionFeedback(null); // Limpa feedback anterior
      try {
@@ -120,8 +123,8 @@ export default function AdminCommentsPage() {
        } else {
          setActionFeedback({ type: 'error', message: result.message || 'Falha ao executar ação.' });
        }
-     } catch (e:any) {
-       setActionFeedback({ type: 'error', message: e.message || 'Erro inesperado.' });
+     } catch (e: unknown) {
+       setActionFeedback({ type: 'error', message: (e instanceof Error ? e.message : String(e)) || 'Erro inesperado.' });
      }
    };
 

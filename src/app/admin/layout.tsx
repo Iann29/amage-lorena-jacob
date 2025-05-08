@@ -114,7 +114,7 @@ export default function AdminLayout({ children }: LayoutProps) {
     fetchUserData();
 
      // Listener para deslogar automaticamente se a sessão for invalidada em outra aba
-     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
         // Simplificado: Apenas reage a SIGNED_OUT aqui.
         // A lógica de token expirado/inválido já é tratada no fetchUserData.
         if (isMounted && event === 'SIGNED_OUT' && !isLoginPage) {
