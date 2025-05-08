@@ -8,6 +8,8 @@ import { blogComments } from '@/lib/mockData'; // Manter para comentários mocka
 
 // Importar as actions
 import { getDashboardBlogStats, getRecentPostsForDashboard } from './blog/actions';
+import { listCommentsForAdmin } from '@/app/comments/actions'; // Action para buscar comentários
+import type { AdminCommentInfo } from '@/app/comments/actions'; // Tipo para comentários do admin
 
 // Definir tipos para os dados que virão das actions
 interface DashboardStats {
@@ -42,6 +44,10 @@ export default function AdminDashboardPage() {
   const comentariosRecentesMock = blogComments.slice(0, 5);
   // const totalCategorias = blogCategorias.length; // Remover se não for mais usado
 
+  // Estados para dados reais dos Comentários
+  const [pendingCommentsCount, setPendingCommentsCount] = useState(0);
+  const [recentPendingComments, setRecentPendingComments] = useState<AdminCommentInfo[]>([]);
+
   // Estado para estatísticas que dependem de cálculos no cliente
   const [clientCalculatedStats, setClientCalculatedStats] = useState({
     mediaComentariosPorPost: 0
@@ -52,26 +58,40 @@ export default function AdminDashboardPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const statsResult = await getDashboardBlogStats();
-        const recentPostsResult = await getRecentPostsForDashboard(5);
+        // Buscar dados do Blog e Comentários em paralelo
+        const [statsResult, recentPostsResult, commentsResult] = await Promise.all([
+          getDashboardBlogStats(),
+          getRecentPostsForDashboard(5),
+          listCommentsForAdmin({ status: 'pending', limit: 5 }) // Buscar 5 pendentes
+        ]);
 
+        // Processar dados do Blog
         if (statsResult.success && statsResult.data) {
           setDashboardStats(statsResult.data);
         } else {
           console.error("Erro ao buscar estatísticas do dashboard:", statsResult.message);
-          setError(statsResult.message || "Falha ao carregar estatísticas.");
+          setError(prev => (prev ? prev + "; " : "") + (statsResult.message || "Falha: Estatísticas Blog"));
         }
-
         if (recentPostsResult.success && recentPostsResult.data) {
           // Garantir que o tipo corresponda. Se o ID for número no DB, ajuste o tipo RecentPost.
           setRecentPosts(recentPostsResult.data as RecentPost[]);
         } else {
           console.error("Erro ao buscar posts recentes:", recentPostsResult.message);
-          setError(prevError => prevError ? prevError + "; " + (recentPostsResult.message || "Falha ao carregar posts.") : (recentPostsResult.message || "Falha ao carregar posts."));
+          setError(prev => (prev ? prev + "; " : "") + (recentPostsResult.message || "Falha: Posts Recentes"));
+        }
+
+        // Processar dados dos Comentários
+        if (commentsResult.success && commentsResult.data) {
+          setRecentPendingComments(commentsResult.data);
+          // O totalCount aqui será apenas dos pendentes. Se quiser total geral, precisaria de outra chamada ou ajuste na action
+          setPendingCommentsCount(commentsResult.totalCount || 0); 
+        } else {
+          console.error("Erro ao buscar comentários pendentes:", commentsResult.message);
+          setError(prev => (prev ? prev + "; " : "") + (commentsResult.message || "Falha: Comentários Pendentes"));
         }
 
       } catch (e: any) {
-        console.error("Erro no useEffect do AdminDashboardPage:", e);
+        console.error("Erro geral no useEffect do AdminDashboardPage:", e);
         setError(e.message || "Ocorreu um erro inesperado ao carregar os dados.");
       } finally {
         setIsLoading(false);
@@ -180,17 +200,19 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-lg shadow p-5">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500">Comentários</p>
-              <p className="text-2xl font-bold text-gray-900">{totalComentariosMock}</p> {/* Usando mock por enquanto */}
+              <p className="text-sm font-medium text-gray-500">Comentários Pendentes</p>
+              <p className="text-2xl font-bold text-gray-900">{pendingCommentsCount}</p>
             </div>
-            <div className="p-2 bg-green-100 rounded-md">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            <div className="p-2 bg-yellow-100 rounded-md">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-sm text-gray-500">{clientCalculatedStats.mediaComentariosPorPost} por post</span> {/* Usando cálculo com mock */}
+            <Link href="/admin/comentarios" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+              Gerenciar
+            </Link>
           </div>
         </div>
       </div>
@@ -228,40 +250,37 @@ export default function AdminDashboardPage() {
           </div>
         </div>
         
-        {/* Comentários recentes (mantendo mock por enquanto) */}
+        {/* Comentários Pendentes Recentes */}
         <div className="bg-white rounded-lg shadow">
           <div className="border-b border-gray-200 px-6 py-4">
-            <h2 className="font-medium text-gray-900">Comentários Recentes</h2>
+            <h2 className="font-medium text-gray-900">Comentários Pendentes Recentes</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {comentariosRecentesMock.map((comment) => (
-              <div key={comment.id} className="px-6 py-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-900 line-clamp-1">{comment.conteudo}</p> {/* Ajustado de comment.texto para comment.conteudo */}
-                    <div className="flex items-center mt-1">
-                      <p className="text-xs font-medium text-gray-900">{comment.user.nome}</p> {/* Ajustado de comment.autor_nome para comment.user.nome */}
-                      <span className="mx-1 text-xs text-gray-500">•</span>
-                      <p className="text-xs text-gray-500">
-                        {new Date(comment.created_at).toLocaleDateString('pt-BR')}
-                      </p>
+            {isLoading ? (
+              <p className="p-6 text-gray-500"></p>
+            ) : recentPendingComments.length > 0 ? (
+              recentPendingComments.map((comment) => (
+                <div key={comment.id} className="px-6 py-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm text-gray-900 line-clamp-2"><strong className="font-medium">{comment.author.nome} {comment.author.sobrenome}</strong> comentou em <Link href={`/blog/${comment.post.slug}`} target="_blank" className="text-blue-600 hover:underline">{comment.post.titulo}</Link></p>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">{comment.conteudo}</p>
+                    </div>
+                    <div className="flex-shrink-0 ml-4">
+                      <Link href="/admin/comentarios" className="text-xs font-medium text-purple-600 hover:text-purple-800">
+                         Revisar
+                      </Link>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <button className="text-xs font-medium text-green-600 hover:text-green-800">
-                      Aprovar
-                    </button>
-                    <button className="text-xs font-medium text-red-600 hover:text-red-800">
-                      Remover
-                    </button>
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="p-6 text-gray-500">Nenhum comentário pendente.</p>
+            )}
           </div>
           <div className="border-t border-gray-200 px-6 py-4">
             <Link href="/admin/comentarios" className="text-sm font-medium text-purple-600 hover:text-purple-800">
-              Gerenciar comentários → {/* Esta rota precisaria existir se for mantida */}
+              Gerenciar todos os comentários →
             </Link>
           </div>
         </div>

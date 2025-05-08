@@ -10,6 +10,12 @@ import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
 // import PostViewTracker from '@/components/blog/PostViewTracker'; // <<< LINHA REMOVIDA
 
+// Novos imports
+import CommentSection from '@/components/blog/CommentSection';
+import type { CommentData, CommentUser } from '@/components/blog/CommentSection';
+import { getCommentsTreeByPostId } from '@/app/comments/actions';
+import { createClient } from '@/utils/supabase/server';
+
 export const revalidate = 3600;
 
 // Metadados dinâmicos (mantido como estava)
@@ -92,11 +98,12 @@ async function PostContent({ slug }: { slug: string }) {
 
 // Componente Principal da Página
 export default async function PostPage({ params }: { params: { slug: string } }) {
-   const { slug } = await Promise.resolve(params);
-  const post = await getBlogPostBySlug(slug);
-  const comments: any[] = []; // Mock
+  const { slug } = await Promise.resolve(params);
 
-  if (!post) {
+  // 1. Buscar dados do post
+  const post = await getBlogPostBySlug(slug);
+
+  if (!post || !post.id) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-4xl font-bold text-[#715B3F] mb-4">Post não encontrado</h1>
@@ -111,6 +118,35 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </Link>
       </div>
     );
+  }
+
+  // 2. Buscar dados do usuário logado (currentUser)
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let currentUserData: CommentUser | null = null;
+
+  if (authUser) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('user_id, nome, sobrenome, avatar_url')
+      .eq('user_id', authUser.id)
+      .single();
+    if (profile) {
+      currentUserData = {
+        id: profile.user_id,
+        nome: profile.nome,
+        avatar_url: profile.avatar_url
+      };
+    }
+  }
+
+  // 3. Buscar comentários para o post
+  let commentsData: CommentData[] = [];
+  const commentsResult = await getCommentsTreeByPostId(post.id);
+  if (commentsResult.success && commentsResult.data) {
+    commentsData = commentsResult.data;
+  } else {
+    console.error("Erro ao buscar comentários para o post:", commentsResult.message);
   }
 
   return (
@@ -162,57 +198,13 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
       </div>
 
-      {/* Seção de Comentários */}
-      <div className={styles.commentsSection}>
-         <div className={styles.commentHeader}>
-          <div className={styles.commentTitle}>
-            <Image
-              src="/assets/quercomentar.png"
-              alt="Ícone de comentário"
-              width={54}
-              height={54}
-              className="mr-2"
-            />
-            Quer comentar?
-          </div>
-          <div className={styles.commentSubtitle}>
-            Entre com sua conta Google ou Conecte-se
-          </div>
-          <div className={styles.commentButtons}>
-            <button className={styles.googleButton}>
-              <Image
-                src="/assets/google.svg"
-                alt="Google"
-                width={24}
-                height={24}
-                className="mr-2"
-              />
-              Entrar com a Conta Google
-            </button>
-            <button className={styles.accountButton}>
-              <Image
-                src="/assets/perfilIcon.png"
-                alt="Perfil"
-                width={32}
-                height={32}
-                className="mr-3"
-              />
-              Já tenho conta
-            </button>
-          </div>
-        </div>
-         <div className={styles.commentsList}>
-          <h3 className="text-2xl font-bold text-[#9772FB] mb-6">Comentários</h3>
-           {comments.length > 0 ? (
-             comments.map((comment: any) => (
-               <div key={comment.id} className={styles.commentItem}>
-                 {/* ... estrutura do comentário ... */}
-               </div>
-             ))
-           ) : (
-             <p className="text-gray-600 mb-8">Seja o primeiro a comentar neste post!</p>
-           )}
-        </div>
+      {/* Seção de Comentários ATUALIZADA */}
+      <div className="container mx-auto max-w-3xl px-4 py-12">
+        <CommentSection 
+          postId={post.id} 
+          comments={commentsData} 
+          currentUser={currentUserData} 
+        />
       </div>
 
       {/* Componente para rastrear visualizações foi removido daqui */}
