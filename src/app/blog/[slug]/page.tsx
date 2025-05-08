@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 // Importar as funções da nova API
 import { getBlogPostBySlug, getPopularBlogPosts, getPublishedBlogPosts } from '@/lib/blog-api'; // Remova getPopularBlogPosts se não usar
-import type { BlogPostPublic } from '@/lib/blog-api';
 import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
 // import PostViewTracker from '@/components/blog/PostViewTracker'; // <<< LINHA REMOVIDA

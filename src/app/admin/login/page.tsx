@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
       // console.log("Lembrar-me está:", rememberMe);
 
       router.push('/admin');
-    } catch (catchedError: any) {
+    } catch (catchedError: unknown) {
       console.error('Erro de login (catch):', catchedError);
       setErrorMsg('Ocorreu um erro inesperado. Tente novamente.');
     } finally {

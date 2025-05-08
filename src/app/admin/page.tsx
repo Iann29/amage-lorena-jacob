@@ -41,18 +41,13 @@ export default function AdminDashboardPage() {
   
   // Dados mockados para comentários e categorias (manter por enquanto ou remover se não for usar)
   const totalComentariosMock = blogComments.length;
-  const comentariosRecentesMock = blogComments.slice(0, 5);
+  // const comentariosRecentesMock = blogComments.slice(0, 5); // Removido - não utilizado
   // const totalCategorias = blogCategorias.length; // Remover se não for mais usado
 
   // Estados para dados reais dos Comentários
   const [pendingCommentsCount, setPendingCommentsCount] = useState(0);
   const [recentPendingComments, setRecentPendingComments] = useState<AdminCommentInfo[]>([]);
 
-  // Estado para estatísticas que dependem de cálculos no cliente
-  const [clientCalculatedStats, setClientCalculatedStats] = useState({
-    mediaComentariosPorPost: 0
-  });
-  
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
@@ -97,9 +92,9 @@ export default function AdminDashboardPage() {
         // Remover log de teste
         // console.log("*** TESTE: Busca de dados principais comentada ***");
 
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error("Erro geral no useEffect do AdminDashboardPage:", e);
-        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados.");
+        setError((e instanceof Error ? e.message : String(e)) || "Ocorreu um erro inesperado ao carregar os dados.");
       } finally {
         setIsLoading(false);
       }
@@ -107,16 +102,6 @@ export default function AdminDashboardPage() {
     fetchData();
   // Usar array vazio de dependências para buscar dados apenas uma vez no mount
   }, []); 
-
-  // Efeito para calcular média de comentários quando os dados relevantes mudarem
-  useEffect(() => {
-    const totalPosts = dashboardStats.totalPosts;
-    // Usar totalComentariosMock por enquanto. Substituir por dashboardStats.totalComentarios se implementado
-    const media = totalPosts > 0 ? (totalComentariosMock / totalPosts) : 0;
-    setClientCalculatedStats({
-      mediaComentariosPorPost: parseFloat(media.toFixed(1))
-    });
-  }, [dashboardStats.totalPosts, totalComentariosMock]);
 
   if (isLoading) {
     return (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'; // Adicionado useCallback
 import Image from 'next/image';
-import Link from 'next/link';
+// import Link from 'next/link'; // Removido - Link não utilizado
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import BlogFilter from '@/components/blog/BlogFilter';
 import styles from './blog.module.css';
