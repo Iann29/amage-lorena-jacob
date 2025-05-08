@@ -151,7 +151,7 @@ export default function AdminCommentsPage() {
               setFilterStatus(e.target.value as 'pending' | 'approved' | 'all');
               setCurrentPage(1); // Resetar para página 1 ao mudar filtro
             }}
-            className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            className="p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 text-gray-800"
           >
             <option value="pending">Pendentes</option>
             <option value="approved">Aprovados</option>

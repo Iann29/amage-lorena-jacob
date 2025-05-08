@@ -235,50 +235,106 @@ interface ModerateCommentResponse {
 
 // Aprovar um comentário
 export async function approveComment(commentId: string): Promise<ModerateCommentResponse> {
+  let postId: string | null = null; // Variável para guardar postId
   try {
-    const adminUserId = await getAuthenticatedAdminId(); // Garante que só admin pode aprovar
+    const adminUserId = await getAuthenticatedAdminId();
     const supabase = await createClient();
 
-    const { error } = await supabase
+    // Primeiro, buscar o postId associado ao comentário
+    const { data: commentData, error: fetchError } = await supabase
+      .from('blog_comments')
+      .select('post_id')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchError || !commentData) {
+      console.error(`Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
+      return { success: false, message: "Comentário não encontrado para aprovação." };
+    }
+    postId = commentData.post_id;
+
+    // Agora, aprovar o comentário
+    const { error: updateError } = await supabase
       .from('blog_comments')
       .update({ is_approved: true, updated_at: new Date().toISOString() })
       .eq('id', commentId);
 
-    if (error) {
-      console.error(`Erro ao aprovar comentário ${commentId}:`, error.message);
+    if (updateError) {
+      console.error(`Erro ao aprovar comentário ${commentId}:`, updateError.message);
       return { success: false, message: "Falha ao aprovar comentário." };
     }
 
-    // TODO: Revalidar paths relevantes? (página do post, página de admin)
-    // Ex: revalidatePath('/admin/comentarios');
-    // Ex: Buscar o post associado para revalidar /blog/[slug]
+    // Revalidação
+    revalidatePath('/admin/comentarios');
+    
+    // Buscar slug para revalidar página do post
+    if (postId) {
+      const { data: postData, error: postFetchError } = await supabase
+         .from('blog_posts')
+         .select('slug')
+         .eq('id', postId)
+         .single();
+      
+      if (postData?.slug && !postFetchError) {
+        revalidatePath(`/blog/${postData.slug}`);
+      } else {
+         console.warn(`Não foi possível revalidar /blog/[slug] para post ${postId} após aprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+      }
+    }
 
     return { success: true, message: "Comentário aprovado!" };
 
   } catch (error: any) {
     console.error("Erro inesperado ao aprovar comentário:", error.message);
-    // Se for erro de autenticação de admin, a mensagem já estará no erro
     return { success: false, message: error.message || "Erro inesperado." };
   }
 }
 
 // Desaprovar um comentário
 export async function unapproveComment(commentId: string): Promise<ModerateCommentResponse> {
+  let postId: string | null = null;
   try {
-    const adminUserId = await getAuthenticatedAdminId(); // Garante que só admin pode desaprovar
+    const adminUserId = await getAuthenticatedAdminId();
     const supabase = await createClient();
 
-    const { error } = await supabase
+    // Buscar postId
+    const { data: commentData, error: fetchError } = await supabase
+      .from('blog_comments')
+      .select('post_id')
+      .eq('id', commentId)
+      .single();
+
+    if (fetchError || !commentData) {
+      console.error(`Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
+      return { success: false, message: "Comentário não encontrado para desaprovação." };
+    }
+    postId = commentData.post_id;
+
+    // Desaprovar
+    const { error: updateError } = await supabase
       .from('blog_comments')
       .update({ is_approved: false, updated_at: new Date().toISOString() })
       .eq('id', commentId);
 
-    if (error) {
-      console.error(`Erro ao desaprovar comentário ${commentId}:`, error.message);
+    if (updateError) {
+      console.error(`Erro ao desaprovar comentário ${commentId}:`, updateError.message);
       return { success: false, message: "Falha ao desaprovar comentário." };
     }
 
-    // TODO: Revalidar paths
+    // Revalidação
+    revalidatePath('/admin/comentarios');
+    if (postId) {
+      const { data: postData, error: postFetchError } = await supabase
+         .from('blog_posts')
+         .select('slug')
+         .eq('id', postId)
+         .single();
+      if (postData?.slug && !postFetchError) {
+        revalidatePath(`/blog/${postData.slug}`);
+      } else {
+         console.warn(`Não foi possível revalidar /blog/[slug] para post ${postId} após desaprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+      }
+    }
 
     return { success: true, message: "Comentário desaprovado." };
 
@@ -290,22 +346,58 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
 
 // Deletar um comentário
 export async function deleteComment(commentId: string): Promise<ModerateCommentResponse> {
+  let postId: string | null = null;
+  let wasApproved: boolean = false;
+  let postSlug: string | null = null;
+
   try {
-    const adminUserId = await getAuthenticatedAdminId(); // Garante que só admin pode deletar
+    const adminUserId = await getAuthenticatedAdminId(); 
     const supabase = await createClient();
 
-    // A deleção em cascata cuidará das respostas e dos likes (blog_comment_likes)
-    const { error } = await supabase
+    // 1. Buscar dados do comentário ANTES de deletar
+    const { data: commentToDelete, error: fetchError } = await supabase
+       .from('blog_comments')
+       .select('post_id, is_approved')
+       .eq('id', commentId)
+       .single();
+
+    if (fetchError || !commentToDelete) {
+       console.error(`Erro ao buscar dados do comentário ${commentId} para deleção:`, fetchError?.message);
+       return { success: false, message: "Comentário não encontrado para deleção." };
+    }
+    postId = commentToDelete.post_id;
+    wasApproved = commentToDelete.is_approved;
+
+    // 2. Se estava aprovado, buscar o slug do post para revalidação posterior
+    if (wasApproved && postId) {
+      const { data: postData, error: postFetchError } = await supabase
+         .from('blog_posts')
+         .select('slug')
+         .eq('id', postId)
+         .single();
+      if (postData?.slug && !postFetchError) {
+        postSlug = postData.slug;
+      } else {
+         console.warn(`Não foi possível obter slug do post ${postId} para revalidação após deletar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+      }
+    }
+
+    // 3. Deletar o comentário
+    const { error: deleteError } = await supabase
       .from('blog_comments')
       .delete()
       .eq('id', commentId);
 
-    if (error) {
-      console.error(`Erro ao deletar comentário ${commentId}:`, error.message);
+    if (deleteError) {
+      console.error(`Erro ao deletar comentário ${commentId}:`, deleteError.message);
       return { success: false, message: "Falha ao deletar comentário." };
     }
 
-    // TODO: Revalidar paths
+    // 4. Revalidação
+    revalidatePath('/admin/comentarios');
+    if (wasApproved && postSlug) { // Revalidar post público apenas se estava aprovado e temos o slug
+      revalidatePath(`/blog/${postSlug}`);
+    }
 
     return { success: true, message: "Comentário deletado." };
 
