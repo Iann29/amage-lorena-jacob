@@ -1,11 +1,10 @@
-// Funções para acessar as Edge Functions do blog
-// Este arquivo centraliza as chamadas às APIs do blog
+// src/lib/blog-api.ts
 
 // URL base para as funções edge do Supabase
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const API_BASE_URL = `${SUPABASE_URL}/functions/v1`;
 
-// Tipos exportados do antigo actions.ts para manter compatibilidade
+// Interfaces (mantenha como estão)
 export interface BlogPostPublic {
   id: string;
   titulo: string;
@@ -35,10 +34,22 @@ export interface BlogPostPublic {
 export interface BlogCategoryPublic {
   id: string;
   nome: string;
-  slug: string;
-  quantidade: number;
+  slug: string; // Slug agora é gerado na Edge Function
+  quantidade: number; // Quantidade agora é calculada na Edge Function
 }
 
+// <<== Interface para a resposta completa da API de posts
+interface PostsApiResponse {
+  posts: BlogPostPublic[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number; // Total de itens *filtrados*
+    totalPages: number; // Total de páginas *filtradas*
+  };
+}
+
+// <<== Interface genérica para a estrutura da resposta da API
 interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -48,53 +59,56 @@ interface ApiResponse<T> {
   };
 }
 
-interface PostsResponse {
-  posts: BlogPostPublic[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
-// Função para buscar posts publicados
+// Função para buscar posts publicados (ATUALIZADA)
 export async function getPublishedBlogPosts(
   page: number = 1,
   limit: number = 10,
-  categoria?: string
-): Promise<BlogPostPublic[]> {
+  categoria?: string // <<== Aceita ID da categoria como string opcional
+): Promise<PostsApiResponse> { // <<== Retorna a estrutura completa com paginação
   try {
-    // Construir a URL com os parâmetros
+    // Constrói a URL base com paginação
     let url = `${API_BASE_URL}/blog-posts?page=${page}&limit=${limit}`;
+
+    // <<== Adiciona o parâmetro de categoria à URL se fornecido
     if (categoria) {
-      url += `&categoria=${categoria}`;
+      url += `&categoria=${encodeURIComponent(categoria)}`;
     }
 
-    // Fazer requisição à Edge Function
+    // Faz a requisição para a Edge Function
     const response = await fetch(url, {
-      next: { revalidate: 60 }, // Cache de 60 segundos
+      next: { revalidate: 60 }, // Cache de 60 segundos (pode ajustar)
     });
 
+    // Verifica se a requisição foi bem-sucedida
     if (!response.ok) {
+      // Tenta ler a mensagem de erro da API, se houver
+      const errorBody = await response.text();
+      console.error(`Erro ${response.status} ao buscar posts: ${errorBody}`);
       throw new Error(`Erro ao buscar posts: ${response.status}`);
     }
 
-    const { success, data, error } = await response.json() as ApiResponse<PostsResponse>;
+    // Lê o JSON da resposta
+    // <<== Espera a estrutura { success, data: { posts, pagination }, error }
+    const apiResponse = await response.json() as ApiResponse<PostsApiResponse>;
 
-    if (!success || error) {
-      console.error("Erro retornado pela API:", error);
-      return [];
+    // Verifica se a API retornou sucesso
+    if (!apiResponse.success || apiResponse.error) {
+      console.error("Erro retornado pela API de posts:", apiResponse.error);
+      // Retorna estrutura vazia em caso de erro da API
+      return { posts: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
     }
 
-    return data.posts;
+    // <<== Retorna os dados { posts, pagination }
+    return apiResponse.data;
+
   } catch (error) {
-    console.error("Falha ao buscar posts do blog:", error);
-    return [];
+    console.error("Falha na requisição para buscar posts do blog:", error);
+    // Retorna estrutura vazia em caso de falha na requisição
+    return { posts: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
   }
 }
 
-// Função para buscar categorias do blog
+// Função para buscar categorias do blog (ATUALIZADA para nova estrutura de resposta)
 export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/blog-categories`, {
@@ -105,86 +119,55 @@ export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
       throw new Error(`Erro ao buscar categorias: ${response.status}`);
     }
 
-    const { success, data, error } = await response.json() as ApiResponse<BlogCategoryPublic[]>;
+    // <<== Espera a estrutura { success, data: Categoria[], error }
+    const apiResponse = await response.json() as ApiResponse<BlogCategoryPublic[]>;
 
-    if (!success || error) {
-      console.error("Erro retornado pela API:", error);
+    if (!apiResponse.success || apiResponse.error) {
+      console.error("Erro retornado pela API de categorias:", apiResponse.error);
       return [];
     }
 
-    return data;
+    return apiResponse.data; // Retorna o array de categorias
   } catch (error) {
-    console.error("Falha ao buscar categorias do blog:", error);
+    console.error("Falha na requisição para buscar categorias do blog:", error);
     return [];
   }
 }
 
-// Função para buscar um post específico pelo slug
+// Função para buscar um post específico pelo slug (ATUALIZADA para nova estrutura de resposta)
 export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | null> {
   try {
-    const cacheKey = `blog-post-${slug}`;
-    
-    // Verificar se temos dados em cache no localStorage (apenas client-side)
-    // Implemente isto apenas em componentes do cliente, não no servidor
-    if (typeof window !== 'undefined') {
-      try {
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          const { data, timestamp } = JSON.parse(cachedData);
-          const isRecent = Date.now() - timestamp < 5 * 60 * 1000; // 5 minutos
-          if (isRecent) {
-            return data;
-          }
-        }
-      } catch (e) {
-        // Falha ao acessar localStorage, continue com a busca normal
-        console.warn('Falha ao acessar cache local:', e);
-      }
-    }
-    
+    // Requisição para a Edge Function
     const response = await fetch(`${API_BASE_URL}/blog-post?slug=${encodeURIComponent(slug)}`, {
-      next: { 
-        revalidate: 60, // Cache de 60 segundos no servidor
-        tags: [`blog-post-${slug}`] // Tag para invalidação seletiva
+      next: {
+        revalidate: 60, // Cache de 60 segundos
+        tags: [`blog-post-${slug}`]
       },
     });
 
     if (!response.ok) {
-      // Se o post não for encontrado
       if (response.status === 404) {
-        return null;
+        return null; // Post não encontrado
       }
       throw new Error(`Erro ao buscar post: ${response.status}`);
     }
 
-    const { success, data, error } = await response.json() as ApiResponse<BlogPostPublic>;
+    // <<== Espera a estrutura { success, data: Post, error }
+    const apiResponse = await response.json() as ApiResponse<BlogPostPublic>;
 
-    if (!success || error) {
-      console.error("Erro retornado pela API:", error);
+    if (!apiResponse.success || apiResponse.error) {
+      console.error("Erro retornado pela API de post:", apiResponse.error);
       return null;
     }
-    
-    // Salvar em cache no localStorage (apenas client-side)
-    if (typeof window !== 'undefined' && data) {
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify({
-          data,
-          timestamp: Date.now()
-        }));
-      } catch (e) {
-        // Falha ao salvar no localStorage, apenas ignore
-        console.warn('Falha ao salvar cache local:', e);
-      }
-    }
 
-    return data;
+    return apiResponse.data; // Retorna o objeto do post
   } catch (error) {
-    console.error(`Falha ao buscar post com slug "${slug}":`, error);
+    console.error(`Falha na requisição para buscar post com slug "${slug}":`, error);
     return null;
   }
 }
 
-// Função para buscar posts populares
+// Função para buscar posts populares (ATUALIZADA para nova estrutura de resposta)
 export async function getPopularBlogPosts(limit: number = 3): Promise<BlogPostPublic[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/blog-popular?limit=${limit}`, {
@@ -195,16 +178,17 @@ export async function getPopularBlogPosts(limit: number = 3): Promise<BlogPostPu
       throw new Error(`Erro ao buscar posts populares: ${response.status}`);
     }
 
-    const { success, data, error } = await response.json() as ApiResponse<BlogPostPublic[]>;
+    // <<== Espera a estrutura { success, data: Post[], error }
+    const apiResponse = await response.json() as ApiResponse<BlogPostPublic[]>;
 
-    if (!success || error) {
-      console.error("Erro retornado pela API:", error);
+    if (!apiResponse.success || apiResponse.error) {
+      console.error("Erro retornado pela API de posts populares:", apiResponse.error);
       return [];
     }
 
-    return data;
+    return apiResponse.data; // Retorna o array de posts populares
   } catch (error) {
-    console.error("Falha ao buscar posts populares do blog:", error);
+    console.error("Falha na requisição para buscar posts populares do blog:", error);
     return [];
   }
-} 
+}
