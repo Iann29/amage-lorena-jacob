@@ -57,10 +57,11 @@ export default function AdminDashboardPage() {
     async function fetchData() {
       setIsLoading(true);
       setError(null);
-      console.log("*** TESTE: FetchData iniciado, mas buscando APENAS categorias (se necessário) ***"); // Log de teste
+      // Remover logs de teste
+      // console.log("*** TESTE: FetchData iniciado, mas buscando APENAS categorias (se necessário) ***");
       try {
-        // --- TEMPORARIAMENTE COMENTADO PARA TESTE DE PERFORMANCE ---
-        /*
+        // --- DESCOMENTAR BLOCO PARA BUSCAR DADOS REAIS ---
+        
         // Buscar dados do Blog e Comentários em paralelo
         const [statsResult, recentPostsResult, commentsResult] = await Promise.all([
           getDashboardBlogStats(),
@@ -76,7 +77,6 @@ export default function AdminDashboardPage() {
           setError(prev => (prev ? prev + "; " : "") + (statsResult.message || "Falha: Estatísticas Blog"));
         }
         if (recentPostsResult.success && recentPostsResult.data) {
-          // Garantir que o tipo corresponda. Se o ID for número no DB, ajuste o tipo RecentPost.
           setRecentPosts(recentPostsResult.data as RecentPost[]);
         } else {
           console.error("Erro ao buscar posts recentes:", recentPostsResult.message);
@@ -86,32 +86,27 @@ export default function AdminDashboardPage() {
         // Processar dados dos Comentários
         if (commentsResult.success && commentsResult.data) {
           setRecentPendingComments(commentsResult.data);
-          // O totalCount aqui será apenas dos pendentes. Se quiser total geral, precisaria de outra chamada ou ajuste na action
           setPendingCommentsCount(commentsResult.totalCount || 0); 
         } else {
           console.error("Erro ao buscar comentários pendentes:", commentsResult.message);
           setError(prev => (prev ? prev + "; " : "") + (commentsResult.message || "Falha: Comentários Pendentes"));
         }
-        */
-        // --- FIM DO BLOCO COMENTADO ---
+        
+        // --- FIM DO BLOCO DESCOMENTADO ---
 
-        // Manter apenas a busca de categorias se ela for necessária em algum lugar ou remover também
-        // Exemplo: Se allCategories fosse usado em algum lugar
-        // if (allCategories.length === 0) { // Assumindo que allCategories é um estado
-        //    const fetchedCategories = await getBlogCategories();
-        //    setAllCategories(fetchedCategories || []);
-        // }
-        console.log("*** TESTE: Busca de dados principais comentada ***");
+        // Remover log de teste
+        // console.log("*** TESTE: Busca de dados principais comentada ***");
 
       } catch (e: any) {
-        console.error("Erro geral no useEffect do AdminDashboardPage (TESTE):", e);
-        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados (TESTE).");
+        console.error("Erro geral no useEffect do AdminDashboardPage:", e);
+        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados.");
       } finally {
         setIsLoading(false);
       }
     }
     fetchData();
-  }, []); // Removido dependências por enquanto, já que a busca principal está comentada
+  // Usar array vazio de dependências para buscar dados apenas uma vez no mount
+  }, []); 
 
   // Efeito para calcular média de comentários quando os dados relevantes mudarem
   useEffect(() => {
