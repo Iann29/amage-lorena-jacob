@@ -212,7 +212,7 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
 
     const userProfileData: UserProfileInfo | null = { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' };
     const categoryIds: string[] = post.blog_post_categories?.map(pc => pc.blog_categories?.[0]?.id ?? pc.category_id).filter(Boolean) as string[] || [];
-    const { blog_post_categories, author_nome, author_sobrenome, ...restOfPost } = post;
+    const { ...restOfPost } = post;
 
     return {
       ...restOfPost,
