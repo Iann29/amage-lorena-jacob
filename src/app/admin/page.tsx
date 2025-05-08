@@ -2,35 +2,117 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { blogPosts, blogComments, blogCategorias } from '@/lib/mockData';
+// Remover import de mockData se não for mais usado para posts ou estatísticas principais
+// import { blogPosts, blogComments, blogCategorias } from '@/lib/mockData';
+import { blogComments } from '@/lib/mockData'; // Manter para comentários mockados por enquanto
+
+// Importar as actions
+import { getDashboardBlogStats, getRecentPostsForDashboard } from './blog/actions';
+
+// Definir tipos para os dados que virão das actions
+interface DashboardStats {
+  totalPosts: number;
+  totalVisualizacoes: number;
+  totalLikes: number;
+  // totalComentarios?: number; // Adicionar se for implementado
+}
+
+interface RecentPost {
+  id: string; // ou number, dependendo do seu schema
+  titulo: string;
+  created_at: string;
+  view_count: number; // Corresponde a visualizacoes no mock, mas vem como view_count da action
+}
 
 export default function AdminDashboardPage() {
-  // Dados mockados para o dashboard
-  const totalPosts = blogPosts.length;
-  const totalComentarios = blogComments.length;
-  const totalCategorias = blogCategorias.length;
-  const postsRecentes = blogPosts.slice(0, 5);
-  const comentariosRecentes = blogComments.slice(0, 5);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Estados para dados reais
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+    totalPosts: 0,
+    totalVisualizacoes: 0,
+    totalLikes: 0,
+    // totalComentarios: 0,
+  });
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   
-  // Estatísticas mockadas
-  const [estatisticas, setEstatisticas] = useState({
-    visualizacoesTotal: 0,
-    likesTotal: 0,
+  // Dados mockados para comentários e categorias (manter por enquanto ou remover se não for usar)
+  const totalComentariosMock = blogComments.length;
+  const comentariosRecentesMock = blogComments.slice(0, 5);
+  // const totalCategorias = blogCategorias.length; // Remover se não for mais usado
+
+  // Estado para estatísticas que dependem de cálculos no cliente
+  const [clientCalculatedStats, setClientCalculatedStats] = useState({
     mediaComentariosPorPost: 0
   });
   
   useEffect(() => {
-    // Cálculo das estatísticas com base nos dados mockados
-    const visualizacoesTotal = blogPosts.reduce((sum, post) => sum + (post.visualizacoes || 0), 0);
-    const likesTotal = blogPosts.reduce((sum, post) => sum + (post.like_count || 0), 0);
-    const mediaComentariosPorPost = totalPosts > 0 ? (totalComentarios / totalPosts).toFixed(1) : 0;
-    
-    setEstatisticas({
-      visualizacoesTotal,
-      likesTotal,
-      mediaComentariosPorPost: Number(mediaComentariosPorPost)
+    async function fetchData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const statsResult = await getDashboardBlogStats();
+        const recentPostsResult = await getRecentPostsForDashboard(5);
+
+        if (statsResult.success && statsResult.data) {
+          setDashboardStats(statsResult.data);
+        } else {
+          console.error("Erro ao buscar estatísticas do dashboard:", statsResult.message);
+          setError(statsResult.message || "Falha ao carregar estatísticas.");
+        }
+
+        if (recentPostsResult.success && recentPostsResult.data) {
+          // Garantir que o tipo corresponda. Se o ID for número no DB, ajuste o tipo RecentPost.
+          setRecentPosts(recentPostsResult.data as RecentPost[]);
+        } else {
+          console.error("Erro ao buscar posts recentes:", recentPostsResult.message);
+          setError(prevError => prevError ? prevError + "; " + (recentPostsResult.message || "Falha ao carregar posts.") : (recentPostsResult.message || "Falha ao carregar posts."));
+        }
+
+      } catch (e: any) {
+        console.error("Erro no useEffect do AdminDashboardPage:", e);
+        setError(e.message || "Ocorreu um erro inesperado ao carregar os dados.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Efeito para calcular média de comentários quando os dados relevantes mudarem
+  useEffect(() => {
+    const totalPosts = dashboardStats.totalPosts;
+    // Usar totalComentariosMock por enquanto. Substituir por dashboardStats.totalComentarios se implementado
+    const media = totalPosts > 0 ? (totalComentariosMock / totalPosts) : 0;
+    setClientCalculatedStats({
+      mediaComentariosPorPost: parseFloat(media.toFixed(1))
     });
-  }, [totalPosts, totalComentarios]);
+  }, [dashboardStats.totalPosts, totalComentariosMock]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <p className="ml-3 text-purple-600">Carregando dados do Dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-red-50 p-4">
+        <h2 className="text-xl font-semibold text-red-700 mb-3">Erro ao Carregar Dados</h2>
+        <p className="text-red-600 text-center mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -45,7 +127,7 @@ export default function AdminDashboardPage() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Total de Posts</p>
-              <p className="text-2xl font-bold text-gray-900">{totalPosts}</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalPosts}</p>
             </div>
             <div className="p-2 bg-purple-100 rounded-md">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -64,7 +146,7 @@ export default function AdminDashboardPage() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Visualizações</p>
-              <p className="text-2xl font-bold text-gray-900">{estatisticas.visualizacoesTotal}</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalVisualizacoes}</p>
             </div>
             <div className="p-2 bg-blue-100 rounded-md">
               <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -74,7 +156,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-sm text-gray-500">Últimos 30 dias</span>
+            <span className="text-sm text-gray-500">Total acumulado</span> {/* Alterado de "Últimos 30 dias" para refletir os dados reais */}
           </div>
         </div>
         
@@ -82,7 +164,7 @@ export default function AdminDashboardPage() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Curtidas</p>
-              <p className="text-2xl font-bold text-gray-900">{estatisticas.likesTotal}</p>
+              <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalLikes}</p>
             </div>
             <div className="p-2 bg-red-100 rounded-md">
               <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -99,7 +181,7 @@ export default function AdminDashboardPage() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-sm font-medium text-gray-500">Comentários</p>
-              <p className="text-2xl font-bold text-gray-900">{totalComentarios}</p>
+              <p className="text-2xl font-bold text-gray-900">{totalComentariosMock}</p> {/* Usando mock por enquanto */}
             </div>
             <div className="p-2 bg-green-100 rounded-md">
               <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -108,7 +190,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-sm text-gray-500">{estatisticas.mediaComentariosPorPost} por post</span>
+            <span className="text-sm text-gray-500">{clientCalculatedStats.mediaComentariosPorPost} por post</span> {/* Usando cálculo com mock */}
           </div>
         </div>
       </div>
@@ -121,13 +203,13 @@ export default function AdminDashboardPage() {
             <h2 className="font-medium text-gray-900">Posts Recentes</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {postsRecentes.map((post) => (
+            {recentPosts.length > 0 ? recentPosts.map((post) => (
               <div key={post.id} className="px-6 py-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{post.titulo}</h3>
                     <p className="text-xs text-gray-500 mt-1">
-                      {new Date(post.created_at).toLocaleDateString('pt-BR')} • {post.visualizacoes} visualizações
+                      {new Date(post.created_at).toLocaleDateString('pt-BR')} • {post.view_count} visualizações
                     </p>
                   </div>
                   <Link href={`/admin/blog/editar/${post.id}`} className="text-sm font-medium text-purple-600 hover:text-purple-800">
@@ -135,7 +217,9 @@ export default function AdminDashboardPage() {
                   </Link>
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="p-6 text-gray-500">Nenhum post recente encontrado.</p>
+            )}
           </div>
           <div className="border-t border-gray-200 px-6 py-4">
             <Link href="/admin/blog" className="text-sm font-medium text-purple-600 hover:text-purple-800">
@@ -144,19 +228,19 @@ export default function AdminDashboardPage() {
           </div>
         </div>
         
-        {/* Comentários recentes */}
+        {/* Comentários recentes (mantendo mock por enquanto) */}
         <div className="bg-white rounded-lg shadow">
           <div className="border-b border-gray-200 px-6 py-4">
             <h2 className="font-medium text-gray-900">Comentários Recentes</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {comentariosRecentes.map((comment) => (
+            {comentariosRecentesMock.map((comment) => (
               <div key={comment.id} className="px-6 py-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm text-gray-900 line-clamp-1">{comment.texto}</p>
+                    <p className="text-sm text-gray-900 line-clamp-1">{comment.conteudo}</p> {/* Ajustado de comment.texto para comment.conteudo */}
                     <div className="flex items-center mt-1">
-                      <p className="text-xs font-medium text-gray-900">{comment.autor_nome}</p>
+                      <p className="text-xs font-medium text-gray-900">{comment.user.nome}</p> {/* Ajustado de comment.autor_nome para comment.user.nome */}
                       <span className="mx-1 text-xs text-gray-500">•</span>
                       <p className="text-xs text-gray-500">
                         {new Date(comment.created_at).toLocaleDateString('pt-BR')}
@@ -177,18 +261,19 @@ export default function AdminDashboardPage() {
           </div>
           <div className="border-t border-gray-200 px-6 py-4">
             <Link href="/admin/comentarios" className="text-sm font-medium text-purple-600 hover:text-purple-800">
-              Gerenciar comentários →
+              Gerenciar comentários → {/* Esta rota precisaria existir se for mantida */}
             </Link>
           </div>
         </div>
       </div>
       
-      {/* Atividades recentes (mockadas) */}
+      {/* Atividades recentes (mockadas) - Você pode querer remover ou adaptar isso também */}
       <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200 px-6 py-4">
           <h2 className="font-medium text-gray-900">Atividades Recentes</h2>
         </div>
         <div className="divide-y divide-gray-200">
+          {/* ... Conteúdo mockado de atividades ... */}
           <div className="px-6 py-4 flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
@@ -218,22 +303,6 @@ export default function AdminDashboardPage() {
                 5 novos comentários foram aprovados
               </p>
               <p className="text-xs text-gray-500 mt-1">há 3 dias atrás</p>
-            </div>
-          </div>
-          
-          <div className="px-6 py-4 flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-900">
-                O post <span className="font-medium">Estratégias para lidar com hiperatividade em casa</span> foi atualizado
-              </p>
-              <p className="text-xs text-gray-500 mt-1">há 5 dias atrás</p>
             </div>
           </div>
         </div>

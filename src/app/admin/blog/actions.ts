@@ -273,6 +273,77 @@ export async function getAdminBlogPosts(): Promise<BlogPostFromDB[]> {
     } catch (error: any) { console.error("Exceção buscar posts admin:", error.message); return []; }
 }
 
+// Nova função para estatísticas do Dashboard
+export async function getDashboardBlogStats() {
+  const supabase = await createClient();
+  try {
+    await getAuthenticatedAdminId();
+
+    const { count: totalPosts, error: postsError } = await supabase
+      .from('blog_posts')
+      .select('*', { count: 'exact', head: true });
+
+    if (postsError) {
+      console.error("Erro ao contar posts para o dashboard:", postsError.message);
+      throw postsError;
+    }
+
+    const { data: statsData, error: statsError } = await supabase
+      .from('blog_posts')
+      .select('view_count, like_count');
+
+    if (statsError) {
+      console.error("Erro ao buscar estatísticas de visualizações e curtidas:", statsError.message);
+      throw statsError;
+    }
+
+    const totalVisualizacoes = statsData?.reduce((sum, post) => sum + (post.view_count || 0), 0) || 0;
+    const totalLikes = statsData?.reduce((sum, post) => sum + (post.like_count || 0), 0) || 0;
+
+    // Por enquanto, não vamos buscar totalComentarios aqui,
+    // a menos que você confirme que tem uma tabela e como ela se chama.
+    // const totalComentarios = 0; // Placeholder
+
+    return {
+      success: true,
+      data: {
+        totalPosts: totalPosts || 0,
+        totalVisualizacoes,
+        totalLikes,
+        // totalComentarios // Adicionar se implementado
+      }
+    };
+  } catch (error: any) {
+    console.error("Erro geral ao buscar estatísticas do dashboard:", error.message);
+    return { success: false, message: error.message, data: null };
+  }
+}
+
+// Função para buscar posts recentes para o Dashboard
+export async function getRecentPostsForDashboard(limit: number = 5) {
+  const supabase = await createClient();
+  try {
+    // Não é necessário getAuthenticatedAdminId() aqui se os posts recentes não forem sensíveis
+    // ou se a página do dashboard já for protegida.
+    // Se precisar de proteção, descomente a linha abaixo:
+    // await getAuthenticatedAdminId();
+
+    const { data: recentPosts, error } = await supabase
+      .from('blog_posts')
+      .select('id, titulo, created_at, view_count')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Erro ao buscar posts recentes para o dashboard:", error.message);
+      throw error;
+    }
+    return { success: true, data: recentPosts || [] };
+  } catch (error: any) {
+    console.error("Erro geral ao buscar posts recentes para o dashboard:", error.message);
+    return { success: false, message: error.message, data: [] };
+  }
+}
 
 // === deletePost AGORA TENTA DELETAR A IMAGEM ===
 export async function deletePost(postId: string): Promise<{ success: boolean, message: string }> {
