@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "./styles.module.css";
 
 export default function EsqueciMinhaSenha() {
@@ -90,7 +90,7 @@ export default function EsqueciMinhaSenha() {
             <h1 className={styles.title}>Esqueceu a senha ?</h1>
             <div className={styles.subtitleContainer}>
               <p className={styles.subtitle}>
-                "todos nós um dia já esquecemos."
+                &quot;todos nós um dia já esquecemos.&quot;
                 <span className={styles.quoteAuthor}>disse a Dory</span>
               </p>
             </div>

@@ -34,7 +34,7 @@ export async function togglePostLike(
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.errors.map((e: any) => e.message).join(", "),
+      message: validation.error.errors.map((e: z.ZodIssue) => e.message).join(", "),
     };
   }
 
@@ -108,8 +108,8 @@ export async function togglePostLike(
       likeCount: likeInfo.new_like_count,
       message: likeInfo.liked ? "Post curtido!" : "Like removido.",
     };
-  } catch (error: any) {
-    console.error("Erro inesperado em togglePostLike:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado em togglePostLike:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -138,7 +138,7 @@ export async function getPostLikeStatus(
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.errors.map((e: any) => e.message).join(", "),
+      message: validation.error.errors.map((e: z.ZodIssue) => e.message).join(", "),
     };
   }
 
@@ -203,8 +203,8 @@ export async function getPostLikeStatus(
       isLiked: !!likeData, // true se likeData não for null (ou seja, o like existe)
       likeCount: currentLikeCount,
     };
-  } catch (error: any) {
-    console.error("Erro inesperado em getPostLikeStatus:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado em getPostLikeStatus:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -225,7 +225,7 @@ export async function toggleCommentLike(
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.errors.map((e: any) => e.message).join(", "),
+      message: validation.error.errors.map((e: z.ZodIssue) => e.message).join(", "),
     };
   }
 
@@ -283,8 +283,8 @@ export async function toggleCommentLike(
       likeCount: likeInfo.new_like_count,
       message: likeInfo.liked ? "Comentário curtido!" : "Like do comentário removido.",
     };
-  } catch (error: any) {
-    console.error("Erro inesperado em toggleCommentLike:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado em toggleCommentLike:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -303,7 +303,7 @@ export async function getCommentLikeStatus(
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.errors.map((e: any) => e.message).join(", "),
+      message: validation.error.errors.map((e: z.ZodIssue) => e.message).join(", "),
     };
   }
 
@@ -364,8 +364,8 @@ export async function getCommentLikeStatus(
       isLiked: !!likeData,
       likeCount: currentLikeCount,
     };
-  } catch (error: any) {
-    console.error("Erro inesperado em getCommentLikeStatus:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado em getCommentLikeStatus:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
