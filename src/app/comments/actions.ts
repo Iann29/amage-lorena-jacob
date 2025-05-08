@@ -84,8 +84,8 @@ export async function submitNewComment(
       commentId: newComment.id
     };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao submeter comentário:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao submeter comentário:", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: "Ocorreu um erro inesperado. Por favor, tente mais tarde." };
   }
 }
@@ -155,7 +155,7 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
     const userIds = [...new Set(commentsFromDb.map(c => c.user_id).filter(Boolean))]; // filter(Boolean) remove nulls/undefineds
 
     // 3. Buscar perfis de usuários correspondentes em uma segunda query
-    let profilesMap: Map<string, CommentAuthor> = new Map();
+    const profilesMap: Map<string, CommentAuthor> = new Map();
     if (userIds.length > 0) {
       const { data: profilesFromDb, error: profilesError } = await supabase
         .from('user_profiles')
@@ -220,8 +220,8 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
     
     return { success: true, data: commentTree };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao buscar árvore de comentários:", error.message);
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao buscar árvore de comentários:", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: "Ocorreu um erro inesperado ao processar comentários." };
   }
 }
@@ -237,7 +237,7 @@ interface ModerateCommentResponse {
 export async function approveComment(commentId: string): Promise<ModerateCommentResponse> {
   let postId: string | null = null; // Variável para guardar postId
   try {
-    const adminUserId = await getAuthenticatedAdminId();
+    await getAuthenticatedAdminId();
     const supabase = await createClient();
 
     // Primeiro, buscar o postId associado ao comentário
@@ -284,9 +284,9 @@ export async function approveComment(commentId: string): Promise<ModerateComment
 
     return { success: true, message: "Comentário aprovado!" };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao aprovar comentário:", error.message);
-    return { success: false, message: error.message || "Erro inesperado." };
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao aprovar comentário:", error);
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
 
@@ -294,7 +294,7 @@ export async function approveComment(commentId: string): Promise<ModerateComment
 export async function unapproveComment(commentId: string): Promise<ModerateCommentResponse> {
   let postId: string | null = null;
   try {
-    const adminUserId = await getAuthenticatedAdminId();
+    await getAuthenticatedAdminId();
     const supabase = await createClient();
 
     // Buscar postId
@@ -338,9 +338,9 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
 
     return { success: true, message: "Comentário desaprovado." };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao desaprovar comentário:", error.message);
-    return { success: false, message: error.message || "Erro inesperado." };
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao desaprovar comentário:", error);
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
 
@@ -351,7 +351,7 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
   let postSlug: string | null = null;
 
   try {
-    const adminUserId = await getAuthenticatedAdminId(); 
+    await getAuthenticatedAdminId(); 
     const supabase = await createClient();
 
     // 1. Buscar dados do comentário ANTES de deletar
@@ -401,9 +401,9 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
 
     return { success: true, message: "Comentário deletado." };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao deletar comentário:", error.message);
-    return { success: false, message: error.message || "Erro inesperado." };
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao deletar comentário:", error);
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
 
@@ -448,7 +448,7 @@ export async function listCommentsForAdmin(
   const { status, postId, page = 1, limit = 20 } = options;
 
   try {
-    const adminUserId = await getAuthenticatedAdminId();
+    await getAuthenticatedAdminId();
     const supabase = await createClient();
 
     // 1. Construir a query base para comentários
@@ -497,8 +497,8 @@ export async function listCommentsForAdmin(
     const postIds = [...new Set(commentsData.map(c => c.post_id).filter(Boolean))];
 
     // 3. Buscar perfis e posts em paralelo
-    let profilesMap: Map<string, CommentAuthor> = new Map();
-    let postsMap: Map<string, { id: string; titulo: string; slug: string; }> = new Map();
+    const profilesMap: Map<string, CommentAuthor> = new Map();
+    const postsMap: Map<string, { id: string; titulo: string; slug: string; }> = new Map();
 
     const [profilesResult, postsResult] = await Promise.all([
       userIds.length > 0 ? supabase.from('user_profiles').select('user_id, nome, sobrenome, avatar_url').in('user_id', userIds) : Promise.resolve({ data: [], error: null }),
@@ -561,8 +561,8 @@ export async function listCommentsForAdmin(
 
     return { success: true, data: formattedComments, totalCount: count || 0 };
 
-  } catch (error: any) {
-    console.error("Erro inesperado ao listar comentários para admin:", error.message);
-    return { success: false, message: error.message || "Erro inesperado." };
+  } catch (error: unknown) {
+    console.error("Erro inesperado ao listar comentários para admin:", error);
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 } 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 // Remover import de mockData se não for mais usado para posts ou estatísticas principais
 // import { blogPosts, blogComments, blogCategorias } from '@/lib/mockData';
-import { blogComments } from '@/lib/mockData'; // Manter para comentários mockados por enquanto
+// import { blogComments } from '@/lib/mockData'; // Removido - Não mais necessário
 
 // Importar as actions
 import { getDashboardBlogStats, getRecentPostsForDashboard } from './blog/actions';
@@ -39,8 +39,8 @@ export default function AdminDashboardPage() {
   });
   const [recentPosts, setRecentPosts] = useState<RecentPost[]>([]);
   
-  // Dados mockados para comentários e categorias (manter por enquanto ou remover se não for usar)
-  const totalComentariosMock = blogComments.length;
+  // Variáveis mockadas removidas - dados agora vêm da API ou não são usados
+  // const totalComentariosMock = blogComments.length;
   // const comentariosRecentesMock = blogComments.slice(0, 5); // Removido - não utilizado
   // const totalCategorias = blogCategorias.length; // Remover se não for mais usado
 
