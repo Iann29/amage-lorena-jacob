@@ -1,5 +1,13 @@
 "use server";
 
+/**
+ * DEPRECATED: Este arquivo está sendo gradualmente substituído por Edge Functions do Supabase.
+ * As funções deste arquivo estão sendo migradas para src/lib/blog-api.ts que usa
+ * as Edge Functions hospedadas no Supabase.
+ * 
+ * Mantenha este arquivo até que todas as referências sejam atualizadas para usar a nova API.
+ */
+
 import { createClient } from '@/utils/supabase/server';
 
 // Tipos para os posts e categorias retornados do Supabase

@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getBlogPostBySlug, getPopularBlogPosts } from '../actions';
-import type { BlogPostPublic } from '../actions'; 
+// Importar as funções da nova API em vez das Server Actions
+import { getBlogPostBySlug, getPopularBlogPosts } from '@/lib/blog-api';
+import type { BlogPostPublic } from '@/lib/blog-api'; 
 import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
 
@@ -29,8 +30,10 @@ export default async function PostPage({ params }: { params: { slug: string } })
   // Garantir que params seja aguardado antes de acessar suas propriedades
   const resolvedParams = await Promise.resolve(params);
   const slug = resolvedParams.slug;
-  // Buscar o post pelo slug usando o Supabase
+  
+  // Buscar o post pelo slug usando a Edge Function
   const post = await getBlogPostBySlug(slug);
+  
   // Buscar posts populares para exibir como sugestões
   const postsPopulares = await getPopularBlogPosts(3);
   
@@ -106,7 +109,6 @@ export default async function PostPage({ params }: { params: { slug: string } })
       
       <div className={styles.paperContainer}>
         <div className={styles.contentWrapper}>
-          {/* Identificação do Autor */}
           {/* Identificação do Autor */}
           <div className={styles.authorLine}>
             <span>por {post.author.nome} {post.author.sobrenome}</span>

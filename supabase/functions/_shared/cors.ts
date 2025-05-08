@@ -6,7 +6,8 @@ const getAllowedOrigins = (): string[] => {
   // Domínios padrão permitidos
   const defaultOrigins = [
     'http://localhost:3000',
-    'http://localhost:4000'
+    'http://localhost:4000',
+    'https://amage-lorena-jacob.vercel.app'
   ];
 
   // Verificar se há domínio configurado no ambiente
