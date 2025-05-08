@@ -3,7 +3,7 @@
 import Image from "next/image";
 // import Link from "next/link"; // Removido - não utilizado
 import ServiceCard from "@/components/ui/ServiceCard";
-import { useModal } from "@/contexts/ModalContext";
+// import { useModal } from "@/contexts/ModalContext"; // Removido - não utilizado
 import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
