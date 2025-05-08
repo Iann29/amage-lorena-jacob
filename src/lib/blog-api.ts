@@ -122,8 +122,31 @@ export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
 // Função para buscar um post específico pelo slug
 export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | null> {
   try {
+    const cacheKey = `blog-post-${slug}`;
+    
+    // Verificar se temos dados em cache no localStorage (apenas client-side)
+    // Implemente isto apenas em componentes do cliente, não no servidor
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          const { data, timestamp } = JSON.parse(cachedData);
+          const isRecent = Date.now() - timestamp < 5 * 60 * 1000; // 5 minutos
+          if (isRecent) {
+            return data;
+          }
+        }
+      } catch (e) {
+        // Falha ao acessar localStorage, continue com a busca normal
+        console.warn('Falha ao acessar cache local:', e);
+      }
+    }
+    
     const response = await fetch(`${API_BASE_URL}/blog-post?slug=${encodeURIComponent(slug)}`, {
-      next: { revalidate: 60 }, // Cache de 60 segundos
+      next: { 
+        revalidate: 60, // Cache de 60 segundos no servidor
+        tags: [`blog-post-${slug}`] // Tag para invalidação seletiva
+      },
     });
 
     if (!response.ok) {
@@ -139,6 +162,19 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
     if (!success || error) {
       console.error("Erro retornado pela API:", error);
       return null;
+    }
+    
+    // Salvar em cache no localStorage (apenas client-side)
+    if (typeof window !== 'undefined' && data) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (e) {
+        // Falha ao salvar no localStorage, apenas ignore
+        console.warn('Falha ao salvar cache local:', e);
+      }
     }
 
     return data;
