@@ -41,7 +41,7 @@ export interface BlogPostFromDB {
   user_profiles?: UserProfileInfo | null;
   blog_post_categories: {
     category_id?: string;
-    blog_categories?: { id: string; nome: string; }
+    blog_categories?: { id: string; nome: string; }[]
   }[];
   like_count: number;
   view_count: number;
@@ -130,9 +130,9 @@ export async function createPost(formData: PostFormData) {
       revalidatePath('/blog'); revalidatePath(`/blog/${postData.slug}`);
     }
     return { success: true, message: "Post criado!", postId: postData.id };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro completo ao criar post:", error);
-    return { success: false, message: error.message || "Falha ao criar post." };
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao criar post." };
   }
 }
 
@@ -152,7 +152,7 @@ export async function updatePost(
         try {
           console.log("[updatePost Action] Removendo imagem antiga:", oldPath);
           await supabase.storage.from('lorena-images-db').remove([oldPath]); // <<< SEU BUCKET
-        } catch (e: any) { console.error("Erro não fatal ao remover img antiga:", e.message); }
+        } catch (e: unknown) { console.error("Erro não fatal ao remover img antiga:", (e instanceof Error ? e.message : String(e))); }
       }
     }
 
@@ -189,9 +189,9 @@ export async function updatePost(
     revalidatePath(`/admin/blog/editar/${postId}`);
 
     return { success: true, message: "Post atualizado!", post: data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro completo ao atualizar post:", error);
-    return { success: false, message: error.message || "Falha ao atualizar." };
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao atualizar." };
   }
 }
 
@@ -210,7 +210,7 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
     if (error) { if (error.code === 'PGRST116') return null; throw error; }
     if (!post) return null;
 
-    let userProfileData: UserProfileInfo | null = { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' };
+    const userProfileData: UserProfileInfo | null = { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' };
     const categoryIds: string[] = post.blog_post_categories?.map(pc => pc.blog_categories?.[0]?.id ?? pc.category_id).filter(Boolean) as string[] || [];
     const { blog_post_categories, author_nome, author_sobrenome, ...restOfPost } = post;
 
@@ -219,8 +219,8 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
       like_count: post.like_count ?? 0, view_count: post.view_count ?? 0,
       user_profiles: userProfileData, categorias: categoryIds
     };
-  } catch (error: any) {
-    console.error(`Erro GERAL buscar post ${id} edit:`, error.message); return null;
+  } catch (error: unknown) {
+    console.error(`Erro GERAL buscar post ${id} edit:`, (error instanceof Error ? error.message : String(error))); return null;
   }
 }
 
@@ -229,9 +229,9 @@ export async function getBlogCategories(): Promise<BlogCategoryFromDB[]> {
   try {
     const { data, error } = await supabase
       .from('blog_categories').select('id, nome').order('nome', { ascending: true });
-    if (error) { console.error("Erro buscar categorias:", error.message); return []; }
+    if (error) { console.error("Erro buscar categorias:", (error instanceof Error ? error.message : String(error))); return []; }
     return data || [];
-  } catch (error: any) { console.error("Exceção buscar categorias:", error.message); return []; }
+  } catch (error: unknown) { console.error("Exceção buscar categorias:", (error instanceof Error ? error.message : String(error))); return []; }
 }
 
 // Interface para resposta da action com paginação
@@ -305,11 +305,11 @@ export async function getAdminBlogPosts(
         const formattedPosts: BlogPostFromDB[] = postsData.map(post => {
              const categoryIds: string[] = [];
              const categoriesInfo: { id: string; nome: string; }[] = [];
-             let postCategoriesData: any[] = [];
+             let postCategoriesData: BlogPostFromDB['blog_post_categories'] = [];
              if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
                 postCategoriesData = post.blog_post_categories;
                 for (const pc of post.blog_post_categories) {
-                     const category = pc.blog_categories?.[0]; // Acesso corrigido
+                     const category = pc.blog_categories?.[0]; // Acesso mantido pois agora o tipo suporta
                      if (category?.id && category?.nome) {
                         categoryIds.push(category.id);
                         categoriesInfo.push({ id: category.id, nome: category.nome });
@@ -330,10 +330,10 @@ export async function getAdminBlogPosts(
         
         return { success: true, data: formattedPosts, totalCount: count || 0 };
 
-    } catch (error: any) { 
-        console.error("Exceção buscar posts admin (paginado/filtrado):", error.message);
+    } catch (error: unknown) { 
+        console.error("Exceção buscar posts admin (paginado/filtrado):", (error instanceof Error ? error.message : String(error)));
         // Se for erro de autenticação, a mensagem já estará no erro
-        return { success: false, message: error.message || "Erro inesperado." }; 
+        return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." }; 
     }
 }
 
@@ -375,10 +375,10 @@ export async function getDashboardBlogStats() {
       }
     };
     
-  } catch (error: any) {
-    console.error("Erro geral ao buscar estatísticas do dashboard (RPC):", error.message);
+  } catch (error: unknown) {
+    console.error("Erro geral ao buscar estatísticas do dashboard (RPC):", (error instanceof Error ? error.message : String(error)));
     // Retorna o erro original se disponível, ou uma mensagem genérica
-    return { success: false, message: error.message || "Falha ao buscar estatísticas.", data: null };
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao buscar estatísticas.", data: null };
   }
 }
 
@@ -402,9 +402,9 @@ export async function getRecentPostsForDashboard(limit: number = 5) {
       throw error;
     }
     return { success: true, data: recentPosts || [] };
-  } catch (error: any) {
-    console.error("Erro geral ao buscar posts recentes para o dashboard:", error.message);
-    return { success: false, message: error.message, data: [] };
+  } catch (error: unknown) {
+    console.error("Erro geral ao buscar posts recentes para o dashboard:", (error instanceof Error ? error.message : String(error)));
+    return { success: false, message: (error instanceof Error ? error.message : String(error)), data: [] };
   }
 }
 
@@ -452,8 +452,8 @@ export async function deletePost(postId: string): Promise<{ success: boolean, me
                 } else {
                     console.log(`[deletePost Action] Imagem '${pathToDelete}' removida do storage.`);
                 }
-            } catch (e:any) {
-                console.error(`[deletePost Action] Exceção ao tentar remover imagem '${pathToDelete}':`, e.message);
+            } catch (e:unknown) {
+                console.error(`[deletePost Action] Exceção ao tentar remover imagem '${pathToDelete}':`, (e instanceof Error ? e.message : String(e)));
             }
         } else {
             console.warn(`[deletePost Action] Não foi possível extrair path válido da URL para deletar: ${imageUrlToDelete}`);
@@ -468,9 +468,9 @@ export async function deletePost(postId: string): Promise<{ success: boolean, me
 
     return { success: true, message: "Post excluído com sucesso." };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Captura erros da busca inicial ou da deleção do post no DB
     console.error("Erro GERAL ao excluir post:", error);
-    return { success: false, message: error.message || "Falha ao excluir post." };
+    return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao excluir post." };
   }
 }
