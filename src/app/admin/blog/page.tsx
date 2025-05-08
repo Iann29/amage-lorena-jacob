@@ -1,68 +1,133 @@
 // src/app/admin/blog/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAdminBlogPosts, getBlogCategories, deletePost, type BlogPostFromDB, type BlogCategoryFromDB } from './actions';
+
+// Reutilizar componente de paginação (ajustar import se necessário)
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // ... (Implementação do componente Pagination como em comentarios/page.tsx) ...
+  return (
+    <nav className="flex justify-center mt-6">
+      <ul className="flex items-center space-x-1">
+        {currentPage > 1 && (
+          <li>
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              className="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100"
+            >
+              Anterior
+            </button>
+          </li>
+        )}
+        {pages.map(page => (
+          <li key={page}>
+            <button
+              onClick={() => onPageChange(page)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === page ? 'bg-purple-600 text-white border-purple-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {page}
+            </button>
+          </li>
+        ))}
+        {currentPage < totalPages && (
+          <li>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              className="px-3 py-1 border rounded text-gray-600 hover:bg-gray-100"
+            >
+              Próxima
+            </button>
+          </li>
+        )}
+      </ul>
+    </nav>
+  );
+}
 
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPostFromDB[]>([]);
   const [allCategories, setAllCategories] = useState<BlogCategoryFromDB[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
   const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
+  
+  // Estados de Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [itemsPerPage] = useState(10); // Ajuste conforme necessário
+  
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-  useEffect(() => {
-    let isMounted = true;
-    let hasRun = false;
-    
-    async function fetchData() {
-      if (hasRun || !isMounted) return;
-      hasRun = true;
-      
-      setIsLoading(true);
-      try {
-        const [fetchedPosts, fetchedCategories] = await Promise.all([
-          getAdminBlogPosts(),
-          getBlogCategories()
-        ]);
-        
-        if (!isMounted) return;
-        
-        setPosts(fetchedPosts);
-        setAllCategories(fetchedCategories);
-      } catch (error) {
-        if (!isMounted) return;
-        console.error("Erro ao carregar dados da página de blog admin:", error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+  // Função para buscar posts paginados e filtrados
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Buscar categorias apenas uma vez (ou mover para fora do useCallback se não mudar)
+      if (allCategories.length === 0) {
+         const fetchedCategories = await getBlogCategories();
+         setAllCategories(fetchedCategories || []);
       }
-    }
-    
-    fetchData();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = searchTerm === '' ||
-      post.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (post.resumo && post.resumo.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (post.user_profiles && `${post.user_profiles.nome} ${post.user_profiles.sobrenome}`.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // Ajuste para a nova estrutura de blog_post_categories
-    const matchesCategory = selectedCategoryId === null ||
-      (post.blog_post_categories && post.blog_post_categories.some(bpc => bpc.blog_categories?.id === selectedCategoryId));
       
-    return matchesSearch && matchesCategory;
-  });
+      // Buscar posts com paginação e filtros
+      const response = await getAdminBlogPosts(currentPage, itemsPerPage, searchTerm || undefined, selectedCategoryId || undefined);
+      
+      if (response.success && response.data) {
+        setPosts(response.data);
+        setTotalCount(response.totalCount || 0);
+      } else {
+        setError(response.message || "Falha ao carregar posts.");
+        setPosts([]);
+        setTotalCount(0);
+      }
+    } catch (error: any) {
+      setError(error.message || "Erro inesperado ao buscar dados.");
+      setPosts([]);
+      setTotalCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  // Dependências: página, termo de busca, categoria. itemsPerPage é constante.
+  }, [currentPage, searchTerm, selectedCategoryId, itemsPerPage, allCategories.length]); 
+
+  // Buscar dados ao montar e quando as dependências mudarem
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Handler para mudança de busca/filtro - reseta para página 1
+  const handleFilterChange = () => {
+      setCurrentPage(1);
+      // fetchData será chamado pelo useEffect por causa da mudança de dependência
+  };
+
+  // Atualiza searchTerm e dispara re-fetch
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+      handleFilterChange(); 
+  };
+
+  // Atualiza selectedCategoryId e dispara re-fetch
+  const handleCategorySelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedCategoryId(e.target.value || null);
+      handleFilterChange();
+  };
 
   const togglePostSelection = (postId: string) => {
     setSelectedPostIds(prev =>
@@ -70,11 +135,13 @@ export default function AdminBlogPage() {
     );
   };
 
+  // Selecionar/desselecionar todos os posts DA PÁGINA ATUAL
   const toggleSelectAll = () => {
-    if (selectedPostIds.length === filteredPosts.length && filteredPosts.length > 0) {
+    const currentPostIds = posts.map(post => post.id); // IDs apenas da página atual
+    if (selectedPostIds.length === currentPostIds.length && currentPostIds.length > 0) {
       setSelectedPostIds([]);
     } else {
-      setSelectedPostIds(filteredPosts.map(post => post.id));
+      setSelectedPostIds(currentPostIds);
     }
   };
 
@@ -82,7 +149,8 @@ export default function AdminBlogPage() {
     if (window.confirm(`Tem certeza que deseja excluir o post "${postTitle}"?`)) {
       const result = await deletePost(postId);
       if (result.success) {
-        setPosts(prev => prev.filter(p => p.id !== postId));
+        // Não manipula mais o estado `posts` diretamente, apenas recarrega os dados da página atual
+        fetchData(); 
         alert(result.message);
       } else {
         alert(`Erro: ${result.message}`);
@@ -94,28 +162,36 @@ export default function AdminBlogPage() {
     if (selectedPostIds.length === 0) return;
     
     if (window.confirm(`Tem certeza que deseja excluir ${selectedPostIds.length} post(s)?`)) {
+      setIsLoading(true); // Mostrar loading durante a exclusão em lote
       let successCount = 0;
+      let errorMessages: string[] = [];
       for (const postId of selectedPostIds) {
         const result = await deletePost(postId);
         if (result.success) {
           successCount++;
         } else {
-          alert(`Erro ao excluir post ${postId}: ${result.message}`);
+          errorMessages.push(`Erro ao excluir post ${postId}: ${result.message}`);
         }
       }
-      setPosts(prev => prev.filter(post => !selectedPostIds.includes(post.id)));
-      setSelectedPostIds([]);
-      alert(`${successCount} post(s) excluído(s) com sucesso.`);
+      setSelectedPostIds([]); // Limpa a seleção
+      setIsBulkActionsOpen(false);
+      fetchData(); // Recarrega os dados após todas as exclusões
+      setIsLoading(false);
+      alert(`${successCount} post(s) excluído(s) com sucesso.${errorMessages.length > 0 ? '\nErros:\n' + errorMessages.join('\n') : ''}`);
     }
   };
 
-  if (isLoading) {
+  if (isLoading && posts.length === 0) {
     return (
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             <p className="ml-3 text-purple-700">Carregando posts...</p>
         </div>
     );
+  }
+
+  if (error) {
+    return <div className="p-6 text-center text-red-600 bg-red-50 rounded-md">Erro ao carregar posts: {error}</div>;
   }
 
   return (
@@ -143,7 +219,7 @@ export default function AdminBlogPage() {
               placeholder="Buscar posts, autores..."
               className="pl-10 pr-4 py-2 border border-gray-400 rounded-md w-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           
@@ -151,7 +227,7 @@ export default function AdminBlogPage() {
             <select
               className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               value={selectedCategoryId || ''}
-              onChange={(e) => setSelectedCategoryId(e.target.value || null)}
+              onChange={handleCategorySelectChange}
             >
               <option value="">Todas as categorias</option>
               {allCategories.map(category => (
@@ -217,9 +293,9 @@ export default function AdminBlogPage() {
                     <input
                       type="checkbox"
                       className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                      checked={selectedPostIds.length === filteredPosts.length && filteredPosts.length > 0}
+                      checked={selectedPostIds.length === posts.length && posts.length > 0}
                       onChange={toggleSelectAll}
-                      disabled={filteredPosts.length === 0}
+                      disabled={posts.length === 0}
                     />
                   </div>
                 </th>
@@ -244,8 +320,17 @@ export default function AdminBlogPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPosts.length > 0 ? (
-                filteredPosts.map((post) => (
+              {isLoading && posts.length > 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500 mr-2"></div>
+                      Carregando...
+                    </div>
+                  </td>
+                </tr>
+              ) : posts.length > 0 ? (
+                posts.map((post) => (
                   <tr key={post.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -340,7 +425,7 @@ export default function AdminBlogPage() {
               ) : (
                 <tr>
                   <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600 font-medium">
-                    Nenhum post encontrado.
+                    Nenhum post encontrado com os filtros atuais.
                   </td>
                 </tr>
               )}
@@ -348,11 +433,19 @@ export default function AdminBlogPage() {
           </table>
         </div>
         
+        <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              onPageChange={(page) => setCurrentPage(page)} 
+            />
+        </div>
+
         <nav className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-800 font-medium">
-                Mostrando <span className="font-medium">{filteredPosts.length}</span> de <span className="font-medium">{posts.length}</span> resultados
+                Mostrando <span className="font-medium">{posts.length}</span> de <span className="font-medium">{totalCount}</span> resultados
               </p>
             </div>
           </div>
