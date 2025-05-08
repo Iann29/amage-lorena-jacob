@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+// import Link from "next/link"; // Removido - não utilizado
 import ServiceCard from "@/components/ui/ServiceCard";
 import { useModal } from "@/contexts/ModalContext";
 import Separator from "@/components/ui/Separator";
@@ -11,7 +11,7 @@ import TestimonialsCarousel from "@/components/ui/TestimonialsCarousel";
 import { motion } from "framer-motion";
 
 export default function Home() {
-  const { openContatoModal } = useModal();
+  // const { openContatoModal } = useModal(); // Removido - não utilizado
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
