@@ -8,25 +8,20 @@ import { getBlogPostBySlug, getPopularBlogPosts, getPublishedBlogPosts } from '@
 import type { BlogPostPublic } from '@/lib/blog-api';
 import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
-import PostViewTracker from '@/components/blog/PostViewTracker';
+// import PostViewTracker from '@/components/blog/PostViewTracker'; // <<< LINHA REMOVIDA
 
 export const revalidate = 3600;
 
 // Metadados dinâmicos (mantido como estava)
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  // ... (código existente)
-  // Usar destructuring com await para evitar o erro
   const { slug } = await Promise.resolve(params);
-
   const post = await getBlogPostBySlug(slug);
-
   if (!post) {
     return {
       title: 'Post não encontrado | Lorena Jacob',
       description: 'O post que você procura não foi encontrado.'
     };
   }
-
   return {
     title: `${post.titulo} | Lorena Jacob`,
     description: post.resumo,
@@ -39,69 +34,28 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-// <<== FUNÇÃO CORRIGIDA ABAIXO ==>>
 // Gerar rotas estáticas para posts populares (ISR)
 export async function generateStaticParams() {
-  console.log("Executando generateStaticParams..."); // Log para depuração no build
   try {
-    // Buscar posts populares e a *resposta completa* de posts recentes
-    // Adicionado timeout para evitar race conditions em alguns ambientes de build
     const [popularPostsResult, recentPostsResponse] = await Promise.all([
-       getPopularBlogPosts(5), // Assumindo que retorna BlogPostPublic[] diretamente
-       getPublishedBlogPosts(1, 10) // Retorna { posts: BlogPostPublic[], pagination: {} }
+       getPopularBlogPosts(5),
+       getPublishedBlogPosts(1, 10)
     ]);
-
-    // Validar resultados antes de usar .map
     const popularPosts = Array.isArray(popularPostsResult) ? popularPostsResult : [];
-    // >>> Acessar o array 'posts' dentro do objeto de resposta <<<
     const recentPosts = Array.isArray(recentPostsResponse?.posts) ? recentPostsResponse.posts : [];
-
-    console.log(`generateStaticParams: Encontrados ${popularPosts.length} populares e ${recentPosts.length} recentes.`);
-
-    // Combinar slugs, garantindo que são strings válidas e removendo duplicatas
-    const slugs = new Set<string>(); // Tipar o Set explicitamente
-
-    popularPosts.forEach(post => {
-      if (post && typeof post.slug === 'string' && post.slug.trim() !== '') {
-        slugs.add(post.slug);
-      } else {
-         console.warn("generateStaticParams: Post popular inválido ou sem slug:", post);
-      }
-    });
-
-    recentPosts.forEach(post => {
-      if (post && typeof post.slug === 'string' && post.slug.trim() !== '') {
-        slugs.add(post.slug);
-      } else {
-         console.warn("generateStaticParams: Post recente inválido ou sem slug:", post);
-      }
-    });
-
+    const slugs = new Set<string>();
+    popularPosts.forEach(post => { if (post?.slug) slugs.add(post.slug); });
+    recentPosts.forEach(post => { if (post?.slug) slugs.add(post.slug); });
     const validSlugs = Array.from(slugs);
-    console.log(`generateStaticParams: Total de slugs únicos para gerar: ${validSlugs.length}`);
-    // console.log("Slugs:", validSlugs); // Descomente para ver os slugs no log do build
-
-    // Retornar parâmetros para geração estática, garantindo que slug existe
-    const params = validSlugs.map(slug => ({
-      slug: slug, // Garante que slug é uma string válida
-    }));
-
-    // console.log("Params gerados:", params); // Descomente para ver os parâmetros
-    return params;
-
+    return validSlugs.map(slug => ({ slug }));
   } catch (error) {
       console.error("Erro CRÍTICO durante generateStaticParams:", error);
-      // Retornar um array vazio em caso de erro para permitir que o build continue,
-      // mas as páginas não serão geradas estaticamente.
-      // Se você *precisar* que essas páginas sejam estáticas, o build deve falhar aqui.
       return [];
   }
 }
 
-
-// Componente de loading (mantido como estava)
+// Componente de loading
 function PostContentSkeleton() {
-  // ... (código existente) ...
   return (
     <div className="animate-pulse">
       <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -114,67 +68,30 @@ function PostContentSkeleton() {
   );
 }
 
-// Componente para o conteúdo do post (mantido como estava)
+// Componente para o conteúdo do post
 async function PostContent({ slug }: { slug: string }) {
-  // ... (código existente) ...
   const post = await getBlogPostBySlug(slug);
-
-  if (!post) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-gray-600">Conteúdo não disponível.</p>
-      </div>
-    );
-  }
-
+  if (!post) { return <div className="text-center py-4"><p className="text-gray-600">Conteúdo não disponível.</p></div>; }
   return (
     <>
-      {/* Identificação do Autor */}
-      <div className={styles.authorLine}>
-        <span>por {post.author.nome} {post.author.sobrenome}</span>
-      </div>
-
-      {/* Conteúdo do Post com estilos aplicados pelo CSS Module */}
+      <div className={styles.authorLine}><span>por {post.author.nome} {post.author.sobrenome}</span></div>
       <div className={styles.postContent}>
-        {post.conteudo ? (
-          <div dangerouslySetInnerHTML={{ __html: post.conteudo }} />
-        ) : (
-          <p className="text-gray-600">Conteúdo não disponível.</p>
-        )}
+        {post.conteudo ? <div dangerouslySetInnerHTML={{ __html: post.conteudo }} /> : <p className="text-gray-600">Conteúdo não disponível.</p>}
       </div>
-
-      {/* Seção de Rodapé */}
       <div className={styles.footerActions}>
-        <div className={styles.stats}>
-          {post.view_count || 0} visualizações • {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR')}
-        </div>
-
+        <div className={styles.stats}>{post.view_count || 0} visualizações • {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR')}</div>
         <div className={styles.actionButtons}>
           <div className={styles.stats}>{post.comment_count || 0} comentários</div>
-
-          <button className="flex items-center justify-center hover:opacity-80 transition">
-            <Image
-              src="/assets/compartilharIcon.svg"
-              alt="Compartilhar"
-              width={22}
-              height={22}
-            />
-          </button>
-
-          <LikeButton
-            itemId={post.id}
-            itemType="post"
-            initialLikeCount={post.like_count}
-          />
+          <button className="flex items-center justify-center hover:opacity-80 transition"><Image src="/assets/compartilharIcon.svg" alt="Compartilhar" width={22} height={22} /></button>
+          <LikeButton itemId={post.id} itemType="post" initialLikeCount={post.like_count} />
         </div>
       </div>
     </>
   );
 }
 
-// Componente principal da página (mantido como estava)
+// Componente Principal da Página
 export default async function PostPage({ params }: { params: { slug: string } }) {
-  // ... (código existente) ...
    const { slug } = await Promise.resolve(params);
   const post = await getBlogPostBySlug(slug);
   const comments: any[] = []; // Mock
@@ -226,7 +143,6 @@ export default async function PostPage({ params }: { params: { slug: string } })
               <h2 className={styles.postTitle}>
                 {post.titulo}
               </h2>
-
               {post.resumo && (
                 <p className={styles.postSubtitle}>
                   {post.resumo}
@@ -237,9 +153,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
       </header>
 
+      {/* Conteúdo do Post */}
       <div className={styles.paperContainer}>
         <div className={styles.contentWrapper}>
-          {/* Usar Suspense para o conteúdo do post */}
           <Suspense fallback={<PostContentSkeleton />}>
             <PostContent slug={slug} />
           </Suspense>
@@ -248,7 +164,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
 
       {/* Seção de Comentários */}
       <div className={styles.commentsSection}>
-        <div className={styles.commentHeader}>
+         <div className={styles.commentHeader}>
           <div className={styles.commentTitle}>
             <Image
               src="/assets/quercomentar.png"
@@ -285,8 +201,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
             </button>
           </div>
         </div>
-
-        <div className={styles.commentsList}>
+         <div className={styles.commentsList}>
           <h3 className="text-2xl font-bold text-[#9772FB] mb-6">Comentários</h3>
            {comments.length > 0 ? (
              comments.map((comment: any) => (
@@ -300,8 +215,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
       </div>
 
-      {/* Componente para rastrear visualizações */}
-      <PostViewTracker postId={post.id} slug={slug} />
+      {/* Componente para rastrear visualizações foi removido daqui */}
+      {/* <PostViewTracker postId={post.id} slug={slug} /> */}
     </main>
   );
 }
