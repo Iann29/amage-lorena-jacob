@@ -172,7 +172,7 @@ function RecuperarSenhaContent() {
         setMessage({ type: 'success', text: 'Senha atualizada com sucesso! Você será redirecionado para o login.' });
         setTimeout(() => router.push('/login'), 3000);
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage({ type: 'error', text: 'Ocorreu um erro inesperado.' });
     } finally {
       setIsUpdating(false);
