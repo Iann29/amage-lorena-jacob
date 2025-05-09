@@ -22,7 +22,6 @@ export default function CodigoVerificacaoPage() {
 
   useEffect(() => {
     let isMounted = true;
-    if(isMounted) setInitialLoading(true);
     console.log("CodigoVerificacaoPage: useEffect iniciado. Aguardando eventos do Supabase Auth.");
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -37,7 +36,9 @@ export default function CodigoVerificacaoPage() {
         }
         return; 
       }
-      if (initialLoading && isMounted) {
+      
+      // Só executa esta verificação se ainda estiver carregando
+      if (isMounted && initialLoading) {
         if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
           console.log("CodigoVerificacaoPage: Sessão detectada, mas não é PASSWORD_RECOVERY.");
           setMessage({ type: 'error', text: 'Link inválido ou você já está logado. Para redefinir a senha de uma conta específica, use o link de recuperação em uma aba anônima ou após sair da sua conta atual.' });
@@ -50,15 +51,17 @@ export default function CodigoVerificacaoPage() {
           setInitialLoading(false);
         }
       }
-       if (event === 'SIGNED_OUT') { 
+      
+      if (event === 'SIGNED_OUT') { 
         console.log("CodigoVerificacaoPage: Usuário deslogado.");
         if(isMounted){
             setMessage({ type: 'info', text: 'Sua sessão foi encerrada. Solicite um novo link se necessário.' });
             setShowPasswordInput(false);
             setInitialLoading(false); 
         }
-    }
+      }
     });
+    
     const timer = setTimeout(() => {
       if (isMounted && initialLoading) {
         console.log("CodigoVerificacaoPage: Timeout - Nenhum evento de recuperação conclusivo detectado.");
@@ -67,12 +70,13 @@ export default function CodigoVerificacaoPage() {
         setInitialLoading(false);
       }
     }, 3500); 
+    
     return () => {
       isMounted = false;
       clearTimeout(timer);
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, initialLoading]);
+  }, [supabase, router]); // Removido initialLoading das dependências
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
