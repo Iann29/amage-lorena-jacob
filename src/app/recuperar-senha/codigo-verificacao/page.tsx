@@ -20,12 +20,17 @@ function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => voi
 
 export default function CodigoVerificacaoPage() {
   // Refs para os inputs de código
+  const inputRef0 = useRef<HTMLInputElement>(null);
+  const inputRef1 = useRef<HTMLInputElement>(null);
+  const inputRef2 = useRef<HTMLInputElement>(null);
+  const inputRef3 = useRef<HTMLInputElement>(null);
+
   const inputRefs = useMemo(() => [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null)
-  ], []);
+    inputRef0,
+    inputRef1,
+    inputRef2,
+    inputRef3
+  ], [inputRef0, inputRef1, inputRef2, inputRef3]);
   
   // Estado para os valores dos campos de código
   const [codigo, setCodigo] = useState(["", "", "", ""]);

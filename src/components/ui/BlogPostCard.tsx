@@ -22,12 +22,6 @@ interface BlogPostCardProps extends BlogPostData {
   commentCount?: number;
 }
 
-// Tipos para futura integração com Supabase
-interface PostStats {
-  views: number;
-  comments: number;
-}
-
 /**
  * Componente de cartão de post do blog
  * No futuro, pode buscar automaticamente estatísticas de visualizações e comentários do Supabase

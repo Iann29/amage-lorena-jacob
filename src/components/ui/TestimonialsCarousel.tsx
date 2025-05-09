@@ -14,13 +14,10 @@ interface Testimonial {
 
 interface TestimonialsCarouselProps {
   testimonials: Testimonial[];
-  visibleItems?: number;
 }
 
 const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   testimonials,
-  // Usando o parâmetro diretamente na configuração abaixo
-  visibleItems = 3
 }) => {
   // Referência para saber se o componente foi montado
   const isMounted = useRef(false);
