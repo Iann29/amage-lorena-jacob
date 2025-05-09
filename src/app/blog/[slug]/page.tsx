@@ -18,14 +18,18 @@ import { createClient } from '@/utils/supabase/server';
 export const revalidate = 3600;
 
 interface PostPageProps {
-  params: { slug: string };
+  // Tipando params como Promise para tentar satisfazer a restrição do Vercel
+  params: Promise<{ slug: string }>; 
   // searchParams: { [key: string]: string | string[] | undefined }; // Adicionar se usar searchParams
 }
 
 // Metadados dinâmicos
 export async function generateMetadata(props: PostPageProps) {
-  const params = await Promise.resolve(props.params);
-  const slug = params.slug;
+  // Como props.params agora é tipado como Promise, podemos usar await diretamente.
+  // No entanto, Next.js provavelmente ainda passa um objeto. O `await` aqui se torna
+  // uma forma de resolver o tipo para o TypeScript e satisfazer a exigência de runtime do Next.js.
+  const paramsObject = await props.params; 
+  const slug = paramsObject.slug;
   const post = await getBlogPostBySlug(slug);
   if (!post) {
     return {
@@ -103,8 +107,9 @@ async function PostContent({ slug }: { slug: string }) {
 
 // Componente Principal da Página
 export default async function PostPage(props: PostPageProps) {
-  const params = await Promise.resolve(props.params);
-  const slug = params.slug;
+  // Similar a generateMetadata, tratamos props.params como uma Promise devido à tipagem.
+  const paramsObject = await props.params;
+  const slug = paramsObject.slug;
 
   // 1. Buscar dados do post
   const post = await getBlogPostBySlug(slug);
