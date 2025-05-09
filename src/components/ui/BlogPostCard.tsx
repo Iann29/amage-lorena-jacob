@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 // Interface para dados estáticos do post (vindo do Supabase no futuro)
 interface BlogPostData {
@@ -65,31 +65,14 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   slug
 }) => {
   // Estados para armazenar as contagens (permitirá atualização dinâmica futura)
-  const [viewCount, setViewCount] = useState<number>(initialViewCount || 0);
-  const [commentCount, setCommentCount] = useState<number>(initialCommentCount || 0);
+  const viewCount = initialViewCount || 0;
+  const commentCount = initialCommentCount || 0;
   
   // Efeito para buscar estatísticas quando o componente montar
   // Isso será útil quando integrarmos com o Supabase
   useEffect(() => {
-    // Função mockada - no futuro, será substituída por uma chamada real ao Supabase
-    // Exemplo de como será a consulta no futuro:
-    // const { data, error } = await supabase
-    //   .from('post_stats')
-    //   .select('views, comments')
-    //   .eq('post_id', postId || postSlug)
-    //   .single()
-    const fetchPostStats = async (/*postId: string | number | undefined, postSlug: string | undefined*/): Promise<PostStats> => {
-      // Simula uma chamada assíncrona
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          // Retorna os valores iniciais por enquanto
-          resolve({
-            views: initialViewCount || 0,
-            comments: initialCommentCount || 0
-          });
-        }, 100);
-      });
-    };
+    // A função fetchPostStats foi removida pois não era chamada.
+    // A lógica interna do if também foi removida/comentada pois dependia de fetchPostStats e dos setters.
 
     // Só tentaria buscar se tivermos um ID ou slug e não tivermos valores iniciais
     if ((id || slug) && (!initialViewCount || !initialCommentCount)) {
@@ -98,16 +81,16 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
       // Exemplo de como seria:
       // const loadAndSetStats = async () => {
       //   try {
-      //     const stats = await fetchPostStats(/*id, slug*/);
-      //     setViewCount(stats.views);
-      //     setCommentCount(stats.comments);
+      //     // const stats = await fetchPostStatsLocal(/*id, slug*/); // fetchPostStatsLocal precisaria ser definida
+      //     // setViewCount(stats.views); // setViewCount não existe mais
+      //     // setCommentCount(stats.comments); // setCommentCount não existe mais
       //   } catch (error) {
       //     console.error('Erro ao carregar estatísticas do post:', error);
       //   }
       // };
       // loadAndSetStats();
     }
-  }, [id, slug, initialViewCount, initialCommentCount]); // fetchPostStats foi removida das dependências pois agora está definida dentro do useEffect
+  }, [id, slug, initialViewCount, initialCommentCount]);
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3" style={{ maxWidth: '380px', height: '450px' }}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -20,12 +20,12 @@ function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => voi
 
 export default function CodigoVerificacaoPage() {
   // Refs para os inputs de código
-  const inputRefs = [
+  const inputRefs = useMemo(() => [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null)
-  ];
+  ], []);
   
   // Estado para os valores dos campos de código
   const [codigo, setCodigo] = useState(["", "", "", ""]);

@@ -62,7 +62,7 @@ export default function AuthCheck({ children }: AuthCheckProps) {
       isMounted = false;
       authListener?.subscription.unsubscribe();
     };
-  }, [pathname, router]); // pathname e router como dependências
+  }, [pathname, router, supabase.auth]); // pathname e router como dependências
 
   if (isLoading) {
     return (
