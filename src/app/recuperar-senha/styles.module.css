@@ -1,6 +1,6 @@
 @charset "UTF-8";
 
-:global(:root) {
+.themeVariables {
   --primary-color: #3068AD;
   --primary-color-dark: #205293;
   --primary-color-light: #52A4DB;
