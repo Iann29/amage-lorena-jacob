@@ -17,9 +17,15 @@ import { createClient } from '@/utils/supabase/server';
 
 export const revalidate = 3600;
 
+interface PostPageProps {
+  params: { slug: string };
+  // searchParams: { [key: string]: string | string[] | undefined }; // Adicionar se usar searchParams
+}
+
 // Metadados dinâmicos
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = await Promise.resolve(params);
+export async function generateMetadata(props: PostPageProps) {
+  const params = await Promise.resolve(props.params);
+  const slug = params.slug;
   const post = await getBlogPostBySlug(slug);
   if (!post) {
     return {
@@ -96,8 +102,9 @@ async function PostContent({ slug }: { slug: string }) {
 }
 
 // Componente Principal da Página
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const { slug } = await Promise.resolve(params);
+export default async function PostPage(props: PostPageProps) {
+  const params = await Promise.resolve(props.params);
+  const slug = params.slug;
 
   // 1. Buscar dados do post
   const post = await getBlogPostBySlug(slug);
