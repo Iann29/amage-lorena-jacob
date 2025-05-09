@@ -172,7 +172,8 @@ function RecuperarSenhaContent() {
         setMessage({ type: 'success', text: 'Senha atualizada com sucesso! Você será redirecionado para o login.' });
         setTimeout(() => router.push('/login'), 3000);
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error("Erro ao atualizar senha Supabase:", error);
       setMessage({ type: 'error', text: 'Ocorreu um erro inesperado.' });
     } finally {
       setIsUpdating(false);
