@@ -101,8 +101,12 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
         setIsLiked(previousIsLiked);
         setLikes(previousLikes);
       }
-    } catch (error: any) {
-      console.error(`Erro ao curtir/descurtir ${itemType}:`, error.message);
+    } catch (error: unknown) {
+      let errorMessage = `Erro ao curtir/descurtir ${itemType}.`;
+      if (error instanceof Error) {
+        errorMessage = `Erro ao curtir/descurtir ${itemType}: ${error.message}`;
+      }
+      console.error(errorMessage, error);
       setIsLiked(previousIsLiked);
       setLikes(previousLikes);
     } finally {

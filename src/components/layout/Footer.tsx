@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 const Footer = () => {
   const router = useRouter();
-  const pathname = usePathname();
+  usePathname();
   const anoAtual = new Date().getFullYear();
   
   // A lógica de exibição/ocultação do Footer foi movida para o template.tsx principal

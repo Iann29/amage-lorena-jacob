@@ -4,12 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
   const { openContatoModal } = useModal();
   const { scrollY } = useScroll();
@@ -30,15 +29,6 @@ const Header = () => {
       setIsMenuOpen(false);
     }
   }, [pathname, isMenuOpen]);
-  
-  // Código comentado pois a variável isScrolled não está sendo utilizada
-  // useMotionValueEvent(scrollY, "change", (latest) => {
-  //   if (latest > 50) {
-  //     setIsScrolled(true);
-  //   } else {
-  //     setIsScrolled(false);
-  //   }
-  // });
   
   // A lógica de exibição/ocultação do Header foi movida para o template.tsx principal
 
