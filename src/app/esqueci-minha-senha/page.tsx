@@ -4,36 +4,50 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./styles.module.css";
+import { createClient } from '@/utils/supabase/client';
 
 export default function EsqueciMinhaSenha() {
+  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [emailEnviado, setEmailEnviado] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email) {
+      setMessage({ type: 'error', text: 'Por favor, insira seu endereço de e-mail.' });
+      return;
+    }
     
     setIsSending(true);
-    
-    try {
-      // Aqui será implementada a lógica de backend para enviar o e-mail de recuperação
-      // Por enquanto, apenas simulamos o envio
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Depois que o email for enviado, redirecionar para a página de código de verificação
-      // Na implementação real, você pode querer passar o email como query param ou usar Context API
-      window.location.href = `/recuperar-senha/codigo-verificacao?email=${encodeURIComponent(email)}`;
-    } catch (error) {
+    setMessage(null);
+
+    const redirectTo = window.location.origin + '/recuperar-senha/codigo-verificacao';
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectTo,
+    });
+
+    setIsSending(false);
+
+    if (error) {
       console.error("Erro ao enviar e-mail de recuperação:", error);
-    } finally {
-      setIsSending(false);
+      if (error.message.includes("User not found")) {
+        setMessage({ type: 'error', text: 'Nenhuma conta encontrada com este e-mail.' });
+      } else if (error.message.includes("Unable to send email for one-time password (OTP)")) {
+         setMessage({ type: 'error', text: 'Ocorreu um problema ao tentar enviar o e-mail. Tente novamente mais tarde.' });
+      } else {
+        setMessage({ type: 'error', text: error.message || 'Ocorreu um erro. Tente novamente.' });
+      }
+    } else {
+      setMessage({ type: 'success', text: `Se uma conta com o e-mail ${email} existir, um link de recuperação foi enviado. Verifique sua caixa de entrada (e spam).` });
     }
   };
 
+  const emailEnviado = message?.type === 'success';
+
   return (
     <div className={styles.container}>
-      {/* Botão para voltar para a página de login */}
       <Link 
         href="/login" 
         className={styles.backButton}
@@ -98,6 +112,23 @@ export default function EsqueciMinhaSenha() {
           
           <div className={styles.content}>
             <div className={styles.formSection}>
+              {message && (
+                <div 
+                  className={styles.messageBox} 
+                  style={{
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    borderRadius: '4px',
+                    textAlign: 'center',
+                    border: message.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb',
+                    backgroundColor: message.type === 'success' ? 'rgba(210, 240, 210, 0.9)' : 'rgba(255, 230, 230, 0.9)',
+                    color: message.type === 'success' ? '#155724' : '#721c24',
+                  }}
+                >
+                  {message.text}
+                </div>
+              )}
+
               {!emailEnviado ? (
                 <>
                   <p className={styles.instructions}>
@@ -119,30 +150,38 @@ export default function EsqueciMinhaSenha() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        disabled={isSending}
                       />
                     </div>
                   </form>
                   
                   <button 
-                    type="button" 
+                    type="button"
                     className={styles.submitButton}
-                    disabled={isSending}
+                    disabled={isSending || !email}
                     onClick={handleSubmit}
                   >
-                    {isSending ? "Enviando..." : "Enviar"}
+                    {isSending ? (
+                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{color: 'currentColor'}}>
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Enviando...
+                        </div>
+                      ) : (
+                        'Enviar Link de Recuperação'
+                      )}
                   </button>
                 </>
               ) : (
-                <div className={styles.successMessage}>
-                  <p>Um e-mail com instruções de recuperação foi enviado para <strong>{email}</strong>.</p>
-                  <p>Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</p>
-                  <button 
-                    onClick={() => setEmailEnviado(false)} 
-                    className={styles.backButton}
-                  >
-                    Voltar
-                  </button>
-                </div>
+                <button 
+                  onClick={() => { setMessage(null); setEmail(''); }}
+                  className={`${styles.submitButton} ${styles.tryAgainButton}`}
+                  style={{marginTop: '1rem'}}
+                >
+                  Enviar para outro e-mail
+                </button>
               )}
             </div>
 
