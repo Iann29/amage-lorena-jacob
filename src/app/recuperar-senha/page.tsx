@@ -24,8 +24,6 @@ export default function RecuperarSenhaPage() {
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [senhaRedefinida, setSenhaRedefinida] = useState(false);
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [erro, setErro] = useState("");
   
   // Função para atualizar o email do parâmetro da URL

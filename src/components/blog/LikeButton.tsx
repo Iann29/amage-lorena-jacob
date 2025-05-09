@@ -117,7 +117,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
         aria-label="Carregando status do like..."
       >
         <Image
-          src={"/assets/likeVazio.svg"}
+          src={"/assets/likeVazio.png"}
           alt={"Carregando"}
           width={26}
           height={26}
@@ -142,7 +142,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
                           : (itemType === 'post' ? "Curtir post" : "Curtir comentário")}
     >
       <Image
-        src={isLiked ? "/assets/like.svg" : "/assets/likeVazio.svg"}
+        src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
         alt={isLiked ? "Curtido" : "Curtir"}
         width={26}
         height={26}
