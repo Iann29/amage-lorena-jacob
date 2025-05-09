@@ -4,8 +4,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import styles from './cadastro.module.css';
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function CadastroPage() {
+  const supabase = createClient();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     primeiroNome: '',
     sobrenome: '',
@@ -20,6 +24,10 @@ export default function CadastroPage() {
   const [dataCollectionChecked, setDataCollectionChecked] = useState(false);
   const [notificationsChecked, setNotificationsChecked] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -28,22 +36,66 @@ export default function CadastroPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui será implementada a integração com Supabase Auth
-    console.log('Cadastro enviado:', formData);
-    
+    setIsLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     if (formData.senha !== formData.confirmarSenha) {
-      alert('As senhas não coincidem.');
+      setErrorMessage('As senhas não coincidem.');
+      setIsLoading(false);
       return;
     }
     
     if (!termsChecked || !dataCollectionChecked) {
-      alert('Você precisa aceitar os termos e a política de privacidade para continuar.');
+      setErrorMessage('Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.');
+      setIsLoading(false);
       return;
     }
-    
-    // Futuramente redirecionaremos para a página de minha-conta após o cadastro bem-sucedido
+
+    const emailRedirectTo = window.location.origin + '/';
+
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.senha,
+      options: {
+        emailRedirectTo: emailRedirectTo,
+        data: {
+          primeiro_nome: formData.primeiroNome,
+          sobrenome: formData.sobrenome,
+        }
+      }
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      console.error('Erro no cadastro:', error);
+      if (error.message.includes("User already registered")) {
+        setErrorMessage("Este e-mail já está cadastrado. Tente fazer login ou use outro e-mail.");
+      } else if (error.message.includes("Password should be at least 6 characters")) {
+        setErrorMessage("A senha deve ter pelo menos 6 caracteres.");
+      } else if (error.message.includes("Unable to validate email address")) {
+        setErrorMessage("O formato do e-mail fornecido é inválido.");
+      }
+       else {
+        setErrorMessage(error.message || 'Ocorreu um erro ao tentar criar a conta. Tente novamente.');
+      }
+    } else if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setErrorMessage("Este e-mail já está cadastrado, mas a conta não foi confirmada. Verifique seu e-mail ou tente fazer login.");
+    } else if (data.session === null && data.user) {
+      setSuccessMessage('Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta.');
+      setFormData({primeiroNome: '', sobrenome: '', email: '', senha: '', confirmarSenha: ''});
+      setTermsChecked(false);
+      setDataCollectionChecked(false);
+      setNotificationsChecked(false);
+    } else if (data.session && data.user) {
+      setSuccessMessage('Conta criada com sucesso! Redirecionando...');
+      router.push('/minha-conta'); 
+    } else {
+      setErrorMessage('Ocorreu uma resposta inesperada do servidor. Por favor, tente novamente.');
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -56,7 +108,6 @@ export default function CadastroPage() {
 
   return (
     <div className={styles.cadastroContainer}>
-      {/* Botão para voltar para o site */}
       <Link href="/" className={styles.backButton}>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 8H1M1 8L8 15M1 8L8 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -93,6 +144,17 @@ export default function CadastroPage() {
         </div>
         
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+          {errorMessage && (
+            <div className={styles.messageContainer} style={{ backgroundColor: 'rgba(255, 230, 230, 0.9)', border: '1px solid #f5c6cb', color: '#721c24', marginBottom: '1rem', padding: '0.75rem', borderRadius: '4px', textAlign: 'center' }}>
+              {errorMessage}
+            </div>
+          )}
+          {successMessage && (
+            <div className={styles.messageContainer} style={{ backgroundColor: 'rgba(230, 245, 230, 0.9)', border: '1px solid #c3e6cb', color: '#155724', marginBottom: '1rem', padding: '0.75rem', borderRadius: '4px', textAlign: 'center' }}>
+              {successMessage}
+            </div>
+          )}
+
           <div className={styles.nameFieldsContainer}>
             <div className={`${styles.formGroup} ${styles.nameField}`}>
               <label htmlFor="primeiroNome" className={styles.label}>Nome: <span className={styles.requiredAsterisk}>*</span></label>
@@ -103,6 +165,7 @@ export default function CadastroPage() {
                 value={formData.primeiroNome}
                 onChange={handleChange}
                 required
+                disabled={isLoading}
                 className={`${styles.input} ${styles.largeInput}`}
                 placeholder="Ex: Sabrina"
                 autoComplete="given-name"
@@ -117,6 +180,7 @@ export default function CadastroPage() {
                 value={formData.sobrenome}
                 onChange={handleChange}
                 required
+                disabled={isLoading}
                 className={`${styles.input} ${styles.largeInput}`}
                 placeholder="Ex: Meireles dos Santos"
                 autoComplete="family-name"
@@ -133,6 +197,7 @@ export default function CadastroPage() {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={isLoading}
               className={`${styles.input} ${styles.largeInput}`}
               placeholder="Ex: sabrinamei@gmail.com"
               autoComplete="email"
@@ -149,6 +214,7 @@ export default function CadastroPage() {
                 value={formData.senha}
                 onChange={handleChange}
                 required
+                disabled={isLoading}
                 className={styles.input}
                 placeholder="Insira sua senha"
               />
@@ -157,6 +223,7 @@ export default function CadastroPage() {
                 onClick={togglePasswordVisibility} 
                 className={styles.passwordToggle}
                 tabIndex={-1}
+                disabled={isLoading}
               >
                 {showPassword ? (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -184,6 +251,7 @@ export default function CadastroPage() {
                 value={formData.confirmarSenha}
                 onChange={handleChange}
                 required
+                disabled={isLoading}
                 className={styles.input}
                 placeholder="Confirme sua senha"
               />
@@ -192,6 +260,7 @@ export default function CadastroPage() {
                 onClick={toggleConfirmPasswordVisibility} 
                 className={styles.passwordToggle}
                 tabIndex={-1}
+                disabled={isLoading}
               >
                 {showConfirmPassword ? (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -213,7 +282,7 @@ export default function CadastroPage() {
           
           <div className={styles.orText}>ou</div>
           
-          <button type="button" className={styles.googleButton}>
+          <button type="button" className={styles.googleButton} disabled={isLoading}>
             <Image 
               src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" 
               alt="Google" 
@@ -228,9 +297,10 @@ export default function CadastroPage() {
             <input 
               type="checkbox" 
               checked={termsChecked}
-              onChange={() => setTermsChecked(!termsChecked)}
+              onChange={(e) => setTermsChecked(e.target.checked)}
               className={styles.checkbox}
               required
+              disabled={isLoading}
             />
             <span className={styles.checkboxLabel}>
               Li e estou de acordo com <span className={styles.highlightedTerms}>os Termos de Uso e a Política de Privacidade. <span className={styles.requiredAsterisk}>*</span></span>
@@ -241,9 +311,10 @@ export default function CadastroPage() {
             <input 
               type="checkbox" 
               checked={dataCollectionChecked}
-              onChange={() => setDataCollectionChecked(!dataCollectionChecked)}
+              onChange={(e) => setDataCollectionChecked(e.target.checked)}
               className={styles.checkbox}
               required
+              disabled={isLoading}
             />
             <span className={styles.checkboxLabel}>
               <span className={styles.destacado}>Autorizo este site</span> a coletar e armazenar os dados fornecidos neste formulário. <span className={styles.requiredAsterisk}>*</span>
@@ -254,8 +325,9 @@ export default function CadastroPage() {
             <input 
               type="checkbox" 
               checked={notificationsChecked}
-              onChange={() => setNotificationsChecked(!notificationsChecked)}
+              onChange={(e) => setNotificationsChecked(e.target.checked)}
               className={styles.checkbox}
+              disabled={isLoading}
             />
             <span className={styles.checkboxLabel}>
               <span className={styles.destacado}>Desejo receber</span> atualizações e notificações por e-mail.
@@ -263,8 +335,18 @@ export default function CadastroPage() {
           </label>
           
           <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <button type="submit" className={styles.button}>
-              Registrar-se
+            <button type="submit" className={styles.button} disabled={isLoading}>
+              {isLoading ? (
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{color: '#3DAEDF'}}>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Registrando...
+                </div>
+              ) : (
+                'Registrar-se'
+              )}
             </button>
           </div>
         </form>
