@@ -24,79 +24,72 @@ function PasswordResetForm() {
 
   useEffect(() => {
     let isMounted = true;
-    setInitialLoading(true); 
+    // Não precisamos mais ler o code da URL da nossa aplicação aqui.
+    // O Supabase processa o token/code no link do e-mail no domínio dele
+    // e então dispara o evento PASSWORD_RECOVERY no cliente se for bem-sucedido.
+    
+    // Começamos com initialLoading = true para mostrar "Verificando link..."
+    // até que o onAuthStateChange nos dê uma resposta definitiva.
+    if(isMounted) setInitialLoading(true);
 
-    const codeFromUrl = searchParams.get("code");
-    console.log("Código de recuperação inicial da URL:", codeFromUrl);
-
-    if (!codeFromUrl) {
-      if (isMounted) {
-        setMessage({ type: 'error', text: 'Link de recuperação inválido: nenhum código fornecido.' });
-        setShowPasswordInput(false);
-        setInitialLoading(false);
-      }
-      return;
-    }
-
-    const checkUserAndProceed = async () => {
-      // O Supabase JS SDK deve tentar trocar o 'code' por uma sessão automaticamente.
-      // Aguardamos um pouco para esse processamento ocorrer antes de chamar getUser().
-      // Isso é uma heurística; o tempo ideal pode variar.
-      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms de delay
-
-      if (!isMounted) return;
-
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (!isMounted) return; // Checar de novo após o await
-
-      if (userError) {
-        console.error("Erro ao buscar usuário após link de recuperação:", userError);
-        setMessage({ type: 'error', text: 'Erro ao processar o link de recuperação. Tente novamente.' });
-        setShowPasswordInput(false);
-      } else if (user) {
-        console.log("Usuário encontrado após link de recuperação:", user.id, "Email:", user.email);
-        // Se chegamos aqui com um usuário E o code estava na URL, assumimos que o link é válido.
-        // O evento PASSWORD_RECOVERY pode ou não ter disparado, mas a sessão está estabelecida.
-        setMessage(null); 
-        setShowPasswordInput(true);
-        router.replace(window.location.pathname, { scroll: false }); // Limpar ?code=
-      } else {
-        console.log("Nenhum usuário encontrado após processar link de recuperação com código.");
-        setMessage({ type: 'error', text: 'O link de recuperação é inválido, expirado ou já foi utilizado. Por favor, solicite um novo.' });
-        setShowPasswordInput(false);
-      }
-      setInitialLoading(false);
-    };
-
-    checkUserAndProceed();
+    console.log("PasswordResetForm: useEffect iniciado. Aguardando eventos do Supabase Auth.");
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
-      console.log("Auth event (pós verificação inicial):", event, "Session:", session);
-      if (event === "SIGNED_OUT") {
-          setMessage({ type: 'info', text: 'Sua sessão foi encerrada. Para redefinir a senha, solicite um novo link.' });
-          setShowPasswordInput(false);
-          setInitialLoading(false); // Para garantir que não fique em loop de loading
+
+      console.log(`PasswordResetForm: Auth Event: ${event}`, session);
+
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log("PasswordResetForm: Evento PASSWORD_RECOVERY recebido. Usuário autenticado para redefinição.");
+        if (isMounted) {
+          setMessage(null); // Limpar mensagens de erro anteriores
+          setShowPasswordInput(true); // Mostra o formulário de nova senha
+          setInitialLoading(false); // Para o loading
+          // Opcional: limpar quaisquer parâmetros da URL que o Supabase possa ter adicionado (geralmente não adiciona ao redirectTo)
+          // router.replace(window.location.pathname, { scroll: false });
+        }
+        return; // Evento principal tratado
       }
-      // Se o evento PASSWORD_RECOVERY ocorrer (pode acontecer depois do checkUserAndProceed dependendo do timing)
-      // e ainda não mostramos o input, mostramos agora.
-      if (event === "PASSWORD_RECOVERY" && !showPasswordInput && isMounted){
-        console.log("Evento PASSWORD_RECOVERY tardio detectado.")
-        setMessage(null);
-        setShowPasswordInput(true);
-        setInitialLoading(false);
-        router.replace(window.location.pathname, { scroll: false });
+
+      // Se o componente ainda está no estado de carregamento inicial E o evento não é PASSWORD_RECOVERY
+      if (initialLoading && isMounted) {
+        // Se o evento for SIGNED_IN, mas não PASSWORD_RECOVERY, o usuário já estava logado
+        // ou o link de recuperação resultou em um login normal (o que não deveria ser o caso para type=recovery)
+        if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          console.log("PasswordResetForm: Sessão detectada, mas não é PASSWORD_RECOVERY. Usuário pode já estar logado ou o link é inválido.");
+          setMessage({ type: 'error', text: 'Link inválido ou você já está logado. Para redefinir a senha de uma conta específica, use o link de recuperação em uma aba anônima ou após sair da sua conta atual.' });
+          setShowPasswordInput(false);
+          setInitialLoading(false);
+        } else if (!session && (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION')) {
+          // Se não há sessão e é o estado inicial ou um logout, o link não funcionou ou não era para recuperação.
+          console.log("PasswordResetForm: Nenhuma sessão ou SIGNED_OUT durante a verificação inicial.");
+          setMessage({ type: 'error', text: 'Link de recuperação inválido, expirado ou já utilizado. Por favor, solicite um novo link.' });
+          setShowPasswordInput(false);
+          setInitialLoading(false);
+        }
+        // Outros eventos durante initialLoading são ignorados enquanto esperamos PASSWORD_RECOVERY ou um dos casos acima.
       }
     });
 
+    // Fallback: Se após um tempo nenhum evento relevante (especialmente PASSWORD_RECOVERY)
+    // tiver mudado initialLoading para false, consideramos que o link não funcionou.
+    const timer = setTimeout(() => {
+      if (isMounted && initialLoading) {
+        console.log("PasswordResetForm: Timeout - Nenhum evento de recuperação conclusivo detectado.");
+        setMessage({ type: 'error', text: 'Falha ao processar o link de recuperação. Verifique se o link está correto e tente novamente, ou solicite um novo link.' });
+        setShowPasswordInput(false);
+        setInitialLoading(false);
+      }
+    }, 3500); // Aumentado para 3.5 segundos para dar mais margem
+
     return () => {
       isMounted = false;
+      clearTimeout(timer);
       authListener.subscription.unsubscribe();
     };
-  // searchParams é estável, mas codeFromUrl garante re-execução se a URL mudar com novo code.
+  // initialLoading está na dependência para permitir que o timeout seja limpo/reavaliado se ele mudar.
   // supabase e router são estáveis.
-  }, [supabase, router, searchParams]); 
+  }, [supabase, router, initialLoading]); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
