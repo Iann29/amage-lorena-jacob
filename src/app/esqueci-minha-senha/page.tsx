@@ -22,7 +22,7 @@ export default function EsqueciMinhaSenha() {
     setIsSending(true);
     setMessage(null);
 
-    const redirectTo = window.location.origin + '/recuperar-senha/codigo-verificacao';
+    const redirectTo = `${window.location.origin}/recuperar-senha?source=recovery`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectTo,
