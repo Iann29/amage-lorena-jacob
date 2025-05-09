@@ -7,7 +7,8 @@ import styles from './cadastro.module.css';
 
 export default function CadastroPage() {
   const [formData, setFormData] = useState({
-    nome: '',
+    primeiroNome: '',
+    sobrenome: '',
     email: '',
     senha: '',
     confirmarSenha: ''
@@ -31,6 +32,11 @@ export default function CadastroPage() {
     e.preventDefault();
     // Aqui será implementada a integração com Supabase Auth
     console.log('Cadastro enviado:', formData);
+    
+    if (formData.senha !== formData.confirmarSenha) {
+      alert('As senhas não coincidem.');
+      return;
+    }
     
     if (!termsChecked || !dataCollectionChecked) {
       alert('Você precisa aceitar os termos e a política de privacidade para continuar.');
@@ -87,19 +93,35 @@ export default function CadastroPage() {
         </div>
         
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <div className={styles.formGroup}>
-            <label htmlFor="nome" className={styles.label}>Nome Completo: <span className={styles.requiredAsterisk}>*</span></label>
-            <input
-              type="text"
-              id="nome"
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-              className={`${styles.input} ${styles.largeInput}`}
-              placeholder="Ex: Sabrina Meireles dos Santos"
-              autoComplete="name"
-            />
+          <div className={styles.nameFieldsContainer}>
+            <div className={`${styles.formGroup} ${styles.nameField}`}>
+              <label htmlFor="primeiroNome" className={styles.label}>Nome: <span className={styles.requiredAsterisk}>*</span></label>
+              <input
+                type="text"
+                id="primeiroNome"
+                name="primeiroNome"
+                value={formData.primeiroNome}
+                onChange={handleChange}
+                required
+                className={`${styles.input} ${styles.largeInput}`}
+                placeholder="Ex: Sabrina"
+                autoComplete="given-name"
+              />
+            </div>
+            <div className={`${styles.formGroup} ${styles.nameField}`}>
+              <label htmlFor="sobrenome" className={styles.label}>Sobrenome: <span className={styles.requiredAsterisk}>*</span></label>
+              <input
+                type="text"
+                id="sobrenome"
+                name="sobrenome"
+                value={formData.sobrenome}
+                onChange={handleChange}
+                required
+                className={`${styles.input} ${styles.largeInput}`}
+                placeholder="Ex: Meireles dos Santos"
+                autoComplete="family-name"
+              />
+            </div>
           </div>
           
           <div className={styles.formGroup}>

@@ -314,3 +314,13 @@
     padding: 0.4rem 0.8rem;
   }
 }
+
+.nameFieldsContainer {
+  display: flex;
+  gap: 1rem; /* Espaçamento entre os campos de nome */
+  width: 100%;
+}
+
+.nameField {
+  flex: 1; /* Faz com que cada campo de nome ocupe metade do espaço */
+}
