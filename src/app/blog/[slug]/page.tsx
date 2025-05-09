@@ -17,7 +17,7 @@ import { createClient } from '@/utils/supabase/server';
 
 export const revalidate = 3600;
 
-// Metadados dinâmicos (mantido como estava)
+// Metadados dinâmicos
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { slug } = await Promise.resolve(params);
   const post = await getBlogPostBySlug(slug);
@@ -97,7 +97,7 @@ async function PostContent({ slug }: { slug: string }) {
 
 // Componente Principal da Página
 export default async function PostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+  const { slug } = await Promise.resolve(params);
 
   // 1. Buscar dados do post
   const post = await getBlogPostBySlug(slug);
