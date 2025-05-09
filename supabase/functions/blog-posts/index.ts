@@ -39,7 +39,7 @@ interface BlogPostPublic {
   }[];
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Tratamento de preflight requests para CORS
   if (isPreflightRequest(req)) {
     return handleCors(req);
@@ -110,48 +110,52 @@ serve(async (req) => {
 
     // Verificar erro do banco
     if (error) {
-      console.error('Erro ao buscar posts do Supabase:', error.message);
+      console.error('[blog-posts] Erro ao buscar posts do Supabase:', error.message);
       return jsonResponse(null, false, 500, { code: 'database_error', message: 'Erro ao buscar posts do blog' });
     }
 
     // Buscar contagens de comentários para os posts retornados (otimizado)
-    const postIds = postsData?.map(post => post.id) ?? [];
+    const postIds = postsData?.map((post: any) => post.id) ?? [];
+    console.log('[blog-posts] postIds para buscar comentários:', JSON.stringify(postIds));
+
     const commentCountMap = new Map<string, number>();
+
     if (postIds.length > 0) {
-        const { data: commentCounts, error: countError } = await supabase
-          .from('blog_comments')
-          .select('post_id, id', { count: 'exact', head: true }) // Otimização: só precisamos da contagem
-          .in('post_id', postIds)
-          .eq('is_approved', true)
-          .then(response => ({ ...response, data: null, count: response.count })); // Ajuste para usar apenas o count
+        console.log('[blog-posts] Entrando no bloco para buscar contagens de comentários.');
 
-        if (!countError && typeof commentCounts === 'number') { // Verifica se a contagem foi retornada
-           // Aqui precisamos buscar os comentários individualmente ou adaptar a lógica
-           // A otimização acima com head:true só retorna a contagem total, não por post.
-           // Vamos reverter para buscar os IDs e contar no código por enquanto:
-           const { data: commentsData, error: commentsError } = await supabase
-              .from('blog_comments')
-              .select('post_id') // Seleciona apenas o post_id
-              .in('post_id', postIds)
-              .eq('is_approved', true);
+        const { data: commentsData, error: commentsError } = await supabase
+            .from('blog_comments')
+            .select('post_id') 
+            .in('post_id', postIds)
+            .eq('is_approved', true);
 
-           if (!commentsError && commentsData) {
-                commentsData.forEach(comment => {
-                    if (comment.post_id) {
-                        const currentCount = commentCountMap.get(comment.post_id) || 0;
-                        commentCountMap.set(comment.post_id, currentCount + 1);
-                    }
-                });
-           } else if (commentsError) {
-               console.error("Erro ao buscar comentários para contagem:", commentsError.message);
-           }
-        } else if (countError) {
-            console.error("Erro ao obter contagem de comentários:", countError.message);
+        console.log('[blog-posts] Resultado da query de comentários - commentsData:', JSON.stringify(commentsData)); 
+        console.log('[blog-posts] Resultado da query de comentários - commentsError:', JSON.stringify(commentsError)); 
+
+        if (commentsError) {
+            console.error("[blog-posts] Erro explícito ao buscar comentários para contagem:", commentsError.message); 
+        } else if (!commentsData || commentsData.length === 0) {
+            console.warn("[blog-posts] Nenhum dado de comentário retornado (commentsData está vazio ou nulo)."); 
+        } else {
+            console.log(`[blog-posts] Processando ${commentsData.length} registros de comentários.`); 
+            commentsData.forEach((comment: any, index: number) => { 
+                console.log(`[blog-posts] Comentário ${index}:`, JSON.stringify(comment)); 
+                if (comment && comment.post_id) { 
+                    const currentCount = commentCountMap.get(comment.post_id) || 0;
+                    commentCountMap.set(comment.post_id, currentCount + 1);
+                } else {
+                    console.warn(`[blog-posts] Comentário ${index} sem post_id válido:`, JSON.stringify(comment)); 
+                }
+            });
         }
+    } else {
+        console.log('[blog-posts] Nenhum post ID encontrado, pulando busca de comentários.'); 
     }
 
+    console.log('[blog-posts] commentCountMap final:', JSON.stringify(Object.fromEntries(commentCountMap))); 
+
     // Formatar os posts para a resposta
-    const formattedPosts: BlogPostPublic[] = postsData?.map(post =>
+    const formattedPosts: BlogPostPublic[] = postsData?.map((post: any) =>
       formatPostForResponse(post, commentCountMap) // Passa o mapa de contagens
     ) ?? [];
 
