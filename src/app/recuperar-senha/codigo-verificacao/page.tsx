@@ -12,12 +12,11 @@ function PasswordResetForm() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const recoveryCode = searchParams.get("code"); // O Supabase usa 'code' como query param aqui
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [showPasswordInput, setShowPasswordInput] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -25,69 +24,79 @@ function PasswordResetForm() {
 
   useEffect(() => {
     let isMounted = true;
-    console.log("Effect triggered. Recovery code from URL:", recoveryCode);
+    setInitialLoading(true); 
 
-    // Se não houver código na URL, o link é inválido para esta página.
-    if (!recoveryCode) {
+    const codeFromUrl = searchParams.get("code");
+    console.log("Código de recuperação inicial da URL:", codeFromUrl);
+
+    if (!codeFromUrl) {
       if (isMounted) {
-        setMessage({ type: 'error', text: 'Link de recuperação inválido. Nenhum código fornecido.' });
+        setMessage({ type: 'error', text: 'Link de recuperação inválido: nenhum código fornecido.' });
         setShowPasswordInput(false);
         setInitialLoading(false);
       }
       return;
     }
 
+    const checkUserAndProceed = async () => {
+      // O Supabase JS SDK deve tentar trocar o 'code' por uma sessão automaticamente.
+      // Aguardamos um pouco para esse processamento ocorrer antes de chamar getUser().
+      // Isso é uma heurística; o tempo ideal pode variar.
+      await new Promise(resolve => setTimeout(resolve, 500)); // 500ms de delay
+
+      if (!isMounted) return;
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (!isMounted) return; // Checar de novo após o await
+
+      if (userError) {
+        console.error("Erro ao buscar usuário após link de recuperação:", userError);
+        setMessage({ type: 'error', text: 'Erro ao processar o link de recuperação. Tente novamente.' });
+        setShowPasswordInput(false);
+      } else if (user) {
+        console.log("Usuário encontrado após link de recuperação:", user.id, "Email:", user.email);
+        // Se chegamos aqui com um usuário E o code estava na URL, assumimos que o link é válido.
+        // O evento PASSWORD_RECOVERY pode ou não ter disparado, mas a sessão está estabelecida.
+        setMessage(null); 
+        setShowPasswordInput(true);
+        router.replace(window.location.pathname, { scroll: false }); // Limpar ?code=
+      } else {
+        console.log("Nenhum usuário encontrado após processar link de recuperação com código.");
+        setMessage({ type: 'error', text: 'O link de recuperação é inválido, expirado ou já foi utilizado. Por favor, solicite um novo.' });
+        setShowPasswordInput(false);
+      }
+      setInitialLoading(false);
+    };
+
+    checkUserAndProceed();
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
-      console.log("Auth event:", event, "Session:", session);
-
-      if (event === 'PASSWORD_RECOVERY') {
-        console.log("Evento PASSWORD_RECOVERY recebido. Sessão estabelecida para redefinição.");
-        setMessage(null); // Limpar mensagens anteriores
+      console.log("Auth event (pós verificação inicial):", event, "Session:", session);
+      if (event === "SIGNED_OUT") {
+          setMessage({ type: 'info', text: 'Sua sessão foi encerrada. Para redefinir a senha, solicite um novo link.' });
+          setShowPasswordInput(false);
+          setInitialLoading(false); // Para garantir que não fique em loop de loading
+      }
+      // Se o evento PASSWORD_RECOVERY ocorrer (pode acontecer depois do checkUserAndProceed dependendo do timing)
+      // e ainda não mostramos o input, mostramos agora.
+      if (event === "PASSWORD_RECOVERY" && !showPasswordInput && isMounted){
+        console.log("Evento PASSWORD_RECOVERY tardio detectado.")
+        setMessage(null);
         setShowPasswordInput(true);
         setInitialLoading(false);
-        // É uma boa prática limpar o código da URL após ser processado
-        // para evitar que seja usado novamente ou fique visível.
         router.replace(window.location.pathname, { scroll: false });
-      } else if (session && event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN' && event !== 'USER_UPDATED') {
-        // Se houver uma sessão, mas não for de PASSWORD_RECOVERY (e não for um evento genérico de sessão já existente)
-        // Isso pode indicar que o usuário já está logado normalmente, o que não deveria acontecer se o teste for em aba anônima.
-        // Ou o token de recuperação era inválido e não resultou no evento PASSWORD_RECOVERY.
-        // Se o initialLoading ainda for true, significa que estamos na primeira carga e esperávamos PASSWORD_RECOVERY.
-        if (initialLoading) {
-            console.log("Sessão existente, mas não é PASSWORD_RECOVERY. Evento:", event);
-            setMessage({ type: 'error', text: 'Este link parece ser inválido ou já foi utilizado. Por favor, solicite um novo link de recuperação.' });
-            setShowPasswordInput(false);
-            setInitialLoading(false);
-        }
-      } else if (!session && initialLoading && recoveryCode) {
-        // Se não há sessão, mas havia um recoveryCode e ainda estamos no loading inicial,
-        // o token pode ser inválido e não resultou no evento PASSWORD_RECOVERY.
-        console.log("Sem sessão após tentativa de recuperação com code.");
-        setMessage({ type: 'error', text: 'O link de recuperação é inválido, expirado ou já foi utilizado.' });
-        setShowPasswordInput(false);
-        setInitialLoading(false);
       }
     });
-    
-    // Fallback para o caso de não haver evento PASSWORD_RECOVERY após um tempo, mas o code existia.
-    // Isso é para cobrir casos onde o listener pode não capturar o evento como esperado inicialmente.
-    const timer = setTimeout(() => {
-        if (isMounted && initialLoading && recoveryCode && !showPasswordInput) {
-            console.log("Timeout: Evento PASSWORD_RECOVERY não recebido, considerando link inválido.");
-            setMessage({ type: 'error', text: 'Falha ao processar o link de recuperação. Pode ser inválido ou expirado.' });
-            setShowPasswordInput(false);
-            setInitialLoading(false);
-        }
-    }, 2500); // Aumentar um pouco o timeout para dar mais margem ao Supabase SDK
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
       authListener.subscription.unsubscribe();
     };
-  // Adicionado recoveryCode como dependência para reavaliar se ele mudar (improvável, mas seguro)
-  }, [supabase, router, recoveryCode, initialLoading, showPasswordInput]); 
+  // searchParams é estável, mas codeFromUrl garante re-execução se a URL mudar com novo code.
+  // supabase e router são estáveis.
+  }, [supabase, router, searchParams]); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,9 +152,9 @@ function PasswordResetForm() {
             borderRadius: '4px',
             textAlign: 'center',
             fontSize: '0.9rem',
-            border: message.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb',
-            backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
-            color: message.type === 'success' ? '#155724' : '#721c24',
+            border: message.type === 'success' ? '1px solid #c3e6cb' : message.type === 'error' ? '1px solid #f5c6cb' : '1px solid #f8d7da',
+            backgroundColor: message.type === 'success' ? '#d4edda' : message.type === 'error' ? '#f8d7da' : '#f8d7da',
+            color: message.type === 'success' ? '#155724' : message.type === 'error' ? '#721c24' : '#842029',
           }}
         >
           {message.text}
