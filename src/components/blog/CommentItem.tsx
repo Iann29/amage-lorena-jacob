@@ -1,7 +1,6 @@
 "use client";
 
 import Image from 'next/image';
-import { useState } from 'react';
 import LikeButton from './LikeButton';
 import type { CommentData } from './CommentSection';
 

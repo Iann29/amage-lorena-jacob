@@ -49,7 +49,7 @@ interface BlogPostCardProps {
 }
 
 export default function BlogPostCard({ post }: BlogPostCardProps) {
-  const [likes, setLikes] = useState(post.like_count);
+  // const [likes, setLikes] = useState(post.like_count);
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
