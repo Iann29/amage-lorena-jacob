@@ -2,16 +2,27 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
+import { createClient } from '@/utils/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 const Header = () => {
+  const supabase = createClient();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { openContatoModal } = useModal();
   const { scrollY } = useScroll();
+
+  // Estados para autenticação e perfil do usuário
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<{ nome: string; sobrenome: string; iniciais: string } | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
   
   // Valores para transformações baseadas no scroll - com transições mais suaves
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
@@ -23,14 +34,114 @@ const Header = () => {
     ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
   
-  // Fechar o menu ao trocar de página - movido para antes da verificação condicional
+  // Fechar o menu ao trocar de página
   useEffect(() => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
-  }, [pathname, isMenuOpen]);
-  
-  // A lógica de exibição/ocultação do Header foi movida para o template.tsx principal
+  }, [pathname]);
+
+  // Efeito para autenticação e busca de perfil
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoadingAuth(true);
+
+    const fetchSessionAndProfile = async () => {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError && isMounted) {
+        console.error("Header: Erro ao buscar sessão", sessionError);
+        setCurrentUser(null);
+        setUserProfile(null);
+        setIsLoadingAuth(false);
+        return;
+      }
+
+      const user = session?.user ?? null;
+      if (isMounted) setCurrentUser(user);
+
+      if (user && isMounted) {
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('nome, sobrenome')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Header: Erro ao buscar perfil do usuário", profileError);
+          // Define um perfil padrão ou lida com o erro como preferir
+          setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais: (user.email?.charAt(0) || 'U').toUpperCase() });
+        } else if (profile) {
+          const nome = profile.nome || '';
+          const sobrenome = profile.sobrenome || '';
+          const iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase() || (user.email?.charAt(0) || 'U').toUpperCase();
+          setUserProfile({ nome, sobrenome, iniciais });
+        }
+      } else if (isMounted) {
+        setUserProfile(null);
+      }
+      if (isMounted) setIsLoadingAuth(false);
+    };
+
+    fetchSessionAndProfile();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
+      const user = session?.user ?? null;
+      setCurrentUser(user);
+      if (user) {
+        // Refetch profile on auth change if user logs in
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('nome, sobrenome')
+          .eq('user_id', user.id)
+          .single();
+        if (profile && !profileError) {
+          const nome = profile.nome || '';
+          const sobrenome = profile.sobrenome || '';
+          const iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase() || (user.email?.charAt(0) || 'U').toUpperCase();
+          setUserProfile({ nome, sobrenome, iniciais });
+        } else {
+          setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais: (user.email?.charAt(0) || 'U').toUpperCase() });
+        }
+      } else {
+        setUserProfile(null); // Clear profile if user logs out
+        setIsUserDropdownOpen(false); // Fechar dropdown no logout
+      }
+      setIsLoadingAuth(false); // Certifique-se de que o loading termina aqui também
+    });
+
+    return () => {
+      isMounted = false;
+      authListener?.subscription.unsubscribe();
+    };
+  }, [supabase, router]);
+
+  // Efeito para fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+    if (isUserDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserDropdownOpen]);
+
+  const handleLogout = async () => {
+    setIsUserDropdownOpen(false); // Fechar dropdown primeiro
+    await supabase.auth.signOut();
+    setCurrentUser(null);
+    setUserProfile(null);
+    router.push('/'); // Redireciona para a home após o logout
+    // router.refresh(); // Opcional, para forçar refresh do estado do servidor
+  };
 
   return (
     <motion.header 
@@ -145,30 +256,79 @@ const Header = () => {
         >
           <div className="flex-1"></div> {/* Espaçador para empurrar conteúdo para direita */}
           
-          {/* Área de "Minha Conta" (estilo da segunda imagem) */}
-          <motion.div 
-            className="flex flex-col items-center mr-32"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link href="/autenticacao" className="flex flex-col items-center">
-              <motion.div
-                whileHover={{ y: -2 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Image 
-                  src="/assets/perfilIcon.png" 
-                  alt="Minha Conta" 
-                  width={40} 
-                  height={40}
-                  className="mb-0.5"
-                  unoptimized
-                  style={{ width: '40px', height: '40px' }}
-                />
-              </motion.div>
-              <span className="text-[#365F71] text-xs font-['Poppins']">Minha Conta</span>
-            </Link>
-          </motion.div>
+          {/* --- ÁREA DE AUTENTICAÇÃO MODIFICADA --- */}
+          {isLoadingAuth ? (
+            <div className="flex flex-col items-center mr-32">
+               <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
+               <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ) : currentUser && userProfile ? (
+            // Usuário Logado
+            <div className="relative mr-32" ref={userDropdownRef}>
+              <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
+                <motion.div 
+                  className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium mb-0.5 border border-purple-300"
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  {userProfile.iniciais || 'U'}
+                </motion.div>
+                <span className="text-[#365F71] text-xs font-['Poppins'] truncate max-w-[100px]">
+                  Olá, {userProfile.nome.split(' ')[0] || 'Usuário'}!
+                </span>
+              </button>
+              <AnimatePresence>
+                {isUserDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200"
+                  >
+                    <Link 
+                      href="/minha-conta" 
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']"
+                    >
+                      Minha Conta
+                    </Link>
+                    <button 
+                      onClick={handleLogout} 
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']"
+                    >
+                      Sair
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            // Usuário Deslogado (original)
+            <motion.div 
+              className="flex flex-col items-center mr-32"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link href="/autenticacao" className="flex flex-col items-center">
+                <motion.div
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  <Image 
+                    src="/assets/perfilIcon.png" 
+                    alt="Minha Conta" 
+                    width={40} 
+                    height={40}
+                    className="mb-0.5"
+                    unoptimized
+                    style={{ width: '40px', height: '40px' }}
+                  />
+                </motion.div>
+                <span className="text-[#365F71] text-xs font-['Poppins']">Minha Conta</span>
+              </Link>
+            </motion.div>
+          )}
+          {/* --- FIM DA ÁREA DE AUTENTICAÇÃO MODIFICADA --- */}
           
           {/* Área de "Siga-me nas redes sociais" */}
           <motion.div 
@@ -243,6 +403,8 @@ const Header = () => {
         {isMenuOpen && (
           <motion.div 
             className="lg:hidden mt-1 py-2 border-t border-gray-200 px-4"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
@@ -288,7 +450,7 @@ const Header = () => {
                   openContatoModal();
                   setIsMenuOpen(false);
                 }} 
-                className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none`}
+                className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none text-left w-full`}
               >
                 Contato
               </button>
@@ -336,16 +498,32 @@ const Header = () => {
               </div>
               
               {/* Minha Conta (mobile - adaptado para o novo estilo) */}
-              <Link href="/autenticacao" className="flex flex-col items-center">
-                <Image 
-                  src="/assets/perfilIcon.png" 
-                  alt="Minha Conta" 
-                  width={18} 
-                  height={18}
-                  className="w-4.5 h-4.5 mb-0.5"
-                />
-                <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
-              </Link>
+              {isLoadingAuth ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-4.5 h-4.5 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
+                  <div className="h-2 w-12 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ) : currentUser && userProfile ? (
+                 <div className="relative" ref={userDropdownRef}>
+                    <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
+                        <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-xs mb-0.5 border border-purple-300">
+                            {userProfile.iniciais || 'U'}
+                        </div>
+                        <span className="text-[#365F71] text-[10px] font-['Poppins']">Olá, {userProfile.nome.split(' ')[0]}</span>
+                    </button>
+                 </div>
+              ) : (
+                <Link href="/autenticacao" className="flex flex-col items-center">
+                  <Image 
+                    src="/assets/perfilIcon.png" 
+                    alt="Minha Conta" 
+                    width={18} 
+                    height={18}
+                    className="w-4.5 h-4.5 mb-0.5"
+                  />
+                  <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
+                </Link>
+              )}
             </div>
           </nav>
           </motion.div>
