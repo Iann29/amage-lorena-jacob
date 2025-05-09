@@ -28,7 +28,7 @@ export default function LoadingWrapper({ children }: { children: React.ReactNode
         
         return () => clearTimeout(timer);
       }
-    } catch (_) {
+    } catch {
       // Em caso de erro (como em SSR), apenas desativa o loader após 2 segundos
       const timer = setTimeout(() => {
         setIsLoading(false);

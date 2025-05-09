@@ -32,11 +32,6 @@ export default function InfoCard({
     return bgColor === "brown" ? "text-white" : "text-black";
   };
 
-  // Obter a cor do ícone interno (não mais usado)
-  const getIconBgColor = () => {
-    return bgColor === "yellow" ? "bg-white" : "bg-[#8C785B]";
-  };
-
   return (
     <div 
       className={`flex flex-col h-full relative ${className}`}

@@ -68,11 +68,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   const [viewCount, setViewCount] = useState<number>(initialViewCount || 0);
   const [commentCount, setCommentCount] = useState<number>(initialCommentCount || 0);
   
-  // Exemplo de função para buscar estatísticas do post no futuro
-  // No futuro, isso chamará o Supabase
-  // Removidos os parâmetros não utilizados diretamente na implementação atual
-  // Parâmetros serão reativados quando a integração com o Supabase for implementada
-  const fetchPostStats = async (/*postId: string | number | undefined, postSlug: string | undefined*/): Promise<PostStats> => {
+  // Efeito para buscar estatísticas quando o componente montar
+  // Isso será útil quando integrarmos com o Supabase
+  useEffect(() => {
     // Função mockada - no futuro, será substituída por uma chamada real ao Supabase
     // Exemplo de como será a consulta no futuro:
     // const { data, error } = await supabase
@@ -80,40 +78,36 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
     //   .select('views, comments')
     //   .eq('post_id', postId || postSlug)
     //   .single()
-    
-    // Simula uma chamada assíncrona
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Retorna os valores iniciais por enquanto
-        resolve({
-          views: initialViewCount || 0,
-          comments: initialCommentCount || 0
-        });
-      }, 100);
-    });
-  };
+    const fetchPostStats = async (/*postId: string | number | undefined, postSlug: string | undefined*/): Promise<PostStats> => {
+      // Simula uma chamada assíncrona
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          // Retorna os valores iniciais por enquanto
+          resolve({
+            views: initialViewCount || 0,
+            comments: initialCommentCount || 0
+          });
+        }, 100);
+      });
+    };
 
-  // Efeito para buscar estatísticas quando o componente montar
-  // Isso será útil quando integrarmos com o Supabase
-  useEffect(() => {
     // Só tentaria buscar se tivermos um ID ou slug e não tivermos valores iniciais
     if ((id || slug) && (!initialViewCount || !initialCommentCount)) {
-      const loadStats = async () => {
-        try {
-          // Parâmetros comentados pois não são usados na implementação atual
-          const stats = await fetchPostStats(/*id, slug*/);
-          setViewCount(stats.views);
-          setCommentCount(stats.comments);
-        } catch (error) {
-          console.error('Erro ao carregar estatísticas do post:', error);
-          // Mantém os valores iniciais em caso de erro
-        }
-      };
-      
-      // Comentado para não executar agora, será habilitado quando conectar ao Supabase
-      // loadStats();
+      // A função loadStats foi removida pois a chamada estava comentada e ela não era utilizada.
+      // Se a lógica de carregamento for reativada, será necessário redefinir e chamar loadStats aqui.
+      // Exemplo de como seria:
+      // const loadAndSetStats = async () => {
+      //   try {
+      //     const stats = await fetchPostStats(/*id, slug*/);
+      //     setViewCount(stats.views);
+      //     setCommentCount(stats.comments);
+      //   } catch (error) {
+      //     console.error('Erro ao carregar estatísticas do post:', error);
+      //   }
+      // };
+      // loadAndSetStats();
     }
-  }, [id, slug, initialViewCount, initialCommentCount, fetchPostStats]);
+  }, [id, slug, initialViewCount, initialCommentCount]); // fetchPostStats foi removida das dependências pois agora está definida dentro do useEffect
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3" style={{ maxWidth: '380px', height: '450px' }}>
