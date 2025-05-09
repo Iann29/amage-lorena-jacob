@@ -7,109 +7,87 @@ import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./styles.module.css";
 import { createClient } from '@/utils/supabase/client';
 
-// Componente interno para ler o parâmetro 'code' e gerenciar o estado inicial
-function PasswordResetCore() {
+// Componente principal que contém a lógica
+function PasswordResetForm() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const recoveryToken = searchParams.get("code"); // O Supabase pode usar 'code' ou similar
+  const recoveryCode = searchParams.get("code"); // O Supabase usa 'code' como query param aqui
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const [isValidToken, setIsValidToken] = useState<boolean | null>(null); // null = verificando, true = válido, false = inválido
 
   useEffect(() => {
     let isMounted = true;
-    // Flag para controlar se a checagem inicial baseada no recoveryToken já foi feita.
-    // Isso ajuda a evitar que a lógica de "token inválido" seja executada prematuramente
-    // se o evento PASSWORD_RECOVERY demorar um pouco para ser emitido pelo SDK.
-    let initialCheckDone = false;
+    console.log("Effect triggered. Recovery code from URL:", recoveryCode);
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Se não houver código na URL, o link é inválido para esta página.
+    if (!recoveryCode) {
+      if (isMounted) {
+        setMessage({ type: 'error', text: 'Link de recuperação inválido. Nenhum código fornecido.' });
+        setShowPasswordInput(false);
+        setInitialLoading(false);
+      }
+      return;
+    }
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
-
-      console.log("Auth Event:", event, "Session:", session, "Current isValidToken:", isValidToken);
+      console.log("Auth event:", event, "Session:", session);
 
       if (event === 'PASSWORD_RECOVERY') {
-        console.log("PASSWORD_RECOVERY event detected.");
-        setIsValidToken(true);
-        initialCheckDone = true; 
-        // Limpar o ?code da URL após o processamento bem-sucedido
-        // Isso previne que o mesmo link seja reprocessado se a página for recarregada com o code ainda na URL.
-        // Também melhora a aparência da URL.
-        const currentPath = window.location.pathname;
-        router.replace(currentPath, { scroll: false }); 
-        return;
-      }
-
-      // Se já determinamos o estado do token (válido ou inválido) e não é um logout, não fazemos mais nada.
-      if (isValidToken !== null && event !== 'SIGNED_OUT') {
-        return;
-      }
-
-      if (event === 'SIGNED_OUT') {
-        console.log("SIGNED_OUT event detected.");
-        setIsValidToken(false); 
-        // Poderia adicionar uma mensagem se relevante, mas geralmente o usuário já saiu.
-        // setMessage({ type: 'error', text: 'Sessão encerrada.' });
-        initialCheckDone = true;
-        return;
-      }
-      
-      // Lógica para ser executada apenas uma vez na carga inicial ou se o estado do token ainda é null
-      if (isValidToken === null && !initialCheckDone) {
-        if (recoveryToken) {
-          // Se temos um recoveryToken (code) na URL, mas o evento PASSWORD_RECOVERY ainda não ocorreu.
-          // Damos um pequeno tempo para o evento ocorrer. Se não ocorrer, consideramos inválido.
-          // Esta é uma heurística, o ideal é confiar no PASSWORD_RECOVERY.
-          // Se o PASSWORD_RECOVERY não vier logo após o INITIAL_SESSION (ou uma rápida sucessão de eventos),
-          // pode ser que o token seja inválido ou já usado.
-          console.log("Initial check: recoveryToken present, waiting for PASSWORD_RECOVERY event or timeout.");
-          // Não setamos isValidToken aqui imediatamente, esperamos o evento ou um timeout implícito.
-          // Se após os eventos iniciais do onAuthStateChange, isValidToken ainda for null e recoveryToken existia,
-          // então o evento PASSWORD_RECOVERY não ocorreu.
-        } else {
-          // Não há recoveryToken na URL.
-          console.log("Initial check: No recoveryToken in URL.");
-          setMessage({ type: 'error', text: 'Nenhum código de recuperação encontrado. Acesse esta página através do link enviado para seu e-mail.'});
-          setIsValidToken(false);
-          initialCheckDone = true;
+        console.log("Evento PASSWORD_RECOVERY recebido. Sessão estabelecida para redefinição.");
+        setMessage(null); // Limpar mensagens anteriores
+        setShowPasswordInput(true);
+        setInitialLoading(false);
+        // É uma boa prática limpar o código da URL após ser processado
+        // para evitar que seja usado novamente ou fique visível.
+        router.replace(window.location.pathname, { scroll: false });
+      } else if (session && event !== 'INITIAL_SESSION' && event !== 'SIGNED_IN' && event !== 'USER_UPDATED') {
+        // Se houver uma sessão, mas não for de PASSWORD_RECOVERY (e não for um evento genérico de sessão já existente)
+        // Isso pode indicar que o usuário já está logado normalmente, o que não deveria acontecer se o teste for em aba anônima.
+        // Ou o token de recuperação era inválido e não resultou no evento PASSWORD_RECOVERY.
+        // Se o initialLoading ainda for true, significa que estamos na primeira carga e esperávamos PASSWORD_RECOVERY.
+        if (initialLoading) {
+            console.log("Sessão existente, mas não é PASSWORD_RECOVERY. Evento:", event);
+            setMessage({ type: 'error', text: 'Este link parece ser inválido ou já foi utilizado. Por favor, solicite um novo link de recuperação.' });
+            setShowPasswordInput(false);
+            setInitialLoading(false);
         }
+      } else if (!session && initialLoading && recoveryCode) {
+        // Se não há sessão, mas havia um recoveryCode e ainda estamos no loading inicial,
+        // o token pode ser inválido e não resultou no evento PASSWORD_RECOVERY.
+        console.log("Sem sessão após tentativa de recuperação com code.");
+        setMessage({ type: 'error', text: 'O link de recuperação é inválido, expirado ou já foi utilizado.' });
+        setShowPasswordInput(false);
+        setInitialLoading(false);
       }
     });
-
-    // Se após a inscrição e os eventos iniciais, e temos um recovery token mas isValidToken não foi setado para true pelo evento,
-    // então consideramos o token inválido. Isso é um fallback.
-    // Idealmente, o evento PASSWORD_RECOVERY cuidaria disso.
-    // Esta verificação é feita fora do listener para capturar o estado após os eventos iniciais.
-    // Usamos um timeout para dar chance ao evento PASSWORD_RECOVERY de ser processado.
-    const fallbackTimer = setTimeout(() => {
-        if (isMounted && isValidToken === null && recoveryToken) {
-            console.log("Fallback: No PASSWORD_RECOVERY event, marking token as invalid.");
-            setMessage({ type: 'error', text: 'Link de recuperação inválido ou expirado (fallback). Por favor, solicite um novo link.'});
-            setIsValidToken(false);
+    
+    // Fallback para o caso de não haver evento PASSWORD_RECOVERY após um tempo, mas o code existia.
+    // Isso é para cobrir casos onde o listener pode não capturar o evento como esperado inicialmente.
+    const timer = setTimeout(() => {
+        if (isMounted && initialLoading && recoveryCode && !showPasswordInput) {
+            console.log("Timeout: Evento PASSWORD_RECOVERY não recebido, considerando link inválido.");
+            setMessage({ type: 'error', text: 'Falha ao processar o link de recuperação. Pode ser inválido ou expirado.' });
+            setShowPasswordInput(false);
+            setInitialLoading(false);
         }
-        // Se não havia recoveryToken, já foi tratado no listener ou na checagem síncrona abaixo.
-        else if (isMounted && isValidToken === null && !recoveryToken){
-             console.log("Fallback: No recoveryToken, already handled or should be.");
-             // A mensagem de "Nenhum código..." já deve ter sido setada.
-             // Apenas garantimos que isValidToken não fique como null.
-             if(!message) setMessage({ type: 'error', text: 'Link de recuperação inválido (sem token).' });
-             setIsValidToken(false); 
-        }
-    }, 1500); // Ajuste o tempo se necessário, 1.5s pode ser suficiente.
+    }, 2500); // Aumentar um pouco o timeout para dar mais margem ao Supabase SDK
 
     return () => {
       isMounted = false;
-      clearTimeout(fallbackTimer);
+      clearTimeout(timer);
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, recoveryToken]); // Removido isValidToken para controlar a lógica de "primeira vez"
+  // Adicionado recoveryCode como dependência para reavaliar se ele mudar (improvável, mas seguro)
+  }, [supabase, router, recoveryCode, initialLoading, showPasswordInput]); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,17 +116,18 @@ function PasswordResetCore() {
       setMessage({ type: 'success', text: 'Senha atualizada com sucesso! Você será redirecionado para fazer login.' });
       setPassword('');
       setConfirmPassword('');
+      setShowPasswordInput(false); // Esconder formulário após sucesso
       setTimeout(() => {
         router.push('/login');
       }, 3000);
     }
   };
 
-  if (isValidToken === null) { // Ainda verificando
+  if (initialLoading) {
     return (
-      <div className={styles.container} style={{ justifyContent: 'center', alignItems: 'center'}}>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="ml-3 text-gray-700">Verificando link...</p>
+      <div className={styles.loadingContainer} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '200px'}}>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        <p className="ml-3 mt-3 text-gray-700">Verificando link de recuperação...</p>
       </div>
     );
   }
@@ -159,83 +138,78 @@ function PasswordResetCore() {
         <div 
           className={styles.messageBox} 
           style={{
-            padding: '1rem',
-            marginBottom: '1rem',
+            padding: '0.8rem 1rem',
+            margin: '1rem 0',
             borderRadius: '4px',
             textAlign: 'center',
+            fontSize: '0.9rem',
             border: message.type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb',
-            backgroundColor: message.type === 'success' ? 'rgba(210, 240, 210, 0.9)' : 'rgba(255, 230, 230, 0.9)',
+            backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
             color: message.type === 'success' ? '#155724' : '#721c24',
-            position: 'absolute', // Para sobrepor o conteúdo se necessário
-            top: '80px', // Ajuste conforme o header
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 20,
-            minWidth: '300px'
           }}
         >
           {message.text}
         </div>
       )}
 
-      {isValidToken && message?.type !== 'success' && (
-        <form onSubmit={handleSubmit} className={styles.form} style={{ marginTop: message ? '60px' : '0'}}> {/* Ajuste de margem se houver mensagem */}
-          <p className={styles.instructions} style={{marginBottom: '1.5rem', textAlign: 'center'}}>
+      {showPasswordInput && message?.type !== 'success' && (
+        <form onSubmit={handleSubmit} className={styles.form} style={{width: '100%'}}>
+          <p className={styles.instructions} style={{marginBottom: '1.5rem', textAlign: 'center', fontSize: '0.95rem'}}>
             Crie uma nova senha para sua conta.
           </p>
+          {/* Campos de senha aqui - reutilizando a estrutura que você já tem, se possível */}
+          {/* Exemplo: */}
           <div className={styles.inputGroup} style={{position: 'relative'}}>
-            <label htmlFor="password" className={styles.label}>
-              Nova Senha
-            </label>
+            <label htmlFor="password" className={styles.label}>Nova Senha</label>
             <input
               type={showPassword ? "text" : "password"}
               id="password"
-              placeholder="Digite sua nova senha"
-              className={styles.input}
+              name="password"
+              className={styles.input} // Use a classe do seu CSS module
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite sua nova senha"
               required
               disabled={isUpdating}
             />
-            <button 
-              type="button" 
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ position: 'absolute', right: '10px', top: 'calc(50% + 12px)', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer'}}
-              disabled={isUpdating}
-              aria-label="Mostrar/Esconder senha"
+             <button 
+                type="button" 
+                onClick={() => setShowPassword(prev => !prev)}
+                className={styles.passwordToggle} // Use a classe do seu CSS module se tiver
+                style={{ position: 'absolute', right: '10px', top: 'calc(50% + 12px)', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer'}}
+                aria-label="Mostrar/Esconder senha"
+                disabled={isUpdating}
             >
-              {showPassword ? '🙈' : '👁️'}
+                {showPassword ? '🙈' : '👁️'}
             </button>
           </div>
-
           <div className={styles.inputGroup} style={{position: 'relative', marginTop: '1rem'}}>
-            <label htmlFor="confirmPassword" className={styles.label}>
-              Confirmar Nova Senha
-            </label>
+            <label htmlFor="confirmPassword" className={styles.label}>Confirmar Nova Senha</label>
             <input
               type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
-              placeholder="Confirme sua nova senha"
-              className={styles.input}
+              name="confirmPassword"
+              className={styles.input} // Use a classe do seu CSS module
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirme sua nova senha"
               required
               disabled={isUpdating}
             />
-            <button 
-              type="button" 
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={{ position: 'absolute', right: '10px', top: 'calc(50% + 12px)', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer'}}
-              disabled={isUpdating}
-              aria-label="Mostrar/Esconder confirmação de senha"
+             <button 
+                type="button" 
+                onClick={() => setShowConfirmPassword(prev => !prev)}
+                className={styles.passwordToggle} // Use a classe do seu CSS module se tiver
+                style={{ position: 'absolute', right: '10px', top: 'calc(50% + 12px)', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer'}}
+                aria-label="Mostrar/Esconder confirmação de senha"
+                disabled={isUpdating}
             >
-              {showConfirmPassword ? '🙈' : '👁️'}
+                {showConfirmPassword ? '🙈' : '👁️'}
             </button>
           </div>
-          
           <button 
             type="submit" 
-            className={styles.submitButton}
+            className={styles.submitButton} // Use a classe do seu CSS module
             disabled={isUpdating || !password || !confirmPassword}
             style={{marginTop: '2rem'}}
           >
@@ -243,26 +217,37 @@ function PasswordResetCore() {
           </button>
         </form>
       )}
-      {/* Se !isValidToken e uma mensagem de erro já foi setada, ela será mostrada. 
-          Não precisamos de um else explícito aqui para mostrar o erro, 
-          pois a mensagem já é exibida condicionalmente no topo. */}
     </>
   );
 }
 
+// Componente da página que envolve o Suspense e o PasswordResetForm
 export default function CodigoVerificacaoPage() {
-  // A UI principal da página, como logo e imagem de fundo, pode ficar aqui.
-  // O Suspense é necessário porque PasswordResetCore usa useSearchParams.
   return (
     <div className={styles.container}>
       <Link 
         href="/login" 
-        className={styles.backButton} // Reutilizando estilo do backButton
-        style={{
+        className={styles.backButton}
+        // Estilos do botão voltar como antes
+         style={{
           position: "absolute",
           top: "1.5rem",
           left: "1.5rem",
-          // ... (outros estilos do botão voltar, se necessário)
+          display: "flex",
+          alignItems: "center",
+          gap: "0.4rem",
+          color: "#3068AD",
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          padding: "0.4rem 0.8rem",
+          borderRadius: "6px",
+          fontFamily: "var(--font-museo-sans)",
+          fontSize: "0.85rem",
+          fontWeight: 500,
+          textDecoration: "none",
+          zIndex: 10,
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
+          transition: "all 0.25s ease",
+          border: "1px solid rgba(48, 104, 173, 0.08)"
         }}
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -281,22 +266,22 @@ export default function CodigoVerificacaoPage() {
             priority
           />
         </div>
-
         <div className={styles.mainContent}>
           <div className={styles.textCenter}>
-            {/* O título pode mudar dependendo se o token é válido ou não, 
-                mas a lógica principal de UI/formulário está no PasswordResetCore */} 
-            <h1 className={styles.title}>Redefinir Sua Senha</h1> 
+            <h1 className={styles.title}>Redefinir Sua Senha</h1>
+             <p className={styles.subtitle} style={{marginTop: '0.5rem', marginBottom: '1.5rem'}}>
+                Se o link de recuperação for válido, você poderá criar uma nova senha abaixo.
+            </p>
           </div>
-          
           <div className={styles.content} style={{ display: 'flex', justifyContent: 'center'}}>
-            <div className={styles.formSection} style={{maxWidth: '450px'}}>
+            <div className={styles.formSection} style={{maxWidth: '450px', width: '100%'}}>
               <Suspense fallback={
-                <div style={{display: 'flex', justifyContent:'center', alignItems:'center', height: '100px'}}>
+                <div style={{display: 'flex',flexDirection: 'column', justifyContent:'center', alignItems:'center', minHeight: '150px'}}>
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  <p className="ml-3 mt-3 text-gray-600 text-sm">Verificando...</p>
                 </div>
               }>
-                <PasswordResetCore />
+                <PasswordResetForm />
               </Suspense>
             </div>
           </div>
