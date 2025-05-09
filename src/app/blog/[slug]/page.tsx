@@ -97,7 +97,7 @@ async function PostContent({ slug }: { slug: string }) {
 
 // Componente Principal da Página
 export default async function PostPage({ params }: { params: { slug: string } }) {
-  const { slug } = await Promise.resolve(params);
+  const { slug } = params;
 
   // 1. Buscar dados do post
   const post = await getBlogPostBySlug(slug);
