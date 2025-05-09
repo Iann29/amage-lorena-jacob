@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import styles from "./styles.module.css";
 
 // Componente separado para lidar com parâmetros da URL
@@ -19,8 +19,6 @@ function EmailParamReader({ onEmailRead }: { onEmailRead: (email: string) => voi
 }
 
 export default function CodigoVerificacaoPage() {
-  const router = useRouter();
-  
   // Refs para os inputs de código
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -107,7 +105,7 @@ export default function CodigoVerificacaoPage() {
   // Focar no primeiro input ao carregar a página
   useEffect(() => {
     inputRefs[0].current?.focus();
-  }, []);
+  }, [inputRefs]);
 
   return (
     <div className={styles.container}>
