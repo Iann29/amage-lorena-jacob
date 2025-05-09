@@ -24,50 +24,92 @@ function PasswordResetCore() {
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null); // null = verificando, true = válido, false = inválido
 
   useEffect(() => {
-    // O evento 'PASSWORD_RECOVERY' é disparado pelo Supabase Auth JS SDK
-    // quando ele detecta os parâmetros de recuperação na URL (seja hash ou query param como ?code=...).
-    // Ele estabelece uma sessão temporária para o usuário.
-    // Não precisamos verificar ativamente o 'code' aqui, apenas se uma sessão de usuário foi estabelecida.
+    let isMounted = true;
+    // Flag para controlar se a checagem inicial baseada no recoveryToken já foi feita.
+    // Isso ajuda a evitar que a lógica de "token inválido" seja executada prematuramente
+    // se o evento PASSWORD_RECOVERY demorar um pouco para ser emitido pelo SDK.
+    let initialCheckDone = false;
+
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      console.log("Auth Event:", event, "Session:", session, "Current isValidToken:", isValidToken);
+
       if (event === 'PASSWORD_RECOVERY') {
-        // Isso confirma que o Supabase processou o link/token e a sessão está pronta para updateUser
+        console.log("PASSWORD_RECOVERY event detected.");
         setIsValidToken(true);
-        // Limpar o código da URL para segurança e evitar reprocessamento
-        // router.replace() pode ser mais suave do que window.history
-        router.replace(window.location.pathname, { scroll: false });
-      } else if (isValidToken === null && !session) {
-        // Se o evento não for PASSWORD_RECOVERY na primeira verificação e não houver sessão,
-        // o link pode ser inválido ou já usado, ou não é um link de recuperação.
-        // Se um 'code' estava na URL, mas não resultou em PASSWORD_RECOVERY, é um problema.
-        if (recoveryToken) {
-            setMessage({ type: 'error', text: 'Link de recuperação inválido, expirado ou já utilizado. Por favor, solicite um novo link.'});
-        }
-        setIsValidToken(false); // Marcar como inválido se não for um evento de recuperação
-      } else if (isValidToken === null && session && event !== 'INITIAL_SESSION') {
-        // Se há uma sessão mas não foi de PASSWORD_RECOVERY (e não é a sessão inicial que pode ainda não ter tipo)
-        // pode ser um usuário já logado normalmente.
-         setIsValidToken(false);
-         setMessage({ type: 'error', text: 'Você já está logado. Para redefinir a senha de outra conta, saia primeiro.'});
+        initialCheckDone = true; 
+        // Limpar o ?code da URL após o processamento bem-sucedido
+        // Isso previne que o mesmo link seja reprocessado se a página for recarregada com o code ainda na URL.
+        // Também melhora a aparência da URL.
+        const currentPath = window.location.pathname;
+        router.replace(currentPath, { scroll: false }); 
+        return;
       }
-      // Se isValidToken já for true ou false, não fazemos nada para evitar loops
+
+      // Se já determinamos o estado do token (válido ou inválido) e não é um logout, não fazemos mais nada.
+      if (isValidToken !== null && event !== 'SIGNED_OUT') {
+        return;
+      }
+
+      if (event === 'SIGNED_OUT') {
+        console.log("SIGNED_OUT event detected.");
+        setIsValidToken(false); 
+        // Poderia adicionar uma mensagem se relevante, mas geralmente o usuário já saiu.
+        // setMessage({ type: 'error', text: 'Sessão encerrada.' });
+        initialCheckDone = true;
+        return;
+      }
+      
+      // Lógica para ser executada apenas uma vez na carga inicial ou se o estado do token ainda é null
+      if (isValidToken === null && !initialCheckDone) {
+        if (recoveryToken) {
+          // Se temos um recoveryToken (code) na URL, mas o evento PASSWORD_RECOVERY ainda não ocorreu.
+          // Damos um pequeno tempo para o evento ocorrer. Se não ocorrer, consideramos inválido.
+          // Esta é uma heurística, o ideal é confiar no PASSWORD_RECOVERY.
+          // Se o PASSWORD_RECOVERY não vier logo após o INITIAL_SESSION (ou uma rápida sucessão de eventos),
+          // pode ser que o token seja inválido ou já usado.
+          console.log("Initial check: recoveryToken present, waiting for PASSWORD_RECOVERY event or timeout.");
+          // Não setamos isValidToken aqui imediatamente, esperamos o evento ou um timeout implícito.
+          // Se após os eventos iniciais do onAuthStateChange, isValidToken ainda for null e recoveryToken existia,
+          // então o evento PASSWORD_RECOVERY não ocorreu.
+        } else {
+          // Não há recoveryToken na URL.
+          console.log("Initial check: No recoveryToken in URL.");
+          setMessage({ type: 'error', text: 'Nenhum código de recuperação encontrado. Acesse esta página através do link enviado para seu e-mail.'});
+          setIsValidToken(false);
+          initialCheckDone = true;
+        }
+      }
     });
 
-    // Checagem inicial caso o onAuthStateChange demore ou não dispare imediatamente com INITIAL_SESSION
-    // para o caso de code na URL.
-    if (recoveryToken && isValidToken === null) {
-        // Presumimos que o listener onAuthStateChange pegará o evento PASSWORD_RECOVERY.
-        // Se após um curto delay ele não mudar, podemos considerar inválido.
-        // Esta parte é delicada pois o tempo de processamento do Supabase pode variar.
-        // Por enquanto, vamos confiar no onAuthStateChange.
-    } else if (!recoveryToken && isValidToken === null) {
-        setIsValidToken(false);
-        setMessage({ type: 'error', text: 'Nenhum código de recuperação encontrado. Acesse esta página através do link enviado para seu e-mail.'});
-    }
+    // Se após a inscrição e os eventos iniciais, e temos um recovery token mas isValidToken não foi setado para true pelo evento,
+    // então consideramos o token inválido. Isso é um fallback.
+    // Idealmente, o evento PASSWORD_RECOVERY cuidaria disso.
+    // Esta verificação é feita fora do listener para capturar o estado após os eventos iniciais.
+    // Usamos um timeout para dar chance ao evento PASSWORD_RECOVERY de ser processado.
+    const fallbackTimer = setTimeout(() => {
+        if (isMounted && isValidToken === null && recoveryToken) {
+            console.log("Fallback: No PASSWORD_RECOVERY event, marking token as invalid.");
+            setMessage({ type: 'error', text: 'Link de recuperação inválido ou expirado (fallback). Por favor, solicite um novo link.'});
+            setIsValidToken(false);
+        }
+        // Se não havia recoveryToken, já foi tratado no listener ou na checagem síncrona abaixo.
+        else if (isMounted && isValidToken === null && !recoveryToken){
+             console.log("Fallback: No recoveryToken, already handled or should be.");
+             // A mensagem de "Nenhum código..." já deve ter sido setada.
+             // Apenas garantimos que isValidToken não fique como null.
+             if(!message) setMessage({ type: 'error', text: 'Link de recuperação inválido (sem token).' });
+             setIsValidToken(false); 
+        }
+    }, 1500); // Ajuste o tempo se necessário, 1.5s pode ser suficiente.
 
     return () => {
+      isMounted = false;
+      clearTimeout(fallbackTimer);
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, router, recoveryToken, isValidToken]); // Adicionado recoveryToken e isValidToken
+  }, [supabase, router, recoveryToken]); // Removido isValidToken para controlar a lógica de "primeira vez"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
