@@ -113,10 +113,10 @@ const fadeIn = {
   visible: { opacity: 1 }
 };
 
-const slideInLeft = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { opacity: 1, x: 0 }
-};
+// const slideInLeft = {
+//   hidden: { opacity: 0, x: -50 },
+//   visible: { opacity: 1, x: 0 }
+// };
 
 const slideInRight = {
   hidden: { opacity: 0, x: 50 },

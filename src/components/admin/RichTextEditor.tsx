@@ -5,7 +5,7 @@ import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import React, { useEffect, useState, useCallback } from 'react'; // Adicionado useCallback
+import React, { useEffect, useState } from 'react';
 
 // --- MenuBar (sem alterações) ---
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
@@ -91,12 +91,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
     setIsClient(true);
   }, []);
 
-  // MODIFICAÇÃO 1: Memoizar a função onChange
-  // Se a função `onChange` passada como prop for recriada a cada renderização do componente pai,
-  // isso pode fazer o `useEditor` recriar o editor. Usar `useCallback` no componente pai
-  // para a função que atualiza `formData.conteudo` é a melhor abordagem.
-  // Aqui, assumimos que o `onChange` passado já pode ser estável.
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({}),
@@ -105,11 +99,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
         types: ['textStyle'],
       }),
     ],
-    // MODIFICAÇÃO 2: Definir o conteúdo inicial APENAS UMA VEZ ou quando explicitamente necessário.
-    // A dependência de `initialContent` no array de dependências do `useEditor` pode ser problemática
-    // se `initialContent` mudar frequentemente de uma forma que não seja a intenção de recarregar o editor.
-    // Vamos controlar o conteúdo inicial de forma mais granular.
-    content: '', // Começar com conteúdo vazio e preencher no useEffect
+    content: '',
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -119,28 +109,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ initialContent, onChang
       },
     },
     immediatelyRender: false,
-  }, [onChange]); // Removido initialContent daqui, será tratado no useEffect abaixo
+  }, [onChange]);
 
-  // MODIFICAÇÃO 3: Efeito para definir o conteúdo inicial e lidar com mudanças externas.
   useEffect(() => {
     if (isClient && editor && !editor.isDestroyed) {
-      // Define o conteúdo inicial SOMENTE se o editor estiver vazio E initialContent tiver valor.
-      // Isso evita sobrescrever o conteúdo do editor a cada renderização se initialContent não mudou significativamente.
       if (editor.isEmpty && initialContent) {
         editor.commands.setContent(initialContent, false);
       }
-      // Se você precisar que `initialContent` (vindo de props, por exemplo, ao carregar um post para edição)
-      // ATUALIZE o conteúdo do editor DEPOIS da montagem inicial, você pode adicionar uma lógica aqui.
-      // Mas cuidado para não fazer isso a cada keystroke.
-      // Exemplo:
-      // else if (initialContent !== editor.getHTML()) {
-      //    // Apenas atualize se o initialContent de fora for realmente diferente
-      //    // e se não for uma atualização causada pelo próprio editor.
-      //    // Esta parte é delicada e depende de como você gerencia o estado `initialContent` no pai.
-      //    // Por agora, focaremos em fazer a digitação funcionar.
-      // }
     }
-  }, [initialContent, editor, isClient]); // Adicionar initialContent aqui é crucial para carregar o conteúdo na edição
+  }, [initialContent, editor, isClient]);
 
   if (!isClient || !editor) {
     return <div className="p-4 border border-gray-300 rounded-md shadow-sm bg-white min-h-[478px] animate-pulse">
