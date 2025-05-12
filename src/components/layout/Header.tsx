@@ -511,6 +511,23 @@ const Header = () => {
                         </div>
                         <span className="text-[#365F71] text-[10px] font-['Poppins']">Olá, {userProfile.nome.split(' ')[0]}</span>
                     </button>
+                    {isUserDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200">
+                        <Link 
+                          href="/minha-conta" 
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="block px-4 py-2 text-[10px] text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']"
+                        >
+                          Minha Conta
+                        </Link>
+                        <button 
+                          onClick={handleLogout} 
+                          className="block w-full text-left px-4 py-2 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']"
+                        >
+                          Sair
+                        </button>
+                      </div>
+                    )}
                  </div>
               ) : (
                 <Link href="/autenticacao" className="flex flex-col items-center">

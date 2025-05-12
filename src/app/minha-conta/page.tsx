@@ -1,74 +1,304 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 // Os metadados agora são exportados de um arquivo separado
 // pois componentes 'use client' não podem exportar metadados
 
 export default function MinhaContaPage() {
+  const supabase = createClient();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Estados para autenticação e dados do usuário
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<{
+    nome: string;
+    sobrenome: string;
+    email: string;
+    telefone?: string;
+    dataCadastro: string;
+  } | null>(null);
+  
+  // Estados para dados dinâmicos
+  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [cursos, setCursos] = useState<any[]>([]);
+  const [downloads, setDownloads] = useState<any[]>([]);
+  
+  // Estados para formulário de dados
+  const [formValues, setFormValues] = useState({
+    nome: '',
+    sobrenome: '',
+    telefone: '',
+    senhaAtual: '',
+    novaSenha: '',
+    confirmarSenha: ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [formMessage, setFormMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
-  // Dados mockados do usuário
-  // Isso seria obtido do Supabase Auth e Database
-  const usuario = {
-    nome: 'Maria Silva',
-    email: 'maria.silva@exemplo.com',
-    telefone: '(11) 98765-4321',
-    dataCadastro: '15/01/2025'
+  // Função para logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
   };
 
-  // Dados mockados de pedidos
-  const pedidos = [
-    {
-      id: '123456',
-      data: '20/04/2025',
-      status: 'Concluído',
-      total: 149.90,
-      itens: [
-        { nome: 'Curso: TDAH na Rotina Familiar', quantidade: 1, preco: 149.90 }
-      ]
-    },
-    {
-      id: '123455',
-      data: '10/03/2025',
-      status: 'Concluído',
-      total: 97.80,
-      itens: [
-        { nome: 'E-book: Guia Prático - Sinais de Autismo', quantidade: 1, preco: 39.90 },
-        { nome: 'Kit de Atividades Sensoriais', quantidade: 1, preco: 57.90 }
-      ]
+  // Carregar dados do usuário e perfil
+  useEffect(() => {
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      
+      // Verificar se o usuário está autenticado
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.error("MinhaContaPage: Erro ao buscar sessão ou usuário não logado", sessionError);
+        router.push('/autenticacao');
+        return;
+      }
+      
+      const user = session.user;
+      setCurrentUser(user);
+      
+      // Buscar perfil do usuário
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profileError) {
+        console.error("MinhaContaPage: Erro ao buscar perfil do usuário", profileError);
+      } else if (profile) {
+        // Formatar a data de cadastro
+        const dataCadastro = user.created_at 
+          ? new Date(user.created_at).toLocaleDateString('pt-BR') 
+          : new Date().toLocaleDateString('pt-BR');
+        
+        setUserProfile({
+          nome: profile.nome || '',
+          sobrenome: profile.sobrenome || '',
+          email: user.email || '',
+          telefone: profile.telefone || '',
+          dataCadastro
+        });
+        
+        // Preencher os valores do formulário
+        setFormValues({
+          ...formValues,
+          nome: profile.nome || '',
+          sobrenome: profile.sobrenome || '',
+          telefone: profile.telefone || '',
+        });
+      }
+      
+      // Buscar pedidos do usuário
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (ordersError) {
+        console.error("MinhaContaPage: Erro ao buscar pedidos", ordersError);
+      } else {
+        // Formatar os dados dos pedidos
+        const formattedOrders = ordersData.map(order => ({
+          id: order.id,
+          data: new Date(order.created_at).toLocaleDateString('pt-BR'),
+          status: order.status,
+          total: order.total_amount,
+          itens: order.order_items.map((item: any) => ({
+            nome: item.product_name,
+            quantidade: item.quantity,
+            preco: item.price
+          }))
+        }));
+        
+        setPedidos(formattedOrders);
+      }
+      
+      // Buscar cursos do usuário
+      const { data: coursesData, error: coursesError } = await supabase
+        .from('user_courses')
+        .select('*, courses(*)')
+        .eq('user_id', user.id);
+      
+      if (coursesError) {
+        console.error("MinhaContaPage: Erro ao buscar cursos", coursesError);
+      } else {
+        // Formatar os dados dos cursos
+        const formattedCourses = coursesData.map((userCourse: any) => ({
+          id: userCourse.course_id,
+          nome: userCourse.courses?.name || 'Curso sem nome',
+          progresso: userCourse.progress || 0,
+          dataAcesso: userCourse.last_accessed 
+            ? new Date(userCourse.last_accessed).toLocaleDateString('pt-BR')
+            : 'Nunca acessado',
+          imagem: userCourse.courses?.cover_image || '/placeholder-curso-1.jpg'
+        }));
+        
+        setCursos(formattedCourses);
+      }
+      
+      // Buscar downloads do usuário
+      const { data: downloadsData, error: downloadsError } = await supabase
+        .from('user_downloads')
+        .select('*, products(*)')
+        .eq('user_id', user.id);
+      
+      if (downloadsError) {
+        console.error("MinhaContaPage: Erro ao buscar downloads", downloadsError);
+      } else {
+        // Formatar os dados dos downloads
+        const formattedDownloads = downloadsData.map((download: any) => ({
+          id: download.id,
+          nome: download.products?.name || 'Produto sem nome',
+          tipo: download.file_type || 'PDF',
+          tamanho: download.file_size || '0 MB',
+          dataCompra: download.created_at 
+            ? new Date(download.created_at).toLocaleDateString('pt-BR')
+            : new Date().toLocaleDateString('pt-BR')
+        }));
+        
+        setDownloads(formattedDownloads);
+      }
+      
+      setIsLoading(false);
+    };
+    
+    fetchUserData();
+    
+    // Listener para mudanças no estado de autenticação
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.push('/autenticacao');
+      }
+    });
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [supabase, router]);
+  
+  // Função para atualizar dados do perfil
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setFormMessage(null);
+    
+    if (!currentUser) {
+      setFormMessage({ type: 'error', text: 'Usuário não está logado.' });
+      setIsSaving(false);
+      return;
     }
-  ];
+    
+    // Validar campos
+    if (!formValues.nome.trim()) {
+      setFormMessage({ type: 'error', text: 'Nome é obrigatório.' });
+      setIsSaving(false);
+      return;
+    }
+    
+    // Se tiver senha atual, validar nova senha
+    if (formValues.senhaAtual) {
+      if (!formValues.novaSenha) {
+        setFormMessage({ type: 'error', text: 'Nova senha é obrigatória.' });
+        setIsSaving(false);
+        return;
+      }
+      
+      if (formValues.novaSenha.length < 6) {
+        setFormMessage({ type: 'error', text: 'A senha deve ter pelo menos 6 caracteres.' });
+        setIsSaving(false);
+        return;
+      }
+      
+      if (formValues.novaSenha !== formValues.confirmarSenha) {
+        setFormMessage({ type: 'error', text: 'As senhas não coincidem.' });
+        setIsSaving(false);
+        return;
+      }
+    }
+    
+    try {
+      // Atualizar perfil do usuário
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          nome: formValues.nome,
+          sobrenome: formValues.sobrenome,
+          telefone: formValues.telefone
+        })
+        .eq('user_id', currentUser.id);
+      
+      if (profileError) {
+        throw new Error(`Erro ao atualizar perfil: ${profileError.message}`);
+      }
+      
+      // Se tiver senha atual, atualizar senha
+      if (formValues.senhaAtual) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: formValues.novaSenha
+        });
+        
+        if (passwordError) {
+          throw new Error(`Erro ao atualizar senha: ${passwordError.message}`);
+        }
+        
+        // Limpar campos de senha
+        setFormValues({
+          ...formValues,
+          senhaAtual: '',
+          novaSenha: '',
+          confirmarSenha: ''
+        });
+      }
+      
+      setFormMessage({ type: 'success', text: 'Dados atualizados com sucesso!' });
+      
+      // Atualizar dados do perfil no estado
+      if (userProfile) {
+        setUserProfile({
+          ...userProfile,
+          nome: formValues.nome,
+          sobrenome: formValues.sobrenome,
+          telefone: formValues.telefone
+        });
+      }
+    } catch (error: any) {
+      console.error("Erro ao salvar dados:", error);
+      setFormMessage({ type: 'error', text: error.message || 'Ocorreu um erro ao salvar os dados.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Handler para atualizar os valores do formulário
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormValues({
+      ...formValues,
+      [name]: value
+    });
+  };
 
-  // Dados mockados de cursos
-  const cursos = [
-    {
-      id: 1,
-      nome: 'TDAH na Rotina Familiar',
-      progresso: 45,
-      dataAcesso: '25/04/2025',
-      imagem: '/placeholder-curso-1.jpg'
-    }
-  ];
-
-  // Dados mockados de downloads
-  const downloads = [
-    {
-      id: 1,
-      nome: 'E-book: Guia Prático - Sinais de Autismo',
-      tipo: 'PDF',
-      tamanho: '3.5 MB',
-      dataCompra: '10/03/2025'
-    },
-    {
-      id: 2,
-      nome: 'Kit de Atividades Sensoriais',
-      tipo: 'ZIP',
-      tamanho: '15.8 MB',
-      dataCompra: '10/03/2025'
-    }
-  ];
+  // Componente de carregamento
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-700 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600">Carregando informações...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -80,11 +310,11 @@ export default function MinhaContaPage() {
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 font-bold">
-                {usuario.nome.slice(0, 1)}
+                {userProfile?.nome.charAt(0) || 'U'}
               </div>
               <div>
-                <h3 className="font-semibold">{usuario.nome}</h3>
-                <p className="text-sm text-gray-500">{usuario.email}</p>
+                <h3 className="font-semibold">{userProfile?.nome} {userProfile?.sobrenome}</h3>
+                <p className="text-sm text-gray-500">{userProfile?.email}</p>
               </div>
             </div>
             
@@ -134,7 +364,10 @@ export default function MinhaContaPage() {
             </nav>
             
             <div className="mt-6 pt-6 border-t border-gray-100">
-              <button className="text-red-600 hover:text-red-800 font-medium">
+              <button 
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-800 font-medium"
+              >
                 Sair da Conta
               </button>
             </div>
@@ -194,7 +427,7 @@ export default function MinhaContaPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {pedidos.map((pedido) => (
+                      {pedidos.length > 0 ? pedidos.slice(0, 3).map((pedido) => (
                         <tr key={pedido.id}>
                           <td className="py-3 px-4 border-b border-gray-200">
                             <span className="font-medium">#{pedido.id}</span>
@@ -211,7 +444,13 @@ export default function MinhaContaPage() {
                             R$ {pedido.total.toFixed(2).replace('.', ',')}
                           </td>
                         </tr>
-                      ))}
+                      )) : (
+                        <tr>
+                          <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
+                            Você ainda não realizou nenhum pedido.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -221,7 +460,7 @@ export default function MinhaContaPage() {
                   
                   {cursos.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {cursos.map((curso) => (
+                      {cursos.slice(0, 2).map((curso) => (
                         <div key={curso.id} className="border border-gray-200 rounded-lg p-4 flex items-center gap-4">
                           <div className="w-16 h-16 bg-purple-200 rounded flex-shrink-0 flex items-center justify-center">
                             <span className="text-purple-700 text-xs">Imagem</span>
@@ -416,18 +655,41 @@ export default function MinhaContaPage() {
               <div>
                 <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Dados</h2>
                 
-                <form className="max-w-2xl">
+                {formMessage && (
+                  <div className={`mb-6 p-4 rounded-md ${
+                    formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}>
+                    {formMessage.text}
+                  </div>
+                )}
+                
+                <form className="max-w-2xl" onSubmit={handleUpdateProfile}>
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-700 mb-4">Dados Pessoais</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome Completo</label>
+                        <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome</label>
                         <input
                           type="text"
                           id="nome"
                           name="nome"
-                          defaultValue={usuario.nome}
+                          value={formValues.nome}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label htmlFor="sobrenome" className="block text-gray-700 font-medium mb-1">Sobrenome</label>
+                        <input
+                          type="text"
+                          id="sobrenome"
+                          name="sobrenome"
+                          value={formValues.sobrenome}
+                          onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
@@ -438,8 +700,8 @@ export default function MinhaContaPage() {
                           type="email"
                           id="email"
                           name="email"
-                          defaultValue={usuario.email}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          value={userProfile?.email || ''}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                           disabled
                         />
                         <p className="text-xs text-gray-500 mt-1">
@@ -453,7 +715,8 @@ export default function MinhaContaPage() {
                           type="tel"
                           id="telefone"
                           name="telefone"
-                          defaultValue={usuario.telefone}
+                          value={formValues.telefone}
+                          onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
@@ -470,6 +733,8 @@ export default function MinhaContaPage() {
                           type="password"
                           id="senhaAtual"
                           name="senhaAtual"
+                          value={formValues.senhaAtual}
+                          onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
@@ -480,6 +745,8 @@ export default function MinhaContaPage() {
                           type="password"
                           id="novaSenha"
                           name="novaSenha"
+                          value={formValues.novaSenha}
+                          onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
@@ -490,6 +757,8 @@ export default function MinhaContaPage() {
                           type="password"
                           id="confirmarSenha"
                           name="confirmarSenha"
+                          value={formValues.confirmarSenha}
+                          onChange={handleInputChange}
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
                       </div>
@@ -499,14 +768,36 @@ export default function MinhaContaPage() {
                   <div className="flex gap-4">
                     <button
                       type="submit"
-                      className="bg-purple-700 text-white px-6 py-2 rounded-md font-medium hover:bg-purple-800 transition"
+                      className="bg-purple-700 text-white px-6 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[150px]"
+                      disabled={isSaving}
                     >
-                      Salvar Alterações
+                      {isSaving ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Salvando...
+                        </>
+                      ) : 'Salvar Alterações'}
                     </button>
                     
                     <button
                       type="button"
                       className="border border-gray-300 text-gray-700 px-6 py-2 rounded-md font-medium hover:bg-gray-50 transition"
+                      onClick={() => {
+                        // Resetar formulário para valores originais
+                        setFormValues({
+                          nome: userProfile?.nome || '',
+                          sobrenome: userProfile?.sobrenome || '',
+                          telefone: userProfile?.telefone || '',
+                          senhaAtual: '',
+                          novaSenha: '',
+                          confirmarSenha: ''
+                        });
+                        setFormMessage(null);
+                      }}
+                      disabled={isSaving}
                     >
                       Cancelar
                     </button>
