@@ -34,21 +34,39 @@ export default function BlogPage() {
   const pageSize = 9;
 
   const isMounted = useRef(true);
+  
+  // Ref para controlar quais requisições estão em andamento e evitar duplicações
+  const fetchingRef = useRef({
+    posts: false,
+    categories: false,
+    likes: false
+  });
 
   // Função separada para buscar categorias apenas uma vez
   const fetchCategories = useCallback(async () => {
-    if (categorias.length > 0) return; // Evita requisições duplicadas
+    // Verifica se existe alguma categoria em andamento ou já carregada
+    if (categorias.length > 0 || fetchingRef.current.categories) return;
+    
+    // Marca que está buscando categorias para evitar chamadas duplicadas
+    fetchingRef.current.categories = true;
     
     try {
       const fetchedCategories = await getPublicBlogCategories();
       if (isMounted.current) setCategorias(fetchedCategories);
     } catch (err) {
       console.error("Erro ao carregar categorias:", err);
+    } finally {
+      // Marca que terminou de buscar categorias
+      fetchingRef.current.categories = false;
     }
   }, [categorias.length]);
 
   // Função otimizada para buscar posts e seus status de likes em lote
   const fetchPosts = useCallback(async (page: number, categoryId?: string, append = false) => {
+    // Evitar requisições duplicadas para a mesma página e filtro
+    if (fetchingRef.current.posts) return;
+    fetchingRef.current.posts = true;
+    
     if (!append) setIsLoading(true);
     else setIsLoadingMore(true);
     setError(null);
@@ -58,9 +76,13 @@ export default function BlogPage() {
       let newPosts = response.posts;
       
       // Buscar status de likes em lote para todos os posts
-      if (newPosts.length > 0) {
+      if (newPosts.length > 0 && !fetchingRef.current.likes) {
+        // Evitar requisições duplicadas de likes
+        fetchingRef.current.likes = true;
+        
         const postIds = newPosts.map(post => post.id);
         const likesResponse = await getBatchPostLikeStatus(postIds);
+        fetchingRef.current.likes = false;
         
         if (likesResponse.success && likesResponse.items) {
           // Converter o array de itens em um objeto para acesso mais rápido
@@ -99,6 +121,7 @@ export default function BlogPage() {
       if (isMounted.current) {
         setIsLoading(false);
         setIsLoadingMore(false);
+        fetchingRef.current.posts = false;
       }
     }
   }, [pageSize]);

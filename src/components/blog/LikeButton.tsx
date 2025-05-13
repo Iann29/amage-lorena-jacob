@@ -28,11 +28,29 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
   // Verificar se o usuário está autenticado
   const { user, isLoading: authLoading } = useUser();
 
+  // Efeito para atualizar o estado local quando as props mudam
+  // Efeito para sincronizar props com estado quando as props forem atualizadas
+  useEffect(() => {
+    if (initialLikeState !== undefined) {
+      setIsLiked(initialLikeState);
+    }
+    if (initialLikeCount !== undefined) {
+      setLikes(initialLikeCount);
+    }
+    
+    // Garante que o componente esteja marcado como carregado
+    if (!initialStateLoaded && initialLikeState !== undefined) {
+      setInitialStateLoaded(true);
+    }
+  }, [initialLikeState, initialLikeCount, initialStateLoaded]);
+
+  // Efeito para buscar o status inicial do like se não for fornecido nas props
   useEffect(() => {
     let isMounted = true;
 
     // Se já temos o estado inicial de like através da prop, não precisamos fazer a requisição
     if (initialLikeState !== undefined) {
+      setInitialStateLoaded(true);
       return;
     }
     
@@ -96,10 +114,12 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
     e.preventDefault();
     e.stopPropagation();
     
-    if (isLoading || !initialStateLoaded || !user) {
+    if (isLoading || !user) {
       if (!user) {
         // Poderia redirecionar para login ou mostrar um aviso
         console.log('Usuário precisa estar logado para curtir');
+        // Opcional: redirecionar para login
+        // window.location.href = '/login?redirectTo=' + encodeURIComponent(window.location.pathname);
       }
       return;
     }
