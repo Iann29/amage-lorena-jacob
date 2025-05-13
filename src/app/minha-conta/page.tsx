@@ -252,13 +252,16 @@ export default function MinhaContaPage() {
       } : null);
 
       // Limpar campos de senha mesmo se não foram alterados (se o formulário for submetido com sucesso)
-      // Isso já é feito acima se a senha foi alterada com sucesso.
       // Se não houve tentativa de alterar senha, não precisamos limpar.
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erro ao salvar dados:", error);
       // Usar a mensagem de erro gerada no bloco try
-      setFormMessage({ type: 'error', text: error.message || 'Ocorreu um erro ao salvar os dados. Tente novamente.' });
+      if (error instanceof Error) {
+        setFormMessage({ type: 'error', text: error.message });  
+      } else {
+        setFormMessage({ type: 'error', text: 'Ocorreu um erro ao salvar os dados. Tente novamente.' });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -436,8 +439,9 @@ export default function MinhaContaPage() {
                           id="email"
                           name="email"
                             value={userProfile?.email || ''}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
-                          disabled
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50 text-gray-700"
+                            disabled
+                            autoComplete="username"
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           O e-mail não pode ser alterado.
