@@ -8,6 +8,9 @@ import BlogFilter from '@/components/blog/BlogFilter';
 import styles from './blog.module.css';
 // Importar funções da nova API
 import { getPublishedBlogPosts, getPublicBlogCategories, type BlogPostPublic, type BlogCategoryPublic } from '@/lib/blog-api'; // Removido getPopularBlogPosts se não usar
+// Importar função para buscar status de likes em lote
+import { getBatchPostLikeStatus } from '../likes/batchActions';
+import { useUser } from '../../hooks/useUser';
 
 export default function BlogPage() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
@@ -19,6 +22,12 @@ export default function BlogPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estado para armazenar informações de likes em lote
+  const [likesInfo, setLikesInfo] = useState<{[postId: string]: {isLiked: boolean, likeCount: number}}>({});
+  
+  // Verificar se o usuário está autenticado
+  const { user } = useUser();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -38,7 +47,7 @@ export default function BlogPage() {
     }
   }, [categorias.length]);
 
-  // Função otimizada para buscar apenas posts
+  // Função otimizada para buscar posts e seus status de likes em lote
   const fetchPosts = useCallback(async (page: number, categoryId?: string, append = false) => {
     if (!append) setIsLoading(true);
     else setIsLoadingMore(true);
@@ -46,12 +55,40 @@ export default function BlogPage() {
 
     try {
       const response = await getPublishedBlogPosts(page, pageSize, categoryId);
+      let newPosts = response.posts;
+      
+      // Buscar status de likes em lote para todos os posts
+      if (newPosts.length > 0) {
+        const postIds = newPosts.map(post => post.id);
+        const likesResponse = await getBatchPostLikeStatus(postIds);
+        
+        if (likesResponse.success && likesResponse.items) {
+          // Converter o array de itens em um objeto para acesso mais rápido
+          const likesInfoMap = likesResponse.items.reduce((acc, item) => {
+            acc[item.postId] = { isLiked: item.isLiked, likeCount: item.likeCount };
+            return acc;
+          }, {} as {[postId: string]: {isLiked: boolean, likeCount: number}});
+          
+          // Atualizar o estado de likes
+          if (append) {
+            setLikesInfo(prev => ({ ...prev, ...likesInfoMap }));
+          } else {
+            setLikesInfo(likesInfoMap);
+          }
+          
+          // Atualizar as contagens de likes nos posts caso necessário
+          newPosts = newPosts.map(post => ({
+            ...post,
+            like_count: likesInfoMap[post.id]?.likeCount ?? post.like_count
+          }));
+        }
+      }
 
       if (isMounted.current) {
         if (append) {
-          setPosts(prevPosts => [...prevPosts, ...response.posts]);
+          setPosts(prevPosts => [...prevPosts, ...newPosts]);
         } else {
-          setPosts(response.posts);
+          setPosts(newPosts);
         }
         setTotalPages(response.pagination.totalPages);
       }
@@ -209,9 +246,12 @@ export default function BlogPage() {
             ) : (
               // Grid de Posts
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mx-auto">
-                {/* Renderiza os posts do estado atual */}
                 {posts.map((post) => (
-                  <BlogPostCard key={post.id} post={post} />
+                  <BlogPostCard 
+                    key={post.id} 
+                    post={post} 
+                    initialLikeInfo={likesInfo[post.id] || { isLiked: false, likeCount: post.like_count }}
+                  />
                 ))}
               </div>
             )}

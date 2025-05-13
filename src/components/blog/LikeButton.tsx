@@ -8,25 +8,49 @@ import {
   toggleCommentLike,
   getCommentLikeStatus
 } from '@/app/likes/actions';
+import { useUser } from '../../hooks/useUser';
 
 interface LikeButtonProps {
   itemId: string; // UUID no banco de dados
   itemType: 'post' | 'comment';
   initialLikeCount: number;
+  initialLikeState?: boolean; // Estado inicial de like (vindo da consulta em lote)
   // Adicionar uma prop para o slug do post pode ser útil para revalidação se necessário no futuro
   // postSlug?: string; 
 }
 
-export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeButtonProps) {
+export default function LikeButton({ itemId, itemType, initialLikeCount, initialLikeState }: LikeButtonProps) {
   const [likes, setLikes] = useState(initialLikeCount);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(initialLikeState || false);
   const [isLoading, setIsLoading] = useState(false);
-  const [initialStateLoaded, setInitialStateLoaded] = useState(false);
+  const [initialStateLoaded, setInitialStateLoaded] = useState(!!initialLikeState);
+  
+  // Verificar se o usuário está autenticado
+  const { user, isLoading: authLoading } = useUser();
 
   useEffect(() => {
     let isMounted = true;
 
+    // Se já temos o estado inicial de like através da prop, não precisamos fazer a requisição
+    if (initialLikeState !== undefined) {
+      return;
+    }
+    
     const fetchInitialStatus = async () => {
+      // Não fazer requisição se ainda estiver carregando o estado de autenticação
+      if (authLoading) return;
+      
+      // Se não há usuário autenticado, não precisamos fazer a requisição
+      if (!user) {
+        if (isMounted) {
+          setIsLiked(false);
+          setLikes(initialLikeCount);
+          setInitialStateLoaded(true);
+          setIsLoading(false);
+        }
+        return;
+      }
+      
       setIsLoading(true);
       try {
         let response;
@@ -66,13 +90,17 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
     return () => {
       isMounted = false;
     };
-  }, [itemId, itemType, initialLikeCount]);
+  }, [itemId, itemType, initialLikeCount, initialLikeState, user, authLoading]);
 
   const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isLoading || !initialStateLoaded) {
+    if (isLoading || !initialStateLoaded || !user) {
+      if (!user) {
+        // Poderia redirecionar para login ou mostrar um aviso
+        console.log('Usuário precisa estar logado para curtir');
+      }
       return;
     }
 
@@ -126,7 +154,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount }: LikeB
           width={26}
           height={26}
         />
-        <span className="text-sm font-medium text-gray-400">{initialLikeCount}</span>
+        <span className="text-sm font-medium text-black">{initialLikeCount}</span>
       </div>
     );
   }

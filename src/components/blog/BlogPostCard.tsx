@@ -45,10 +45,14 @@ interface BlogPostCardProps {
       slug?: string; // Gerado pelo código
     }[];
   };
+  initialLikeInfo?: {
+    isLiked: boolean;
+    likeCount: number;
+  };
 }
 
-export default function BlogPostCard({ post }: BlogPostCardProps) {
-  // const [likes, setLikes] = useState(post.like_count);
+export default function BlogPostCard({ post, initialLikeInfo }: BlogPostCardProps) {
+  // const [likes, setLikes] = useState(initialLikeInfo?.likeCount ?? post.like_count);
 
   return (
     <article className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
@@ -96,7 +100,8 @@ export default function BlogPostCard({ post }: BlogPostCardProps) {
           <LikeButton 
             itemId={post.id} 
             itemType="post" 
-            initialLikeCount={post.like_count} 
+            initialLikeCount={initialLikeInfo?.likeCount ?? post.like_count}
+            initialLikeState={initialLikeInfo?.isLiked}
           />
         </div>
       </div>
