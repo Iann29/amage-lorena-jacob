@@ -7,13 +7,10 @@ import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { 
   LayoutDashboard, 
-  ShoppingBag, 
   UserCog, 
   LogOut,
   HelpCircle,
   Loader2, // Ícone de carregamento
-  CheckCircle, // Ícone de sucesso
-  XCircle // Ícone de erro
 } from 'lucide-react'; // Usar lucide para ícones consistentes
 
 // Os metadados agora são exportados de um arquivo separado
@@ -34,10 +31,6 @@ export default function MinhaContaPage() {
     telefone?: string;
     dataCadastro: string;
   } | null>(null);
-  
-  // Estados para dados dinâmicos
-  const [cursos, setCursos] = useState<any[]>([]);
-  const [downloads, setDownloads] = useState<any[]>([]);
   
   // Estados para formulário de dados
   const [formValues, setFormValues] = useState({
@@ -63,9 +56,8 @@ export default function MinhaContaPage() {
   // Carregar dados do usuário e perfil
   useEffect(() => {
     const fetchUserData = async (userToFetch: User) => {
-      if (!userToFetch) return; // Não tentar buscar se o usuário for nulo explicitamente
+      if (!userToFetch) return;
       
-      // console.log("MinhaContaPage: Chamando fetchUserData para o usuário:", userToFetch.id);
       setIsLoading(true);
       setFormMessage(null);
       
@@ -107,48 +99,33 @@ export default function MinhaContaPage() {
       }
     };
 
-    // Listener para mudanças no estado de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const user = session?.user ?? null;
-      const currentUserId = currentUser?.id;
-      
-      // console.log("MinhaContaPage: onAuthStateChange - Evento:", _event, "Session User ID:", user?.id, "Current User ID:", currentUserId);
 
-      if (user?.id && user.id !== currentUserId) {
-        // console.log("MinhaContaPage: Usuário mudou ou logou. Novo ID:", user.id, "Antigo ID:", currentUserId);
-        setCurrentUser(user); // Atualiza o usuário no estado
-        await fetchUserData(user); // Busca os dados para o novo usuário
-      } else if (!user && currentUserId) {
-        // console.log("MinhaContaPage: Usuário deslogou. Redirecionando.");
-        // Usuário deslogou
+      if (user?.id && user.id !== currentUser?.id) {
+        setCurrentUser(user);
+        await fetchUserData(user);
+      } else if (!user && currentUser) { 
         setCurrentUser(null);
         setUserProfile(null);
         setFormValues({ nome: '', sobrenome: '', telefone: '', senhaAtual: '', novaSenha: '', confirmarSenha: ''});
         router.push('/autenticacao');
-      } else if (!user && !currentUserId && !initialLoadDone.current) {
-         // console.log("MinhaContaPage: Nenhuma sessão na carga inicial, verificando...");
-         // Nenhuma sessão na carga inicial, verifica se já tentou buscar
-         // Tenta pegar a sessão uma vez para o carregamento inicial, caso o listener demore
+      } else if (!user && !currentUser && !initialLoadDone.current) {
          const { data: { session: initialSession } } = await supabase.auth.getSession();
          if (initialSession?.user) {
-            // console.log("MinhaContaPage: Sessão encontrada na verificação inicial, carregando dados.");
             setCurrentUser(initialSession.user);
             await fetchUserData(initialSession.user);
          } else {
-            // console.log("MinhaContaPage: Nenhuma sessão encontrada na verificação inicial. Redirecionando.");
             router.push('/autenticacao');
          }
       }
-      initialLoadDone.current = true; // Marca que a lógica inicial do auth listener rodou
+      initialLoadDone.current = true;
     });
     
     return () => {
-      // console.log("MinhaContaPage: Limpando listener de autenticação.");
       authListener?.subscription.unsubscribe();
     };
-  // Removido currentUser e router das dependências para controle manual dentro do onAuthStateChange
-  // e para evitar re-execuções indesejadas do useEffect inteiro.
-  // O useEffect agora roda apenas uma vez na montagem para configurar o listener.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
   
   // Função para atualizar dados do perfil
@@ -256,7 +233,6 @@ export default function MinhaContaPage() {
 
     } catch (error: unknown) {
       console.error("Erro ao salvar dados:", error);
-      // Usar a mensagem de erro gerada no bloco try
       if (error instanceof Error) {
         setFormMessage({ type: 'error', text: error.message });  
       } else {
