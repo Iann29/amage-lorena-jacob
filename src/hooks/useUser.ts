@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 // Armazena o estado do usuário globalmente para evitar requisições duplicadas
 let globalUser: User | null = null;
@@ -70,7 +70,7 @@ export function useUser() {
 
       // Configurar listener para mudanças na autenticação
       // Ignoramos o retorno pois o listener persiste enquanto a aplicação estiver rodando
-      supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
         globalUser = session?.user ?? null;
         notifySubscribers();
       });
