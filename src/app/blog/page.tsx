@@ -10,7 +10,6 @@ import styles from './blog.module.css';
 import { getPublishedBlogPosts, getPublicBlogCategories, type BlogPostPublic, type BlogCategoryPublic } from '@/lib/blog-api'; // Removido getPopularBlogPosts se não usar
 // Importar função para buscar status de likes em lote
 import { getBatchPostLikeStatus } from '../likes/batchActions';
-import { useUser } from '../../hooks/useUser';
 
 export default function BlogPage() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
