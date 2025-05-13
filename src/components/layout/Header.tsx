@@ -39,19 +39,18 @@ const Header = () => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
-  }, [pathname]);
+  }, [pathname, isMenuOpen, setIsMenuOpen]);
 
   // Efeito para autenticação e busca de perfil
   useEffect(() => {
     let isMounted = true;
-    // setIsLoadingAuth(true); // Movido para dentro do onAuthStateChange e getSession
-
-    // Removida a chamada direta a fetchSessionAndProfile aqui
+    if (isMounted) setIsLoadingAuth(true); // Inicia o loading aqui
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
-      
-      setIsLoadingAuth(true); // Sempre inicia o loading ao receber um evento de auth
+
+      // Não precisa de setIsLoadingAuth(true) aqui, pois o efeito já começa com true
+      // ou o evento subsequente já terá o loading tratado no final.
       const user = session?.user ?? null;
       setCurrentUser(user);
 
@@ -66,61 +65,51 @@ const Header = () => {
           if (profile && !profileError) {
             const nome = profile.nome || '';
             const sobrenome = profile.sobrenome || '';
-            let iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
-            if (!iniciais.trim() && user.email) {
-              iniciais = user.email.charAt(0).toUpperCase();
-            } else if (!iniciais.trim()) {
-              iniciais = 'U'; // Fallback final para iniciais
-            }
+            const baseIniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+            const emailInicial = user.email?.charAt(0).toUpperCase();
+            const iniciais = baseIniciais.trim() ? baseIniciais : (emailInicial || 'U');
             setUserProfile({ nome, sobrenome, iniciais });
           } else {
             console.error("Header (onAuthChange): Erro ao buscar perfil ou perfil vazio", profileError);
-            let iniciais = (user.email?.charAt(0) || 'U').toUpperCase();
+            const iniciais = (user.email?.charAt(0) || 'U').toUpperCase();
             setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais });
           }
+          setIsLoadingAuth(false); // Define loading false APÓS tentar buscar/definir perfil
         }
-      } else {
+      } else { 
         if (isMounted) {
           setUserProfile(null);
           setIsUserDropdownOpen(false);
+          setIsLoadingAuth(false); // Define loading false pois não há usuário para carregar
         }
-      }
-      if (isMounted) {
-        setIsLoadingAuth(false); // Finaliza o loading após todas as operações do auth state change
       }
     });
 
-    // Verifica a sessão inicial para o caso do listener não pegar imediatamente ou para definir isLoadingAuth
-    if (isMounted) { // Para evitar setState em componente desmontado se a promessa resolver depois
-      supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
-        if (!isMounted) return;
-        
-        // Se o listener onAuthStateChange ainda não definiu um usuário mas há uma sessão inicial,
-        // podemos tentar popular os dados. No entanto, onAuthStateChange geralmente é disparado
-        // na inscrição com a sessão atual, então esta parte é mais um fallback ou para garantir
-        // que isLoadingAuth seja definido corretamente se não houver sessão.
-        if (!currentUser && initialSession?.user) {
-          // console.log("Header: Sessão inicial encontrada via getSession, onAuthStateChange deve tratar ou já tratou.");
-          // O onAuthStateChange deve lidar com isso. Se quisermos forçar aqui, precisamos ter cuidado com race conditions.
-          // Por ora, vamos confiar que o onAuthStateChange será disparado. O principal aqui é o else.
-        } else if (!currentUser && !initialSession?.user) {
-          // console.log("Header: Nenhuma sessão inicial encontrada via getSession e currentUser é nulo.");
-          // Garante que o loading termine se não houver nenhuma sessão e o onAuthStateChange não tiver definido um user (nulo)
-          setIsLoadingAuth(false);
+    // Chamada inicial a getSession para tratar o caso de já existir uma sessão
+    // mas principalmente para desligar o isLoadingAuth se não houver nenhuma sessão inicial
+    // e o onAuthStateChange ainda não tiver sido disparado com uma sessão nula.
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (!isMounted) return;
+      if (!initialSession?.user && !currentUser) { // Adicionado !currentUser para segurança
+        // Se getSession não encontrou usuário E o onAuthStateChange ainda não definiu um currentUser,
+        // então podemos com mais segurança dizer que não há sessão e parar o loading.
+        setIsLoadingAuth(false);
+      }
+      // Se initialSession.user existir, ou se currentUser já foi populado,
+      // confiamos que o onAuthStateChange (que já foi configurado e provavelmente já disparou ou vai disparar)
+      // lidará com o estado corretamente, incluindo setIsLoadingAuth(false) no seu próprio fluxo.
+    }).catch(error => {
+        if(isMounted) {
+            console.error("Header: Erro no getSession inicial", error);
+            setIsLoadingAuth(false); // Para o loading em caso de erro também.
         }
-        // Se currentUser já existe, o onAuthStateChange já atuou.
-      }).catch(error => {
-        if (isMounted) {
-          console.error("Header: Erro ao tentar obter sessão inicial (getSession fallback)", error);
-          setIsLoadingAuth(false); // Termina o loading em caso de erro também
-        }
-      });
-    }
+    });
 
     return () => {
       isMounted = false;
       authListener?.subscription.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, router]);
 
   // Efeito para fechar dropdown ao clicar fora
