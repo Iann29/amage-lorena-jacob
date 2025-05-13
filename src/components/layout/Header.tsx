@@ -236,6 +236,7 @@ const Header = () => {
               >
                 <Link 
                   href="/loja" 
+                  prefetch={false}
                   className="bg-[#52A4DB] text-white text-sm font-['Poppins'] rounded-md px-4 py-1 hover:bg-[#4790c2] transition"
                 >
                   Loja
@@ -457,6 +458,7 @@ const Header = () => {
             >
               <Link 
                 href="/loja" 
+                prefetch={false}
                 className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full"
               >
                 Loja
