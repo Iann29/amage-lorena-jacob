@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import LikeButton from './LikeButton';
+import { useState } from 'react';
 
 /**
  * Extrai o texto puro de uma string HTML e retorna um trecho com o tamanho especificado
@@ -52,12 +53,21 @@ interface BlogPostCardProps {
 }
 
 export default function BlogPostCard({ post, initialLikeInfo }: BlogPostCardProps) {
-  // const [likes, setLikes] = useState(initialLikeInfo?.likeCount ?? post.like_count);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleNavigate = () => {
+    setIsNavigating(true);
+    // Não é necessário chamar router.push explicitamente se estiver usando <Link>
+    // O cursor será resetado quando a nova página carregar ou se o usuário navegar para outro lugar.
+  };
 
   return (
-    <article className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
-      <Link href={`/blog/${post.slug}`}>
-        <div className="relative h-56 w-full rounded-2xl overflow-hidden mb-5">
+    <article 
+      className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6"
+      style={{ cursor: isNavigating ? 'wait' : 'auto' }} // Aplica cursor ao card inteiro durante a navegação
+    >
+      <Link href={`/blog/${post.slug}`} onClick={handleNavigate} legacyBehavior={false}> {/* Adicionado onClick e legacyBehavior={false} para melhor comportamento com manipuladores de clique */} 
+        <div className="relative h-56 w-full rounded-2xl overflow-hidden mb-5" style={{ cursor: isNavigating ? 'wait' : 'pointer' }}>
           {post.imagem_destaque_url ? (
             <Image 
               src={post.imagem_destaque_url} 
@@ -76,7 +86,7 @@ export default function BlogPostCard({ post, initialLikeInfo }: BlogPostCardProp
       
       <div>
         <h2 className="text-2xl font-bold mb-3 text-[#6397C3]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-          <Link href={`/blog/${post.slug}`} className="hover:opacity-80 transition">
+          <Link href={`/blog/${post.slug}`} onClick={handleNavigate} className="hover:opacity-80 transition" style={{ cursor: isNavigating ? 'wait' : 'pointer' }}>
             {post.titulo}
           </Link>
         </h2>

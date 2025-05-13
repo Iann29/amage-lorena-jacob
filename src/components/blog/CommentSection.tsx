@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import CommentItem from './CommentItem';
-import Image from 'next/image';
+// Image e Link podem não ser mais necessários aqui se a seção "Quer comentar?" for movida completamente
+// import Image from 'next/image'; 
+// import Link from 'next/link';
 import { submitNewComment } from '@/app/comments/actions';
 
 // Interface para os dados de um usuário de comentário (simplificada)
@@ -84,10 +86,10 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
   };
 
   return (
-    <section className="mt-12">
-      <h2 className="text-2xl font-semibold text-[#715B3F] mb-6">Comentários</h2>
-      
-      {currentUser ? (
+    // A <section> agora só contém o formulário (se logado) e a lista de comentários.
+    // O título "Comentários" também foi movido para a page.tsx para melhor controle de layout.
+    <>
+      {currentUser && (
         <form onSubmit={handleCommentSubmit} className="mb-8 p-6 bg-stone-50 rounded-xl shadow">
           {replyingToCommentId && (
             <div className="mb-3 text-sm text-gray-600">
@@ -121,32 +123,12 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
             </button>
           </div>
         </form>
-      ) : (
-        <div className="mb-8 bg-blue-50 p-6 rounded-xl text-center shadow">
-          <div className="flex items-center justify-center gap-2">
-            <Image src="/assets/configIcon.png" alt="Comentar" width={24} height={24} />
-            <h3 className="text-xl font-medium text-gray-800">Quer comentar?</h3>
-          </div>
-          <p className="text-sm text-gray-600 mt-1 mb-4">
-            Você precisa estar logado para deixar um comentário.
-          </p>
-          {/* Aqui você colocaria seus botões de login reais */}
-          {/* Exemplo:
-          <button 
-            className="bg-white text-gray-700 px-4 py-2 rounded-md border border-gray-300 flex items-center gap-2 hover:bg-gray-50 mx-auto"
-            // onClick={handleLoginMock} // Substituir por sua lógica de login real
-          >
-            <Image src="/logos/google-logo.png" alt="Google" width={20} height={20} />
-            Entrar com a Conta Google
-          </button> */}
-           <p className="text-xs text-gray-500">(Botões de login seriam colocados aqui)</p>
-        </div>
       )}
       
+      {/* A lista de comentários permanece aqui */}
       <div>
         {comments && comments.length > 0 ? (
           <div>
-            {/* <h3 className="text-xl font-medium text-[#715B3F] mb-4">Comentários</h3> */}
             <div className="space-y-1">
               {comments.map(comment => (
                 <CommentItem 
@@ -160,10 +142,10 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
           </div>
         ) : (
           <p className="text-center text-gray-500 py-8">
-            Seja o primeiro a deixar um comentário!
+            {!currentUser ? 'Nenhum comentário ainda.' : 'Seja o primeiro a deixar um comentário!'}
           </p>
         )}
       </div>
-    </section>
+    </>
   );
 }

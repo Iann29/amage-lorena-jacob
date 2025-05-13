@@ -9,6 +9,7 @@ import {
   getCommentLikeStatus
 } from '@/app/likes/actions';
 import { useUser } from '../../hooks/useUser';
+import Link from 'next/link';
 
 interface LikeButtonProps {
   itemId: string; // UUID no banco de dados
@@ -27,6 +28,10 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
   
   // Verificar se o usuário está autenticado
   const { user, isLoading: authLoading } = useUser();
+
+  // Novo estado para a mensagem de aviso
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
+  const [authWarningMessage, setAuthWarningMessage] = useState("");
 
   // Efeito para atualizar o estado local quando as props mudam
   // Efeito para sincronizar props com estado quando as props forem atualizadas
@@ -103,24 +108,28 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
       }
     };
 
-    fetchInitialStatus();
+    if (!initialStateLoaded) { // Adicionado para evitar busca se já carregado pela prop
+        fetchInitialStatus();
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [itemId, itemType, initialLikeCount, initialLikeState, user, authLoading]);
+  }, [itemId, itemType, initialLikeCount, initialLikeState, user, authLoading, initialStateLoaded]);
 
   const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (isLoading || !user) {
-      if (!user) {
-        // Poderia redirecionar para login ou mostrar um aviso
-        console.log('Usuário precisa estar logado para curtir');
-        // Opcional: redirecionar para login
-        // window.location.href = '/login?redirectTo=' + encodeURIComponent(window.location.pathname);
-      }
+    if (showAuthWarning) setShowAuthWarning(false); // Esconde aviso anterior se houver
+
+    if (isLoading) return; // Se já estiver carregando uma ação, não faz nada
+
+    if (!user) {
+      console.log('Usuário precisa estar logado para curtir');
+      setAuthWarningMessage("Você precisa estar logado para curtir!");
+      setShowAuthWarning(true);
+      setTimeout(() => setShowAuthWarning(false), 4000); // Esconde a mensagem após 4 segundos
       return;
     }
 
@@ -148,6 +157,10 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
         console.error(`Falha ao curtir/descurtir ${itemType}:`, response.message);
         setIsLiked(previousIsLiked);
         setLikes(previousLikes);
+        // Mostrar erro da action para o usuário também?
+        setAuthWarningMessage(response.message || `Falha ao ${previousIsLiked ? 'descurtir' : 'curtir'}.`);
+        setShowAuthWarning(true);
+        setTimeout(() => setShowAuthWarning(false), 4000);
       }
     } catch (error: unknown) {
       let errorMessage = `Erro ao curtir/descurtir ${itemType}.`;
@@ -157,12 +170,15 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
       console.error(errorMessage, error);
       setIsLiked(previousIsLiked);
       setLikes(previousLikes);
+      setAuthWarningMessage("Erro ao processar sua ação.");
+      setShowAuthWarning(true);
+      setTimeout(() => setShowAuthWarning(false), 4000);
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, initialStateLoaded, itemType, itemId, isLiked, likes]);
+  }, [isLoading, user, itemType, itemId, isLiked, likes, showAuthWarning]);
 
-  if (!initialStateLoaded) {
+  if (!initialStateLoaded && initialLikeState === undefined) {
     return (
       <div
         className="flex items-center justify-center gap-1 p-1.5 opacity-50"
@@ -186,21 +202,31 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
   }
 
   return (
-    <button
-      onClick={handleLike}
-      disabled={isLoading || !initialStateLoaded}
-      className="flex items-center justify-center gap-1 transition-all hover:scale-110 p-1.5"
-      aria-label={isLiked ? (itemType === 'post' ? "Remover curtida do post" : "Remover curtida do comentário") 
+    <div className="relative">
+      <button
+        onClick={handleLike}
+        disabled={isLoading || !initialStateLoaded || authLoading}
+        className="flex items-center justify-center gap-1 transition-all hover:scale-110 p-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+        aria-label={isLiked ? (itemType === 'post' ? "Remover curtida do post" : "Remover curtida do comentário") 
                           : (itemType === 'post' ? "Curtir post" : "Curtir comentário")}
-    >
-      <Image
-        src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
-        alt={isLiked ? "Curtido" : "Curtir"}
-        width={26}
-        height={26}
-        className="transition-all"
-      />
-      <span className="text-sm font-bold text-black">{likes}</span>
-    </button>
+      >
+        <Image
+          src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
+          alt={isLiked ? "Curtido" : "Curtir"}
+          width={26}
+          height={26}
+          className="transition-all"
+        />
+        <span className="text-sm font-bold text-black">{likes}</span>
+      </button>
+      {showAuthWarning && (
+        <div 
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs px-3 py-1.5 bg-gray-800 text-white text-xs rounded-md shadow-lg animate-fadeInQuick"
+          role="alert"
+        >
+          {authWarningMessage} Ir para <Link href="/login" className="underline hover:text-gray-300">Login?</Link>
+        </div>
+      )}
+    </div>
   );
 }

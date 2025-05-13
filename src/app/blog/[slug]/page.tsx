@@ -200,7 +200,7 @@ export default async function PostPage(props: PostPageProps) {
         </div>
       </header>
 
-      {/* Conteúdo do Post */}
+      {/* Conteúdo do Post (dentro do container de papel) */}
       <div className={styles.paperContainer}>
         <div className={styles.contentWrapper}>
           <Suspense fallback={<PostContentSkeleton />}>
@@ -209,8 +209,44 @@ export default async function PostPage(props: PostPageProps) {
         </div>
       </div>
 
-      {/* Seção de Comentários ATUALIZADA */}
+      {/* NOVA SEÇÃO "QUER COMENTAR?" (se não logado) - Fora do paperContainer, largura total */}
+      {!currentUserData && (
+        <div 
+          className="py-12 sm:py-16 text-center w-full mt-32" 
+          style={{ backgroundColor: '#6FB1CE' }} 
+        >
+          <div className="container mx-auto px-4"> 
+            <div className="flex items-center justify-center gap-4 mb-5">
+              <Image src="/assets/quercomentar.png" alt="Ícone de comentário" width={68} height={68} />
+              <h3 className="text-6xl font-bold text-white" style={{ fontFamily: 'var(--font-museo-sans)' }}>Quer comentar?</h3>
+            </div>
+            <p className="text-lg text-white mb-12 text-center" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+              Entre com sua conta Google ou Conecte-se
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4 max-w-xl mx-auto">
+              <button 
+                type="button"
+                className="bg-white text-gray-800 px-8 py-4 rounded-lg border border-gray-300 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors w-full sm:min-w-[300px] shadow-md text-lg font-medium"
+              >
+                <Image src="/assets/google.svg" alt="Google" width={26} height={26} />
+                <span className="whitespace-nowrap">Entrar com a Conta Google</span>
+              </button>
+              <Link 
+                href="/login" 
+                className="px-8 py-4 rounded-lg flex items-center justify-center gap-3 hover:opacity-90 transition-opacity w-full sm:min-w-[300px] shadow-md text-xl font-medium"
+                style={{ backgroundColor: '#FFFEEC', color: '#378DB2', fontFamily: 'var(--font-museo-sans)' }}
+              >
+                <Image src="/assets/perfilIcon.png" alt="Perfil" width={32} height={32} />
+                <span className="whitespace-nowrap">Já tenho conta</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Seção de Comentários (formulário se logado + lista) - DENTRO do container de largura normal */}
       <div className="container mx-auto max-w-3xl px-4 py-12">
+        <h2 className="text-2xl font-semibold text-[#715B3F] mb-6">Comentários</h2> {/* Título movido para cá */}
         <CommentSection 
           postId={post.id} 
           comments={commentsData} 
