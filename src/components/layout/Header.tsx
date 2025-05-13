@@ -44,72 +44,78 @@ const Header = () => {
   // Efeito para autenticação e busca de perfil
   useEffect(() => {
     let isMounted = true;
-    setIsLoadingAuth(true);
+    // setIsLoadingAuth(true); // Movido para dentro do onAuthStateChange e getSession
 
-    const fetchSessionAndProfile = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError && isMounted) {
-        console.error("Header: Erro ao buscar sessão", sessionError);
-        setCurrentUser(null);
-        setUserProfile(null);
-        setIsLoadingAuth(false);
-        return;
-      }
-
-      const user = session?.user ?? null;
-      if (isMounted) setCurrentUser(user);
-
-      if (user && isMounted) {
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('nome, sobrenome')
-          .eq('user_id', user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Header: Erro ao buscar perfil do usuário", profileError);
-          // Define um perfil padrão ou lida com o erro como preferir
-          setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais: (user.email?.charAt(0) || 'U').toUpperCase() });
-        } else if (profile) {
-          const nome = profile.nome || '';
-          const sobrenome = profile.sobrenome || '';
-          const iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase() || (user.email?.charAt(0) || 'U').toUpperCase();
-          setUserProfile({ nome, sobrenome, iniciais });
-        }
-      } else if (isMounted) {
-        setUserProfile(null);
-      }
-      if (isMounted) setIsLoadingAuth(false);
-    };
-
-    fetchSessionAndProfile();
+    // Removida a chamada direta a fetchSessionAndProfile aqui
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
+      
+      setIsLoadingAuth(true); // Sempre inicia o loading ao receber um evento de auth
       const user = session?.user ?? null;
       setCurrentUser(user);
+
       if (user) {
-        // Refetch profile on auth change if user logs in
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
           .select('nome, sobrenome')
           .eq('user_id', user.id)
           .single();
-        if (profile && !profileError) {
-          const nome = profile.nome || '';
-          const sobrenome = profile.sobrenome || '';
-          const iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase() || (user.email?.charAt(0) || 'U').toUpperCase();
-          setUserProfile({ nome, sobrenome, iniciais });
-        } else {
-          setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais: (user.email?.charAt(0) || 'U').toUpperCase() });
+
+        if (isMounted) {
+          if (profile && !profileError) {
+            const nome = profile.nome || '';
+            const sobrenome = profile.sobrenome || '';
+            let iniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+            if (!iniciais.trim() && user.email) {
+              iniciais = user.email.charAt(0).toUpperCase();
+            } else if (!iniciais.trim()) {
+              iniciais = 'U'; // Fallback final para iniciais
+            }
+            setUserProfile({ nome, sobrenome, iniciais });
+          } else {
+            console.error("Header (onAuthChange): Erro ao buscar perfil ou perfil vazio", profileError);
+            let iniciais = (user.email?.charAt(0) || 'U').toUpperCase();
+            setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais });
+          }
         }
       } else {
-        setUserProfile(null); // Clear profile if user logs out
-        setIsUserDropdownOpen(false); // Fechar dropdown no logout
+        if (isMounted) {
+          setUserProfile(null);
+          setIsUserDropdownOpen(false);
+        }
       }
-      setIsLoadingAuth(false); // Certifique-se de que o loading termina aqui também
+      if (isMounted) {
+        setIsLoadingAuth(false); // Finaliza o loading após todas as operações do auth state change
+      }
     });
+
+    // Verifica a sessão inicial para o caso do listener não pegar imediatamente ou para definir isLoadingAuth
+    if (isMounted) { // Para evitar setState em componente desmontado se a promessa resolver depois
+      supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
+        if (!isMounted) return;
+        
+        // Se o listener onAuthStateChange ainda não definiu um usuário mas há uma sessão inicial,
+        // podemos tentar popular os dados. No entanto, onAuthStateChange geralmente é disparado
+        // na inscrição com a sessão atual, então esta parte é mais um fallback ou para garantir
+        // que isLoadingAuth seja definido corretamente se não houver sessão.
+        if (!currentUser && initialSession?.user) {
+          // console.log("Header: Sessão inicial encontrada via getSession, onAuthStateChange deve tratar ou já tratou.");
+          // O onAuthStateChange deve lidar com isso. Se quisermos forçar aqui, precisamos ter cuidado com race conditions.
+          // Por ora, vamos confiar que o onAuthStateChange será disparado. O principal aqui é o else.
+        } else if (!currentUser && !initialSession?.user) {
+          // console.log("Header: Nenhuma sessão inicial encontrada via getSession e currentUser é nulo.");
+          // Garante que o loading termine se não houver nenhuma sessão e o onAuthStateChange não tiver definido um user (nulo)
+          setIsLoadingAuth(false);
+        }
+        // Se currentUser já existe, o onAuthStateChange já atuou.
+      }).catch(error => {
+        if (isMounted) {
+          console.error("Header: Erro ao tentar obter sessão inicial (getSession fallback)", error);
+          setIsLoadingAuth(false); // Termina o loading em caso de erro também
+        }
+      });
+    }
 
     return () => {
       isMounted = false;
