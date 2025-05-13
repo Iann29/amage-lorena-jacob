@@ -58,6 +58,7 @@ export default function AdminLoginPage() {
       // de expiração de token, se necessário no futuro.
       // console.log("Lembrar-me está:", rememberMe);
 
+      router.refresh(); // Adicionado para atualizar o estado da sessão para outros componentes
       router.push('/admin');
     } catch (catchedError: unknown) {
       console.error('Erro de login (catch):', catchedError);
