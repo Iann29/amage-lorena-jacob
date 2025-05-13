@@ -11,11 +11,6 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // Log temporário - REMOVER APÓS DEPURAÇÃO
-  console.log("[Middleware] SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ? "Carregada" : "NÃO CARREGADA");
-  console.log("[Middleware] SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Carregada" : "NÃO CARREGADA");
-  // Fim do log temporário
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

@@ -132,11 +132,11 @@ export default function AdminLayout({ children }: LayoutProps) {
             <header className="bg-white shadow-sm sticky top-0 z-20 flex-shrink-0">
                <div className="flex justify-between items-center p-4">
                  <h1 className="text-2xl font-semibold text-gray-800">Painel Administrativo</h1>
-                 {userProfile && ( // Usa userProfile do hook
+                 {profile && ( // Alterado de userProfile para profile
                     <div className="relative" ref={dropdownRef}>
                         <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex items-center space-x-2 text-gray-700 hover:text-purple-700">
-                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium">{userProfile.iniciais || '??'}</div>
-                        <span>{`${userProfile.nome} ${userProfile.sobrenome}`}</span>
+                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium">{profile.iniciais || '??'}</div> {/* Alterado para profile.iniciais */}
+                        <span>{`${profile.nome} ${profile.sobrenome}`}</span> {/* Alterado para profile.nome e profile.sobrenome */}
                         <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                         </button>
                         {isUserDropdownOpen && (
