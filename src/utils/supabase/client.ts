@@ -8,21 +8,19 @@ export function createClient() {
   // Se já existe um cliente, use-o para manter a sessão consistente
   if (supabaseClient) return supabaseClient;
   
-  // Caso contrário, crie um novo cliente com persistência de sessão
+  // Caso contrário, crie um novo cliente.
+  // O @supabase/ssr gerenciará a persistência da sessão (incluindo localStorage)
+  // e a configuração dos cookies HTTP Only necessários para o servidor.
   supabaseClient = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    // Remova a configuração explícita de 'auth.storage' e 'auth.storageKey'
+    // para permitir que @supabase/ssr use seus padrões, que incluem o gerenciamento
+    // de cookies HTTP Only para o servidor.
     {
-      // Configurações para persistência de sessão
       auth: {
-        persistSession: true, // Persistir sessão entre recarregamentos de página
-        storageKey: 'lorena-jacob-auth-session', // Chave única para armazenamento
-        storage: {
-          // Usar localStorage para garantir persistência
-          getItem: (key) => window.localStorage.getItem(key),
-          setItem: (key, value) => window.localStorage.setItem(key, value),
-          removeItem: (key) => window.localStorage.removeItem(key)
-        }
+        persistSession: true, // Isso é bom manter
+        // autoRefreshToken: true, // Já é padrão e gerenciado
       }
     }
   );

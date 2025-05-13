@@ -1,86 +1,145 @@
+// src/hooks/useUser.ts
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback } from 'react';
+import { createClient } from '@/utils/supabase/client'; // Cliente do browser
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-// Armazena o estado do usuário globalmente para evitar requisições duplicadas
-let globalUser: User | null = null;
-let globalUserLoading = true;
-let globalUserError: Error | null = null;
-const subscribers = new Set<() => void>();
-
-// Função para notificar todos os assinantes sobre a mudança do usuário
-function notifySubscribers() {
-  subscribers.forEach(callback => callback());
+export interface UserProfile {
+    id: string; // user_id
+    nome: string;
+    sobrenome: string;
+    avatar_url?: string | null;
+    iniciais?: string;
+    role?: string; // Para verificar se é admin
 }
 
-/**
- * Hook para gerenciar o estado de autenticação do usuário
- * Retorna o usuário atual, status de carregamento e erro se houver
- */
-export function useUser() {
-  const [user, setUser] = useState<User | null>(globalUser);
-  const [isLoading, setIsLoading] = useState(globalUserLoading);
-  const [error, setError] = useState<Error | null>(globalUserError);
-  const isFirstMount = useRef(true);
+interface UseUserReturn {
+  user: User | null;
+  profile: UserProfile | null;
+  isLoading: boolean; // Combina loading do usuário e do perfil
+  error: Error | null;
+}
+
+// Para evitar múltiplas verificações iniciais de sessão entre instâncias do hook
+let initialAuthCheckCompleted = false;
+let globalUserCache: User | null = null;
+let globalProfileCache: UserProfile | null = null;
+
+export function useUser(): UseUserReturn {
+  const [user, setUser] = useState<User | null>(globalUserCache);
+  const [profile, setProfile] = useState<UserProfile | null>(globalProfileCache);
+  const [isLoading, setIsLoading] = useState(!initialAuthCheckCompleted);
+  const [error, setError] = useState<Error | null>(null);
+  const supabase = createClient();
+
+  const fetchUserProfile = useCallback(async (userId: string, userEmail?: string | null) => {
+    if (!userId) {
+        setProfile(null);
+        globalProfileCache = null;
+        return;
+    }
+    // Não precisa de setIsLoadingProfile separado, o isLoading geral cobre isso.
+    try {
+        const { data, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('user_id, nome, sobrenome, avatar_url, role')
+            .eq('user_id', userId)
+            .single();
+
+        if (profileError) {
+            // Se o perfil não existe (PGRST116), não é um erro fatal, apenas não há perfil.
+            if (profileError.code === 'PGRST116') {
+                console.warn(`useUser: Perfil não encontrado para user ${userId}. Criando perfil básico.`);
+                const nomeFallback = userEmail?.split('@')[0] || 'Usuário';
+                const iniciaisFallback = (nomeFallback.charAt(0) || 'U').toUpperCase();
+                const basicProfile: UserProfile = { id: userId, nome: nomeFallback, sobrenome: '', iniciais: iniciaisFallback, role: 'user' };
+                setProfile(basicProfile);
+                globalProfileCache = basicProfile;
+                return;
+            }
+            throw profileError;
+        }
+
+        if (data) {
+            const nome = data.nome || '';
+            const sobrenome = data.sobrenome || '';
+            const emailInicial = userEmail?.charAt(0).toUpperCase();
+            const baseIniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+            const iniciais = baseIniciais.trim() ? baseIniciais : (emailInicial || 'U');
+            
+            const userProfileData: UserProfile = {
+                id: data.user_id,
+                nome: data.nome,
+                sobrenome: data.sobrenome,
+                avatar_url: data.avatar_url,
+                iniciais,
+                role: data.role,
+            };
+            setProfile(userProfileData);
+            globalProfileCache = userProfileData;
+        } else {
+            setProfile(null);
+            globalProfileCache = null;
+        }
+    } catch (profileError) {
+        console.error("useUser: Erro ao buscar perfil do usuário:", profileError);
+        setError(profileError instanceof Error ? profileError : new Error(String(profileError)));
+        setProfile(null);
+        globalProfileCache = null;
+    }
+  }, [supabase]);
 
   useEffect(() => {
-    // Adicionar assinante para atualizações
-    const updateState = () => {
-      setUser(globalUser);
-      setIsLoading(globalUserLoading);
-      setError(globalUserError);
+    let isMounted = true;
+
+    const processSession = async (session: Session | null) => {
+        if (!isMounted) return;
+
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        globalUserCache = currentUser;
+        setError(null);
+
+        if (currentUser) {
+            await fetchUserProfile(currentUser.id, currentUser.email);
+        } else {
+            setProfile(null);
+            globalProfileCache = null;
+        }
+        setIsLoading(false);
+        initialAuthCheckCompleted = true;
     };
 
-    // Adicionar como assinante
-    subscribers.add(updateState);
-
-    // Se for a primeira montagem e ainda estamos carregando globalmente, buscar o usuário
-    if (isFirstMount.current && globalUserLoading) {
-      isFirstMount.current = false;
-      
-      const supabase = createClient();
-      
-      // Função para buscar usuário (executada apenas uma vez globalmente)
-      const fetchUser = async () => {
-        try {
-          globalUserLoading = true;
-          notifySubscribers();
-          
-          const { data: { user }, error } = await supabase.auth.getUser();
-          
-          if (error) {
-            globalUserError = error instanceof Error ? error : new Error(String(error));
-            globalUser = null;
-          } else {
-            globalUser = user;
-            globalUserError = null;
-          }
-        } catch (e) {
-          globalUserError = e instanceof Error ? e : new Error(String(e));
-          globalUser = null;
-        } finally {
-          globalUserLoading = false;
-          notifySubscribers();
-        }
-      };
-
-      fetchUser();
-
-      // Configurar listener para mudanças na autenticação
-      // Ignoramos o retorno pois o listener persiste enquanto a aplicação estiver rodando
-      supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-        globalUser = session?.user ?? null;
-        notifySubscribers();
-      });
+    // Se a verificação inicial ainda não foi feita, faz agora.
+    if (!initialAuthCheckCompleted) {
+        setIsLoading(true);
+        supabase.auth.getSession()
+            .then(({ data: { session }, error: sessionError }) => {
+                if (sessionError) {
+                    console.error("useUser: Erro ao obter sessão inicial:", sessionError);
+                    setError(sessionError);
+                }
+                processSession(session);
+            })
+            .catch(err => {
+                 if (!isMounted) return;
+                console.error("useUser: Catch - Erro ao obter sessão inicial:", err);
+                setError(err instanceof Error ? err : new Error(String(err)));
+                processSession(null);
+            });
     }
 
-    // Limpar assinante ao desmontar
-    return () => {
-      subscribers.delete(updateState);
-    };
-  }, []);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log(`useUser: Auth event - ${event}, User ID: ${session?.user?.id}`);
+        processSession(session);
+    });
 
-  return { user, isLoading, error };
+    return () => {
+      isMounted = false;
+      authListener?.subscription.unsubscribe();
+    };
+  }, [supabase, fetchUserProfile]);
+
+  return { user, profile, isLoading, error };
 }

@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx
 "use client";
 
 import Link from "next/link";
@@ -6,25 +7,23 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
-import { createClient } from '@/utils/supabase/client';
-import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client'; // Mantido para signOut
+import { useUser } from '../../hooks/useUser'; // Importar o hook centralizado
 
 const Header = () => {
-  const supabase = createClient();
+  const supabase = createClient(); // Usado apenas para signOut
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { openContatoModal } = useModal();
   const { scrollY } = useScroll();
 
-  // Estados para autenticação e perfil do usuário
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<{ nome: string; sobrenome: string; iniciais: string } | null>(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  // Usar o hook centralizado para estado de autenticação e perfil
+  const { user: currentUser, profile: userProfile, isLoading: isLoadingAuth } = useUser();
+
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   
-  // Valores para transformações baseadas no scroll - com transições mais suaves
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
   const logoScale = useTransform(scrollY, [0, 100], [1, 0.72]);
@@ -34,85 +33,12 @@ const Header = () => {
     ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
   
-  // Fechar o menu ao trocar de página
   useEffect(() => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
-  }, [pathname, isMenuOpen, setIsMenuOpen]);
+  }, [pathname, isMenuOpen]); // Removido setIsMenuOpen da dependência
 
-  // Efeito para autenticação e busca de perfil
-  useEffect(() => {
-    let isMounted = true;
-    if (isMounted) setIsLoadingAuth(true); // Inicia o loading aqui
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
-      if (!isMounted) return;
-
-      // Não precisa de setIsLoadingAuth(true) aqui, pois o efeito já começa com true
-      // ou o evento subsequente já terá o loading tratado no final.
-      const user = session?.user ?? null;
-      setCurrentUser(user);
-
-      if (user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('nome, sobrenome')
-          .eq('user_id', user.id)
-          .single();
-
-        if (isMounted) {
-          if (profile && !profileError) {
-            const nome = profile.nome || '';
-            const sobrenome = profile.sobrenome || '';
-            const baseIniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
-            const emailInicial = user.email?.charAt(0).toUpperCase();
-            const iniciais = baseIniciais.trim() ? baseIniciais : (emailInicial || 'U');
-            setUserProfile({ nome, sobrenome, iniciais });
-          } else {
-            console.error("Header (onAuthChange): Erro ao buscar perfil ou perfil vazio", profileError);
-            const iniciais = (user.email?.charAt(0) || 'U').toUpperCase();
-            setUserProfile({ nome: 'Usuário', sobrenome: '', iniciais });
-          }
-          setIsLoadingAuth(false); // Define loading false APÓS tentar buscar/definir perfil
-        }
-      } else { 
-        if (isMounted) {
-          setUserProfile(null);
-          setIsUserDropdownOpen(false);
-          setIsLoadingAuth(false); // Define loading false pois não há usuário para carregar
-        }
-      }
-    });
-
-    // Chamada inicial a getSession para tratar o caso de já existir uma sessão
-    // mas principalmente para desligar o isLoadingAuth se não houver nenhuma sessão inicial
-    // e o onAuthStateChange ainda não tiver sido disparado com uma sessão nula.
-    supabase.auth.getSession().then(({ data: { session: initialSession } }: { data: { session: Session | null } }) => {
-      if (!isMounted) return;
-      if (!initialSession?.user && !currentUser) { // Adicionado !currentUser para segurança
-        // Se getSession não encontrou usuário E o onAuthStateChange ainda não definiu um currentUser,
-        // então podemos com mais segurança dizer que não há sessão e parar o loading.
-        setIsLoadingAuth(false);
-      }
-      // Se initialSession.user existir, ou se currentUser já foi populado,
-      // confiamos que o onAuthStateChange (que já foi configurado e provavelmente já disparou ou vai disparar)
-      // lidará com o estado corretamente, incluindo setIsLoadingAuth(false) no seu próprio fluxo.
-    }).catch((error: Error) => {
-        if(isMounted) {
-            console.error("Header: Erro no getSession inicial", error);
-            setIsLoadingAuth(false); // Para o loading em caso de erro também.
-        }
-    });
-
-    return () => {
-      isMounted = false;
-      authListener?.subscription.unsubscribe();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, router]);
-
-  // Efeito para fechar dropdown ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
@@ -130,12 +56,12 @@ const Header = () => {
   }, [isUserDropdownOpen]);
 
   const handleLogout = async () => {
-    setIsUserDropdownOpen(false); // Fechar dropdown primeiro
+    setIsUserDropdownOpen(false);
     await supabase.auth.signOut();
-    setCurrentUser(null);
-    setUserProfile(null);
-    router.push('/'); // Redireciona para a home após o logout
-    // router.refresh(); // Opcional, para forçar refresh do estado do servidor
+    // O hook useUser vai pegar a mudança e atualizar o estado.
+    // Opcionalmente, pode redirecionar aqui ou deixar que outros componentes reajam à ausência de usuário.
+    router.push('/'); 
+    router.refresh(); // Força o refresh para limpar qualquer estado do servidor que dependa do user
   };
 
   return (
@@ -148,7 +74,7 @@ const Header = () => {
       }}
     >
       <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
-        {/* Logo à esquerda - animado */}
+        {/* Logo */}
         <motion.div>
           <Link href="/" className="flex items-center">
             <motion.div 
@@ -172,7 +98,7 @@ const Header = () => {
           </Link>
         </motion.div>
 
-        {/* Menu de navegação centralizado - desktop */}
+        {/* Menu Desktop */}
         <motion.nav 
           className="hidden lg:flex items-center justify-center flex-[0.7]"
           style={{ 
@@ -180,7 +106,8 @@ const Header = () => {
             scale: useTransform(scrollY, [0, 100], [1, 0.95]) 
           }}
         >
-          <div className="flex items-center justify-center">
+          {/* ... (links do menu como estavam) ... */}
+           <div className="flex items-center justify-center">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/" 
@@ -246,20 +173,16 @@ const Header = () => {
           </div>
         </motion.nav>
 
-        {/* Área direita - desktop */}
-        <motion.div 
-          className="hidden lg:flex items-center flex-[0.3]"
-        >
-          <div className="flex-1"></div> {/* Espaçador para empurrar conteúdo para direita */}
+        {/* Área Direita Desktop (Autenticação e Redes Sociais) */}
+        <motion.div className="hidden lg:flex items-center flex-[0.3]">
+          <div className="flex-1"></div>
           
-          {/* --- ÁREA DE AUTENTICAÇÃO MODIFICADA --- */}
           {isLoadingAuth ? (
             <div className="flex flex-col items-center mr-32">
                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
             </div>
           ) : currentUser && userProfile ? (
-            // Usuário Logado
             <div className="relative mr-32" ref={userDropdownRef}>
               <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
                 <motion.div 
@@ -299,7 +222,6 @@ const Header = () => {
               </AnimatePresence>
             </div>
           ) : (
-            // Usuário Deslogado (original)
             <motion.div 
               className="flex flex-col items-center mr-32"
               whileHover={{ scale: 1.05 }}
@@ -324,20 +246,18 @@ const Header = () => {
               </Link>
             </motion.div>
           )}
-          {/* --- FIM DA ÁREA DE AUTENTICAÇÃO MODIFICADA --- */}
           
-          {/* Área de "Siga-me nas redes sociais" */}
-          <motion.div 
-            className="flex flex-col items-center"
-          >
-            <div className="text-[10px] font-['Poppins'] mb-1 text-center">
+          {/* Redes Sociais */}
+          <motion.div className="flex flex-col items-center">
+            {/* ... (ícones de redes sociais como estavam) ... */}
+             <div className="text-[10px] font-['Poppins'] mb-1 text-center">
               <span className="text-[#52A4DB] font-bold">Siga-me</span>
               <span className="text-[#52A4DB]"> nas</span><br/>
               <span className="text-[#52A4DB]">redes sociais</span>
             </div>
             <div className="flex items-center">
               <motion.a 
-                href="https://facebook.com" 
+                href="https://facebook.com/lorenajacob.st" // Link Corrigido
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="mx-1.5 relative group"
@@ -354,7 +274,7 @@ const Header = () => {
                 </svg>
               </motion.a>
               <motion.a 
-                href="https://instagram.com" 
+                href="https://instagram.com/lorenajacob.st" // Link Corrigido
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="mx-1.5"
@@ -374,7 +294,7 @@ const Header = () => {
           </motion.div>
         </motion.div>
 
-        {/* Botão do menu mobile */}
+        {/* Botão Menu Mobile */}
         <motion.button 
           className="lg:hidden text-[#6E6B46] focus:outline-none"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -382,7 +302,8 @@ const Header = () => {
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.1 }}
         >
-          {isMenuOpen ? (
+          {/* ... (ícone do menu mobile como estava) ... */}
+           {isMenuOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -394,7 +315,7 @@ const Header = () => {
         </motion.button>
       </div>
 
-      {/* Menu móvel */}
+      {/* Menu Mobile */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
@@ -404,142 +325,88 @@ const Header = () => {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-          <nav className="flex flex-col space-y-2">
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="/" 
-                className={`text-[#6E6B46] text-xs ${pathname === '/' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
-              >
-                Início
-              </Link>
-            </motion.div>
+            <nav className="flex flex-col space-y-2">
+              {/* ... (links do menu mobile como estavam) ... */}
+               <motion.div whileTap={{ scale: 0.95 }}>
+                <Link href="/" className={`text-[#6E6B46] text-xs ${pathname === '/' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Início</Link>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Link href="/sobre" className={`text-[#6E6B46] text-xs ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Sobre Mim</Link>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Link href="/blog" className={`text-[#6E6B46] text-xs ${pathname === '/blog' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Blog</Link>
+              </motion.div>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <button onClick={() => { openContatoModal(); setIsMenuOpen(false); }} className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none text-left w-full`}>Contato</button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link href="/loja" prefetch={false} className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full">Loja</Link>
+              </motion.div>
             
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="/sobre" 
-                className={`text-[#6E6B46] text-xs ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
-              >
-                Sobre Mim
-              </Link>
-            </motion.div>
-            
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="/blog" 
-                className={`text-[#6E6B46] text-xs ${pathname === '/blog' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}
-              >
-                Blog
-              </Link>
-            </motion.div>
-            
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-            >
-              <button 
-                onClick={() => {
-                  openContatoModal();
-                  setIsMenuOpen(false);
-                }} 
-                className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none text-left w-full`}
-              >
-                Contato
-              </button>
-            </motion.div>
-            
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="/loja" 
-                prefetch={false}
-                className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full"
-              >
-                Loja
-              </Link>
-            </motion.div>
-            
-            <div className="flex justify-between pt-2 mt-1 border-t border-gray-200">
-              {/* Siga-me nas redes sociais (mobile) */}
-              <div className="flex flex-col">
-                <div className="text-[10px] font-['Poppins']">
-                  <span className="text-[#52A4DB] font-bold">Siga-me</span>
-                  <span className="text-[#52A4DB]"> nas redes sociais</span>
+              <div className="flex justify-between pt-2 mt-1 border-t border-gray-200">
+                 {/* Redes Sociais Mobile */}
+                <div className="flex flex-col">
+                   {/* ... (como estava) ... */}
+                    <div className="text-[10px] font-['Poppins']">
+                        <span className="text-[#52A4DB] font-bold">Siga-me</span>
+                        <span className="text-[#52A4DB]"> nas redes sociais</span>
+                    </div>
+                    <div className="flex items-center mt-1 space-x-2">
+                        <a href="https://facebook.com/lorenajacob.st" target="_blank" rel="noopener noreferrer"> {/* Link Corrigido */}
+                            <Image src="/assets/facebookHe.png" alt="Facebook" width={14} height={14} className="w-3.5 h-3.5"/>
+                        </a>
+                        <a href="https://instagram.com/lorenajacob.st" target="_blank" rel="noopener noreferrer"> {/* Link Corrigido */}
+                            <Image src="/assets/instagramHe.png" alt="Instagram" width={14} height={14} className="w-3.5 h-3.5"/>
+                        </a>
+                    </div>
                 </div>
-                <div className="flex items-center mt-1 space-x-2">
-                  <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-                    <Image 
-                      src="/assets/facebookHe.png" 
-                      alt="Facebook" 
-                      width={14} 
-                      height={14}
-                      className="w-3.5 h-3.5"
-                    />
-                  </a>
-                  <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-                    <Image 
-                      src="/assets/instagramHe.png" 
-                      alt="Instagram" 
-                      width={14} 
-                      height={14}
-                      className="w-3.5 h-3.5"
-                    />
-                  </a>
-                </div>
-              </div>
-              
-              {/* Minha Conta (mobile - adaptado para o novo estilo) */}
-              {isLoadingAuth ? (
-                <div className="flex flex-col items-center">
-                  <div className="w-4.5 h-4.5 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
-                  <div className="h-2 w-12 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-              ) : currentUser && userProfile ? (
-                 <div className="relative" ref={userDropdownRef}>
-                    <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
-                        <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-xs mb-0.5 border border-purple-300">
-                            {userProfile.iniciais || 'U'}
+                
+                {/* Minha Conta Mobile */}
+                {isLoadingAuth ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-4.5 h-4.5 bg-gray-200 rounded-full animate-pulse mb-0.5"></div> {/* Ajustado para `w-4.5 h-4.5` */}
+                    <div className="h-2 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                ) : currentUser && userProfile ? (
+                   <div className="relative" ref={userDropdownRef}>
+                      <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
+                          <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-xs mb-0.5 border border-purple-300">
+                              {userProfile.iniciais || 'U'}
+                          </div>
+                          <span className="text-[#365F71] text-[10px] font-['Poppins'] truncate max-w-[70px]">Olá, {userProfile.nome.split(' ')[0]}</span>
+                      </button>
+                      {isUserDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200"> {/* Ajustado w-36 */}
+                          <Link 
+                            href="/minha-conta" 
+                            onClick={() => { setIsUserDropdownOpen(false); setIsMenuOpen(false); }}
+                            className="block px-3 py-1.5 text-[10px] text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']" /* Ajustado padding e text size */
+                          >
+                            Minha Conta
+                          </Link>
+                          <button 
+                            onClick={() => { handleLogout(); setIsMenuOpen(false); }} 
+                            className="block w-full text-left px-3 py-1.5 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']" /* Ajustado padding e text size */
+                          >
+                            Sair
+                          </button>
                         </div>
-                        <span className="text-[#365F71] text-[10px] font-['Poppins']">Olá, {userProfile.nome.split(' ')[0]}</span>
-                    </button>
-                    {isUserDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200">
-                        <Link 
-                          href="/minha-conta" 
-                          onClick={() => setIsUserDropdownOpen(false)}
-                          className="block px-4 py-2 text-[10px] text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']"
-                        >
-                          Minha Conta
-                        </Link>
-                        <button 
-                          onClick={handleLogout} 
-                          className="block w-full text-left px-4 py-2 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']"
-                        >
-                          Sair
-                        </button>
-                      </div>
-                    )}
-                 </div>
-              ) : (
-                <Link href="/autenticacao" className="flex flex-col items-center">
-                  <Image 
-                    src="/assets/perfilIcon.png" 
-                    alt="Minha Conta" 
-                    width={18} 
-                    height={18}
-                    className="w-4.5 h-4.5 mb-0.5"
-                  />
-                  <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
-                </Link>
-              )}
-            </div>
-          </nav>
+                      )}
+                   </div>
+                ) : (
+                  <Link href="/autenticacao" className="flex flex-col items-center" onClick={() => setIsMenuOpen(false)}>
+                    <Image 
+                      src="/assets/perfilIcon.png" 
+                      alt="Minha Conta" 
+                      width={18} 
+                      height={18}
+                      className="w-4.5 h-4.5 mb-0.5" // Ajustado para `w-4.5 h-4.5`
+                    />
+                    <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
+                  </Link>
+                )}
+              </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>

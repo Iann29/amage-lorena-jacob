@@ -1,68 +1,47 @@
 // src/components/admin/AuthCheck.tsx
 "use client";
 
-import { useEffect, useState, ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
-import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { useUser } from '@/hooks/useUser'; // Importar o hook centralizado
 
 interface AuthCheckProps {
   children: ReactNode;
 }
 
 export default function AuthCheck({ children }: AuthCheckProps) {
-  const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null); // Estado para o usuário
+  const { user, isLoading, profile } = useUser(); // Usar o hook
 
   useEffect(() => {
-    let isMounted = true;
+    if (isLoading) {
+      return; // Aguarda o hook useUser terminar de carregar
+    }
 
-    // Função para lidar com o estado da sessão e redirecionar conforme necessário
-    const handleAuthSession = async (session: Session | null) => {
-      if (!isMounted) return;
+    const isLoginPage = pathname === '/admin/login';
+    const isAdminUser = profile?.role === 'admin';
 
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setIsLoading(false); // Importante: definir isLoading como false após obter a sessão
-
-      const isLoginPage = pathname === '/admin/login';
-
-      if (!currentUser && !isLoginPage) {
-        router.push('/admin/login');
-      } else if (currentUser && isLoginPage) {
+    if (!user && !isLoginPage) {
+      console.log("AuthCheck: Não há usuário e não é login page. Redirecionando para /admin/login");
+      router.push('/admin/login');
+    } else if (user && isLoginPage) {
+      // Se o usuário está logado E é admin, redireciona para /admin
+      // Se não for admin, o AdminLayout cuidará de redirecionar para home
+      if (isAdminUser) {
+        console.log("AuthCheck: Usuário logado na página de login. Redirecionando para /admin");
         router.push('/admin');
+      } else {
+        // Se logado mas não admin, e está na página de login do admin,
+        // idealmente o AdminLayout o redirecionaria para '/', mas
+        // como estamos no AuthCheck da página de login, é melhor redirecionar para home.
+        console.log("AuthCheck: Usuário logado (não admin) na página de login. Redirecionando para /");
+        router.push('/');
       }
-    };
-
-    // Verifica a sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
-      handleAuthSession(session);
-    }).catch((error: Error) => {
-      if (isMounted) {
-        console.error("AuthCheck: Erro ao obter sessão inicial", error);
-        setIsLoading(false);
-        if (pathname !== '/admin/login') router.push('/admin/login');
-      }
-    });
-
-    // Ouve mudanças no estado de autenticação
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        if (isMounted) {
-          // Atualiza o usuário e lida com redirecionamentos baseado no novo estado da sessão
-          handleAuthSession(session);
-        }
-      }
-    );
-
-    return () => {
-      isMounted = false;
-      authListener?.subscription.unsubscribe();
-    };
-  }, [pathname, router, supabase.auth]); // pathname e router como dependências
+    }
+    // A lógica de verificação de role 'admin' para acesso às páginas de admin
+    // será primariamente responsabilidade do AdminLayout.tsx
+  }, [user, isLoading, profile, pathname, router]);
 
   if (isLoading) {
     return (
@@ -72,13 +51,13 @@ export default function AuthCheck({ children }: AuthCheckProps) {
     );
   }
 
-  // Se não está carregando e o usuário está definido (logado), OU se estamos na página de login, renderiza children
+  // Se não está carregando E (tem usuário OU está na página de login), renderiza children
+  // A verificação de 'admin' role para proteger rotas internas do admin será feita no AdminLayout
   if (user || pathname === '/admin/login') {
     return <>{children}</>;
   }
   
-  // Se chegou aqui, significa que não está carregando, não tem usuário e não é a página de login.
-  // O useEffect já deveria ter redirecionado. Retornar o loader é uma segurança para evitar flash de conteúdo.
+  // Fallback, mas o useEffect deve ter redirecionado.
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
