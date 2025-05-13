@@ -70,7 +70,7 @@ export function useUser() {
 
       // Configurar listener para mudanças na autenticação
       // Ignoramos o retorno pois o listener persiste enquanto a aplicação estiver rodando
-      supabase.auth.onAuthStateChange((_event, session) => {
+      supabase.auth.onAuthStateChange((_event: any, session: any) => {
         globalUser = session?.user ?? null;
         notifySubscribers();
       });
