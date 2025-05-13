@@ -227,7 +227,7 @@ export default function Home() {
                 title="Treinamento para"
                 subtitle="Pais & Educadores"
                 buttonText="SAIBA MAIS"
-                linkHref="/servicos"
+                linkHref="/sobre"
                 backgroundImage="/assets/treinamento-bg.jpg"
               />
               
