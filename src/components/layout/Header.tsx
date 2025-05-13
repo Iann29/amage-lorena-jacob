@@ -98,7 +98,7 @@ const Header = () => {
       // Se initialSession.user existir, ou se currentUser já foi populado,
       // confiamos que o onAuthStateChange (que já foi configurado e provavelmente já disparou ou vai disparar)
       // lidará com o estado corretamente, incluindo setIsLoadingAuth(false) no seu próprio fluxo.
-    }).catch((error: any) => {
+    }).catch((error: Error) => {
         if(isMounted) {
             console.error("Header: Erro no getSession inicial", error);
             setIsLoadingAuth(false); // Para o loading em caso de erro também.

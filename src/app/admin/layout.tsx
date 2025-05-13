@@ -1,11 +1,9 @@
 // src/app/admin/layout.tsx
 "use client";
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import AuthCheck from '@/components/admin/AuthCheck'; // Importante: AuthCheck ainda é necessário

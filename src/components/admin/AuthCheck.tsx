@@ -40,7 +40,7 @@ export default function AuthCheck({ children }: AuthCheckProps) {
     // Verifica a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       handleAuthSession(session);
-    }).catch((error: any) => {
+    }).catch((error: Error) => {
       if (isMounted) {
         console.error("AuthCheck: Erro ao obter sessão inicial", error);
         setIsLoading(false);
