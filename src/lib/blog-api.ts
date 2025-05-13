@@ -76,7 +76,7 @@ export async function getPublishedBlogPosts(
 
     // Faz a requisição para a Edge Function
     const response = await fetch(url, {
-      next: { revalidate: 60 }, // Cache de 60 segundos (pode ajustar)
+      cache: 'no-store', // <<== DADOS SEMPRE FRESCOS
     });
 
     // Verifica se a requisição foi bem-sucedida
@@ -112,7 +112,7 @@ export async function getPublishedBlogPosts(
 export async function getPublicBlogCategories(): Promise<BlogCategoryPublic[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/blog-categories`, {
-      next: { revalidate: 300 }, // Cache de 5 minutos
+      cache: 'no-store', // <<== DADOS SEMPRE FRESCOS
     });
 
     if (!response.ok) {
@@ -139,8 +139,10 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
   try {
     // Requisição para a Edge Function
     const response = await fetch(`${API_BASE_URL}/blog-post?slug=${encodeURIComponent(slug)}`, {
+      // Mantendo revalidate para posts individuais, pois podem ser atualizados com menos frequência
+      // e a revalidação por tag é uma boa prática aqui.
       next: {
-        revalidate: 60, // Cache de 60 segundos
+        revalidate: 60, 
         tags: [`blog-post-${slug}`]
       },
     });
@@ -171,7 +173,7 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostPublic | 
 export async function getPopularBlogPosts(limit: number = 3): Promise<BlogPostPublic[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/blog-popular?limit=${limit}`, {
-      next: { revalidate: 300 }, // Cache de 5 minutos
+      cache: 'no-store', // <<== DADOS SEMPRE FRESCOS PARA POSTS POPULARES TAMBÉM
     });
 
     if (!response.ok) {
