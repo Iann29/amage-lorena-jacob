@@ -12,6 +12,40 @@ import { motion } from "framer-motion";
 
 export default function Home() {
   // const { openContatoModal } = useModal(); // Removido - não utilizado
+
+  const instagramPostsData = [
+    {
+      link: "https://www.instagram.com/p/DJaFil7uiwT/",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/1.jpg",
+      altText: "Post 1 do Instagram de Lorena Jacob"
+    },
+    {
+      link: "https://www.instagram.com/p/DJSbLQEoCjj/?img_index=1",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/2.jpg",
+      altText: "Post 2 do Instagram de Lorena Jacob"
+    },
+    {
+      link: "https://www.instagram.com/p/DJIB1fBxass/",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/3.jpg",
+      altText: "Post 3 do Instagram de Lorena Jacob"
+    },
+    {
+      link: "https://www.instagram.com/p/DJC5ELqxCWJ/",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/4.jpg",
+      altText: "Post 4 do Instagram de Lorena Jacob"
+    },
+    {
+      link: "https://www.instagram.com/p/DI1BE1wRlec/",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/5.jpg",
+      altText: "Post 5 do Instagram de Lorena Jacob"
+    },
+    {
+      link: "https://www.instagram.com/p/DIv275cK5BJ/?img_index=1",
+      imageUrl: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/instagram-posts/6.jpg",
+      altText: "Post 6 do Instagram de Lorena Jacob"
+    }
+  ];
+
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -294,9 +328,25 @@ export default function Home() {
             
             {/* Imagens */}
             <div className="grid grid-cols-3 gap-4 md:w-1/2">
-              {/* Placeholder para 6 imagens de posts do Instagram */}
-              {[...Array(6)].map((_, index) => (
-                <div key={index} className="bg-white aspect-square rounded-lg"></div>
+              {instagramPostsData.map((post, index) => (
+                <a
+                  key={index}
+                  href={post.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block aspect-square rounded-lg overflow-hidden relative group hover:shadow-lg transition-shadow duration-300"
+                  aria-label={`Ver post ${index + 1} no Instagram`}
+                >
+                  <Image
+                    src={post.imageUrl}
+                    alt={post.altText}
+                    fill
+                    sizes="(max-width: 767px) 30vw, 15vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    priority={index < 3} // Prioriza o carregamento das primeiras 3 imagens
+                    quality={75}
+                  />
+                </a>
               ))}
             </div>
           </div>

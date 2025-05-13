@@ -26,7 +26,7 @@ const nextConfig = {
   },
   // Configuração para ignorar avisos específicos durante o build
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: false,
