@@ -39,10 +39,6 @@ export interface BlogPostFromDB {
   created_at: string;
   updated_at: string | null;
   user_profiles?: UserProfileInfo | null;
-  blog_post_categories: {
-    category_id?: string;
-    blog_categories?: { id: string; nome: string; }[]
-  }[];
   like_count: number;
   view_count: number;
   categorias: string[];
@@ -78,6 +74,7 @@ function getStoragePathFromUrl(url: string | null | undefined, bucketName: strin
 }
 
 export async function getAuthenticatedAdminId() {
+  // console.log("[Server Action Called] getAuthenticatedAdminId"); // Log opcional se precisar depurar esta especificamente
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Usuário não autenticado.");
@@ -90,6 +87,7 @@ export async function getAuthenticatedAdminId() {
 }
 
 export async function createPost(formData: PostFormData) {
+  console.log("[Server Action Called] createPost");
   const supabase = await createClient();
   try {
     const author_id = await getAuthenticatedAdminId();
@@ -141,6 +139,7 @@ export async function updatePost(
     formData: PostFormData,
     oldImageUrlFromClient?: string | null
 ) {
+  console.log("[Server Action Called] updatePost");
   const supabase = await createClient();
   try {
     await getAuthenticatedAdminId();
@@ -248,93 +247,96 @@ export async function getAdminBlogPosts(
   limit: number = 15,
   searchTerm?: string,
   categoryId?: string
-): Promise<GetAdminBlogPostsResponse> { // Ajustado tipo de retorno
-    const supabase = await createClient();
-    try {
-        await getAuthenticatedAdminId();
+): Promise<GetAdminBlogPostsResponse> { 
+  console.log(`[Server Action Called] getAdminBlogPosts - Page: ${page}, Limit: ${limit}, Search: ${searchTerm}, Category: ${categoryId}`);
+  const supabase = await createClient();
+  try {
+    await getAuthenticatedAdminId();
         
-        // Construir a query base
-        let query = supabase
-            .from('blog_posts')
-            .select(`
-                id, titulo, slug, resumo, conteudo, imagem_destaque_url,
-                author_id, author_nome, author_sobrenome,
-                is_published, published_at, created_at, updated_at, like_count, view_count,
-                blog_post_categories!inner ( category_id, blog_categories!inner ( id, nome ) )
-            `, { count: 'exact' }); // Adicionado count
+    // Construir a query base
+    let query = supabase
+        .from('blog_posts')
+        .select(`
+            id, titulo, slug, resumo, conteudo, imagem_destaque_url,
+            author_id, author_nome, author_sobrenome,
+            is_published, published_at, created_at, updated_at, like_count, view_count,
+            blog_post_categories!inner ( category_id, blog_categories!inner ( id, nome ) )
+        `, { count: 'exact' }); // Adicionado count
 
-        // Aplicar filtro de categoria SE fornecido
-        // Nota: Isso requer que a relação blog_post_categories -> blog_categories esteja definida
-        // e que o Supabase consiga fazer o join implícito corretamente aqui.
-        // Se falhar, precisaremos de uma abordagem diferente para filtro de categoria.
-        if (categoryId) {
-           query = query.eq('blog_post_categories.category_id', categoryId);
-        }
-
-        // Aplicar filtro de busca SE fornecido
-        if (searchTerm) {
-            const searchTermSanitized = searchTerm.replace(/[%_]/g, '\\$&'); // Escapar caracteres especiais
-            // Buscar no título, resumo ou nome/sobrenome do autor desnormalizado
-            query = query.or(`titulo.ilike.%${searchTermSanitized}%,resumo.ilike.%${searchTermSanitized}%,author_nome.ilike.%${searchTermSanitized}%,author_sobrenome.ilike.%${searchTermSanitized}%`);
-        }
-
-        // Aplicar ordenação
-        query = query.order('created_at', { ascending: false });
-
-        // Aplicar paginação
-        const rangeFrom = (page - 1) * limit;
-        const rangeTo = rangeFrom + limit - 1;
-        query = query.range(rangeFrom, rangeTo);
-
-        // Executar a query
-        const { data: postsData, error: postsError, count } = await query;
-
-        if (postsError) { 
-          console.error("Erro buscar posts admin (paginado/filtrado):", postsError.message);
-          // Se o erro for relação não encontrada no filtro de categoria, logar aviso
-          if (postsError.message.includes('relationship') && postsError.message.includes('blog_post_categories')) {
-              console.warn("Não foi possível filtrar por categoria via join implícito.");
-          }
-          return { success: false, message: postsError.message }; 
-        }
-        if (!postsData) {
-            return { success: true, data: [], totalCount: 0 };
-        }
-
-        // Mapear os dados (lógica de mapeamento de categorias corrigida anteriormente)
-        const formattedPosts: BlogPostFromDB[] = postsData.map(post => {
-             const categoryIds: string[] = [];
-             const categoriesInfo: { id: string; nome: string; }[] = [];
-             let postCategoriesData: BlogPostFromDB['blog_post_categories'] = [];
-             if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
-                postCategoriesData = post.blog_post_categories;
-                for (const pc of post.blog_post_categories) {
-                     const category = pc.blog_categories?.[0]; // Acesso mantido pois agora o tipo suporta
-                     if (category?.id && category?.nome) {
-                        categoryIds.push(category.id);
-                        categoriesInfo.push({ id: category.id, nome: category.nome });
-                    }
-                }
-             }
-             return {
-                 ...post,
-                 conteudo: post.conteudo || '', 
-                 like_count: post.like_count ?? 0, 
-                 view_count: post.view_count ?? 0,
-                 user_profiles: { nome: post.author_nome || 'Autor', sobrenome: post.author_sobrenome || '' },
-                 blog_post_categories: postCategoriesData, 
-                 categorias: categoryIds, 
-                 categoriasInfo: categoriesInfo
-             } as BlogPostFromDB;
-        });
-        
-        return { success: true, data: formattedPosts, totalCount: count || 0 };
-
-    } catch (error: unknown) { 
-        console.error("Exceção buscar posts admin (paginado/filtrado):", (error instanceof Error ? error.message : String(error)));
-        // Se for erro de autenticação, a mensagem já estará no erro
-        return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." }; 
+    // Aplicar filtro de categoria SE fornecido
+    // Nota: Isso requer que a relação blog_post_categories -> blog_categories esteja definida
+    // e que o Supabase consiga fazer o join implícito corretamente aqui.
+    // Se falhar, precisaremos de uma abordagem diferente para filtro de categoria.
+    if (categoryId) {
+       query = query.eq('blog_post_categories.category_id', categoryId);
     }
+
+    // Aplicar filtro de busca SE fornecido
+    if (searchTerm) {
+        const searchTermSanitized = searchTerm.replace(/[%_]/g, '\\$&'); // Escapar caracteres especiais
+        // Buscar no título, resumo ou nome/sobrenome do autor desnormalizado
+        query = query.or(`titulo.ilike.%${searchTermSanitized}%,resumo.ilike.%${searchTermSanitized}%,author_nome.ilike.%${searchTermSanitized}%,author_sobrenome.ilike.%${searchTermSanitized}%`);
+    }
+
+    // Aplicar ordenação
+    query = query.order('created_at', { ascending: false });
+
+    // Aplicar paginação
+    const rangeFrom = (page - 1) * limit;
+    const rangeTo = rangeFrom + limit - 1;
+    query = query.range(rangeFrom, rangeTo);
+
+    // Executar a query
+    const { data: postsData, error: postsError, count } = await query;
+
+    if (postsError) { 
+      console.error("Erro buscar posts admin (paginado/filtrado):", postsError.message);
+      // Se o erro for relação não encontrada no filtro de categoria, logar aviso
+      if (postsError.message.includes('relationship') && postsError.message.includes('blog_post_categories')) {
+          console.warn("Não foi possível filtrar por categoria via join implícito.");
+      }
+      return { success: false, message: postsError.message }; 
+    }
+    if (!postsData) {
+        return { success: true, data: [], totalCount: 0 };
+    }
+
+    // Mapear os dados
+    const formattedPosts: BlogPostFromDB[] = postsData.map(post => {
+         const categoryIds: string[] = [];
+         const categoriesInfo: { id: string; nome: string; }[] = [];
+
+         if (post.blog_post_categories && Array.isArray(post.blog_post_categories)) {
+            for (const pc of post.blog_post_categories) {
+                 const category = pc.blog_categories?.[0]; 
+                 if (category?.id && category?.nome) {
+                    categoryIds.push(category.id);
+                    categoriesInfo.push({ id: category.id, nome: category.nome });
+                }
+            }
+         }
+         // Removendo explicitamente blog_post_categories do objeto post retornado
+         // para evitar confusão e usar apenas categoriasInfo para o display.
+         const { blog_post_categories, ...restOfPost } = post;
+
+         return {
+             ...restOfPost,
+             conteudo: restOfPost.conteudo || '', 
+             like_count: restOfPost.like_count ?? 0, 
+             view_count: restOfPost.view_count ?? 0,
+             user_profiles: { nome: restOfPost.author_nome || 'Autor', sobrenome: restOfPost.author_sobrenome || '' },
+             categorias: categoryIds, 
+             categoriasInfo: categoriesInfo
+         } as BlogPostFromDB;
+    });
+    
+    return { success: true, data: formattedPosts, totalCount: count || 0 };
+
+  } catch (error: unknown) { 
+      console.error("Exceção buscar posts admin (paginado/filtrado):", (error instanceof Error ? error.message : String(error)));
+      // Se for erro de autenticação, a mensagem já estará no erro
+      return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." }; 
+  }
 }
 
 // Interface para o retorno da RPC get_blog_stats

@@ -306,9 +306,6 @@ export default function AdminBlogPage() {
                   Autor
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Categorias
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Data
                 </th>
                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
@@ -320,12 +317,12 @@ export default function AdminBlogPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {isLoading && posts.length > 0 ? (
+              {isLoading && posts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     <div className="flex justify-center items-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500 mr-2"></div>
-                      Carregando...
+                      Carregando posts...
                     </div>
                   </td>
                 </tr>
@@ -373,24 +370,6 @@ export default function AdminBlogPage() {
                         {post.user_profiles ? `${post.user_profiles.nome} ${post.user_profiles.sobrenome}` : 'N/A'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        {post.blog_post_categories?.map((bpc) => {
-                          const category = bpc.blog_categories?.[0];
-                          return category ? (
-                            <span
-                                key={category.id}
-                                className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800"
-                            >
-                                {category.nome}
-                            </span>
-                          ) : null;
-                        })}
-                        {(!post.blog_post_categories || post.blog_post_categories.length === 0 || post.blog_post_categories.every(bpc => !bpc.blog_categories || bpc.blog_categories.length === 0)) && (
-                            <span className="text-xs text-gray-500">Nenhuma</span>
-                        )}
-                      </div>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(post.created_at).toLocaleDateString('pt-BR')}
                     </td>
@@ -425,7 +404,7 @@ export default function AdminBlogPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-600 font-medium">
+                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-600 font-medium">
                     Nenhum post encontrado com os filtros atuais.
                   </td>
                 </tr>

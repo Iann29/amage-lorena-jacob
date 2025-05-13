@@ -21,6 +21,7 @@ export async function submitNewComment(
   content: string,
   parentCommentId?: string | null // Pode ser null ou undefined
 ): Promise<SubmitCommentResponse> {
+  console.log("[Server Action Called] submitNewComment");
   // Aguardar a resolução da Promise do Supabase client
   const supabaseClient = await createClient();
 
@@ -118,6 +119,7 @@ interface GetCommentsResponse {
 }
 
 export async function getCommentsTreeByPostId(postId: string): Promise<GetCommentsResponse> {
+  console.log("[Server Action Called] getCommentsTreeByPostId for post:", postId);
   if (!postId) {
     return { success: false, message: "ID do post não fornecido." };
   }
@@ -235,6 +237,7 @@ interface ModerateCommentResponse {
 
 // Aprovar um comentário
 export async function approveComment(commentId: string): Promise<ModerateCommentResponse> {
+  console.log("[Server Action Called] approveComment for comment:", commentId);
   let postId: string | null = null; // Variável para guardar postId
   try {
     await getAuthenticatedAdminId();
@@ -292,6 +295,7 @@ export async function approveComment(commentId: string): Promise<ModerateComment
 
 // Desaprovar um comentário
 export async function unapproveComment(commentId: string): Promise<ModerateCommentResponse> {
+  console.log("[Server Action Called] unapproveComment for comment:", commentId);
   let postId: string | null = null;
   try {
     await getAuthenticatedAdminId();
@@ -346,6 +350,7 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
 
 // Deletar um comentário
 export async function deleteComment(commentId: string): Promise<ModerateCommentResponse> {
+  console.log("[Server Action Called] deleteComment for comment:", commentId);
   let postId: string | null = null;
   let wasApproved: boolean = false;
   let postSlug: string | null = null;
@@ -445,6 +450,7 @@ interface ListAdminCommentsResponse {
 export async function listCommentsForAdmin(
   options: ListAdminCommentsOptions = {}
 ): Promise<ListAdminCommentsResponse> {
+  console.log("[Server Action Called] listCommentsForAdmin with options:", options);
   const { status, postId, page = 1, limit = 20 } = options;
 
   try {
