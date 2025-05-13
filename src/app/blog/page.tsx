@@ -26,9 +26,6 @@ export default function BlogPage() {
   // Estado para armazenar informações de likes em lote
   const [likesInfo, setLikesInfo] = useState<{[postId: string]: {isLiked: boolean, likeCount: number}}>({});
   
-  // Verificar se o usuário está autenticado
-  const { user } = useUser();
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 9;

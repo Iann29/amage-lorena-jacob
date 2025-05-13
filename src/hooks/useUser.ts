@@ -8,7 +8,7 @@ import { User } from '@supabase/supabase-js';
 let globalUser: User | null = null;
 let globalUserLoading = true;
 let globalUserError: Error | null = null;
-let subscribers = new Set<() => void>();
+const subscribers = new Set<() => void>();
 
 // Função para notificar todos os assinantes sobre a mudança do usuário
 function notifySubscribers() {
@@ -69,7 +69,8 @@ export function useUser() {
       fetchUser();
 
       // Configurar listener para mudanças na autenticação
-      const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Ignoramos o retorno pois o listener persiste enquanto a aplicação estiver rodando
+      supabase.auth.onAuthStateChange((_event, session) => {
         globalUser = session?.user ?? null;
         notifySubscribers();
       });
