@@ -4,7 +4,7 @@
 import { useEffect, useState, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 interface AuthCheckProps {
   children: ReactNode;
@@ -20,8 +20,8 @@ export default function AuthCheck({ children }: AuthCheckProps) {
   useEffect(() => {
     let isMounted = true;
 
-    // Função para lidar com a sessão e redirecionamentos
-    const handleAuthSession = (session: Session | null) => {
+    // Função para lidar com o estado da sessão e redirecionar conforme necessário
+    const handleAuthSession = async (session: Session | null) => {
       if (!isMounted) return;
 
       const currentUser = session?.user ?? null;
@@ -38,9 +38,9 @@ export default function AuthCheck({ children }: AuthCheckProps) {
     };
 
     // Verifica a sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       handleAuthSession(session);
-    }).catch(error => {
+    }).catch((error: any) => {
       if (isMounted) {
         console.error("AuthCheck: Erro ao obter sessão inicial", error);
         setIsLoading(false);
@@ -50,7 +50,7 @@ export default function AuthCheck({ children }: AuthCheckProps) {
 
     // Ouve mudanças no estado de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
         if (isMounted) {
           // Atualiza o usuário e lida com redirecionamentos baseado no novo estado da sessão
           handleAuthSession(session);

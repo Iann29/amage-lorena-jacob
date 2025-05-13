@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
 import { createClient } from '@/utils/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const Header = () => {
   const supabase = createClient();
@@ -46,7 +46,7 @@ const Header = () => {
     let isMounted = true;
     if (isMounted) setIsLoadingAuth(true); // Inicia o loading aqui
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       if (!isMounted) return;
 
       // Não precisa de setIsLoadingAuth(true) aqui, pois o efeito já começa com true
@@ -88,7 +88,7 @@ const Header = () => {
     // Chamada inicial a getSession para tratar o caso de já existir uma sessão
     // mas principalmente para desligar o isLoadingAuth se não houver nenhuma sessão inicial
     // e o onAuthStateChange ainda não tiver sido disparado com uma sessão nula.
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    supabase.auth.getSession().then(({ data: { session: initialSession } }: { data: { session: Session | null } }) => {
       if (!isMounted) return;
       if (!initialSession?.user && !currentUser) { // Adicionado !currentUser para segurança
         // Se getSession não encontrou usuário E o onAuthStateChange ainda não definiu um currentUser,
@@ -98,7 +98,7 @@ const Header = () => {
       // Se initialSession.user existir, ou se currentUser já foi populado,
       // confiamos que o onAuthStateChange (que já foi configurado e provavelmente já disparou ou vai disparar)
       // lidará com o estado corretamente, incluindo setIsLoadingAuth(false) no seu próprio fluxo.
-    }).catch(error => {
+    }).catch((error: any) => {
         if(isMounted) {
             console.error("Header: Erro no getSession inicial", error);
             setIsLoadingAuth(false); // Para o loading em caso de erro também.

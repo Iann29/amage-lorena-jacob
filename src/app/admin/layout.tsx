@@ -1,10 +1,13 @@
 // src/app/admin/layout.tsx
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import AuthCheck from '@/components/admin/AuthCheck'; // Importante: AuthCheck ainda é necessário
 import { createClient } from '@/utils/supabase/client';
 
@@ -20,7 +23,11 @@ export default function AdminLayout({ children }: LayoutProps) {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [userInfo, setUserInfo] = useState<{
-    id: string; nome: string; sobrenome: string; iniciais: string; role: string;
+    id: string; 
+    nome: string; 
+    sobrenome: string; 
+    iniciais: string; 
+    role: string;
   } | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(true); // Estado de loading para dados do user
   const [showTokenExpiredMessage, setShowTokenExpiredMessage] = useState(false); // <<< NOVO ESTADO
@@ -134,7 +141,7 @@ export default function AdminLayout({ children }: LayoutProps) {
     fetchUserDataAndAuthorize();
 
      // Listener para deslogar automaticamente se a sessão for invalidada em outra aba
-     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+     const { data: authListener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
         if (isMounted && !isLoginPage) {
           if (event === 'SIGNED_OUT') {
             console.log(`Auth state changed to ${event} in AdminLayout, redirecting.`);

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import styles from "./styles.module.css";
 
 // Componente Fallback para Suspense (simples, pode ser mais elaborado)
@@ -114,7 +115,7 @@ function RecuperarSenhaContent() {
       }
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (!isMounted) return;
       console.log(`RecuperarSenhaPage: Evento Auth: ${event}`, session?.user?.id);
       
