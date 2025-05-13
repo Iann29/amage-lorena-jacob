@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react'; // Adicionado useCallback
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 // import Link from 'next/link'; // Removido - Link não utilizado
 import BlogPostCard from '@/components/blog/BlogPostCard';
@@ -11,8 +11,8 @@ import { getPublishedBlogPosts, getPublicBlogCategories, type BlogPostPublic, ty
 
 export default function BlogPage() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]); // Armazena IDs das categorias selecionadas
-  const [selectedTemas, setSelectedTemas] = useState<string[]>([]); // Mantido para o filtro de temas (UI)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedTemas, setSelectedTemas] = useState<string[]>([]);
 
   const [posts, setPosts] = useState<BlogPostPublic[]>([]);
   const [categorias, setCategorias] = useState<BlogCategoryPublic[]>([]);
@@ -22,42 +22,41 @@ export default function BlogPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 9; // 9 posts por página (3 colunas x 3 linhas)
+  const pageSize = 9;
 
-  const isMounted = useRef(true); // Para evitar updates de estado em componente desmontado
+  const isMounted = useRef(true);
 
-  // Função centralizada para buscar dados (posts e categorias)
-  // Usamos useCallback para memoizar e evitar recriações desnecessárias
-  const fetchData = useCallback(async (page: number, categoryId?: string, append = false) => {
+  // Função separada para buscar categorias apenas uma vez
+  const fetchCategories = useCallback(async () => {
+    if (categorias.length > 0) return; // Evita requisições duplicadas
+    
+    try {
+      const fetchedCategories = await getPublicBlogCategories();
+      if (isMounted.current) setCategorias(fetchedCategories);
+    } catch (err) {
+      console.error("Erro ao carregar categorias:", err);
+    }
+  }, [categorias.length]);
+
+  // Função otimizada para buscar apenas posts
+  const fetchPosts = useCallback(async (page: number, categoryId?: string, append = false) => {
     if (!append) setIsLoading(true);
     else setIsLoadingMore(true);
     setError(null);
 
     try {
-      // Busca categorias apenas na primeira carga ou se ainda não tiver
-      if (categorias.length === 0) {
-        const fetchedCategories = await getPublicBlogCategories();
-        // Verifica se o componente ainda está montado antes de atualizar o estado
-        if (isMounted.current) setCategorias(fetchedCategories);
-      }
-
-      // Busca posts passando a página e o ID da categoria (se houver)
       const response = await getPublishedBlogPosts(page, pageSize, categoryId);
 
-      // Verifica se o componente ainda está montado
       if (isMounted.current) {
         if (append) {
-          // Adiciona os novos posts aos existentes
           setPosts(prevPosts => [...prevPosts, ...response.posts]);
         } else {
-          // Substitui os posts (quando muda filtro ou volta pra pág 1)
           setPosts(response.posts);
         }
-        // Atualiza o total de páginas vindo da API
         setTotalPages(response.pagination.totalPages);
       }
     } catch (err) {
-      console.error("Erro ao carregar dados do blog:", err);
+      console.error("Erro ao carregar posts do blog:", err);
       if (isMounted.current) setError("Não foi possível carregar o conteúdo. Tente novamente.");
     } finally {
       if (isMounted.current) {
@@ -65,43 +64,35 @@ export default function BlogPage() {
         setIsLoadingMore(false);
       }
     }
-  // Dependências: pageSize e o array de categorias (para garantir que buscou uma vez)
-  }, [pageSize, categorias.length]);
+  }, [pageSize]);
 
-  // Efeito para buscar dados iniciais e quando a página ou categoria selecionada muda
+  // Efeito para carregar categorias uma única vez na montagem do componente
   useEffect(() => {
-    isMounted.current = true; // Define como montado ao iniciar o efeito
-    // Determina se é para anexar (append) - só anexa se não for a primeira página
-    const shouldAppend = currentPage > 1;
-    // Pega o primeiro ID de categoria selecionado (API atual só suporta um)
-    const categoryToFilter = selectedCategories[0]; // Undefined se nenhum selecionado
-    // Chama a função fetchData
-    fetchData(currentPage, categoryToFilter, shouldAppend);
-
-    // Função de limpeza que será executada quando o componente desmontar
-    // ou antes de o efeito rodar novamente
+    isMounted.current = true;
+    fetchCategories();
     return () => {
-      isMounted.current = false; // Define como desmontado
+      isMounted.current = false;
     };
-  // Dispara o efeito quando currentPage ou selectedCategories mudar
-  }, [currentPage, selectedCategories, fetchData]);
+  }, [fetchCategories]);
 
-  // Handler para mudança de categoria no filtro
+  // Efeito separado para carregar posts quando página ou filtros mudam
+  useEffect(() => {
+    const shouldAppend = currentPage > 1;
+    const categoryToFilter = selectedCategories[0];
+    fetchPosts(currentPage, categoryToFilter, shouldAppend);
+  }, [currentPage, selectedCategories, fetchPosts]);
+
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories(prev => {
-      // Se já está selecionado, deseleciona (limpa o filtro)
       if (prev.includes(categoryId)) {
         return [];
       } else {
-        // Senão, seleciona *apenas* este (sobrescreve seleção anterior)
         return [categoryId];
       }
     });
-    // <<== IMPORTANTE: Reseta para a página 1 ao mudar o filtro
     setCurrentPage(1);
   };
 
-  // Handler para mudança de tema (UI apenas por enquanto)
   const handleTemaChange = (tema: string) => {
     setSelectedTemas(prev =>
       prev.includes(tema)
@@ -110,15 +101,17 @@ export default function BlogPage() {
     );
   };
 
-  // Handler para o botão "Ver Mais"
   const handleLoadMore = () => {
-    // Só carrega mais se não estiver já carregando e se houver mais páginas
     if (!isLoadingMore && currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1); // Incrementa a página, o useEffect cuidará da busca
+      setCurrentPage(prev => prev + 1);
     }
   };
 
-  // Abre/fecha o painel de filtro
+  const handleRetry = () => {
+    // Reseta para página 1 e chama o useEffect naturalmente
+    setCurrentPage(1);
+  };
+
   const toggleFilterPanel = () => {
     setFilterPanelOpen(!filterPanelOpen);
   };
@@ -171,7 +164,7 @@ export default function BlogPage() {
           <div className="text-center my-8 p-4 bg-red-50 text-red-700 rounded-md">
             {error}
             <button
-              onClick={() => fetchData(1, selectedCategories[0])} // Tenta recarregar a primeira página
+              onClick={handleRetry}
               className="ml-2 underline"
             >
               Tentar novamente
@@ -184,9 +177,9 @@ export default function BlogPage() {
           {/* Painel de Filtros */}
           <BlogFilter
             isOpen={filterPanelOpen}
-            categorias={categorias} // Passa as categorias carregadas
-            selectedCategories={selectedCategories} // Passa os IDs selecionados
-            onCategoryChange={handleCategoryChange} // Passa o handler
+            categorias={categorias}
+            selectedCategories={selectedCategories}
+            onCategoryChange={handleCategoryChange}
             selectedTemas={selectedTemas}
             onTemaChange={handleTemaChange}
           />
@@ -231,7 +224,6 @@ export default function BlogPage() {
              )}
 
             {/* Botão Ver Mais */}
-            {/* Mostra se não estiver carregando, e se a página atual for menor que o total de páginas */}
             {!isLoading && !isLoadingMore && currentPage < totalPages && (
               <button
                 onClick={handleLoadMore}
