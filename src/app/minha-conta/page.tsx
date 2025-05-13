@@ -1,10 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { 
+  LayoutDashboard, 
+  ShoppingBag, 
+  UserCog, 
+  LogOut,
+  HelpCircle,
+  Loader2, // Ícone de carregamento
+  CheckCircle, // Ícone de sucesso
+  XCircle // Ícone de erro
+} from 'lucide-react'; // Usar lucide para ícones consistentes
 
 // Os metadados agora são exportados de um arquivo separado
 // pois componentes 'use client' não podem exportar metadados
@@ -13,7 +23,7 @@ export default function MinhaContaPage() {
   const supabase = createClient();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   // Estados para autenticação e dados do usuário
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -26,7 +36,6 @@ export default function MinhaContaPage() {
   } | null>(null);
   
   // Estados para dados dinâmicos
-  const [pedidos, setPedidos] = useState<any[]>([]);
   const [cursos, setCursos] = useState<any[]>([]);
   const [downloads, setDownloads] = useState<any[]>([]);
   
@@ -42,149 +51,105 @@ export default function MinhaContaPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [formMessage, setFormMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
+  // Ref para controlar a chamada inicial do fetchUserData
+  const initialLoadDone = useRef(false);
+
   // Função para logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
+    router.push('/'); // Redirecionar para a home após logout
   };
 
   // Carregar dados do usuário e perfil
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserData = async (userToFetch: User) => {
+      if (!userToFetch) return; // Não tentar buscar se o usuário for nulo explicitamente
+      
+      // console.log("MinhaContaPage: Chamando fetchUserData para o usuário:", userToFetch.id);
       setIsLoading(true);
+      setFormMessage(null);
       
-      // Verificar se o usuário está autenticado
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        console.error("MinhaContaPage: Erro ao buscar sessão ou usuário não logado", sessionError);
-        router.push('/autenticacao');
-        return;
-      }
-      
-      const user = session.user;
-      setCurrentUser(user);
-      
-      // Buscar perfil do usuário
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (profileError) {
-        console.error("MinhaContaPage: Erro ao buscar perfil do usuário", profileError);
-      } else if (profile) {
-        // Formatar a data de cadastro
-        const dataCadastro = user.created_at 
-          ? new Date(user.created_at).toLocaleDateString('pt-BR') 
-          : new Date().toLocaleDateString('pt-BR');
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('nome, sobrenome, telefone')
+          .eq('user_id', userToFetch.id)
+          .single();
+        
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError;
+        } 
+        
+        const dataCadastro = userToFetch.created_at 
+          ? new Date(userToFetch.created_at).toLocaleDateString('pt-BR') 
+          : 'Data indisponível';
         
         setUserProfile({
-          nome: profile.nome || '',
-          sobrenome: profile.sobrenome || '',
-          email: user.email || '',
-          telefone: profile.telefone || '',
+          nome: profile?.nome || '',
+          sobrenome: profile?.sobrenome || '',
+          email: userToFetch.email || '',
+          telefone: profile?.telefone || '',
           dataCadastro
         });
         
-        // Preencher os valores do formulário
-        setFormValues({
-          ...formValues,
-          nome: profile.nome || '',
-          sobrenome: profile.sobrenome || '',
-          telefone: profile.telefone || '',
-        });
-      }
-      
-      // Buscar pedidos do usuário
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (ordersError) {
-        console.error("MinhaContaPage: Erro ao buscar pedidos", ordersError);
-      } else {
-        // Formatar os dados dos pedidos
-        const formattedOrders = ordersData.map(order => ({
-          id: order.id,
-          data: new Date(order.created_at).toLocaleDateString('pt-BR'),
-          status: order.status,
-          total: order.total_amount,
-          itens: order.order_items.map((item: any) => ({
-            nome: item.product_name,
-            quantidade: item.quantity,
-            preco: item.price
-          }))
+        setFormValues(prev => ({
+          ...prev,
+          nome: profile?.nome || '',
+          sobrenome: profile?.sobrenome || '',
+          telefone: profile?.telefone || '',
         }));
-        
-        setPedidos(formattedOrders);
+
+      } catch (error) {
+        console.error("MinhaContaPage: Erro geral ao buscar dados do usuário", error);
+        setFormMessage({ type: 'error', text: 'Erro ao carregar seus dados. Tente novamente mais tarde.' });
+      } finally {
+        setIsLoading(false);
       }
-      
-      // Buscar cursos do usuário
-      const { data: coursesData, error: coursesError } = await supabase
-        .from('user_courses')
-        .select('*, courses(*)')
-        .eq('user_id', user.id);
-      
-      if (coursesError) {
-        console.error("MinhaContaPage: Erro ao buscar cursos", coursesError);
-      } else {
-        // Formatar os dados dos cursos
-        const formattedCourses = coursesData.map((userCourse: any) => ({
-          id: userCourse.course_id,
-          nome: userCourse.courses?.name || 'Curso sem nome',
-          progresso: userCourse.progress || 0,
-          dataAcesso: userCourse.last_accessed 
-            ? new Date(userCourse.last_accessed).toLocaleDateString('pt-BR')
-            : 'Nunca acessado',
-          imagem: userCourse.courses?.cover_image || '/placeholder-curso-1.jpg'
-        }));
-        
-        setCursos(formattedCourses);
-      }
-      
-      // Buscar downloads do usuário
-      const { data: downloadsData, error: downloadsError } = await supabase
-        .from('user_downloads')
-        .select('*, products(*)')
-        .eq('user_id', user.id);
-      
-      if (downloadsError) {
-        console.error("MinhaContaPage: Erro ao buscar downloads", downloadsError);
-      } else {
-        // Formatar os dados dos downloads
-        const formattedDownloads = downloadsData.map((download: any) => ({
-          id: download.id,
-          nome: download.products?.name || 'Produto sem nome',
-          tipo: download.file_type || 'PDF',
-          tamanho: download.file_size || '0 MB',
-          dataCompra: download.created_at 
-            ? new Date(download.created_at).toLocaleDateString('pt-BR')
-            : new Date().toLocaleDateString('pt-BR')
-        }));
-        
-        setDownloads(formattedDownloads);
-      }
-      
-      setIsLoading(false);
     };
-    
-    fetchUserData();
-    
+
     // Listener para mudanças no estado de autenticação
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const user = session?.user ?? null;
+      const currentUserId = currentUser?.id;
+      
+      // console.log("MinhaContaPage: onAuthStateChange - Evento:", _event, "Session User ID:", user?.id, "Current User ID:", currentUserId);
+
+      if (user?.id && user.id !== currentUserId) {
+        // console.log("MinhaContaPage: Usuário mudou ou logou. Novo ID:", user.id, "Antigo ID:", currentUserId);
+        setCurrentUser(user); // Atualiza o usuário no estado
+        await fetchUserData(user); // Busca os dados para o novo usuário
+      } else if (!user && currentUserId) {
+        // console.log("MinhaContaPage: Usuário deslogou. Redirecionando.");
+        // Usuário deslogou
+        setCurrentUser(null);
+        setUserProfile(null);
+        setFormValues({ nome: '', sobrenome: '', telefone: '', senhaAtual: '', novaSenha: '', confirmarSenha: ''});
         router.push('/autenticacao');
+      } else if (!user && !currentUserId && !initialLoadDone.current) {
+         // console.log("MinhaContaPage: Nenhuma sessão na carga inicial, verificando...");
+         // Nenhuma sessão na carga inicial, verifica se já tentou buscar
+         // Tenta pegar a sessão uma vez para o carregamento inicial, caso o listener demore
+         const { data: { session: initialSession } } = await supabase.auth.getSession();
+         if (initialSession?.user) {
+            // console.log("MinhaContaPage: Sessão encontrada na verificação inicial, carregando dados.");
+            setCurrentUser(initialSession.user);
+            await fetchUserData(initialSession.user);
+         } else {
+            // console.log("MinhaContaPage: Nenhuma sessão encontrada na verificação inicial. Redirecionando.");
+            router.push('/autenticacao');
+         }
       }
+      initialLoadDone.current = true; // Marca que a lógica inicial do auth listener rodou
     });
     
     return () => {
+      // console.log("MinhaContaPage: Limpando listener de autenticação.");
       authListener?.subscription.unsubscribe();
     };
-  }, [supabase, router]);
+  // Removido currentUser e router das dependências para controle manual dentro do onAuthStateChange
+  // e para evitar re-execuções indesejadas do useEffect inteiro.
+  // O useEffect agora roda apenas uma vez na montagem para configurar o listener.
+  }, []); 
   
   // Função para atualizar dados do perfil
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -200,80 +165,100 @@ export default function MinhaContaPage() {
     
     // Validar campos
     if (!formValues.nome.trim()) {
-      setFormMessage({ type: 'error', text: 'Nome é obrigatório.' });
+      setFormMessage({ type: 'error', text: 'O campo Nome é obrigatório.' });
       setIsSaving(false);
       return;
     }
     
-    // Se tiver senha atual, validar nova senha
-    if (formValues.senhaAtual) {
-      if (!formValues.novaSenha) {
-        setFormMessage({ type: 'error', text: 'Nova senha é obrigatória.' });
-        setIsSaving(false);
-        return;
-      }
-      
-      if (formValues.novaSenha.length < 6) {
-        setFormMessage({ type: 'error', text: 'A senha deve ter pelo menos 6 caracteres.' });
-        setIsSaving(false);
-        return;
-      }
-      
-      if (formValues.novaSenha !== formValues.confirmarSenha) {
-        setFormMessage({ type: 'error', text: 'As senhas não coincidem.' });
-        setIsSaving(false);
-        return;
-      }
+    // Validar alteração de senha (apenas se nova senha foi digitada)
+    if (formValues.novaSenha) {
+        if (!formValues.senhaAtual) {
+            setFormMessage({ type: 'error', text: 'Digite sua senha atual para definir uma nova.' });
+            setIsSaving(false);
+            return;
+        }
+        if (formValues.novaSenha.length < 6) {
+            setFormMessage({ type: 'error', text: 'A nova senha deve ter pelo menos 6 caracteres.' });
+            setIsSaving(false);
+            return;
+        }
+        if (formValues.novaSenha !== formValues.confirmarSenha) {
+            setFormMessage({ type: 'error', text: 'A confirmação da nova senha não coincide.' });
+            setIsSaving(false);
+            return;
+        }
     }
     
     try {
-      // Atualizar perfil do usuário
+      // 1. Atualizar Perfil (nome, sobrenome, telefone)
+      const profileUpdateData: { nome: string; sobrenome: string; telefone?: string } = {
+        nome: formValues.nome.trim(),
+        sobrenome: formValues.sobrenome.trim(),
+      };
+      if (formValues.telefone.trim()) {
+        profileUpdateData.telefone = formValues.telefone.trim();
+      } else {
+        // Explicitamente setar como null se vazio, caso o Supabase/DB exija ou para limpar o campo
+         profileUpdateData.telefone = undefined; // Ou null, dependendo da definição da coluna
+      }
+
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .update({
-          nome: formValues.nome,
-          sobrenome: formValues.sobrenome,
-          telefone: formValues.telefone
-        })
+        .update(profileUpdateData)
         .eq('user_id', currentUser.id);
       
       if (profileError) {
-        throw new Error(`Erro ao atualizar perfil: ${profileError.message}`);
+        console.error("Erro ao atualizar perfil:", profileError);
+        throw new Error(`Erro ao atualizar dados: ${profileError.message}`);
       }
       
-      // Se tiver senha atual, atualizar senha
-      if (formValues.senhaAtual) {
+      // 2. Atualizar Senha (se campos preenchidos)
+      if (formValues.novaSenha && formValues.senhaAtual) {
+        // A API updateUser do Supabase Auth agora pode exigir a senha antiga para confirmação,
+        // mas a chamada atual `updateUser({ password: ... })` tenta mudar diretamente.
+        // Idealmente, verificaríamos a senha antiga primeiro, mas isso requer outra chamada ou uma função de Borda.
+        // Por simplicidade, vamos tentar atualizar diretamente.
         const { error: passwordError } = await supabase.auth.updateUser({
           password: formValues.novaSenha
         });
         
+        // Tratar erros específicos de senha (ex: senha atual incorreta, se aplicável pela política do Supabase)
         if (passwordError) {
-          throw new Error(`Erro ao atualizar senha: ${passwordError.message}`);
+            console.error("Erro ao atualizar senha:", passwordError);
+            // Verificar mensagem de erro específica para senha inválida, se houver
+            if (passwordError.message.includes("password")) { // Exemplo genérico
+                 throw new Error('Senha atual incorreta ou erro ao definir nova senha.');
+            }
+            throw new Error(`Erro ao atualizar senha: ${passwordError.message}`);
         }
         
-        // Limpar campos de senha
-        setFormValues({
-          ...formValues,
+        // Limpar campos de senha APENAS se a atualização for bem-sucedida
+        setFormValues(prev => ({
+          ...prev,
           senhaAtual: '',
           novaSenha: '',
           confirmarSenha: ''
-        });
+        }));
       }
       
       setFormMessage({ type: 'success', text: 'Dados atualizados com sucesso!' });
       
-      // Atualizar dados do perfil no estado
-      if (userProfile) {
-        setUserProfile({
-          ...userProfile,
-          nome: formValues.nome,
-          sobrenome: formValues.sobrenome,
-          telefone: formValues.telefone
-        });
-      }
+      // Atualizar dados do perfil no estado local para refletir a mudança imediatamente
+      setUserProfile(prev => prev ? {
+        ...prev,
+        nome: formValues.nome,
+        sobrenome: formValues.sobrenome,
+        telefone: formValues.telefone
+      } : null);
+
+      // Limpar campos de senha mesmo se não foram alterados (se o formulário for submetido com sucesso)
+      // Isso já é feito acima se a senha foi alterada com sucesso.
+      // Se não houve tentativa de alterar senha, não precisamos limpar.
+
     } catch (error: any) {
       console.error("Erro ao salvar dados:", error);
-      setFormMessage({ type: 'error', text: error.message || 'Ocorreu um erro ao salvar os dados.' });
+      // Usar a mensagem de erro gerada no bloco try
+      setFormMessage({ type: 'error', text: error.message || 'Ocorreu um erro ao salvar os dados. Tente novamente.' });
     } finally {
       setIsSaving(false);
     }
@@ -282,415 +267,165 @@ export default function MinhaContaPage() {
   // Handler para atualizar os valores do formulário
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormValues({
-      ...formValues,
+    setFormValues(prev => ({ // Usar função de atualização
+      ...prev,
       [name]: value
-    });
+    }));
+    // Limpar mensagem de erro ao digitar em qualquer campo
+    if (formMessage?.type === 'error') {
+        setFormMessage(null);
+    }
   };
 
-  // Componente de carregamento
-  if (isLoading) {
+  // Componente de carregamento melhorado
+  if (isLoading && !userProfile) { // Alterado para !userProfile para melhor refletir o estado de carregamento dos dados
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-700 rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-600">Carregando informações...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]"> {/* Centraliza na viewport */}
+        <Loader2 className="h-12 w-12 animate-spin text-purple-700" />
+        <span className="ml-4 text-lg text-gray-600">Carregando sua conta...</span>
       </div>
     );
   }
 
+  // Estrutura principal da página (Container e Grid)
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-purple-800 mb-8">Minha Conta</h1>
-      
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Menu lateral */}
-        <div className="md:w-1/4">
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 font-bold">
-                {userProfile?.nome.charAt(0) || 'U'}
+    <div className="bg-gray-50 min-h-screen"> {/* Fundo geral cinza claro */}
+      <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl"> {/* Container mais largo */}
+        
+        {/* Cabeçalho da Página */}
+        <div className="mb-8 md:mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800">Minha Conta</h1>
+            <p className="text-gray-500 mt-1">Gerencie suas informações, pedidos e cursos.</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Menu Lateral (Sidebar) */}
+          <aside className="lg:w-1/4">
+            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200"> {/* Sombra sutil e borda */}
+              {/* Informações do Usuário no Topo */}
+              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xl font-semibold">
+                  {/* Inicial do nome ou ícone padrão */}
+                  {userProfile?.nome ? userProfile.nome.charAt(0).toUpperCase() : <UserCog size={24} />}
               </div>
-              <div>
-                <h3 className="font-semibold">{userProfile?.nome} {userProfile?.sobrenome}</h3>
-                <p className="text-sm text-gray-500">{userProfile?.email}</p>
+                <div className="overflow-hidden"> {/* Evitar quebra de texto */}
+                  <h3 className="font-semibold text-gray-800 truncate">{userProfile?.nome} {userProfile?.sobrenome}</h3>
+                  <p className="text-sm text-gray-500 truncate">{userProfile?.email}</p>
               </div>
             </div>
             
-            <nav>
-              <ul className="space-y-1">
-                <li>
+              {/* Navegação Principal */}
+              <nav className="space-y-1 mb-6">
+                {[
+                  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                  { id: 'dados', label: 'Meus Dados', icon: UserCog },
+                ].map((item) => (
                   <button
-                    onClick={() => setActiveTab('dashboard')}
-                    className={`w-full text-left px-4 py-2 rounded-md ${activeTab === 'dashboard' ? 'bg-purple-100 text-purple-800 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors duration-150 ${
+                      activeTab === item.id 
+                        ? 'bg-purple-50 text-purple-700 font-medium' 
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+                    }`}
                   >
-                    Dashboard
+                    <item.icon size={18} className={`${activeTab === item.id ? 'text-purple-600' : 'text-gray-400'}`} />
+                    {item.label}
                   </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('pedidos')}
-                    className={`w-full text-left px-4 py-2 rounded-md ${activeTab === 'pedidos' ? 'bg-purple-100 text-purple-800 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                  >
-                    Meus Pedidos
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('cursos')}
-                    className={`w-full text-left px-4 py-2 rounded-md ${activeTab === 'cursos' ? 'bg-purple-100 text-purple-800 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                  >
-                    Meus Cursos
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('downloads')}
-                    className={`w-full text-left px-4 py-2 rounded-md ${activeTab === 'downloads' ? 'bg-purple-100 text-purple-800 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                  >
-                    Downloads
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('dados')}
-                    className={`w-full text-left px-4 py-2 rounded-md ${activeTab === 'dados' ? 'bg-purple-100 text-purple-800 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
-                  >
-                    Meus Dados
-                  </button>
-                </li>
-              </ul>
+                ))}
             </nav>
             
-            <div className="mt-6 pt-6 border-t border-gray-100">
-              <button 
-                onClick={handleLogout}
-                className="text-red-600 hover:text-red-800 font-medium"
-              >
+              {/* Links Adicionais e Logout */}
+              <div className="space-y-1 pt-4 border-t border-gray-100">
+                 <Link href="/contato" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-150">
+                    <HelpCircle size={18} className="text-gray-400" />
+                    Ajuda e Suporte
+                 </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors duration-150"
+                >
+                  <LogOut size={18} />
                 Sair da Conta
               </button>
             </div>
           </div>
+          </aside>
           
-          <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
-            <h3 className="text-lg font-semibold text-purple-800 mb-3">Precisa de ajuda?</h3>
-            <p className="text-gray-700 text-sm mb-4">
-              Se você tiver dúvidas sobre seu pedido ou conta, entre em contato conosco.
-            </p>
-            <Link href="/contato" className="text-purple-700 hover:text-purple-900 font-medium text-sm">
-              Ir para o Contato →
-            </Link>
-          </div>
-        </div>
-        
-        {/* Conteúdo principal */}
-        <div className="md:w-3/4">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            {/* Dashboard */}
+          {/* Conteúdo Principal (será ajustado nas próximas etapas) */}
+          <main className="lg:w-3/4">
+            <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-200 min-h-[400px]"> {/* Padding e altura mínima */}
+              {/* Dashboard (Exemplo inicial, será refatorado) */}
             {activeTab === 'dashboard' && (
               <div>
-                <h2 className="text-2xl font-semibold text-purple-800 mb-6">Dashboard</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <h3 className="font-semibold text-purple-800 mb-2">Pedidos</h3>
-                    <p className="text-3xl font-bold">{pedidos.length}</p>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <h3 className="font-semibold text-purple-800 mb-2">Cursos</h3>
-                    <p className="text-3xl font-bold">{cursos.length}</p>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <h3 className="font-semibold text-purple-800 mb-2">Downloads</h3>
-                    <p className="text-3xl font-bold">{downloads.length}</p>
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-purple-800 mb-4">Últimos Pedidos</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white">
-                    <thead>
-                      <tr>
-                        <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                          Pedido
-                        </th>
-                        <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                          Data
-                        </th>
-                        <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                          Total
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pedidos.length > 0 ? pedidos.slice(0, 3).map((pedido) => (
-                        <tr key={pedido.id}>
-                          <td className="py-3 px-4 border-b border-gray-200">
-                            <span className="font-medium">#{pedido.id}</span>
-                          </td>
-                          <td className="py-3 px-4 border-b border-gray-200">
-                            {pedido.data}
-                          </td>
-                          <td className="py-3 px-4 border-b border-gray-200">
-                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                              {pedido.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 border-b border-gray-200">
-                            R$ {pedido.total.toFixed(2).replace('.', ',')}
-                          </td>
-                        </tr>
-                      )) : (
-                        <tr>
-                          <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
-                            Você ainda não realizou nenhum pedido.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold text-purple-800 mb-4">Meus Cursos</h3>
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h2>
                   
-                  {cursos.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {cursos.slice(0, 2).map((curso) => (
-                        <div key={curso.id} className="border border-gray-200 rounded-lg p-4 flex items-center gap-4">
-                          <div className="w-16 h-16 bg-purple-200 rounded flex-shrink-0 flex items-center justify-center">
-                            <span className="text-purple-700 text-xs">Imagem</span>
-                          </div>
-                          <div className="flex-grow">
-                            <h4 className="font-medium">{curso.nome}</h4>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mt-2 mb-1">
-                              <div className="bg-purple-600 h-2 rounded-full" style={{ width: `${curso.progresso}%` }}></div>
-                            </div>
-                            <div className="flex justify-between text-xs text-gray-500">
-                              <span>{curso.progresso}% concluído</span>
-                              <span>Último acesso: {curso.dataAcesso}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-gray-500 text-center py-8">
-                      <p>Você ainda não possui cursos.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {/* Pedidos */}
-            {activeTab === 'pedidos' && (
-              <div>
-                <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Pedidos</h2>
-                
-                {pedidos.length > 0 ? (
-                  <div className="space-y-6">
-                    {pedidos.map((pedido) => (
-                      <div key={pedido.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="bg-gray-50 p-4 flex justify-between items-center">
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-medium">Pedido #{pedido.id}</span>
-                              <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                {pedido.status}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-500">Realizado em {pedido.data}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">Total</p>
-                            <p className="text-lg font-bold text-purple-800">
-                              R$ {pedido.total.toFixed(2).replace('.', ',')}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="p-4">
-                          <h3 className="font-medium mb-2">Itens do Pedido</h3>
-                          <div className="space-y-2">
-                            {pedido.itens.map((item, index) => (
-                              <div key={index} className="flex justify-between">
-                                <div>
-                                  <p>{item.nome}</p>
-                                  <p className="text-sm text-gray-500">Quantidade: {item.quantidade}</p>
-                                </div>
-                                <p className="font-medium">
-                                  R$ {item.preco.toFixed(2).replace('.', ',')}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  {/* Card de resumo de pedidos e tabela de últimos pedidos foram removidos daqui */}
+                  {/* O card de Informações da Conta foi mantido e ajustado para ocupar o espaço, ou pode ser centralizado se preferir */}
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8"> {/* Ajustado para 1 coluna ou conforme design desejado */} 
+                     <div className="bg-gradient-to-br from-gray-50 to-blue-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+                       <div className="flex items-center gap-3 mb-3">
+                         <UserCog className="text-blue-600" size={24} />
+                         <h3 className="text-lg font-semibold text-gray-700">Informações da Conta</h3>
                   </div>
-                ) : (
-                  <div className="text-gray-500 text-center py-8">
-                    <p>Você ainda não realizou nenhum pedido.</p>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Cursos */}
-            {activeTab === 'cursos' && (
-              <div>
-                <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Cursos</h2>
-                
-                {cursos.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {cursos.map((curso) => (
-                      <div key={curso.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="h-48 bg-purple-200 relative">
-                          <div className="absolute inset-0 flex items-center justify-center text-purple-700 font-medium">
-                            Imagem do Curso
-                          </div>
-                        </div>
-                        
-                        <div className="p-4">
-                          <h3 className="text-xl font-semibold mb-2">{curso.nome}</h3>
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className="text-gray-600">{curso.progresso}% concluído</span>
-                            <div className="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-purple-600" 
-                                style={{ width: `${curso.progresso}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          
-                          <p className="text-sm text-gray-500 mb-4">
-                            Último acesso: {curso.dataAcesso}
-                          </p>
-                          
-                          <button className="w-full bg-purple-700 text-white py-2 rounded-md font-medium hover:bg-purple-800 transition">
-                            Continuar Curso
+                       <p className="text-sm text-gray-600 mb-3">Gerencie seus dados pessoais e de acesso.</p>
+                       <button 
+                           onClick={() => setActiveTab('dados')}
+                           className="text-sm font-medium text-blue-700 hover:text-blue-900"
+                       >
+                           Editar meus dados →
                           </button>
                         </div>
-                      </div>
-                    ))}
                   </div>
-                ) : (
-                  <div className="text-gray-500 text-center py-8">
-                    <p>Você ainda não possui cursos.</p>
-                    <Link href="/loja" className="text-purple-700 hover:underline mt-2 inline-block">
-                      Explorar cursos disponíveis
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Downloads */}
-            {activeTab === 'downloads' && (
-              <div>
-                <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Downloads</h2>
-                
-                {downloads.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white">
-                      <thead>
-                        <tr>
-                          <th className="py-3 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Produto
-                          </th>
-                          <th className="py-3 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Tipo
-                          </th>
-                          <th className="py-3 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Tamanho
-                          </th>
-                          <th className="py-3 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Data de Compra
-                          </th>
-                          <th className="py-3 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Ações
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {downloads.map((download) => (
-                          <tr key={download.id}>
-                            <td className="py-3 px-4 border-b border-gray-200">
-                              <span className="font-medium">{download.nome}</span>
-                            </td>
-                            <td className="py-3 px-4 border-b border-gray-200">
-                              {download.tipo}
-                            </td>
-                            <td className="py-3 px-4 border-b border-gray-200">
-                              {download.tamanho}
-                            </td>
-                            <td className="py-3 px-4 border-b border-gray-200">
-                              {download.dataCompra}
-                            </td>
-                            <td className="py-3 px-4 border-b border-gray-200">
-                              <button className="bg-purple-700 text-white px-3 py-1 rounded text-sm hover:bg-purple-800 transition">
-                                Download
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="text-gray-500 text-center py-8">
-                    <p>Você ainda não possui downloads disponíveis.</p>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Meus Dados */}
+                  
+                </div>
+              )}
+              
+              {/* Conteúdo da aba 'pedidos' foi completamente removido */}
+              
+              {/* Meus Dados (Exemplo inicial, será refatorado) */}
             {activeTab === 'dados' && (
               <div>
                 <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Dados</h2>
                 
-                {formMessage && (
-                  <div className={`mb-6 p-4 rounded-md ${
-                    formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
-                  }`}>
-                    {formMessage.text}
-                  </div>
-                )}
-                
-                <form className="max-w-2xl" onSubmit={handleUpdateProfile}>
+                  {formMessage && (
+                    <div className={`mb-6 p-4 rounded-md ${
+                      formMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' 
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}>
+                      {formMessage.text}
+                    </div>
+                  )}
+                  
+                  <form className="max-w-2xl" onSubmit={handleUpdateProfile}>
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-700 mb-4">Dados Pessoais</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome</label>
+                          <label htmlFor="nome" className="block text-gray-700 font-medium mb-1">Nome</label>
                         <input
                           type="text"
                           id="nome"
                           name="nome"
-                          value={formValues.nome}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="sobrenome" className="block text-gray-700 font-medium mb-1">Sobrenome</label>
-                        <input
-                          type="text"
-                          id="sobrenome"
-                          name="sobrenome"
-                          value={formValues.sobrenome}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            value={formValues.nome}
+                            onChange={handleInputChange}
+                            placeholder="Digite seu nome"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="sobrenome" className="block text-gray-700 font-medium mb-1">Sobrenome</label>
+                          <input
+                            type="text"
+                            id="sobrenome"
+                            name="sobrenome"
+                            value={formValues.sobrenome}
+                            onChange={handleInputChange}
+                            placeholder="Digite seu sobrenome"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
                         />
                       </div>
                       
@@ -700,8 +435,8 @@ export default function MinhaContaPage() {
                           type="email"
                           id="email"
                           name="email"
-                          value={userProfile?.email || ''}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
+                            value={userProfile?.email || ''}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                           disabled
                         />
                         <p className="text-xs text-gray-500 mt-1">
@@ -715,9 +450,10 @@ export default function MinhaContaPage() {
                           type="tel"
                           id="telefone"
                           name="telefone"
-                          value={formValues.telefone}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            value={formValues.telefone}
+                            onChange={handleInputChange}
+                            placeholder="Digite seu telefone"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
                         />
                       </div>
                     </div>
@@ -733,9 +469,11 @@ export default function MinhaContaPage() {
                           type="password"
                           id="senhaAtual"
                           name="senhaAtual"
-                          value={formValues.senhaAtual}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            value={formValues.senhaAtual}
+                            onChange={handleInputChange}
+                            placeholder="Digite sua senha atual"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            autoComplete="current-password"
                         />
                       </div>
                       
@@ -745,9 +483,11 @@ export default function MinhaContaPage() {
                           type="password"
                           id="novaSenha"
                           name="novaSenha"
-                          value={formValues.novaSenha}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            value={formValues.novaSenha}
+                            onChange={handleInputChange}
+                            placeholder="Digite sua nova senha"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            autoComplete="new-password"
                         />
                       </div>
                       
@@ -757,9 +497,11 @@ export default function MinhaContaPage() {
                           type="password"
                           id="confirmarSenha"
                           name="confirmarSenha"
-                          value={formValues.confirmarSenha}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            value={formValues.confirmarSenha}
+                            onChange={handleInputChange}
+                            placeholder="Confirme sua nova senha"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            autoComplete="new-password"
                         />
                       </div>
                     </div>
@@ -768,36 +510,36 @@ export default function MinhaContaPage() {
                   <div className="flex gap-4">
                     <button
                       type="submit"
-                      className="bg-purple-700 text-white px-6 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[150px]"
-                      disabled={isSaving}
-                    >
-                      {isSaving ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Salvando...
-                        </>
-                      ) : 'Salvar Alterações'}
+                        className="bg-purple-700 text-white px-6 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[150px]"
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Salvando...
+                          </>
+                        ) : 'Salvar Alterações'}
                     </button>
                     
                     <button
                       type="button"
                       className="border border-gray-300 text-gray-700 px-6 py-2 rounded-md font-medium hover:bg-gray-50 transition"
-                      onClick={() => {
-                        // Resetar formulário para valores originais
-                        setFormValues({
-                          nome: userProfile?.nome || '',
-                          sobrenome: userProfile?.sobrenome || '',
-                          telefone: userProfile?.telefone || '',
-                          senhaAtual: '',
-                          novaSenha: '',
-                          confirmarSenha: ''
-                        });
-                        setFormMessage(null);
-                      }}
-                      disabled={isSaving}
+                        onClick={() => {
+                          // Resetar formulário para valores originais
+                          setFormValues({
+                            nome: userProfile?.nome || '',
+                            sobrenome: userProfile?.sobrenome || '',
+                            telefone: userProfile?.telefone || '',
+                            senhaAtual: '',
+                            novaSenha: '',
+                            confirmarSenha: ''
+                          });
+                          setFormMessage(null);
+                        }}
+                        disabled={isSaving}
                     >
                       Cancelar
                     </button>
@@ -806,6 +548,7 @@ export default function MinhaContaPage() {
               </div>
             )}
           </div>
+          </main>
         </div>
       </div>
     </div>
