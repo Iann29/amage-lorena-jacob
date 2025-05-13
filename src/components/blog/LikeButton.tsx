@@ -174,7 +174,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
           width={26}
           height={26}
         />
-        <span className="text-sm font-medium text-black">{initialLikeCount}</span>
+        <span className="text-sm font-bold text-black">{initialLikeCount}</span>
       </div>
     );
   }
@@ -200,7 +200,7 @@ export default function LikeButton({ itemId, itemType, initialLikeCount, initial
         height={26}
         className="transition-all"
       />
-      <span className="text-sm font-medium">{likes}</span>
+      <span className="text-sm font-bold text-black">{likes}</span>
     </button>
   );
 }
