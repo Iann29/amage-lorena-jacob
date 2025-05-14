@@ -13,12 +13,12 @@ const allSlidesData: SlideData[] = [
   {
     src: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/anuncios/anuncio1.webp",
     alt: "E-book Rotina Diária - Clique para comprar",
-    href: "/loja/ebook-rotina-diaria",
+    href: "#", // Link alterado
   },
   {
     src: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/anuncios/anuncio2.webp",
     alt: "sistema-de-comunicacao-por-troca-de-imagens",
-    href: "/loja/sistema-comunicacao-imagens", // POR FAVOR, VERIFIQUE ESTE LINK
+    href: "#", // Link alterado
   },
 ];
 
