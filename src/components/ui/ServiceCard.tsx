@@ -9,7 +9,8 @@ interface ServiceCardProps {
   subtitle?: string;
   buttonText: string;
   backgroundImage?: string;
-  linkHref: string;
+  linkHref?: string;
+  onButtonClick?: () => void;
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ 
@@ -17,7 +18,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   subtitle = '',
   buttonText, 
   backgroundImage,
-  linkHref 
+  linkHref,
+  onButtonClick
 }) => {
 
   // Dividir o título em duas partes se não houver subtítulo fornecido
@@ -92,11 +94,26 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           
           {/* Botão SAIBA MAIS */}
           <div className="absolute top-[127px] left-0 w-full flex justify-center z-10">
-            <Link href={linkHref}>
-              <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+            {onButtonClick ? (
+              <button 
+                type="button"
+                onClick={onButtonClick}
+                className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105" 
+                style={{ fontFamily: 'var(--font-museo-sans)' }}
+              >
+                {buttonText}
+              </button>
+            ) : linkHref ? (
+              <Link href={linkHref}>
+                <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  {buttonText}
+                </div>
+              </Link>
+            ) : (
+              <div className="flex items-center justify-center bg-gray-400 text-white text-lg font-bold w-[160px] h-[40px] rounded-lg cursor-not-allowed" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                 {buttonText}
               </div>
-            </Link>
+            )}
           </div>
         </div>
       </div>

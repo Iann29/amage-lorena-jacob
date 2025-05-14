@@ -3,7 +3,7 @@
 import Image from "next/image";
 // import Link from "next/link"; // Removido - não utilizado
 import ServiceCard from "@/components/ui/ServiceCard";
-// import { useModal } from "@/contexts/ModalContext"; // Removido - não utilizado
+import { useModal } from "@/contexts/ModalContext"; // Adicionar importação
 import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
@@ -26,7 +26,7 @@ interface CarouselPost {
 }
 
 export default function Home() {
-  // const { openContatoModal } = useModal(); // Removido - não utilizado
+  const { openContatoModal } = useModal(); // Chamar o hook
   const [carouselPosts, setCarouselPosts] = useState<CarouselPost[]>([]);
   const [isLoadingCarouselPosts, setIsLoadingCarouselPosts] = useState(true);
 
@@ -319,7 +319,7 @@ export default function Home() {
                 title="Palestras &"
                 subtitle="Consultorias"
                 buttonText="SAIBA MAIS"
-                linkHref="/contato"
+                onButtonClick={openContatoModal}
                 backgroundImage="/assets/palestras-bg.jpg"
               />
             </div>
