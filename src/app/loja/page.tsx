@@ -6,8 +6,33 @@ export const metadata = {
 };
 
 export default function LojaPage() {
-  // Dados mockados para os produtos
-  // Estes dados eventualmente virão do Supabase
+  // Flag para controlar a exibição da loja ou da mensagem "Em Breve"
+  const isLojaLive = false; // Mude para true para ativar a loja
+
+  if (!isLojaLive) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 text-center px-4 py-10">
+        <div className="max-w-lg">
+          <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+            Nossa Loja Chega em Breve!
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 mb-8">
+            Estamos preparando um espaço incrível com e-books e materiais exclusivos para você. 
+            Volte em breve para conferir as novidades!
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out text-lg"
+            style={{ fontFamily: 'var(--font-museo-sans)' }}
+          >
+            Voltar para a Página Inicial
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // O código da loja real começa aqui. Só será alcançado se isLojaLive = true;
   const produtos = [
     {
       id: 1,
@@ -91,7 +116,6 @@ export default function LojaPage() {
     }
   ];
 
-  // Categorias da loja
   const categorias = [
     { nome: 'E-books', slug: 'ebooks' },
     { nome: 'Cursos', slug: 'cursos' },
@@ -107,9 +131,7 @@ export default function LojaPage() {
       </p>
       
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar com filtros */}
         <div className="md:w-1/4">
-          {/* Categorias */}
           <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-semibold text-purple-800 mb-4">Categorias</h3>
             <ul className="space-y-2">
@@ -128,7 +150,6 @@ export default function LojaPage() {
             </ul>
           </div>
           
-          {/* Filtro de preço */}
           <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
             <h3 className="text-xl font-semibold text-purple-800 mb-4">Faixa de Preço</h3>
             <div className="space-y-2">
@@ -151,7 +172,6 @@ export default function LojaPage() {
             </div>
           </div>
           
-          {/* Banner promocional */}
           <div className="bg-purple-700 text-white p-6 rounded-lg">
             <h3 className="text-xl font-semibold mb-2">Kit Completo</h3>
             <p className="text-sm mb-4">
@@ -166,9 +186,7 @@ export default function LojaPage() {
           </div>
         </div>
         
-        {/* Lista de Produtos */}
         <div className="md:w-3/4">
-          {/* Controles de ordenação */}
           <div className="flex justify-between items-center mb-6">
             <div className="text-gray-600">
               Mostrando {produtos.length} produtos
@@ -184,11 +202,9 @@ export default function LojaPage() {
             </div>
           </div>
           
-          {/* Grid de produtos */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {produtos.map((produto) => (
               <div key={produto.id} className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition">
-                {/* Imagem do produto */}
                 <Link href={`/loja/${produto.slug}`}>
                   <div className="h-48 bg-purple-200 relative">
                     <div className="absolute inset-0 flex items-center justify-center text-purple-700 font-medium">
@@ -224,7 +240,6 @@ export default function LojaPage() {
             ))}
           </div>
           
-          {/* Paginação */}
           <div className="flex justify-center mt-12">
             <nav className="inline-flex">
               <a href="#" className="px-4 py-2 border border-gray-300 bg-white text-purple-700 rounded-l-md hover:bg-gray-50">
