@@ -6,7 +6,7 @@ import BlogPostCard from './BlogPostCard';
 
 // Interface para os dados do post do blog
 interface BlogPost {
-  id: number;
+  id: string;
   title: string;
   summary: string;
   imageUrl: string;

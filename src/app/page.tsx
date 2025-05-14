@@ -9,9 +9,59 @@ import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
 import TestimonialsCarousel from "@/components/ui/TestimonialsCarousel";
 import { motion } from "framer-motion";
+// Tipos e função da API do blog
+import { getPublishedBlogPosts, type BlogPostPublic } from '@/lib/blog-api';
+import { useEffect, useState } from "react";
+
+// Interface para os dados do post do blog como esperado pelo BlogCarousel
+interface CarouselPost {
+  id: string; // Mantido como string para compatibilidade com UUID da API
+  title: string;
+  summary: string;
+  imageUrl: string;
+  postUrl: string;
+  viewCount: number;
+  commentCount: number;
+  content?: string; // Adicionado para que o card possa extrair resumo se necessário
+}
 
 export default function Home() {
   // const { openContatoModal } = useModal(); // Removido - não utilizado
+  const [carouselPosts, setCarouselPosts] = useState<CarouselPost[]>([]);
+  const [isLoadingCarouselPosts, setIsLoadingCarouselPosts] = useState(true);
+
+  useEffect(() => {
+    const fetchBlogPostsForCarousel = async () => {
+      setIsLoadingCarouselPosts(true);
+      try {
+        // Buscar, por exemplo, os 6 posts mais recentes (página 1, 6 itens)
+        // Ajuste a paginação e ordenação conforme necessário e disponível na API
+        const { posts: apiPosts } = await getPublishedBlogPosts(1, 6);
+
+        const formattedPosts: CarouselPost[] = apiPosts.map((post: BlogPostPublic) => ({
+          id: post.id,
+          title: post.titulo,
+          // Usar resumo se disponível, senão deixar string vazia (ou extrair do conteúdo se preferir)
+          summary: post.resumo || "", 
+          // Passar o conteúdo completo para que BlogPostCard possa usar extractTextFromHtml
+          content: post.conteudo, 
+          imageUrl: post.imagem_destaque_url || "/assets/blog-placeholder.jpg", // Fallback para placeholder
+          postUrl: `/blog/${post.slug}`,
+          viewCount: post.view_count || 0,
+          commentCount: post.comment_count || 0,
+        }));
+        setCarouselPosts(formattedPosts);
+      } catch (error) {
+        console.error("Erro ao buscar posts para o carrossel:", error);
+        // Poderia definir um estado de erro aqui e exibir uma mensagem na UI
+        setCarouselPosts([]); // Define como vazio em caso de erro para não quebrar o carrossel
+      } finally {
+        setIsLoadingCarouselPosts(false);
+      }
+    };
+
+    fetchBlogPostsForCarousel();
+  }, []);
 
   const instagramPostsData = [
     {
@@ -366,64 +416,18 @@ export default function Home() {
           </div>
           
           {/* Cards do Blog - Carrossel */}
-          <BlogCarousel 
-            posts={[
-              {
-                id: 1,
-                title: "Título aqui",
-                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-1",
-                viewCount: 4,
-                commentCount: 2
-              },
-              {
-                id: 2,
-                title: "Título aqui",
-                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-2",
-                viewCount: 4,
-                commentCount: 2
-              },
-              {
-                id: 3,
-                title: "Título aqui",
-                summary: "Resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo aqui resumo do artigo.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-3",
-                viewCount: 4,
-                commentCount: 2
-              },
-              {
-                id: 4,
-                title: "Outro post",
-                summary: "Este é um post adicional que aparecerá quando o usuário clicar na seta para avançar no carrossel.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-4",
-                viewCount: 6,
-                commentCount: 3
-              },
-              {
-                id: 5,
-                title: "Mais um post",
-                summary: "Este é mais um post adicional para demonstrar a funcionalidade do carrossel de blog.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-5",
-                viewCount: 8,
-                commentCount: 4
-              },
-              {
-                id: 6,
-                title: "Post final",
-                summary: "Este é o último post de exemplo para o carrossel de posts do blog na página inicial.",
-                imageUrl: "/assets/blog-placeholder.jpg",
-                postUrl: "/blog/post-6",
-                viewCount: 5,
-                commentCount: 1
-              }
-            ]}
-          />
+          {isLoadingCarouselPosts ? (
+            <div className="text-center py-10">
+              <p>Carregando posts do blog...</p>
+              {/* Poderia adicionar um spinner aqui */}
+            </div>
+          ) : carouselPosts.length > 0 ? (
+            <BlogCarousel posts={carouselPosts} />
+          ) : (
+            <div className="text-center py-10">
+              <p>Nenhum post disponível no momento.</p>
+            </div>
+          )}
           
           {/* Botão para acessar o blog */}
           <div className="mt-16 text-center">
