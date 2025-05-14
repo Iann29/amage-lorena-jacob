@@ -47,16 +47,13 @@ export async function togglePostLike(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error("Erro de autenticação ao tentar curtir post:", authError?.message);
       return { success: false, message: "Usuário não autenticado." };
     }
 
-    // Modificando a forma da chamada RPC e tratamento de tipo
     const rpcResponse = await supabase
       .rpc("toggle_post_like", { p_post_id: postId });
 
     if (rpcResponse.error) {
-      console.error("Erro RPC ao alternar like:", rpcResponse.error.message);
       let userMessage = "Falha ao processar sua curtida. Tente novamente.";
       if (rpcResponse.error.message.includes("Usuário não autenticado")) {
         userMessage = "Você precisa estar logado para curtir um post.";
@@ -68,21 +65,14 @@ export async function togglePostLike(
       return { success: false, message: userMessage };
     }
 
-    // A RPC toggle_post_like retorna um array com um objeto (ou deveria)
-    // quando chamada com .rpc() sem .single() ou .maybeSingle()
-    // Se a RPC é definida para retornar TABLE(...), o `data` será um array.
     const resultData = rpcResponse.data as TogglePostLikeRpcResponse[] | null;
 
     if (!resultData || resultData.length === 0) {
-        console.error("Nenhum dado retornado ou array vazio pela RPC toggle_post_like para o post:", postId, "Raw response data:", rpcResponse.data);
-        return { success: false, message: "Ocorreu um erro inesperado ao processar sua curtida (RPC não retornou dados válidos)." };
+      return { success: false, message: "Ocorreu um erro inesperado ao processar sua curtida (RPC não retornou dados válidos)." };
     }
     
-    // Pegamos o primeiro (e único) elemento do array
     const likeInfo = resultData[0];
 
-    // Buscar o slug do post para revalidação
-    // É importante revalidar o path correto para o Next.js atualizar o cache da página.
     const { data: postSlugData, error: slugError } = await supabase
       .from("blog_posts")
       .select("slug")
@@ -93,13 +83,8 @@ export async function togglePostLike(
       console.warn(
         `Não foi possível obter o slug para o post ID ${postId} para revalidação. Erro: ${slugError?.message}`
       );
-      // Continuar mesmo se a revalidação do path específico falhar, mas logar o aviso.
-      // Uma revalidação mais genérica ou nenhuma revalidação pode ocorrer.
     } else {
       revalidatePath(`/blog/${postSlugData.slug}`);
-      // Considere revalidar outras páginas onde a contagem de likes possa aparecer,
-      // como a página principal do blog, se aplicável.
-      // revalidatePath("/blog");
     }
 
     return {
@@ -109,7 +94,7 @@ export async function togglePostLike(
       message: likeInfo.liked ? "Post curtido!" : "Like removido.",
     };
   } catch (error: unknown) {
-    console.error("Erro inesperado em togglePostLike:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] togglePostLike:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -151,13 +136,11 @@ export async function getPostLikeStatus(
     if (authError) {
       // Não é necessariamente um erro se o usuário não estiver logado,
       // apenas significa que ele não pode ter curtido o post.
-      console.log("Usuário não autenticado ao verificar status do like:", authError.message);
     }
     if (user) {
       userId = user.id;
     }
 
-    // Buscar a contagem de likes do post diretamente da tabela blog_posts
     const { data: postData, error: postError } = await supabase
       .from("blog_posts")
       .select("like_count")
@@ -166,7 +149,7 @@ export async function getPostLikeStatus(
 
     if (postError || !postData) {
       console.error(
-        `Erro ao buscar contagem de likes para post ${postId}:`,
+        `[ACTION ERROR] getPostLikeStatus - Erro ao buscar contagem de likes para post ${postId}:`,
         postError?.message
       );
       return { success: false, message: "Falha ao buscar dados do post." };
@@ -174,22 +157,20 @@ export async function getPostLikeStatus(
 
     const currentLikeCount = postData.like_count || 0;
 
-    // Se não houver usuário logado, ele não pode ter curtido o post.
     if (!userId) {
       return { success: true, isLiked: false, likeCount: currentLikeCount };
     }
 
-    // Verificar se existe um like do usuário para este post
     const { data: likeData, error: likeError } = await supabase
       .from("blog_post_likes")
       .select("id")
       .eq("post_id", postId)
       .eq("user_id", userId)
-      .maybeSingle(); // Use maybeSingle para não dar erro se não encontrar
+      .maybeSingle();
 
     if (likeError) {
       console.error(
-        `Erro ao verificar like do usuário ${userId} para post ${postId}:`,
+        `[ACTION ERROR] getPostLikeStatus - Erro ao verificar like do usuário ${userId} para post ${postId}:`,
         likeError.message
       );
       return {
@@ -200,11 +181,11 @@ export async function getPostLikeStatus(
 
     return {
       success: true,
-      isLiked: !!likeData, // true se likeData não for null (ou seja, o like existe)
+      isLiked: !!likeData,
       likeCount: currentLikeCount,
     };
   } catch (error: unknown) {
-    console.error("Erro inesperado em getPostLikeStatus:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] getPostLikeStatus:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -238,7 +219,6 @@ export async function toggleCommentLike(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error("Erro de autenticação ao tentar curtir comentário:", authError?.message);
       return { success: false, message: "Usuário não autenticado." };
     }
 
@@ -246,7 +226,6 @@ export async function toggleCommentLike(
       .rpc("toggle_comment_like", { p_comment_id: commentId });
 
     if (rpcResponse.error) {
-      console.error("Erro RPC ao alternar like do comentário:", rpcResponse.error.message);
       let userMessage = "Falha ao processar sua curtida no comentário. Tente novamente.";
       if (rpcResponse.error.message.includes("Usuário não autenticado")) {
         userMessage = "Você precisa estar logado para curtir um comentário.";
@@ -258,24 +237,13 @@ export async function toggleCommentLike(
       return { success: false, message: userMessage };
     }
 
-    const resultData = rpcResponse.data as TogglePostLikeRpcResponse[] | null; // Reutilizando a interface, pois a estrutura é a mesma
+    const resultData = rpcResponse.data as TogglePostLikeRpcResponse[] | null;
 
     if (!resultData || resultData.length === 0) {
-        console.error("Nenhum dado retornado pela RPC toggle_comment_like para o comentário:", commentId, "Raw response data:", rpcResponse.data);
-        return { success: false, message: "Ocorreu um erro inesperado ao processar sua curtida no comentário (RPC não retornou dados válidos)." };
+      return { success: false, message: "Ocorreu um erro inesperado ao processar sua curtida no comentário (RPC não retornou dados válidos)." };
     }
     
     const likeInfo = resultData[0];
-
-    // Para revalidar o path do post onde o comentário está, precisamos do slug do post.
-    // Isso pode exigir uma query adicional para buscar o post_id e depois o slug do post.
-    // Ou, se a UI dos comentários for carregada dinamicamente sem cache pesado do Next no lado do cliente,
-    // a revalidação pode não ser estritamente necessária para a contagem de likes do comentário em si,
-    // mas sim para a contagem agregada no post, se houver.
-    // Por simplicidade e como a contagem de likes do comentário geralmente é atualizada na UI dinamicamente,
-    // não farei a revalidação de path aqui, mas pode ser considerada.
-    // Ex: const { data: commentData } = await supabase.from('blog_comments').select('post_id').eq('id', commentId).single();
-    // Se commentData.post_id, buscar slug e revalidar.
 
     return {
       success: true,
@@ -284,7 +252,7 @@ export async function toggleCommentLike(
       message: likeInfo.liked ? "Comentário curtido!" : "Like do comentário removido.",
     };
   } catch (error: unknown) {
-    console.error("Erro inesperado em toggleCommentLike:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] toggleCommentLike:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",
@@ -314,7 +282,6 @@ export async function getCommentLikeStatus(
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError) {
-      console.log("Usuário não autenticado ao verificar status do like do comentário:", authError.message);
     }
     if (user) {
       userId = user.id;
@@ -322,14 +289,14 @@ export async function getCommentLikeStatus(
 
     const { data: commentData, error: commentError } = await supabase
       .from("blog_comments")
-      .select("like_count") // Supondo que 'blog_comments' tem 'like_count'
+      .select("like_count")
       .eq("id", commentId)
-      .eq("is_approved", true) // Apenas para comentários aprovados
+      .eq("is_approved", true)
       .single();
 
     if (commentError || !commentData) {
       console.error(
-        `Erro ao buscar contagem de likes para comentário ${commentId}:`,
+        `[ACTION ERROR] getCommentLikeStatus - Erro ao buscar contagem de likes para comentário ${commentId}:`,
         commentError?.message
       );
       return { success: false, message: "Falha ao buscar dados do comentário." };
@@ -350,7 +317,7 @@ export async function getCommentLikeStatus(
 
     if (likeError) {
       console.error(
-        `Erro ao verificar like do usuário ${userId} para comentário ${commentId}:`,
+        `[ACTION ERROR] getCommentLikeStatus - Erro ao verificar like do usuário ${userId} para comentário ${commentId}:`,
         likeError.message
       );
       return {
@@ -365,7 +332,7 @@ export async function getCommentLikeStatus(
       likeCount: currentLikeCount,
     };
   } catch (error: unknown) {
-    console.error("Erro inesperado em getCommentLikeStatus:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] getCommentLikeStatus:", (error instanceof Error ? error.message : String(error)));
     return {
       success: false,
       message: "Ocorreu um erro inesperado. Por favor, tente mais tarde.",

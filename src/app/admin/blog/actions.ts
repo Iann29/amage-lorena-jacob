@@ -74,7 +74,6 @@ function getStoragePathFromUrl(url: string | null | undefined, bucketName: strin
 }
 
 export async function getAuthenticatedAdminId() {
-  // console.log("[Server Action Called] getAuthenticatedAdminId"); // Log opcional se precisar depurar esta especificamente
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Usuário não autenticado.");
@@ -87,7 +86,6 @@ export async function getAuthenticatedAdminId() {
 }
 
 export async function createPost(formData: PostFormData) {
-  console.log("[Server Action Called] createPost");
   const supabase = await createClient();
   try {
     const author_id = await getAuthenticatedAdminId();
@@ -139,7 +137,6 @@ export async function updatePost(
     formData: PostFormData,
     oldImageUrlFromClient?: string | null
 ) {
-  console.log("[Server Action Called] updatePost");
   const supabase = await createClient();
   try {
     await getAuthenticatedAdminId();
@@ -219,7 +216,8 @@ export async function getPostForEdit(id: string): Promise<(Omit<BlogPostFromDB, 
       user_profiles: userProfileData, categorias: categoryIds
     };
   } catch (error: unknown) {
-    console.error(`Erro GERAL buscar post ${id} edit:`, (error instanceof Error ? error.message : String(error))); return null;
+    console.error(`[ACTION ERROR] getPostForEdit - ID ${id}:`, (error instanceof Error ? error.message : String(error)));
+    return null;
   }
 }
 
@@ -228,9 +226,15 @@ export async function getBlogCategories(): Promise<BlogCategoryFromDB[]> {
   try {
     const { data, error } = await supabase
       .from('blog_categories').select('id, nome').order('nome', { ascending: true });
-    if (error) { console.error("Erro buscar categorias:", (error instanceof Error ? error.message : String(error))); return []; }
+    if (error) { 
+      console.error("[ACTION ERROR] getBlogCategories:", (error instanceof Error ? error.message : String(error)));
+      return []; 
+    }
     return data || [];
-  } catch (error: unknown) { console.error("Exceção buscar categorias:", (error instanceof Error ? error.message : String(error))); return []; }
+  } catch (error: unknown) { 
+    console.error("[ACTION ERROR] getBlogCategories (Exception):", (error instanceof Error ? error.message : String(error)));
+    return []; 
+  }
 }
 
 // Interface para resposta da action com paginação
@@ -248,7 +252,6 @@ export async function getAdminBlogPosts(
   searchTerm?: string,
   categoryId?: string
 ): Promise<GetAdminBlogPostsResponse> { 
-  console.log(`[Server Action Called] getAdminBlogPosts - Page: ${page}, Limit: ${limit}, Search: ${searchTerm}, Category: ${categoryId}`);
   const supabase = await createClient();
   try {
     await getAuthenticatedAdminId();
@@ -290,10 +293,9 @@ export async function getAdminBlogPosts(
     const { data: postsData, error: postsError, count } = await query;
 
     if (postsError) { 
-      console.error("Erro buscar posts admin (paginado/filtrado):", postsError.message);
-      // Se o erro for relação não encontrada no filtro de categoria, logar aviso
+      console.error("[ACTION ERROR] getAdminBlogPosts - Erro ao buscar posts:", postsError.message);
       if (postsError.message.includes('relationship') && postsError.message.includes('blog_post_categories')) {
-          console.warn("Não foi possível filtrar por categoria via join implícito.");
+          console.warn("[ACTION WARN] getAdminBlogPosts - Não foi possível filtrar por categoria via join implícito.");
       }
       return { success: false, message: postsError.message }; 
     }
@@ -333,8 +335,7 @@ export async function getAdminBlogPosts(
     return { success: true, data: formattedPosts, totalCount: count || 0 };
 
   } catch (error: unknown) { 
-      console.error("Exceção buscar posts admin (paginado/filtrado):", (error instanceof Error ? error.message : String(error)));
-      // Se for erro de autenticação, a mensagem já estará no erro
+      console.error("[ACTION ERROR] getAdminBlogPosts (Exception):", (error instanceof Error ? error.message : String(error)));
       return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." }; 
   }
 }
@@ -358,12 +359,12 @@ export async function getDashboardBlogStats() {
       .single<BlogStatsRPCResponse>(); // <-- Adicionado tipo genérico
 
     if (rpcError) {
-      console.error("Erro ao chamar RPC get_blog_stats:", rpcError.message);
+      console.error("[ACTION ERROR] getDashboardBlogStats - Erro RPC:", rpcError.message);
       throw rpcError;
     }
 
     if (!statsData) {
-      console.error("RPC get_blog_stats não retornou dados.");
+      console.error("[ACTION ERROR] getDashboardBlogStats - RPC não retornou dados.");
       throw new Error("Falha ao buscar estatísticas do dashboard.");
     }
 
@@ -378,8 +379,7 @@ export async function getDashboardBlogStats() {
     };
     
   } catch (error: unknown) {
-    console.error("Erro geral ao buscar estatísticas do dashboard (RPC):", (error instanceof Error ? error.message : String(error)));
-    // Retorna o erro original se disponível, ou uma mensagem genérica
+    console.error("[ACTION ERROR] getDashboardBlogStats (Exception):", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao buscar estatísticas.", data: null };
   }
 }
@@ -400,12 +400,12 @@ export async function getRecentPostsForDashboard(limit: number = 5) {
       .limit(limit);
 
     if (error) {
-      console.error("Erro ao buscar posts recentes para o dashboard:", error.message);
+      console.error("[ACTION ERROR] getRecentPostsForDashboard:", error.message);
       throw error;
     }
     return { success: true, data: recentPosts || [] };
   } catch (error: unknown) {
-    console.error("Erro geral ao buscar posts recentes para o dashboard:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] getRecentPostsForDashboard (Exception):", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: (error instanceof Error ? error.message : String(error)), data: [] };
   }
 }
@@ -472,7 +472,7 @@ export async function deletePost(postId: string): Promise<{ success: boolean, me
 
   } catch (error: unknown) {
     // Captura erros da busca inicial ou da deleção do post no DB
-    console.error("Erro GERAL ao excluir post:", error);
+    console.error("[ACTION ERROR] deletePost - Erro GERAL:", error);
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Falha ao excluir post." };
   }
 }

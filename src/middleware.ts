@@ -37,22 +37,10 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // É CRUCIAL chamar supabase.auth.getUser() aqui.
-  // Isso atualiza o cookie de sessão se ele tiver expirado ou se um novo
-  // usuário acabou de fazer login. Se a sessão for atualizada, os manipuladores
-  // `set` ou `remove` acima serão chamados para atualizar os cookies da resposta.
-  const { data: { user: middlewareUser }, error: middlewareAuthError } = await supabase.auth.getUser();
+  // A chamada abaixo é importante para atualizar a sessão e os cookies.
+  await supabase.auth.getUser();
 
-  // Log para depuração
-  console.log("[Middleware] Path:", request.nextUrl.pathname);
-  if (middlewareAuthError) {
-    console.error("[Middleware] Auth Error:", middlewareAuthError.message);
-  } else if (middlewareUser) {
-    console.log("[Middleware] User ID:", middlewareUser.id);
-  } else {
-    console.log("[Middleware] No user session found.");
-  }
-  // Fim do log para depuração
+  // Logs de depuração removidos daqui
 
   return response
 }

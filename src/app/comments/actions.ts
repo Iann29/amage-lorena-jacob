@@ -21,8 +21,6 @@ export async function submitNewComment(
   content: string,
   parentCommentId?: string | null // Pode ser null ou undefined
 ): Promise<SubmitCommentResponse> {
-  console.log("[Server Action Called] submitNewComment");
-  // Aguardar a resolução da Promise do Supabase client
   const supabaseClient = await createClient();
 
   try {
@@ -86,7 +84,7 @@ export async function submitNewComment(
     };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao submeter comentário:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] submitNewComment (Exception):", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: "Ocorreu um erro inesperado. Por favor, tente mais tarde." };
   }
 }
@@ -119,7 +117,6 @@ interface GetCommentsResponse {
 }
 
 export async function getCommentsTreeByPostId(postId: string): Promise<GetCommentsResponse> {
-  console.log("[Server Action Called] getCommentsTreeByPostId for post:", postId);
   if (!postId) {
     return { success: false, message: "ID do post não fornecido." };
   }
@@ -145,7 +142,7 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
       .order('created_at', { ascending: true });
 
     if (commentsError) {
-      console.error("Erro ao buscar comentários (passo 1):", commentsError.message);
+      console.error("[ACTION ERROR] getCommentsTreeByPostId - Erro ao buscar comentários (passo 1):", commentsError.message);
       return { success: false, message: "Falha ao buscar comentários." };
     }
 
@@ -165,7 +162,7 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
         .in('user_id', userIds);
 
       if (profilesError) {
-        console.error("Erro ao buscar perfis de usuário (passo 2):", profilesError.message);
+        console.error("[ACTION ERROR] getCommentsTreeByPostId - Erro ao buscar perfis (passo 2):", profilesError.message);
         // Não falhar a requisição inteira, apenas os perfis podem ficar como padrão
       } else if (profilesFromDb) {
         profilesFromDb.forEach(profile => {
@@ -223,7 +220,7 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
     return { success: true, data: commentTree };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao buscar árvore de comentários:", (error instanceof Error ? error.message : String(error)));
+    console.error("[ACTION ERROR] getCommentsTreeByPostId (Exception):", (error instanceof Error ? error.message : String(error)));
     return { success: false, message: "Ocorreu um erro inesperado ao processar comentários." };
   }
 }
@@ -237,7 +234,6 @@ interface ModerateCommentResponse {
 
 // Aprovar um comentário
 export async function approveComment(commentId: string): Promise<ModerateCommentResponse> {
-  console.log("[Server Action Called] approveComment for comment:", commentId);
   let postId: string | null = null; // Variável para guardar postId
   try {
     await getAuthenticatedAdminId();
@@ -251,7 +247,7 @@ export async function approveComment(commentId: string): Promise<ModerateComment
       .single();
 
     if (fetchError || !commentData) {
-      console.error(`Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
+      console.error(`[ACTION ERROR] approveComment - Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
       return { success: false, message: "Comentário não encontrado para aprovação." };
     }
     postId = commentData.post_id;
@@ -263,7 +259,7 @@ export async function approveComment(commentId: string): Promise<ModerateComment
       .eq('id', commentId);
 
     if (updateError) {
-      console.error(`Erro ao aprovar comentário ${commentId}:`, updateError.message);
+      console.error(`[ACTION ERROR] approveComment - Erro ao aprovar comentário ${commentId}:`, updateError.message);
       return { success: false, message: "Falha ao aprovar comentário." };
     }
 
@@ -281,21 +277,20 @@ export async function approveComment(commentId: string): Promise<ModerateComment
       if (postData?.slug && !postFetchError) {
         revalidatePath(`/blog/${postData.slug}`);
       } else {
-         console.warn(`Não foi possível revalidar /blog/[slug] para post ${postId} após aprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+         console.warn(`[ACTION WARN] approveComment - Não foi possível revalidar /blog/[slug] para post ${postId} após aprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
       }
     }
 
     return { success: true, message: "Comentário aprovado!" };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao aprovar comentário:", error);
+    console.error("[ACTION ERROR] approveComment (Exception):", error);
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
 
 // Desaprovar um comentário
 export async function unapproveComment(commentId: string): Promise<ModerateCommentResponse> {
-  console.log("[Server Action Called] unapproveComment for comment:", commentId);
   let postId: string | null = null;
   try {
     await getAuthenticatedAdminId();
@@ -309,7 +304,7 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
       .single();
 
     if (fetchError || !commentData) {
-      console.error(`Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
+      console.error(`[ACTION ERROR] unapproveComment - Erro ao buscar postId para comentário ${commentId}:`, fetchError?.message);
       return { success: false, message: "Comentário não encontrado para desaprovação." };
     }
     postId = commentData.post_id;
@@ -321,7 +316,7 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
       .eq('id', commentId);
 
     if (updateError) {
-      console.error(`Erro ao desaprovar comentário ${commentId}:`, updateError.message);
+      console.error(`[ACTION ERROR] unapproveComment - Erro ao desaprovar comentário ${commentId}:`, updateError.message);
       return { success: false, message: "Falha ao desaprovar comentário." };
     }
 
@@ -336,21 +331,20 @@ export async function unapproveComment(commentId: string): Promise<ModerateComme
       if (postData?.slug && !postFetchError) {
         revalidatePath(`/blog/${postData.slug}`);
       } else {
-         console.warn(`Não foi possível revalidar /blog/[slug] para post ${postId} após desaprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+         console.warn(`[ACTION WARN] unapproveComment - Não foi possível revalidar /blog/[slug] para post ${postId} após desaprovar comentário ${commentId}. Erro: ${postFetchError?.message}`);
       }
     }
 
     return { success: true, message: "Comentário desaprovado." };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao desaprovar comentário:", error);
+    console.error("[ACTION ERROR] unapproveComment (Exception):", error);
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
 
 // Deletar um comentário
 export async function deleteComment(commentId: string): Promise<ModerateCommentResponse> {
-  console.log("[Server Action Called] deleteComment for comment:", commentId);
   let postId: string | null = null;
   let wasApproved: boolean = false;
   let postSlug: string | null = null;
@@ -367,7 +361,7 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
        .single();
 
     if (fetchError || !commentToDelete) {
-       console.error(`Erro ao buscar dados do comentário ${commentId} para deleção:`, fetchError?.message);
+       console.error(`[ACTION ERROR] deleteComment - Erro ao buscar dados do comentário ${commentId} para deleção:`, fetchError?.message);
        return { success: false, message: "Comentário não encontrado para deleção." };
     }
     postId = commentToDelete.post_id;
@@ -383,7 +377,7 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
       if (postData?.slug && !postFetchError) {
         postSlug = postData.slug;
       } else {
-         console.warn(`Não foi possível obter slug do post ${postId} para revalidação após deletar comentário ${commentId}. Erro: ${postFetchError?.message}`);
+         console.warn(`[ACTION WARN] deleteComment - Não foi possível obter slug do post ${postId} para revalidação após deletar comentário ${commentId}. Erro: ${postFetchError?.message}`);
       }
     }
 
@@ -394,7 +388,7 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
       .eq('id', commentId);
 
     if (deleteError) {
-      console.error(`Erro ao deletar comentário ${commentId}:`, deleteError.message);
+      console.error(`[ACTION ERROR] deleteComment - Erro ao deletar comentário ${commentId}:`, deleteError.message);
       return { success: false, message: "Falha ao deletar comentário." };
     }
 
@@ -407,7 +401,7 @@ export async function deleteComment(commentId: string): Promise<ModerateCommentR
     return { success: true, message: "Comentário deletado." };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao deletar comentário:", error);
+    console.error("[ACTION ERROR] deleteComment (Exception):", error);
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 }
@@ -450,7 +444,6 @@ interface ListAdminCommentsResponse {
 export async function listCommentsForAdmin(
   options: ListAdminCommentsOptions = {}
 ): Promise<ListAdminCommentsResponse> {
-  console.log("[Server Action Called] listCommentsForAdmin with options:", options);
   const { status, postId, page = 1, limit = 20 } = options;
 
   try {
@@ -490,7 +483,7 @@ export async function listCommentsForAdmin(
     const { data: commentsData, error: commentsError, count } = await commentsQuery;
 
     if (commentsError) {
-      console.error("Erro ao listar comentários base para admin:", commentsError.message);
+      console.error("[ACTION ERROR] listCommentsForAdmin - Erro ao listar comentários base para admin:", commentsError.message);
       return { success: false, message: "Falha ao buscar comentários." };
     }
 
@@ -513,7 +506,7 @@ export async function listCommentsForAdmin(
 
     // Processar perfis
     if (profilesResult.error) {
-      console.error("Erro ao buscar perfis para admin:", profilesResult.error.message);
+      console.error("[ACTION ERROR] listCommentsForAdmin - Erro ao buscar perfis para admin:", profilesResult.error.message);
       // Continuar mesmo com erro, usará fallback
     } else if (profilesResult.data) {
       profilesResult.data.forEach(profile => {
@@ -528,7 +521,7 @@ export async function listCommentsForAdmin(
 
     // Processar posts
     if (postsResult.error) {
-      console.error("Erro ao buscar posts para admin:", postsResult.error.message);
+      console.error("[ACTION ERROR] listCommentsForAdmin - Erro ao buscar posts para admin:", postsResult.error.message);
       // Continuar mesmo com erro, usará fallback
     } else if (postsResult.data) {
       postsResult.data.forEach(post => {
@@ -568,7 +561,7 @@ export async function listCommentsForAdmin(
     return { success: true, data: formattedComments, totalCount: count || 0 };
 
   } catch (error: unknown) {
-    console.error("Erro inesperado ao listar comentários para admin:", error);
+    console.error("[ACTION ERROR] listCommentsForAdmin (Exception):", error);
     return { success: false, message: (error instanceof Error ? error.message : String(error)) || "Erro inesperado." };
   }
 } 
