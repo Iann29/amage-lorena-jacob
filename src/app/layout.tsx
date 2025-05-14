@@ -61,6 +61,9 @@ export const metadata: Metadata = {
   title: "Lorena Jacob | Terapeuta Infantil",
   description: "E-commerce e Blog de terapia infantil especializada em desenvolvimento, autismo, TDAH e outros transtornos do neurodesenvolvimento.",
   keywords: "terapia infantil, desenvolvimento infantil, autismo, TDAH",
+  appleWebApp: {
+    title: "Lorena",
+  },
 };
 
 export default function RootLayout({
