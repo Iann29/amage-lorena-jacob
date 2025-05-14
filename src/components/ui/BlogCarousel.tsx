@@ -76,6 +76,18 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
     prevPage();
   };
 
+  // Determinar classes dinâmicas para o layout do grid
+  const numCurrentPosts = currentPosts.length;
+  let motionDivClassName = "grid grid-cols-1 gap-8 mx-auto h-full"; // Base para mobile e outras props
+
+  if (numCurrentPosts === 1) {
+    motionDivClassName += " md:grid-cols-1 md:justify-items-center";
+  } else if (numCurrentPosts === 2) {
+    motionDivClassName += " md:grid-cols-2";
+  } else { // Default para 3 posts (considerando postsPerPage = 3)
+    motionDivClassName += " md:grid-cols-3";
+  }
+
   return (
     <div className="relative max-w-6xl mx-auto px-12 overflow-hidden">
       {/* Seta esquerda em formato circular */}
@@ -105,7 +117,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
               x: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 }
             }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto h-full"
+            className={motionDivClassName}
           >
             {currentPosts.map((post) => (
               <BlogPostCard 
