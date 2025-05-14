@@ -23,19 +23,19 @@ export default function AuthCheck({ children }: AuthCheckProps) {
     const isAdminUser = profile?.role === 'admin';
 
     if (!user && !isLoginPage) {
-      console.log("AuthCheck: Não há usuário e não é login page. Redirecionando para /admin/login");
+      // console.log("AuthCheck: Não há usuário e não é login page. Redirecionando para /admin/login");
       router.push('/admin/login');
     } else if (user && isLoginPage) {
       // Se o usuário está logado E é admin, redireciona para /admin
       // Se não for admin, o AdminLayout cuidará de redirecionar para home
       if (isAdminUser) {
-        console.log("AuthCheck: Usuário logado na página de login. Redirecionando para /admin");
+        // console.log("AuthCheck: Usuário logado na página de login. Redirecionando para /admin");
         router.push('/admin');
       } else {
         // Se logado mas não admin, e está na página de login do admin,
         // idealmente o AdminLayout o redirecionaria para '/', mas
         // como estamos no AuthCheck da página de login, é melhor redirecionar para home.
-        console.log("AuthCheck: Usuário logado (não admin) na página de login. Redirecionando para /");
+        // console.log("AuthCheck: Usuário logado (não admin) na página de login. Redirecionando para /");
         router.push('/');
       }
     }

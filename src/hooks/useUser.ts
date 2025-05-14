@@ -50,7 +50,7 @@ export function useUser(): UseUserReturn {
         if (profileError) {
             // Se o perfil não existe (PGRST116), não é um erro fatal, apenas não há perfil.
             if (profileError.code === 'PGRST116') {
-                console.warn(`useUser: Perfil não encontrado para user ${userId}. Criando perfil básico.`);
+                // console.warn(`useUser: Perfil não encontrado para user ${userId}. Criando perfil básico.`);
                 const nomeFallback = userEmail?.split('@')[0] || 'Usuário';
                 const iniciaisFallback = (nomeFallback.charAt(0) || 'U').toUpperCase();
                 const basicProfile: UserProfile = { id: userId, nome: nomeFallback, sobrenome: '', iniciais: iniciaisFallback, role: 'user' };
@@ -83,7 +83,7 @@ export function useUser(): UseUserReturn {
             globalProfileCache = null;
         }
     } catch (profileError) {
-        console.error("useUser: Erro ao buscar perfil do usuário:", profileError);
+        // console.error("useUser: Erro ao buscar perfil do usuário:", profileError);
         setError(profileError instanceof Error ? profileError : new Error(String(profileError)));
         setProfile(null);
         globalProfileCache = null;
@@ -118,14 +118,14 @@ export function useUser(): UseUserReturn {
             .then((response: { data: { session: Session | null }, error: Error | null }) => {
                 const { data: { session }, error: sessionError } = response; 
                 if (sessionError) {
-                    console.error("useUser: Erro ao obter sessão inicial:", sessionError);
+                    // console.error("useUser: Erro ao obter sessão inicial:", sessionError);
                     setError(sessionError);
                 }
                 processSession(session);
             })
             .catch((err: unknown) => { // Tipado err como unknown
                  if (!isMounted) return;
-                console.error("useUser: Catch - Erro ao obter sessão inicial:", err);
+                // console.error("useUser: Catch - Erro ao obter sessão inicial:", err);
                 // Verifica se é uma instância de Error antes de acessar message
                 const errorMessage = err instanceof Error ? err.message : String(err);
                 setError(err instanceof Error ? err : new Error(errorMessage));
@@ -134,7 +134,7 @@ export function useUser(): UseUserReturn {
     }
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-        console.log(`useUser: Auth event - ${event}, User ID: ${session?.user?.id}`);
+        // console.log(`useUser: Auth event - ${event}, User ID: ${session?.user?.id}`);
         processSession(session);
     });
 
