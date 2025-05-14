@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client'; // Cliente do browser
-import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import type { User, AuthChangeEvent, Session, SupabaseClient } from '@supabase/supabase-js';
 
 export interface UserProfile {
     id: string; // user_id
@@ -115,22 +115,25 @@ export function useUser(): UseUserReturn {
     if (!initialAuthCheckCompleted) {
         setIsLoading(true);
         supabase.auth.getSession()
-            .then(({ data: { session }, error: sessionError }) => {
+            .then((response: { data: { session: Session | null }, error: Error | null }) => {
+                const { data: { session }, error: sessionError } = response; 
                 if (sessionError) {
                     console.error("useUser: Erro ao obter sessão inicial:", sessionError);
                     setError(sessionError);
                 }
                 processSession(session);
             })
-            .catch(err => {
+            .catch((err: unknown) => { // Tipado err como unknown
                  if (!isMounted) return;
                 console.error("useUser: Catch - Erro ao obter sessão inicial:", err);
-                setError(err instanceof Error ? err : new Error(String(err)));
+                // Verifica se é uma instância de Error antes de acessar message
+                const errorMessage = err instanceof Error ? err.message : String(err);
+                setError(err instanceof Error ? err : new Error(errorMessage));
                 processSession(null);
             });
     }
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
         console.log(`useUser: Auth event - ${event}, User ID: ${session?.user?.id}`);
         processSession(session);
     });
