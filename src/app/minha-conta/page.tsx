@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { useModal } from '@/contexts/ModalContext';
 import { 
   LayoutDashboard, 
   UserCog, 
@@ -20,6 +21,7 @@ export default function MinhaContaPage() {
   const supabase = createClient();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { openContatoModal } = useModal();
 
   // Estados para autenticação e dados do usuário
   const [isLoading, setIsLoading] = useState(true);
@@ -316,10 +318,14 @@ export default function MinhaContaPage() {
             
               {/* Links Adicionais e Logout */}
               <div className="space-y-1 pt-4 border-t border-gray-100">
-                 <Link href="/contato" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-150">
+                 <button 
+                    type="button"
+                    onClick={openContatoModal}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-150 text-left"
+                  >
                     <HelpCircle size={18} className="text-gray-400" />
                     Ajuda e Suporte
-                 </Link>
+                 </button>
                 <button 
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors duration-150"
