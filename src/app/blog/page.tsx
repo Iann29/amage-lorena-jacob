@@ -16,6 +16,7 @@ export default function BlogPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTemas, setSelectedTemas] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   const [posts, setPosts] = useState<BlogPostPublic[]>([]);
   const [categorias, setCategorias] = useState<BlogCategoryPublic[]>([]);
@@ -127,17 +128,30 @@ export default function BlogPage() {
   useEffect(() => {
     isMounted.current = true;
     fetchCategories();
+    setDebouncedSearchTerm(searchTerm);
     return () => {
       isMounted.current = false;
     };
-  }, [fetchCategories]);
+  }, [fetchCategories, searchTerm]);
 
-  // Efeito separado para carregar posts quando página ou filtros mudam
+  // Efeito para aplicar debounce ao searchTerm
   useEffect(() => {
-    const shouldAppend = currentPage > 1 && !searchTerm;
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // Atraso de 500ms
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
+
+  // Efeito separado para carregar posts quando página, filtros ou debouncedSearchTerm mudam
+  useEffect(() => {
+    const shouldAppend = currentPage > 1 && !debouncedSearchTerm;
     const categoryToFilter = selectedCategories[0];
-    fetchPosts(currentPage, categoryToFilter, searchTerm, shouldAppend);
-  }, [currentPage, selectedCategories, searchTerm, fetchPosts]);
+    
+    fetchPosts(currentPage, categoryToFilter, debouncedSearchTerm, shouldAppend);
+  }, [currentPage, selectedCategories, debouncedSearchTerm, fetchPosts]);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories(prev => {
