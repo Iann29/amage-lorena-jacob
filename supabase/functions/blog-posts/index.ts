@@ -116,12 +116,12 @@ serve(async (req: Request) => {
 
     // Buscar contagens de comentários para os posts retornados (otimizado)
     const postIds = postsData?.map((post: any) => post.id) ?? [];
-    console.log('[blog-posts] postIds para buscar comentários:', JSON.stringify(postIds));
+    // console.log('[blog-posts] postIds para buscar comentários:', JSON.stringify(postIds));
 
     const commentCountMap = new Map<string, number>();
 
     if (postIds.length > 0) {
-        console.log('[blog-posts] Entrando no bloco para buscar contagens de comentários.');
+        // console.log('[blog-posts] Entrando no bloco para buscar contagens de comentários.');
 
         const { data: commentsData, error: commentsError } = await supabase
             .from('blog_comments')
@@ -129,17 +129,17 @@ serve(async (req: Request) => {
             .in('post_id', postIds)
             .eq('is_approved', true);
 
-        console.log('[blog-posts] Resultado da query de comentários - commentsData:', JSON.stringify(commentsData)); 
-        console.log('[blog-posts] Resultado da query de comentários - commentsError:', JSON.stringify(commentsError)); 
+        // console.log('[blog-posts] Resultado da query de comentários - commentsData:', JSON.stringify(commentsData)); 
+        // console.log('[blog-posts] Resultado da query de comentários - commentsError:', JSON.stringify(commentsError)); 
 
         if (commentsError) {
             console.error("[blog-posts] Erro explícito ao buscar comentários para contagem:", commentsError.message); 
         } else if (!commentsData || commentsData.length === 0) {
             console.warn("[blog-posts] Nenhum dado de comentário retornado (commentsData está vazio ou nulo)."); 
         } else {
-            console.log(`[blog-posts] Processando ${commentsData.length} registros de comentários.`); 
+            // console.log(`[blog-posts] Processando ${commentsData.length} registros de comentários.`); 
             commentsData.forEach((comment: any, index: number) => { 
-                console.log(`[blog-posts] Comentário ${index}:`, JSON.stringify(comment)); 
+                // console.log(`[blog-posts] Comentário ${index}:`, JSON.stringify(comment)); 
                 if (comment && comment.post_id) { 
                     const currentCount = commentCountMap.get(comment.post_id) || 0;
                     commentCountMap.set(comment.post_id, currentCount + 1);
@@ -149,10 +149,10 @@ serve(async (req: Request) => {
             });
         }
     } else {
-        console.log('[blog-posts] Nenhum post ID encontrado, pulando busca de comentários.'); 
+        // console.log('[blog-posts] Nenhum post ID encontrado, pulando busca de comentários.'); 
     }
 
-    console.log('[blog-posts] commentCountMap final:', JSON.stringify(Object.fromEntries(commentCountMap))); 
+    // console.log('[blog-posts] commentCountMap final:', JSON.stringify(Object.fromEntries(commentCountMap))); 
 
     // Formatar os posts para a resposta
     const formattedPosts: BlogPostPublic[] = postsData?.map((post: any) =>
