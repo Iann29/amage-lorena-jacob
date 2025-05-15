@@ -63,7 +63,8 @@ interface ApiResponse<T> {
 export async function getPublishedBlogPosts(
   page: number = 1,
   limit: number = 10,
-  categoria?: string // <<== Aceita ID da categoria como string opcional
+  categoria?: string, // <<== Aceita ID da categoria como string opcional
+  searchTerm?: string // <<== Novo parâmetro para o termo de busca
 ): Promise<PostsApiResponse> { // <<== Retorna a estrutura completa com paginação
   try {
     // Constrói a URL base com paginação
@@ -72,6 +73,11 @@ export async function getPublishedBlogPosts(
     // <<== Adiciona o parâmetro de categoria à URL se fornecido
     if (categoria) {
       url += `&categoria=${encodeURIComponent(categoria)}`;
+    }
+
+    // <<== Adiciona o parâmetro de busca à URL se fornecido
+    if (searchTerm) {
+      url += `&busca=${encodeURIComponent(searchTerm)}`;
     }
 
     // Faz a requisição para a Edge Function

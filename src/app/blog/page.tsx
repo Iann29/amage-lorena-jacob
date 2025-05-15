@@ -15,6 +15,7 @@ export default function BlogPage() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTemas, setSelectedTemas] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [posts, setPosts] = useState<BlogPostPublic[]>([]);
   const [categorias, setCategorias] = useState<BlogCategoryPublic[]>([]);
@@ -58,7 +59,7 @@ export default function BlogPage() {
   }, [categorias.length]);
 
   // Função otimizada para buscar posts e seus status de likes em lote
-  const fetchPosts = useCallback(async (page: number, categoryId?: string, append = false) => {
+  const fetchPosts = useCallback(async (page: number, categoryId?: string, currentSearchTerm?: string, append = false) => {
     // Evitar requisições duplicadas para a mesma página e filtro
     if (fetchingRef.current.posts) return;
     fetchingRef.current.posts = true;
@@ -68,7 +69,7 @@ export default function BlogPage() {
     setError(null);
 
     try {
-      const response = await getPublishedBlogPosts(page, pageSize, categoryId);
+      const response = await getPublishedBlogPosts(page, pageSize, categoryId, currentSearchTerm);
       let newPosts = response.posts;
       
       // Buscar status de likes em lote para todos os posts
@@ -133,10 +134,10 @@ export default function BlogPage() {
 
   // Efeito separado para carregar posts quando página ou filtros mudam
   useEffect(() => {
-    const shouldAppend = currentPage > 1;
+    const shouldAppend = currentPage > 1 && !searchTerm;
     const categoryToFilter = selectedCategories[0];
-    fetchPosts(currentPage, categoryToFilter, shouldAppend);
-  }, [currentPage, selectedCategories, fetchPosts]);
+    fetchPosts(currentPage, categoryToFilter, searchTerm, shouldAppend);
+  }, [currentPage, selectedCategories, searchTerm, fetchPosts]);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories(prev => {
@@ -165,11 +166,18 @@ export default function BlogPage() {
 
   const handleRetry = () => {
     // Reseta para página 1 e chama o useEffect naturalmente
+    setSearchTerm('');
     setCurrentPage(1);
   };
 
   const toggleFilterPanel = () => {
     setFilterPanelOpen(!filterPanelOpen);
+  };
+
+  // Manipulador para o input de pesquisa
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1);
   };
 
   return (
@@ -195,7 +203,8 @@ export default function BlogPage() {
               type="text"
               placeholder="Pesquisar por palavra ou tema"
               className={styles.searchInput}
-              // Adicionar value e onChange se for implementar busca
+              value={searchTerm}
+              onChange={handleSearchInputChange}
             />
             {/* Ícone de filtro */}
             <div
