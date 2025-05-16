@@ -73,7 +73,7 @@ export function ContatoModal({ isOpen, onClose }: ContatoModalProps) {
         <p className={styles.whatsappText}>Entre em contato pelo WhatsApp</p>
         
         <a 
-          href="https://wa.me/5591999999999" 
+          href="https://wa.me/5527998206121" 
           target="_blank" 
           rel="noopener noreferrer" 
           className={styles.whatsappButton}

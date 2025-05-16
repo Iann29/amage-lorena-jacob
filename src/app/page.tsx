@@ -360,7 +360,7 @@ export default function Home() {
           </motion.a>
           {/* Ícone do Facebook */}
           <motion.a 
-            href="https://facebook.com/lorenajacob.st" 
+            href="https://www.facebook.com/profile.php?id=61573695501036" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="mb-6 mr-2"

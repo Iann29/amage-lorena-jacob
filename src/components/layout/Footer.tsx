@@ -201,7 +201,7 @@ const Footer = () => {
               
               <div className="flex items-center space-x-6">
                 <motion.a 
-                  href="https://facebook.com" 
+                  href="https://www.facebook.com/profile.php?id=61573695501036"
                   target="_blank" 
                   rel="noopener noreferrer"
                   whileHover={{ scale: 1.1 }}
@@ -212,7 +212,7 @@ const Footer = () => {
                   </svg>
                 </motion.a>
                 <motion.a 
-                  href="https://instagram.com" 
+                  href="https://www.instagram.com/lorenajacob.st/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   whileHover={{ scale: 1.1 }}

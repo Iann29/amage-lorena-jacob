@@ -263,7 +263,7 @@ const Header = () => {
             </div>
             <div className="flex items-center">
               <motion.a 
-                href="https://facebook.com/lorenajacob.st" // Link Corrigido
+                href="https://www.facebook.com/profile.php?id=61573695501036"
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="mx-1.5 relative group"
@@ -404,7 +404,7 @@ const Header = () => {
                         <span className="text-[#52A4DB]"> nas redes sociais</span>
                     </div>
                     <div className="flex items-center mt-1 space-x-2">
-                        <a href="https://facebook.com/lorenajacob.st" target="_blank" rel="noopener noreferrer"> {/* Link Corrigido */}
+                        <a href="https://www.facebook.com/profile.php?id=61573695501036" target="_blank" rel="noopener noreferrer">
                             <Image src="/assets/facebookHe.png" alt="Facebook" width={14} height={14} className="w-3.5 h-3.5"/>
                         </a>
                         <a href="https://instagram.com/lorenajacob.st" target="_blank" rel="noopener noreferrer"> {/* Link Corrigido */}

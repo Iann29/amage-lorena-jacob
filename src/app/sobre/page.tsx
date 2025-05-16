@@ -31,7 +31,7 @@ const PROFILE_DATA = {
   lastName: "Jacob",
   title: "TERAPEUTA INFANTIL",
   socialLinks: {
-    facebook: "https://facebook.com/lorenajacob.st",
+    facebook: "https://www.facebook.com/profile.php?id=61573695501036",
     instagram: "https://instagram.com/lorenajacob.st",
     handle: "@lorenajacob.st",
   },
