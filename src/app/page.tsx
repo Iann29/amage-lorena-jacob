@@ -313,7 +313,9 @@ export default function Home() {
                 title="Treinamento para"
                 subtitle="Pais & Educadores"
                 buttonText="SAIBA MAIS"
-                linkHref="/sobre"
+                linkHref="https://wa.me/5527998206121?text=Oi%2C%20Lorena!%20Gostaria%20de%20saber%20mais%20sobre%20o%20treinamento%20para%20pais%20e%20educadores.%20Voc%C3%AA%20pode%20me%20enviar%20mais%20informa%C3%A7%C3%B5es%3F"
+                target="_blank"
+                rel="noopener noreferrer"
                 backgroundImage="/assets/treinamento-bg.jpg"
               />
               
@@ -321,7 +323,9 @@ export default function Home() {
                 title="Palestras &"
                 subtitle="Consultorias"
                 buttonText="SAIBA MAIS"
-                onButtonClick={openContatoModal}
+                linkHref="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Me%20interessei%20pelas%20palestras%20e%20consultorias.%20Pode%20me%20contar%20como%20funciona%20e%20como%20agendar%3F"
+                target="_blank"
+                rel="noopener noreferrer"
                 backgroundImage="/assets/palestras-bg.jpg"
               />
             </div>
