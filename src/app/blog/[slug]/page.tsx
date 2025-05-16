@@ -14,6 +14,7 @@ import CommentSection from '@/components/blog/CommentSection';
 import type { CommentData, CommentUser } from '@/components/blog/CommentSection';
 import { getCommentsTreeByPostId } from '@/app/comments/actions';
 import { createClient } from '@/utils/supabase/server';
+import ShareButton from '@/components/blog/ShareButton';
 
 export const revalidate = 3600;
 
@@ -87,6 +88,11 @@ function PostContentSkeleton() {
 async function PostContent({ slug }: { slug: string }) {
   const post = await getBlogPostBySlug(slug);
   if (!post) { return <div className="text-center py-4"><p className="text-gray-600">Conteúdo não disponível.</p></div>; }
+  
+  // Construir a URL completa sem usar window
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://lorenajacob.com.br';
+  const postUrl = `${baseUrl}/blog/${slug}`;
+  
   return (
     <>
       <div className={styles.authorLine}><span>por {post.author.nome} {post.author.sobrenome}</span></div>
@@ -97,7 +103,10 @@ async function PostContent({ slug }: { slug: string }) {
         <div className={styles.stats}>{post.view_count || 0} visualizações • {new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR')}</div>
         <div className={styles.actionButtons}>
           <div className={styles.stats}>{post.comment_count || 0} comentários</div>
-          <button className="flex items-center justify-center hover:opacity-80 transition"><Image src="/assets/compartilharIcon.svg" alt="Compartilhar" width={22} height={22} /></button>
+          <ShareButton 
+            title={post.titulo} 
+            url={postUrl} 
+          />
           <LikeButton itemId={post.id} itemType="post" initialLikeCount={post.like_count} />
         </div>
       </div>
