@@ -10,6 +10,8 @@ interface ServiceCardProps {
   buttonText: string;
   backgroundImage?: string;
   linkHref?: string;
+  target?: string;
+  rel?: string;
   onButtonClick?: () => void;
 }
 
@@ -19,6 +21,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   buttonText, 
   backgroundImage,
   linkHref,
+  target = '_self',
+  rel = '',
   onButtonClick
 }) => {
 
@@ -104,10 +108,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 {buttonText}
               </button>
             ) : linkHref ? (
-              <Link href={linkHref}>
-                <div className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-                  {buttonText}
-                </div>
+              <Link 
+                href={linkHref} 
+                target={target}
+                rel={rel}
+                className="flex items-center justify-center bg-[#27769B] hover:bg-[#1d5a77] text-white text-lg font-bold w-[160px] h-[40px] rounded-lg transform transition-all duration-300 hover:scale-105"
+              >
+                {buttonText}
               </Link>
             ) : (
               <div className="flex items-center justify-center bg-gray-400 text-white text-lg font-bold w-[160px] h-[40px] rounded-lg cursor-not-allowed" style={{ fontFamily: 'var(--font-museo-sans)' }}>

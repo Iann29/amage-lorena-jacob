@@ -304,7 +304,9 @@ export default function Home() {
                 title="Acompanhamento"
                 subtitle="Personalizado"
                 buttonText="SAIBA MAIS"
-                linkHref="/sobre"
+                linkHref="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20acompanhamento%20personalizado.%20Pode%20me%20explicar%20como%20funciona%3F"
+                target="_blank"
+                rel="noopener noreferrer"
               />
               
               <ServiceCard 
