@@ -24,6 +24,11 @@ const Header = () => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   
+  // Novos estados para o dropdown de idioma
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<'pt' | 'en' | 'es'>('pt'); // pt, en, es
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
   const logoScale = useTransform(scrollY, [0, 100], [1, 0.72]);
@@ -44,8 +49,12 @@ const Header = () => {
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
         setIsUserDropdownOpen(false);
       }
+      // Adicionado para o dropdown de idioma
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setIsLangDropdownOpen(false);
+      }
     };
-    if (isUserDropdownOpen) {
+    if (isUserDropdownOpen || isLangDropdownOpen) { // Modificado para incluir isLangDropdownOpen
       document.addEventListener('mousedown', handleClickOutside);
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -53,7 +62,7 @@ const Header = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isUserDropdownOpen]);
+  }, [isUserDropdownOpen, isLangDropdownOpen]); // Modificado para incluir isLangDropdownOpen
 
   const handleLogout = async () => {
     setIsUserDropdownOpen(false);
@@ -66,7 +75,7 @@ const Header = () => {
 
   return (
     <motion.header 
-      className="w-full sticky top-0 z-50 bg-white"
+      className="w-full sticky top-0 z-50 bg-white relative"
       style={{
         boxShadow: headerShadow,
         height: headerHeight,
@@ -100,7 +109,7 @@ const Header = () => {
 
         {/* Menu Desktop */}
         <motion.nav 
-          className="hidden lg:flex items-center justify-center flex-[0.7]"
+          className="hidden lg:flex items-center justify-center flex-1"
           style={{ 
             translateY: useTransform(scrollY, [0, 100], [0, -2]),
             scale: useTransform(scrollY, [0, 100], [1, 0.95]) 
@@ -174,16 +183,14 @@ const Header = () => {
         </motion.nav>
 
         {/* Área Direita Desktop (Autenticação e Redes Sociais) */}
-        <motion.div className="hidden lg:flex items-center flex-[0.3]">
-          <div className="flex-1"></div>
-          
+        <motion.div className="hidden lg:flex items-center justify-end gap-24">
           {isLoadingAuth ? (
-            <div className="flex flex-col items-center mr-32">
+            <div className="flex flex-col items-center">
                <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
             </div>
           ) : currentUser && userProfile ? (
-            <div className="relative mr-32" ref={userDropdownRef}>
+            <div className="relative" ref={userDropdownRef}>
               <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
                 <motion.div 
                   className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium mb-0.5 border border-purple-300"
@@ -223,7 +230,7 @@ const Header = () => {
             </div>
           ) : (
             <motion.div 
-              className="flex flex-col items-center mr-32"
+              className="flex flex-col items-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -249,7 +256,6 @@ const Header = () => {
           
           {/* Redes Sociais */}
           <motion.div className="flex flex-col items-center">
-            {/* ... (ícones de redes sociais como estavam) ... */}
              <div className="text-[10px] font-['Poppins'] mb-1 text-center">
               <span className="text-[#52A4DB] font-bold">Siga-me</span>
               <span className="text-[#52A4DB]"> nas</span><br/>
@@ -315,6 +321,52 @@ const Header = () => {
         </motion.button>
       </div>
 
+      {/* Novo Seletor de Idioma Desktop - Posicionado Absolutamente */}
+      <div className="hidden lg:block absolute top-0 right-0 mr-32 h-full flex items-center justify-center" ref={langDropdownRef}>
+        <div className="flex items-center h-full relative">
+          <motion.button
+            onClick={() => setIsLangDropdownOpen(prev => !prev)}
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors focus:outline-none border border-gray-400 bg-white"
+            aria-label="Selecionar idioma"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {selectedLang === 'pt' && <span className="text-sm font-medium text-[#6E6B46]">BR</span>}
+            {selectedLang === 'en' && <span className="text-sm font-medium text-[#6E6B46]">EN</span>}
+            {selectedLang === 'es' && <span className="text-sm font-medium text-[#6E6B46]">ES</span>}
+          </motion.button>
+          <AnimatePresence>
+            {isLangDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 w-40 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200"
+              >
+                <button
+                  onClick={() => { setSelectedLang('pt'); setIsLangDropdownOpen(false); }}
+                  className={`flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'pt' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                >
+                  <span className="mr-2">🇧🇷</span> Português
+                </button>
+                <button
+                  onClick={() => { setSelectedLang('en'); setIsLangDropdownOpen(false); }}
+                  className={`flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'en' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                >
+                  <span className="mr-2">🇺🇸</span> English
+                </button>
+                <button
+                  onClick={() => { setSelectedLang('es'); setIsLangDropdownOpen(false); }}
+                  className={`flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'es' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                >
+                  <span className="mr-2">🇪🇸</span> Español
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
       {/* Menu Mobile */}
       <AnimatePresence>
         {isMenuOpen && (
@@ -343,7 +395,7 @@ const Header = () => {
                 <Link href="/loja" prefetch={false} className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full">Loja</Link>
               </motion.div>
             
-              <div className="flex justify-between pt-2 mt-1 border-t border-gray-200">
+              <div className="flex justify-between items-start pt-2 mt-1 border-t border-gray-200">
                  {/* Redes Sociais Mobile */}
                 <div className="flex flex-col">
                    {/* ... (como estava) ... */}
@@ -361,50 +413,105 @@ const Header = () => {
                     </div>
                 </div>
                 
-                {/* Minha Conta Mobile */}
-                {isLoadingAuth ? (
-                  <div className="flex flex-col items-center">
-                    <div className="w-4.5 h-4.5 bg-gray-200 rounded-full animate-pulse mb-0.5"></div> {/* Ajustado para `w-4.5 h-4.5` */}
-                    <div className="h-2 w-12 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                ) : currentUser && userProfile ? (
-                   <div className="relative" ref={userDropdownRef}>
-                      <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
-                          <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-xs mb-0.5 border border-purple-300">
-                              {userProfile.iniciais || 'U'}
-                          </div>
-                          <span className="text-[#365F71] text-[10px] font-['Poppins'] truncate max-w-[70px]">Olá, {userProfile.nome.split(' ')[0]}</span>
-                      </button>
-                      {isUserDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200"> {/* Ajustado w-36 */}
-                          <Link 
-                            href="/minha-conta" 
-                            onClick={() => { setIsUserDropdownOpen(false); setIsMenuOpen(false); }}
-                            className="block px-3 py-1.5 text-[10px] text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']" /* Ajustado padding e text size */
+                {/* Grupo: Minha Conta Mobile + Seletor de Idioma Mobile */}
+                <div className="flex items-center space-x-3">
+                  {/* Minha Conta Mobile */}
+                  {isLoadingAuth ? (
+                    <div className="flex flex-col items-center">
+                      <div className="w-4.5 h-4.5 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
+                      <div className="h-2 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  ) : currentUser && userProfile ? (
+                     <div className="relative" ref={userDropdownRef}> {/* userDropdownRef já está aqui */}
+                        <button onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)} className="flex flex-col items-center focus:outline-none cursor-pointer">
+                            <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-medium text-xs mb-0.5 border border-purple-300">
+                                {userProfile.iniciais || 'U'}
+                            </div>
+                            <span className="text-[#365F71] text-[10px] font-['Poppins'] truncate max-w-[70px]">Olá, {userProfile.nome.split(' ')[0]}</span>
+                        </button>
+                        {isUserDropdownOpen && ( /* Este é o dropdown do usuário */
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute right-0 mt-2 w-36 bg-white rounded-md shadow-xl z-50 py-1 border border-gray-200"
                           >
-                            Minha Conta
-                          </Link>
-                          <button 
-                            onClick={() => { handleLogout(); setIsMenuOpen(false); }} 
-                            className="block w-full text-left px-3 py-1.5 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']" /* Ajustado padding e text size */
+                            <Link 
+                              href="/minha-conta" 
+                              onClick={() => { setIsUserDropdownOpen(false); setIsMenuOpen(false); }}
+                              className="block px-3 py-1.5 text-[10px] text-gray-700 hover:bg-purple-50 hover:text-purple-700 font-['Poppins']"
+                            >
+                              Minha Conta
+                            </Link>
+                            <button 
+                              onClick={() => { handleLogout(); setIsMenuOpen(false); }} 
+                              className="block w-full text-left px-3 py-1.5 text-[10px] text-red-600 hover:bg-red-50 hover:text-red-700 font-['Poppins']"
+                            >
+                              Sair
+                            </button>
+                          </motion.div>
+                        )}
+                     </div>
+                  ) : (
+                    <Link href="/autenticacao" className="flex flex-col items-center" onClick={() => setIsMenuOpen(false)}>
+                      <Image 
+                        src="/assets/perfilIcon.png" 
+                        alt="Minha Conta" 
+                        width={18} 
+                        height={18}
+                        className="w-4.5 h-4.5 mb-0.5"
+                      />
+                      <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
+                    </Link>
+                  )}
+
+                  {/* Seletor de Idioma Mobile */}
+                  <div className="relative"> {/* langDropdownRef já foi declarado e pode ser usado aqui, o useEffect cuidará de fechar este ou o de desktop */}
+                    <button
+                      onClick={() => setIsLangDropdownOpen(prev => !prev)}
+                      className="flex flex-col items-center text-[#365F71] focus:outline-none"
+                      aria-label="Selecionar idioma"
+                    >
+                      <div className="w-5 h-5 flex items-center justify-center rounded border border-gray-400 mb-0.5 bg-white">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {selectedLang === 'pt' && 'PT'}
+                          {selectedLang === 'en' && 'EN'}
+                          {selectedLang === 'es' && 'ES'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-['Poppins']">Idioma</span>
+                    </button>
+                    <AnimatePresence>
+                      {isLangDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute right-0 bottom-full mb-1 w-36 bg-white rounded-md shadow-xl z-[60] py-1 border border-gray-200" // bottom-full para abrir para cima
+                        >
+                          <button
+                            onClick={() => { setSelectedLang('pt'); setIsLangDropdownOpen(false); /* setIsMenuOpen(false) opcional aqui, pois o dropdown de idioma não fecha o menu principal por padrão */ }}
+                            className={`flex items-center w-full px-3 py-1.5 text-[10px] hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'pt' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
                           >
-                            Sair
+                            <span className="mr-1.5">🇧🇷</span> Português
                           </button>
-                        </div>
+                          <button
+                            onClick={() => { setSelectedLang('en'); setIsLangDropdownOpen(false); }}
+                            className={`flex items-center w-full px-3 py-1.5 text-[10px] hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'en' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                          >
+                            <span className="mr-1.5">🇺🇸</span> English
+                          </button>
+                          <button
+                            onClick={() => { setSelectedLang('es'); setIsLangDropdownOpen(false); }}
+                            className={`flex items-center w-full px-3 py-1.5 text-[10px] hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'es' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                          >
+                            <span className="mr-1.5">🇪🇸</span> Español
+                          </button>
+                        </motion.div>
                       )}
-                   </div>
-                ) : (
-                  <Link href="/autenticacao" className="flex flex-col items-center" onClick={() => setIsMenuOpen(false)}>
-                    <Image 
-                      src="/assets/perfilIcon.png" 
-                      alt="Minha Conta" 
-                      width={18} 
-                      height={18}
-                      className="w-4.5 h-4.5 mb-0.5" // Ajustado para `w-4.5 h-4.5`
-                    />
-                    <span className="text-[#365F71] text-[10px] font-['Poppins']">Minha Conta</span>
-                  </Link>
-                )}
+                    </AnimatePresence>
+                  </div>
+                </div>
               </div>
             </nav>
           </motion.div>

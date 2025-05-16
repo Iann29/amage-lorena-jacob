@@ -182,7 +182,7 @@ export default function Home() {
             
               <div className="mt-3 relative pl-2">
                 <a
-                  href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                  href="https://wa.me/message/FDF46FODEQMTL1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
@@ -204,7 +204,7 @@ export default function Home() {
             {/* Botão para tablet e desktop */}
             <div className="hidden sm:block md:hidden pl-4">
               <a
-                href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                href="https://wa.me/message/FDF46FODEQMTL1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 mt-8"
@@ -216,7 +216,7 @@ export default function Home() {
             {/* Botão para desktop */}
             <div className="hidden md:flex pl-[32px] mt-12 justify-center">
               <a
-                href="https://wa.me/5591999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o"
+                href="https://wa.me/message/FDF46FODEQMTL1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" 
