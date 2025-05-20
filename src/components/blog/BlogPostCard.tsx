@@ -63,7 +63,7 @@ export default function BlogPostCard({ post, initialLikeInfo }: BlogPostCardProp
 
   return (
     <article 
-      className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 p-6"
+      className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6"
       style={{ cursor: isNavigating ? 'wait' : 'auto' }} // Aplica cursor ao card inteiro durante a navegação
     >
       <Link href={`/blog/${post.slug}`} onClick={handleNavigate} legacyBehavior={false}> {/* Adicionado onClick e legacyBehavior={false} para melhor comportamento com manipuladores de clique */} 
