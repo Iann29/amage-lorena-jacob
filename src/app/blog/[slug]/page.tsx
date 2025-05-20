@@ -2,16 +2,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 // Importar as funções da nova API
 import { getBlogPostBySlug, getPopularBlogPosts, getPublishedBlogPosts } from '@/lib/blog-api'; // Remova getPopularBlogPosts se não usar
 import LikeButton from '@/components/blog/LikeButton';
 import styles from './post.module.css';
 // import PostViewTracker from '@/components/blog/PostViewTracker'; // <<< LINHA REMOVIDA
 
-// Novos imports
-import CommentSection from '@/components/blog/CommentSection';
+// Importando tipos diretamente, mas o componente será importado dinamicamente
 import type { CommentData, CommentUser } from '@/components/blog/CommentSection';
+
+// Import dinâmico do CommentSection para evitar problemas SSR
+const CommentSection = lazy(() => import('@/components/blog/CommentSection'));
 import { getCommentsTreeByPostId } from '@/app/comments/actions';
 import { createClient } from '@/utils/supabase/server';
 import ShareButton from '@/components/blog/ShareButton';
@@ -155,6 +157,7 @@ export default async function PostPage(props: PostPageProps) {
       currentUserData = {
         id: profile.user_id,
         nome: profile.nome,
+        sobrenome: profile.sobrenome || '',
         avatar_url: profile.avatar_url
       };
     }
@@ -256,11 +259,13 @@ export default async function PostPage(props: PostPageProps) {
       {/* Seção de Comentários (formulário se logado + lista) - DENTRO do container de largura normal */}
       <div className="container mx-auto max-w-3xl px-4 py-12">
         <h2 className="text-2xl font-semibold text-[#715B3F] mb-6">Comentários</h2> {/* Título movido para cá */}
-        <CommentSection 
-          postId={post.id} 
-          comments={commentsData} 
-          currentUser={currentUserData} 
-        />
+        <Suspense fallback={<div className="p-8 text-center"><p className="text-gray-500">Carregando comentários...</p></div>}>
+          <CommentSection 
+            postId={post.id} 
+            comments={commentsData} 
+            currentUser={currentUserData} 
+          />
+        </Suspense>
       </div>
 
       {/* Componente para rastrear visualizações foi removido daqui */}

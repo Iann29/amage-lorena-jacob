@@ -27,7 +27,7 @@ export default function CommentItem({ comment, onSetReplyTo, currentUserId }: Co
       <div className="flex gap-4">
         <div className="flex-shrink-0">
           {comment.user.avatar_url ? (
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-[#715B3F]">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-purple-300">
               <Image 
                 src={comment.user.avatar_url} 
                 alt={comment.user.nome} 
@@ -37,9 +37,16 @@ export default function CommentItem({ comment, onSetReplyTo, currentUserId }: Co
               />
             </div>
           ) : (
-            <div className="w-12 h-12 rounded-full bg-[#F5F0E6] flex items-center justify-center text-lg font-medium border-2 border-[#715B3F]">
-              <span className="text-[#715B3F] uppercase">
-                {comment.user.nome?.charAt(0) || 'U'}
+            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-lg font-medium border border-purple-300">
+              <span className="text-purple-700 uppercase">
+                {(() => {
+                  const nome = comment.user.nome || '';
+                  const sobrenome = comment.user.sobrenome || '';
+                  
+                  // Lógica idêntica ao hook useUser e CommentSection
+                  const baseIniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+                  return baseIniciais.trim() ? baseIniciais : 'U';
+                })()}
               </span>
             </div>
           )}
@@ -47,7 +54,9 @@ export default function CommentItem({ comment, onSetReplyTo, currentUserId }: Co
         
         <div className="flex-grow">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-            <h4 className="text-[#2C3E50] font-bold text-lg">{comment.user.nome || 'Usuário Anônimo'}</h4>
+            <h4 className="text-[#2C3E50] font-bold text-lg">
+              {comment.user.nome} {comment.user.sobrenome ? comment.user.sobrenome : ''}
+            </h4>
             <span className="text-sm text-gray-500">{formatDate(comment.created_at)}</span>
           </div>
           

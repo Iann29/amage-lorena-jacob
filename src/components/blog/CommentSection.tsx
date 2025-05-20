@@ -10,6 +10,7 @@ import { submitNewComment } from '@/app/comments/actions';
 export interface CommentUser {
   id: string; // ou number, dependendo do schema original do mock, mas user.id do Supabase é UUID (string)
   nome: string;
+  sobrenome?: string | null;
   avatar_url?: string | null;
 }
 
@@ -119,14 +120,14 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-lg font-medium border border-purple-300">
                     <span className="text-purple-700 uppercase">
-                      {/* Extraindo iniciais como no Header */}
+                      {/* Usando a mesma lógica de iniciais do hook useUser */}
                       {(() => {
                         const nome = currentUser.nome || '';
-                        const nomePartes = nome.split(' ');
-                        const primeiraInicial = nomePartes[0]?.charAt(0) || '';
-                        const segundaInicial = nomePartes[1]?.charAt(0) || '';
-                        const iniciais = (primeiraInicial + segundaInicial).toUpperCase() || 'U';
-                        return iniciais;
+                        const sobrenome = currentUser.sobrenome || '';
+                        
+                        // Lógica idêntica ao hook useUser
+                        const baseIniciais = (nome.charAt(0) + (sobrenome ? sobrenome.charAt(0) : '')).toUpperCase();
+                        return baseIniciais.trim() ? baseIniciais : 'U';
                       })()}
                     </span>
                   </div>
