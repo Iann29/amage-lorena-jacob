@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CommentItem from './CommentItem';
-// Image e Link podem não ser mais necessários aqui se a seção "Quer comentar?" for movida completamente
-// import Image from 'next/image'; 
-// import Link from 'next/link';
+import Image from 'next/image';
 import { submitNewComment } from '@/app/comments/actions';
 
 // Interface para os dados de um usuário de comentário (simplificada)
@@ -86,50 +84,130 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
   };
 
   return (
-    // A <section> agora só contém o formulário (se logado) e a lista de comentários.
-    // O título "Comentários" também foi movido para a page.tsx para melhor controle de layout.
-    <>
+    <div className="space-y-6">
+      {/* Formulário de comentário */}
       {currentUser && (
-        <form onSubmit={handleCommentSubmit} className="mb-8 p-6 bg-stone-50 rounded-xl shadow">
+        <div className="bg-white rounded-lg p-6">
+          <h3 className="text-xl font-semibold text-[#8A6642] mb-4">{replyingToCommentId ? 'Responder comentário' : 'Deixe seu comentário'}</h3>
+          
           {replyingToCommentId && (
-            <div className="mb-3 text-sm text-gray-600">
-              Respondendo a <strong className="text-gray-800">{replyingToUserName || 'Comentário'}</strong>
-              <button type="button" onClick={cancelReply} className="ml-2 text-blue-500 hover:text-blue-700 text-xs">
+            <div className="mb-3 text-sm bg-[#F8F5F0] text-[#8A6642] p-2 rounded-md inline-flex items-center">
+              <span>Respondendo a <strong>{replyingToUserName || 'Comentário'}</strong></span>
+              <button 
+                type="button" 
+                onClick={cancelReply} 
+                className="ml-2 text-[#8A6642] hover:text-[#5a4a32] text-xs font-medium"
+              >
                 (Cancelar)
               </button>
             </div>
           )}
-          <textarea
-            id="comment-textarea"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder={replyingToCommentId ? 'Escreva sua resposta...' : 'Escreva seu comentário...'}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] disabled:bg-gray-100"
-            required
-            disabled={isSubmitting}
-          />
-          <div className="flex justify-end items-center mt-3">
-            {formMessage && (
-              <span className={`text-sm mr-4 ${formMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                {formMessage.text}
-              </span>
-            )}
-            <button 
-              type="submit"
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors duration-150"
-              disabled={isSubmitting || !newComment.trim()}
-            >
-              {isSubmitting ? 'Enviando...' : (replyingToCommentId ? 'Enviar Resposta' : 'Enviar Comentário')}
-            </button>
-          </div>
-        </form>
+          
+          <form onSubmit={handleCommentSubmit}>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                {currentUser.avatar_url ? (
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border border-purple-300">
+                    <Image 
+                      src={currentUser.avatar_url} 
+                      alt={currentUser.nome} 
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-lg font-medium border border-purple-300">
+                    <span className="text-purple-700 uppercase">
+                      {/* Extraindo iniciais como no Header */}
+                      {(() => {
+                        const nome = currentUser.nome || '';
+                        const nomePartes = nome.split(' ');
+                        const primeiraInicial = nomePartes[0]?.charAt(0) || '';
+                        const segundaInicial = nomePartes[1]?.charAt(0) || '';
+                        const iniciais = (primeiraInicial + segundaInicial).toUpperCase() || 'U';
+                        return iniciais;
+                      })()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex-grow space-y-3">
+                <div className="relative">
+                  <textarea
+                    id="comment-textarea"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder={replyingToCommentId ? 'Escreva sua resposta...' : 'Digite sua mensagem'}
+                    className="w-full p-4 border border-[#D0D0D0] rounded-lg min-h-[120px] resize-none placeholder:text-gray-600 text-gray-800"
+                    required
+                    disabled={isSubmitting}
+                    rows={3}
+                    style={{
+                      boxShadow: 'none',
+                      outline: 'none',
+                      transition: 'all 0.2s ease-in-out',
+                      color: '#333333',
+                      fontWeight: '400'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#79B9DC';
+                      e.target.style.borderWidth = '2px';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#D0D0D0';
+                      e.target.style.borderWidth = '1px';
+                    }}
+                  />
+                </div>
+            
+                <div className="flex items-center justify-end">
+                  {formMessage && (
+                    <div className={`text-sm mr-3 ${formMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                      {formMessage.text}
+                    </div>
+                  )}
+                  <button 
+                    type="submit"
+                    className="bg-[#61ADDB] hover:bg-[#4A95C5] text-white font-medium px-6 py-2.5 rounded-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap flex items-center"
+                    style={{
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    }}
+                    disabled={isSubmitting || !newComment.trim()}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enviando...
+                      </span>
+                    ) : (
+                      <>
+                        <span>Enviar</span>
+                        <svg className="ml-1.5 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
       )}
       
-      {/* A lista de comentários permanece aqui */}
-      <div>
+      {/* Lista de comentários */}
+      <div className="space-y-4">
         {comments && comments.length > 0 ? (
-          <div>
-            <div className="space-y-1">
+          <>
+            <h3 className="text-xl font-bold text-[#2C3E50] mb-2">
+              {comments.length} {comments.length === 1 ? 'Comentário' : 'Comentários'}
+            </h3>
+            <div className="space-y-4">
               {comments.map(comment => (
                 <CommentItem 
                   key={comment.id} 
@@ -139,13 +217,21 @@ export default function CommentSection({ postId, comments, currentUser }: Commen
                 />
               ))}
             </div>
-          </div>
+          </>
         ) : (
-          <p className="text-center text-gray-500 py-8">
-            {!currentUser ? 'Nenhum comentário ainda.' : 'Seja o primeiro a deixar um comentário!'}
-          </p>
+          <div className="bg-white rounded-lg p-8 text-center shadow-sm">
+            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <h3 className="mt-2 text-lg font-medium text-gray-900">Nenhum comentário ainda</h3>
+            <p className="mt-1 text-gray-500">
+              {currentUser 
+                ? 'Seja o primeiro a deixar um comentário!' 
+                : 'Faça login para deixar um comentário.'}
+            </p>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
