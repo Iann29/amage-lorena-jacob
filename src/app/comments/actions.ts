@@ -181,7 +181,7 @@ export async function getCommentsTreeByPostId(postId: string): Promise<GetCommen
       const author = profilesMap.get(comment.user_id) || { 
         id: comment.user_id,
         nome: 'Usuário', 
-        sobrenome: 'Desconhecido', 
+        sobrenome: '', 
         avatar_url: null 
       }; // Fallback se o perfil não for encontrado
       
