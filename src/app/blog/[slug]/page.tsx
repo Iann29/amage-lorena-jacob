@@ -236,13 +236,13 @@ export default async function PostPage(props: PostPageProps) {
               Entre com sua conta Google ou Conecte-se
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-4 max-w-xl mx-auto">
-              <button 
-                type="button"
+              <Link
+                href="/login"
                 className="bg-white text-gray-800 px-8 py-4 rounded-lg border border-gray-300 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors w-full sm:min-w-[300px] shadow-md text-lg font-medium"
               >
                 <Image src="/assets/google.svg" alt="Google" width={26} height={26} />
                 <span className="whitespace-nowrap">Entrar com a Conta Google</span>
-              </button>
+              </Link>
               <Link 
                 href="/login" 
                 className="px-8 py-4 rounded-lg flex items-center justify-center gap-3 hover:opacity-90 transition-opacity w-full sm:min-w-[300px] shadow-md text-xl font-medium"

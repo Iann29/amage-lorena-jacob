@@ -617,6 +617,28 @@ const Header = () => {
       </AnimatePresence>
       {/* Adiciona o elemento div para o Google Translate Widget (oculto) */}
       <div id="google_translate_element" style={{ display: "none" }}></div>
+
+      <style jsx global>{`
+        body {
+          position: relative !important;
+          top: 0 !important; /* Impede que o Google Translate empurre o conteúdo para baixo */
+        }
+        .goog-te-banner-frame {
+          display: none !important;
+        }
+        #goog-gt-tt {
+          display: none !important;
+          visibility: hidden !important; /* Garante que esteja oculto */
+        }
+        /* Remove o espaço que o Google pode adicionar no topo do body */
+        body > .skiptranslate {
+            display: none !important;
+        }
+        html.translated-ltr body,
+        html.translated-rtl body {
+            top: 0px !important; /* Garante que não haja deslocamento */
+        }
+      `}</style>
     </motion.header>
   );
 };
