@@ -98,6 +98,35 @@ export default function CadastroPage() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`, // Pode precisar ajustar se o fluxo de cadastro for diferente
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+        // Não precisamos passar 'primeiro_nome' e 'sobrenome' aqui diretamente,
+        // pois o Google Auth geralmente lida com isso.
+        // Se precisarmos de dados adicionais no cadastro via Google,
+        // teremos que coletá-los em uma etapa posterior ou configurar no Supabase.
+      },
+    });
+
+    if (error) {
+      console.error('Erro no cadastro com Google:', error);
+      setErrorMessage('Ocorreu um erro ao tentar criar a conta com o Google. Tente novamente.');
+      setIsLoading(false);
+    }
+    // O redirecionamento para /minha-conta ou a mensagem de sucesso será tratado pelo /auth/callback
+    // ou pela lógica de observação do estado de autenticação do Supabase.
+  };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -282,7 +311,7 @@ export default function CadastroPage() {
           
           <div className={styles.orText}>ou</div>
           
-          <button type="button" className={styles.googleButton} disabled={isLoading}>
+          <button type="button" className={styles.googleButton} disabled={isLoading} onClick={handleGoogleSignUp}>
             <Image 
               src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" 
               alt="Google" 
