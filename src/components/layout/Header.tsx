@@ -28,7 +28,8 @@ const Header = () => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'pt' | 'en' | 'es'>('pt'); // pt, en, es
   const langDropdownRef = useRef<HTMLDivElement>(null);
-  
+  const initialLangSyncDone = useRef(false); // Ref para controlar a sincronização inicial
+
   const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
   const logoScale = useTransform(scrollY, [0, 100], [1, 0.72]);
@@ -63,6 +64,103 @@ const Header = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isUserDropdownOpen, isLangDropdownOpen]); // Modificado para incluir isLangDropdownOpen
+
+  useEffect(() => {
+    const initGoogleTranslate = () => {
+      if ((window as any).google && (window as any).google.translate) {
+        new (window as any).google.translate.TranslateElement(
+          {
+            pageLanguage: 'pt',
+            includedLanguages: 'en,es,pt',
+            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          'google_translate_element'
+        );
+      }
+
+      // Sincroniza o selectedLang com o cookie do Google na primeira carga útil
+      if (!initialLangSyncDone.current) {
+        const getCookieValue = (name: string) => {
+          const parts = `; ${document.cookie}`.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop()?.split(';').shift();
+          return null;
+        };
+        const currentGoogTransCookie = getCookieValue('googtrans');
+        if (currentGoogTransCookie) {
+          const langInCookie = currentGoogTransCookie.split('/')[2];
+          if ((langInCookie === 'en' || langInCookie === 'es' || langInCookie === 'pt') && selectedLang !== langInCookie) {
+            setSelectedLang(langInCookie as 'pt' | 'en' | 'es');
+          }
+        }
+        initialLangSyncDone.current = true;
+      }
+    };
+
+    (window as any).googleTranslateElementInit = initGoogleTranslate;
+
+    // Adiciona o script do Google Translate se ainda não existir
+    if (!document.getElementById('google-translate-script')) {
+      const script = document.createElement('script');
+      script.id = 'google-translate-script';
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.body.appendChild(script);
+    } else if (typeof (window as any).googleTranslateElementInit === 'function' && !(window as any).google?.translate?.TranslateElement) {
+      // Script tag existe, mas o google object não está pronto, tenta chamar o init manualmente se o script carregou mas não executou o cb
+      // Isso é uma tentativa de fallback, pode precisar de ajuste
+       (window as any).googleTranslateElementInit();
+    } else if ((window as any).google?.translate?.TranslateElement && !document.querySelector('#google_translate_element .goog-te-gadget')) {
+      // Objeto Google existe, mas widget não foi renderizado, força inicialização
+      initGoogleTranslate();
+    }
+
+
+  }, []); // Roda apenas uma vez na montagem
+
+
+  // Efeito para mudar o idioma quando o usuário seleciona no dropdown
+  useEffect(() => {
+    if (!initialLangSyncDone.current) {
+      // Não faz nada até que a sincronização inicial com o cookie seja feita
+      return;
+    }
+
+    const getCookieValue = (name: string) => {
+      const parts = `; ${document.cookie}`.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const currentGoogTrans = getCookieValue('googtrans');
+    let currentLangInCookie: string | null = null;
+    if (currentGoogTrans) {
+      const parts = currentGoogTrans.split('/');
+      if (parts.length === 3) { // Formato /auto/lang
+        currentLangInCookie = parts[2];
+      }
+    }
+
+    // Se o idioma que queremos (selectedLang) é diferente do idioma atual no cookie
+    if (selectedLang !== currentLangInCookie) {
+      if (selectedLang === 'pt') {
+        // Se o cookie existe e não é 'pt' (ou seja, está traduzido), então reseta.
+        if (currentGoogTrans && currentLangInCookie !== 'pt') {
+          // Remove o cookie setando uma data de expiração no passado.
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${window.location.hostname}; path=/`;
+          // O Google trata a ausência do cookie como o idioma original da página.
+          // Adicionalmente, podemos setar para /auto/pt para ser explícito se o widget precisar.
+          document.cookie = `googtrans=/auto/pt; expires=Session; domain=${window.location.hostname}; path=/`;
+          window.location.reload();
+        } else if (!currentGoogTrans) {
+          // Se não há cookie e queremos 'pt', não faz nada, já está no original.
+        }
+      } else { // 'en' or 'es'
+        document.cookie = `googtrans=/auto/${selectedLang}; expires=Session; domain=${window.location.hostname}; path=/`;
+        window.location.reload();
+      }
+    }
+  }, [selectedLang]); // Este useEffect reage às mudanças de selectedLang
 
   const handleLogout = async () => {
     setIsUserDropdownOpen(false);
@@ -517,6 +615,8 @@ const Header = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Adiciona o elemento div para o Google Translate Widget (oculto) */}
+      <div id="google_translate_element" style={{ display: "none" }}></div>
     </motion.header>
   );
 };
