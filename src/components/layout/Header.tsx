@@ -151,13 +151,14 @@ const Header = () => {
           // O Google trata a ausência do cookie como o idioma original da página.
           // Adicionalmente, podemos setar para /auto/pt para ser explícito se o widget precisar.
           document.cookie = `googtrans=/auto/pt; expires=Session; domain=${window.location.hostname}; path=/`;
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 50); // Adicionado setTimeout
         } else if (!currentGoogTrans) {
           // Se não há cookie e queremos 'pt', não faz nada, já está no original.
+          // Não precisa de reload se já está em PT e sem cookie.
         }
       } else { // 'en' or 'es'
         document.cookie = `googtrans=/auto/${selectedLang}; expires=Session; domain=${window.location.hostname}; path=/`;
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 50); // Adicionado setTimeout
       }
     }
   }, [selectedLang]); // Este useEffect reage às mudanças de selectedLang
