@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
@@ -39,11 +39,15 @@ const Header = () => {
     ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
   );
   
+  // Fechar o menu ao mudar de rota
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  // Fechar o menu quando o pathname mudar
   useEffect(() => {
-    if (isMenuOpen) {
-      setIsMenuOpen(false);
-    }
-  }, [pathname, isMenuOpen]); // Removido setIsMenuOpen da dependência
+    closeMenu();
+  }, [pathname, closeMenu]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,7 +67,35 @@ const Header = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isUserDropdownOpen, isLangDropdownOpen]); // Modificado para incluir isLangDropdownOpen
+  }, [isUserDropdownOpen, isLangDropdownOpen]);  // Efeito para fechar o menu ao redimensionar a tela ou pressionar ESC
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Bloquear o scroll do body quando o menu estiver aberto
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const initGoogleTranslate = () => {
@@ -401,22 +433,46 @@ const Header = () => {
 
         {/* Botão Menu Mobile */}
         <motion.button 
-          className="lg:hidden text-[#6E6B46] focus:outline-none"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Menu"
+          className="lg:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(prev => !prev);
+          }}
+          aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
           whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05, backgroundColor: 'rgba(0,0,0,0.05)' }}
         >
-          {/* ... (ícone do menu mobile como estava) ... */}
-           {isMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+          <div className="relative w-6 h-5 flex flex-col justify-between">
+            <motion.span 
+              className="block h-0.5 w-6 bg-[#6E6B46] rounded-full origin-center"
+              animate={isMenuOpen ? { 
+                transform: 'translateY(9px) rotate(45deg)'
+              } : { 
+                transform: 'translateY(0) rotate(0)' 
+              }}
+              transition={{ duration: 0.3 }}
+            />
+            <motion.span 
+              className="block h-0.5 w-6 bg-[#6E6B46] rounded-full"
+              animate={isMenuOpen ? { 
+                opacity: 0 
+              } : { 
+                opacity: 1 
+              }}
+              transition={{ duration: 0.1 }}
+            />
+            <motion.span 
+              className="block h-0.5 w-6 bg-[#6E6B46] rounded-full origin-center"
+              animate={isMenuOpen ? { 
+                transform: 'translateY(-9px) rotate(-45deg)'
+              } : { 
+                transform: 'translateY(0) rotate(0)' 
+              }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
         </motion.button>
       </div>
 
@@ -466,50 +522,149 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Menu Mobile */}
+      {/* Overlay e Menu Mobile */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
-            className="lg:hidden mt-1 py-2 border-t border-gray-200 px-4"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <nav className="flex flex-col space-y-2">
-              {/* ... (links do menu mobile como estavam) ... */}
-               <motion.div whileTap={{ scale: 0.95 }}>
-                <Link href="/" className={`text-[#6E6B46] text-xs ${pathname === '/' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Início</Link>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Link href="/sobre" className={`text-[#6E6B46] text-xs ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Sobre Mim</Link>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Link href="/blog" className={`text-[#6E6B46] text-xs ${pathname === '/blog' ? 'font-bold' : 'font-normal'} py-1 font-['Poppins']`}>Blog</Link>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <button onClick={() => { openContatoModal(); setIsMenuOpen(false); }} className={`text-[#6E6B46] text-xs font-normal py-1 font-['Poppins'] cursor-pointer bg-transparent border-none text-left w-full`}>Contato</button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link href="/loja" prefetch={false} className="bg-[#52A4DB] text-white text-xs font-['Poppins'] text-center rounded-md px-3 py-1 my-1 inline-block w-full">Loja</Link>
-              </motion.div>
+          <div key="mobile-menu-container">
+            {/* Overlay */}
+            <motion.div
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              onClick={() => setIsMenuOpen(false)}
+              aria-hidden="true"
+              key="overlay"
+            />
             
-              <div className="flex justify-between items-start pt-2 mt-1 border-t border-gray-200">
+            {/* Menu */}
+            <motion.div 
+              id="mobile-menu"
+              className="fixed top-20 left-0 right-0 mx-4 bg-white shadow-xl rounded-lg z-50 max-h-[calc(100vh-6rem)] overflow-y-auto"
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ 
+                y: -20, 
+                opacity: 0,
+                transition: { 
+                  duration: 0.2,
+                  when: "afterChildren"
+                } 
+              }}
+              transition={{ 
+                type: "spring",
+                damping: 25,
+                stiffness: 300,
+                mass: 0.5,
+                delay: 0.1
+              }}
+              aria-hidden={!isMenuOpen}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="menu-heading"
+            >
+              <div className="px-4 py-3 border-b border-gray-100">
+                <h2 id="menu-heading" className="text-lg font-medium text-gray-900">Menu</h2>
+              </div>
+              <nav className="flex flex-col p-4" aria-label="Menu principal">
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                className="mb-2"
+              >
+                <Link 
+                  href="/" 
+                  className={`block w-full text-left py-3 px-4 rounded-md transition-colors ${pathname === '/' ? 'bg-purple-50 text-[#6E6B46] font-semibold' : 'text-[#6E6B46] hover:bg-gray-50'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Início
+                </Link>
+              </motion.div>
+              
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                className="mb-2"
+              >
+                <Link 
+                  href="/sobre" 
+                  className={`block w-full text-left py-3 px-4 rounded-md transition-colors ${pathname === '/sobre' ? 'bg-purple-50 text-[#6E6B46] font-semibold' : 'text-[#6E6B46] hover:bg-gray-50'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sobre Mim
+                </Link>
+              </motion.div>
+              
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                className="mb-2"
+              >
+                <Link 
+                  href="/blog" 
+                  className={`block w-full text-left py-3 px-4 rounded-md transition-colors ${pathname === '/blog' ? 'bg-purple-50 text-[#6E6B46] font-semibold' : 'text-[#6E6B46] hover:bg-gray-50'}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+              </motion.div>
+              
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                className="mb-4"
+              >
+                <button 
+                  onClick={() => { 
+                    openContatoModal(); 
+                    setIsMenuOpen(false); 
+                  }} 
+                  className="w-full text-left py-3 px-4 rounded-md text-[#6E6B46] hover:bg-gray-50 transition-colors"
+                >
+                  Contato
+                </button>
+              </motion.div>
+              
+              <motion.div 
+                whileTap={{ scale: 0.98 }}
+                className="mb-4"
+              >
+                <Link 
+                  href="/loja" 
+                  prefetch={false} 
+                  className="block w-full text-center bg-[#52A4DB] hover:bg-[#4790c2] text-white font-medium py-3 px-4 rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Acessar Loja
+                </Link>
+              </motion.div>
+              
+              <div className="pt-4 border-t border-gray-200">
                  {/* Redes Sociais Mobile */}
-                <div className="flex flex-col">
-                   {/* ... (como estava) ... */}
-                    <div className="text-[10px] font-['Poppins']">
-                        <span className="text-[#52A4DB] font-bold">Siga-me</span>
-                        <span className="text-[#52A4DB]"> nas redes sociais</span>
-                    </div>
-                    <div className="flex items-center mt-1 space-x-2">
-                        <a href="https://www.facebook.com/profile.php?id=61573695501036" target="_blank" rel="noopener noreferrer">
-                            <Image src="/assets/facebookHe.png" alt="Facebook" width={14} height={14} className="w-3.5 h-3.5"/>
-                        </a>
-                        <a href="https://instagram.com/lorenajacob.st" target="_blank" rel="noopener noreferrer"> {/* Link Corrigido */}
-                            <Image src="/assets/instagramHe.png" alt="Instagram" width={14} height={14} className="w-3.5 h-3.5"/>
-                        </a>
-                    </div>
+                <div className="flex flex-col mb-4">
+                  <div className="text-sm font-medium text-[#52A4DB] mb-2">
+                    Siga-me nas redes sociais
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <a 
+                      href="https://www.facebook.com/profile.php?id=61573695501036" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors"
+                      aria-label="Facebook"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>
+                      </svg>
+                    </a>
+                    <a 
+                      href="https://instagram.com/lorenajacob.st" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-pink-50 hover:bg-pink-100 transition-colors"
+                      aria-label="Instagram"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
                 
                 {/* Grupo: Minha Conta Mobile + Seletor de Idioma Mobile */}
@@ -565,40 +720,47 @@ const Header = () => {
                   )}
 
                   {/* Seletor de Idioma Mobile */}
-                  <div className="relative"> {/* langDropdownRef já foi declarado e pode ser usado aqui, o useEffect cuidará de fechar este ou o de desktop */}
+                  <div className="relative">
                     <button
                       onClick={() => setIsLangDropdownOpen(prev => !prev)}
-                      className="flex flex-col items-center text-[#365F71] focus:outline-none"
+                      className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                       aria-label="Selecionar idioma"
+                      aria-expanded={isLangDropdownOpen}
+                      aria-haspopup="true"
                     >
-                      <div className="w-5 h-5 flex items-center justify-center rounded border border-gray-400 mb-0.5 bg-white">
-                        <span className="text-xs font-semibold text-gray-700">
-                          {selectedLang === 'pt' && 'PT'}
-                          {selectedLang === 'en' && 'EN'}
-                          {selectedLang === 'es' && 'ES'}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-['Poppins']">Idioma</span>
+                      <span className="text-sm">
+                        {selectedLang === 'pt' && '🇧🇷 PT'}
+                        {selectedLang === 'en' && '🇺🇸 EN'}
+                        {selectedLang === 'es' && '🇪🇸 ES'}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </button>
                     <AnimatePresence>
                       {isLangDropdownOpen && (
                         <motion.div
-                          initial={{ opacity: 0, y: -10 }}
+                          initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="absolute right-0 bottom-full mb-1 w-36 bg-white rounded-md shadow-xl z-[60] py-1 border border-gray-200" // bottom-full para abrir para cima
+                          className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50 py-1 border border-gray-200"
+                          role="menu"
+                          aria-orientation="vertical"
+                          aria-labelledby="language-menu"
                         >
                           <button
-                            onClick={() => { setSelectedLang('pt'); setIsLangDropdownOpen(false); /* setIsMenuOpen(false) opcional aqui, pois o dropdown de idioma não fecha o menu principal por padrão */ }}
-                            className={`flex items-center w-full px-3 py-1.5 text-[10px] hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'pt' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                            onClick={() => { setSelectedLang('pt'); setIsLangDropdownOpen(false); }}
+                            className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 ${selectedLang === 'pt' ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-700'}`}
+                            role="menuitem"
                           >
-                            <span className="mr-1.5">🇧🇷</span> Português
+                            <span className="mr-2">🇧🇷</span> Português
                           </button>
                           <button
                             onClick={() => { setSelectedLang('en'); setIsLangDropdownOpen(false); }}
-                            className={`flex items-center w-full px-3 py-1.5 text-[10px] hover:bg-gray-100 font-['Poppins'] ${selectedLang === 'en' ? 'font-bold text-[#52A4DB]' : 'text-gray-700'}`}
+                            className={`flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100 ${selectedLang === 'en' ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-700'}`}
+                            role="menuitem"
                           >
-                            <span className="mr-1.5">🇺🇸</span> English
+                            <span className="mr-2">🇺🇸</span> English
                           </button>
                           <button
                             onClick={() => { setSelectedLang('es'); setIsLangDropdownOpen(false); }}
@@ -612,8 +774,17 @@ const Header = () => {
                   </div>
                 </div>
               </div>
+              <div className="p-4 border-t border-gray-100">
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-full py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  Fechar menu
+                </button>
+              </div>
             </nav>
           </motion.div>
+          </div>
         )}
       </AnimatePresence>
       {/* Adiciona o elemento div para o Google Translate Widget (oculto) */}
