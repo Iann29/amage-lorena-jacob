@@ -278,47 +278,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-      
-      {/* Atividades recentes (mockadas) - Você pode querer remover ou adaptar isso também */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="font-medium text-gray-900">Atividades Recentes</h2>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {/* ... Conteúdo mockado de atividades ... */}
-          <div className="px-6 py-4 flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                <svg className="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-900">
-                Novo post <span className="font-medium">A importância de dizer não</span> foi publicado
-              </p>
-              <p className="text-xs text-gray-500 mt-1">há 2 dias atrás</p>
-            </div>
-          </div>
-          
-          <div className="px-6 py-4 flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                <svg className="h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-900">
-                5 novos comentários foram aprovados
-              </p>
-              <p className="text-xs text-gray-500 mt-1">há 3 dias atrás</p>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }
