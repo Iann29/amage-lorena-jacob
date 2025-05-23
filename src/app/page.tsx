@@ -118,7 +118,7 @@ export default function Home() {
         {/* Background Image - Mobile */}
         <div className="w-screen md:hidden relative" style={{ height: 'auto' }}>
           <Image 
-            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/Backgroud2mob.webp" 
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/backMobile.webp" 
             alt="Fundo Mobile" 
             width={750}
             height={1334}
