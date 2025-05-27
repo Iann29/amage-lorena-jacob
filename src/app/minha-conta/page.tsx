@@ -57,6 +57,7 @@ export default function MinhaContaPage() {
   // Estados para gerenciamento de endereços
   const [addresses, setAddresses] = useState<Array<{
     id: string;
+    nome_destinatario: string;
     cep: string;
     rua: string;
     numero: string;
@@ -69,6 +70,7 @@ export default function MinhaContaPage() {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
   const [addressFormValues, setAddressFormValues] = useState({
+    nome_destinatario: '',
     cep: '',
     rua: '',
     numero: '',
@@ -120,10 +122,19 @@ export default function MinhaContaPage() {
     }
     
     // Validar campos obrigatórios
-    const requiredFields = ['cep', 'rua', 'numero', 'bairro', 'cidade', 'estado'];
+    const requiredFields = ['nome_destinatario', 'cep', 'rua', 'numero', 'bairro', 'cidade', 'estado'];
+    const fieldLabels: Record<string, string> = {
+      nome_destinatario: 'Nome do destinatário',
+      cep: 'CEP',
+      rua: 'Rua',
+      numero: 'Número',
+      bairro: 'Bairro',
+      cidade: 'Cidade',
+      estado: 'Estado'
+    };
     for (const field of requiredFields) {
       if (!addressFormValues[field as keyof typeof addressFormValues]) {
-        setAddressFormMessage({ type: 'error', text: `O campo ${field} é obrigatório.` });
+        setAddressFormMessage({ type: 'error', text: `O campo "${fieldLabels[field]}" é obrigatório.` });
         setIsSavingAddress(false);
         return;
       }
@@ -227,6 +238,7 @@ export default function MinhaContaPage() {
   
   const resetAddressForm = () => {
     setAddressFormValues({
+      nome_destinatario: '',
       cep: '',
       rua: '',
       numero: '',
@@ -242,6 +254,7 @@ export default function MinhaContaPage() {
   
   const handleEditAddress = (address: typeof addresses[0]) => {
     setAddressFormValues({
+      nome_destinatario: address.nome_destinatario,
       cep: address.cep,
       rua: address.rua,
       numero: address.numero,
@@ -990,9 +1003,12 @@ export default function MinhaContaPage() {
                         )}
                         
                         <div className="pr-20">
-                          <h3 className="font-semibold text-gray-800 mb-2">
-                            {address.rua}, {address.numero}
+                          <h3 className="font-semibold text-gray-800 mb-1">
+                            {address.nome_destinatario}
                           </h3>
+                          <p className="text-sm text-gray-700 font-medium">
+                            {address.rua}, {address.numero}
+                          </p>
                           {address.complemento && (
                             <p className="text-sm text-gray-600">{address.complemento}</p>
                           )}
@@ -1033,8 +1049,8 @@ export default function MinhaContaPage() {
                 
                 {/* Modal de Adicionar/Editar Endereço */}
                 {showAddressModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-gray-800 mb-4">
                           {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
@@ -1052,8 +1068,24 @@ export default function MinhaContaPage() {
                         <form onSubmit={handleSaveAddress}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div className="md:col-span-2">
+                              <label htmlFor="nome_destinatario" className="block text-gray-700 font-medium mb-1">
+                                Nome do Destinatário <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="nome_destinatario"
+                                name="nome_destinatario"
+                                value={addressFormValues.nome_destinatario}
+                                onChange={handleAddressInputChange}
+                                placeholder="Nome completo do destinatário"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                required
+                              />
+                            </div>
+                            
+                            <div className="md:col-span-2">
                               <label htmlFor="cep" className="block text-gray-700 font-medium mb-1">
-                                CEP
+                                CEP <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -1068,14 +1100,14 @@ export default function MinhaContaPage() {
                                 }}
                                 placeholder="00000-000"
                                 maxLength={9}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
                             
                             <div>
                               <label htmlFor="rua" className="block text-gray-700 font-medium mb-1">
-                                Rua
+                                Rua <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -1084,14 +1116,14 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.rua}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome da rua"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
                             
                             <div>
                               <label htmlFor="numero" className="block text-gray-700 font-medium mb-1">
-                                Número
+                                Número <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -1100,7 +1132,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.numero}
                                 onChange={handleAddressInputChange}
                                 placeholder="123"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1116,13 +1148,13 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.complemento}
                                 onChange={handleAddressInputChange}
                                 placeholder="Apartamento, sala, etc."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                               />
                             </div>
                             
                             <div>
                               <label htmlFor="bairro" className="block text-gray-700 font-medium mb-1">
-                                Bairro
+                                Bairro <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -1131,14 +1163,14 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.bairro}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome do bairro"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
                             
                             <div>
                               <label htmlFor="cidade" className="block text-gray-700 font-medium mb-1">
-                                Cidade
+                                Cidade <span className="text-red-500">*</span>
                               </label>
                               <input
                                 type="text"
@@ -1147,21 +1179,21 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.cidade}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome da cidade"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
                             
                             <div>
                               <label htmlFor="estado" className="block text-gray-700 font-medium mb-1">
-                                Estado
+                                Estado <span className="text-red-500">*</span>
                               </label>
                               <select
                                 id="estado"
                                 name="estado"
                                 value={addressFormValues.estado}
                                 onChange={handleAddressInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white"
                                 required
                               >
                                 <option value="">Selecione</option>
