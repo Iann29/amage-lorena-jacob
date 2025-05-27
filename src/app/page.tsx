@@ -8,6 +8,7 @@ import Separator from "@/components/ui/Separator";
 import BlogCarousel from "@/components/ui/BlogCarousel";
 import EbookBanner from "@/components/ui/EbookBanner";
 import TestimonialsCarousel from "@/components/ui/TestimonialsCarousel";
+import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import { motion } from "framer-motion";
 // Tipos e função da API do blog
 import { getPublishedBlogPosts, type BlogPostPublic } from '@/lib/blog-api';
@@ -529,6 +530,9 @@ export default function Home() {
           {/* Aqui entrariam os ícones decorativos */}
         </div>
       </div>
+
+      {/* Botão flutuante do WhatsApp */}
+      <WhatsAppFloat />
     </div>
   );
 }

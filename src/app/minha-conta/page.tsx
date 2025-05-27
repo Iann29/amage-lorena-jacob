@@ -12,6 +12,11 @@ import {
   LogOut,
   HelpCircle,
   Loader2, // Ícone de carregamento
+  Camera, // Ícone para upload de foto
+  MapPin, // Ícone para endereços
+  Plus, // Ícone para adicionar
+  Trash2, // Ícone para deletar
+  Edit2, // Ícone para editar
 } from 'lucide-react'; // Usar lucide para ícones consistentes
 
 // Os metadados agora são exportados de um arquivo separado
@@ -32,6 +37,7 @@ export default function MinhaContaPage() {
     email: string;
     telefone?: string;
     dataCadastro: string;
+    avatar_url?: string;
   } | null>(null);
   
   // Estados para formulário de dados
@@ -45,9 +51,247 @@ export default function MinhaContaPage() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [formMessage, setFormMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  
+  // Estados para gerenciamento de endereços
+  const [addresses, setAddresses] = useState<Array<{
+    id: string;
+    cep: string;
+    rua: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    is_default: boolean;
+  }>>([]);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<string | null>(null);
+  const [addressFormValues, setAddressFormValues] = useState({
+    cep: '',
+    rua: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    is_default: false
+  });
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [addressFormMessage, setAddressFormMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   // Ref para controlar a chamada inicial do fetchUserData
   const initialLoadDone = useRef(false);
+  
+  // Funções CRUD para endereços
+  const fetchAddresses = async () => {
+    if (!currentUser) return;
+    
+    setIsLoadingAddresses(true);
+    try {
+      const { data, error } = await supabase
+        .from('shipping_addresses')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setAddresses(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar endereços:', error);
+      setAddressFormMessage({ type: 'error', text: 'Erro ao carregar endereços.' });
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  };
+  
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingAddress(true);
+    setAddressFormMessage(null);
+    
+    if (!currentUser) {
+      setAddressFormMessage({ type: 'error', text: 'Usuário não está logado.' });
+      setIsSavingAddress(false);
+      return;
+    }
+    
+    // Validar campos obrigatórios
+    const requiredFields = ['cep', 'rua', 'numero', 'bairro', 'cidade', 'estado'];
+    for (const field of requiredFields) {
+      if (!addressFormValues[field as keyof typeof addressFormValues]) {
+        setAddressFormMessage({ type: 'error', text: `O campo ${field} é obrigatório.` });
+        setIsSavingAddress(false);
+        return;
+      }
+    }
+    
+    try {
+      // Se marcado como padrão, desmarcar outros endereços
+      if (addressFormValues.is_default && !editingAddress) {
+        await supabase
+          .from('shipping_addresses')
+          .update({ is_default: false })
+          .eq('user_id', currentUser.id);
+      }
+      
+      const addressData = {
+        ...addressFormValues,
+        user_id: currentUser.id
+      };
+      
+      if (editingAddress) {
+        // Atualizar endereço existente
+        const { error } = await supabase
+          .from('shipping_addresses')
+          .update(addressData)
+          .eq('id', editingAddress)
+          .eq('user_id', currentUser.id);
+        
+        if (error) throw error;
+        setAddressFormMessage({ type: 'success', text: 'Endereço atualizado com sucesso!' });
+      } else {
+        // Criar novo endereço
+        const { error } = await supabase
+          .from('shipping_addresses')
+          .insert(addressData);
+        
+        if (error) throw error;
+        setAddressFormMessage({ type: 'success', text: 'Endereço adicionado com sucesso!' });
+      }
+      
+      // Recarregar endereços e fechar modal
+      await fetchAddresses();
+      setTimeout(() => {
+        setShowAddressModal(false);
+        resetAddressForm();
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Erro ao salvar endereço:', error);
+      setAddressFormMessage({ type: 'error', text: 'Erro ao salvar endereço. Tente novamente.' });
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+  
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!currentUser || !confirm('Tem certeza que deseja excluir este endereço?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('shipping_addresses')
+        .delete()
+        .eq('id', addressId)
+        .eq('user_id', currentUser.id);
+      
+      if (error) throw error;
+      
+      await fetchAddresses();
+      setAddressFormMessage({ type: 'success', text: 'Endereço excluído com sucesso!' });
+    } catch (error) {
+      console.error('Erro ao excluir endereço:', error);
+      setAddressFormMessage({ type: 'error', text: 'Erro ao excluir endereço.' });
+    }
+  };
+  
+  const handleSetDefaultAddress = async (addressId: string) => {
+    if (!currentUser) return;
+    
+    try {
+      // Desmarcar todos os endereços como padrão
+      await supabase
+        .from('shipping_addresses')
+        .update({ is_default: false })
+        .eq('user_id', currentUser.id);
+      
+      // Marcar o selecionado como padrão
+      const { error } = await supabase
+        .from('shipping_addresses')
+        .update({ is_default: true })
+        .eq('id', addressId)
+        .eq('user_id', currentUser.id);
+      
+      if (error) throw error;
+      
+      await fetchAddresses();
+      setAddressFormMessage({ type: 'success', text: 'Endereço padrão atualizado!' });
+    } catch (error) {
+      console.error('Erro ao definir endereço padrão:', error);
+      setAddressFormMessage({ type: 'error', text: 'Erro ao definir endereço padrão.' });
+    }
+  };
+  
+  const resetAddressForm = () => {
+    setAddressFormValues({
+      cep: '',
+      rua: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      is_default: false
+    });
+    setEditingAddress(null);
+    setAddressFormMessage(null);
+  };
+  
+  const handleEditAddress = (address: typeof addresses[0]) => {
+    setAddressFormValues({
+      cep: address.cep,
+      rua: address.rua,
+      numero: address.numero,
+      complemento: address.complemento || '',
+      bairro: address.bairro,
+      cidade: address.cidade,
+      estado: address.estado,
+      is_default: address.is_default
+    });
+    setEditingAddress(address.id);
+    setShowAddressModal(true);
+  };
+  
+  const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    setAddressFormValues(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    
+    // Limpar mensagem de erro ao digitar
+    if (addressFormMessage?.type === 'error') {
+      setAddressFormMessage(null);
+    }
+  };
+  
+  // Buscar CEP na API
+  const handleCepSearch = async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        setAddressFormValues(prev => ({
+          ...prev,
+          rua: data.logradouro || '',
+          bairro: data.bairro || '',
+          cidade: data.localidade || '',
+          estado: data.uf || ''
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    }
+  };
 
   // Função para logout
   const handleLogout = async () => {
@@ -66,7 +310,7 @@ export default function MinhaContaPage() {
       try {
         const { data: profile, error: profileError } = await supabase
           .from('user_profiles')
-          .select('nome, sobrenome, telefone')
+          .select('nome, sobrenome, telefone, avatar_url')
           .eq('user_id', userToFetch.id)
           .single();
         
@@ -83,8 +327,14 @@ export default function MinhaContaPage() {
           sobrenome: profile?.sobrenome || '',
           email: userToFetch.email || '',
           telefone: profile?.telefone || '',
-          dataCadastro
+          dataCadastro,
+          avatar_url: profile?.avatar_url || ''
         });
+        
+        // Definir preview da foto se existir
+        if (profile?.avatar_url) {
+          setPhotoPreview(profile.avatar_url);
+        }
         
         setFormValues(prev => ({
           ...prev,
@@ -128,7 +378,15 @@ export default function MinhaContaPage() {
       authListener?.subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
+  
+  // Carregar endereços quando a aba for alterada
+  useEffect(() => {
+    if (activeTab === 'enderecos' && currentUser) {
+      fetchAddresses();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentUser]); 
   
   // Função para atualizar dados do perfil
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -258,6 +516,73 @@ export default function MinhaContaPage() {
     }
   };
 
+  // Handler para upload de foto
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+    
+    // Validar tipo de arquivo
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setFormMessage({ type: 'error', text: 'Por favor, selecione uma imagem válida (JPG, PNG ou WebP).' });
+      return;
+    }
+    
+    // Validar tamanho (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setFormMessage({ type: 'error', text: 'A imagem deve ter no máximo 5MB.' });
+      return;
+    }
+    
+    setIsUploadingPhoto(true);
+    setFormMessage(null);
+    
+    try {
+      // Criar nome único para o arquivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+      const filePath = `profile-pic/${fileName}`;
+      
+      // Upload para o bucket
+      const { error: uploadError } = await supabase.storage
+        .from('lorena-images-db')
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: '3600'
+        });
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('lorena-images-db')
+        .getPublicUrl(filePath);
+      
+      // Atualizar perfil com nova URL
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', currentUser.id);
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      // Atualizar estado local
+      setUserProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+      setPhotoPreview(publicUrl);
+      setFormMessage({ type: 'success', text: 'Foto de perfil atualizada com sucesso!' });
+      
+    } catch (error) {
+      console.error('Erro ao fazer upload da foto:', error);
+      setFormMessage({ type: 'error', text: 'Erro ao fazer upload da foto. Tente novamente.' });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   // Componente de carregamento melhorado
   if (isLoading && !userProfile) { // Alterado para !userProfile para melhor refletir o estado de carregamento dos dados
     return (
@@ -285,9 +610,19 @@ export default function MinhaContaPage() {
             <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200"> {/* Sombra sutil e borda */}
               {/* Informações do Usuário no Topo */}
               <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xl font-semibold">
-                  {/* Inicial do nome ou ícone padrão */}
-                  {userProfile?.nome ? userProfile.nome.charAt(0).toUpperCase() : <UserCog size={24} />}
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xl font-semibold overflow-hidden">
+                  {/* Avatar ou inicial do nome */}
+                  {userProfile?.avatar_url ? (
+                    <img 
+                      src={userProfile.avatar_url} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : userProfile?.nome ? (
+                    userProfile.nome.charAt(0).toUpperCase()
+                  ) : (
+                    <UserCog size={24} />
+                  )}
               </div>
                 <div className="overflow-hidden"> {/* Evitar quebra de texto */}
                   <h3 className="font-semibold text-gray-800 truncate">{userProfile?.nome} {userProfile?.sobrenome}</h3>
@@ -300,6 +635,7 @@ export default function MinhaContaPage() {
                 {[
                   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'dados', label: 'Meus Dados', icon: UserCog },
+                  { id: 'enderecos', label: 'Meus Endereços', icon: MapPin },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -383,6 +719,63 @@ export default function MinhaContaPage() {
                   )}
                   
                   <form className="max-w-2xl" onSubmit={handleUpdateProfile}>
+                  {/* Seção de Foto de Perfil */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Foto de Perfil</h3>
+                    
+                    <div className="flex items-center gap-6">
+                      {/* Preview da foto */}
+                      <div className="relative">
+                        <div className="w-24 h-24 bg-gray-100 rounded-full overflow-hidden border-2 border-purple-100">
+                          {photoPreview || userProfile?.avatar_url ? (
+                            <img 
+                              src={photoPreview || userProfile?.avatar_url} 
+                              alt="Foto de perfil" 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <UserCog size={40} />
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Botão de upload sobreposto */}
+                        <label 
+                          htmlFor="photo-upload" 
+                          className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition shadow-lg"
+                        >
+                          <Camera size={16} />
+                          <input 
+                            type="file" 
+                            id="photo-upload" 
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            onChange={handlePhotoUpload}
+                            className="hidden"
+                            disabled={isUploadingPhoto}
+                          />
+                        </label>
+                      </div>
+                      
+                      {/* Informações sobre upload */}
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-600 mb-2">
+                          Clique no ícone da câmera para fazer upload de uma nova foto.
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Formatos aceitos: JPG, PNG, WebP. Tamanho máximo: 5MB.
+                        </p>
+                        
+                        {isUploadingPhoto && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+                            <span className="text-sm text-purple-600">Fazendo upload...</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-gray-700 mb-4">Dados Pessoais</h3>
                     
@@ -531,6 +924,321 @@ export default function MinhaContaPage() {
                     </button>
                   </div>
                 </form>
+              </div>
+            )}
+            
+            {/* Meus Endereços */}
+            {activeTab === 'enderecos' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-purple-800">Meus Endereços</h2>
+                  <button
+                    onClick={() => {
+                      resetAddressForm();
+                      setShowAddressModal(true);
+                    }}
+                    className="bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center gap-2"
+                  >
+                    <Plus size={18} />
+                    Adicionar Endereço
+                  </button>
+                </div>
+                
+                {addressFormMessage && !showAddressModal && (
+                  <div className={`mb-6 p-4 rounded-md ${
+                    addressFormMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' 
+                    : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}>
+                    {addressFormMessage.text}
+                  </div>
+                )}
+                
+                {isLoadingAddresses ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-purple-700" />
+                    <span className="ml-3 text-gray-600">Carregando endereços...</span>
+                  </div>
+                ) : addresses.length === 0 ? (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                    <MapPin className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-600 mb-4">Você ainda não possui endereços cadastrados.</p>
+                    <button
+                      onClick={() => {
+                        resetAddressForm();
+                        setShowAddressModal(true);
+                      }}
+                      className="text-purple-700 font-medium hover:text-purple-900"
+                    >
+                      Adicionar seu primeiro endereço
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {addresses.map((address) => (
+                      <div
+                        key={address.id}
+                        className={`border rounded-lg p-4 relative ${
+                          address.is_default
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        {address.is_default && (
+                          <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                            Padrão
+                          </span>
+                        )}
+                        
+                        <div className="pr-20">
+                          <h3 className="font-semibold text-gray-800 mb-2">
+                            {address.rua}, {address.numero}
+                          </h3>
+                          {address.complemento && (
+                            <p className="text-sm text-gray-600">{address.complemento}</p>
+                          )}
+                          <p className="text-sm text-gray-600">
+                            {address.bairro} - {address.cidade}/{address.estado}
+                          </p>
+                          <p className="text-sm text-gray-600">CEP: {address.cep}</p>
+                        </div>
+                        
+                        <div className="mt-4 flex gap-2">
+                          {!address.is_default && (
+                            <button
+                              onClick={() => handleSetDefaultAddress(address.id)}
+                              className="text-sm text-purple-700 hover:text-purple-900 font-medium"
+                            >
+                              Tornar padrão
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleEditAddress(address)}
+                            className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+                          >
+                            <Edit2 size={14} />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAddress(address.id)}
+                            className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1"
+                          >
+                            <Trash2 size={14} />
+                            Excluir
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Modal de Adicionar/Editar Endereço */}
+                {showAddressModal && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                          {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
+                        </h3>
+                        
+                        {addressFormMessage && (
+                          <div className={`mb-4 p-3 rounded-md text-sm ${
+                            addressFormMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' 
+                            : 'bg-red-50 text-red-800 border border-red-200'
+                          }`}>
+                            {addressFormMessage.text}
+                          </div>
+                        )}
+                        
+                        <form onSubmit={handleSaveAddress}>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="md:col-span-2">
+                              <label htmlFor="cep" className="block text-gray-700 font-medium mb-1">
+                                CEP
+                              </label>
+                              <input
+                                type="text"
+                                id="cep"
+                                name="cep"
+                                value={addressFormValues.cep}
+                                onChange={(e) => {
+                                  handleAddressInputChange(e);
+                                  if (e.target.value.replace(/\D/g, '').length === 8) {
+                                    handleCepSearch(e.target.value);
+                                  }
+                                }}
+                                placeholder="00000-000"
+                                maxLength={9}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="rua" className="block text-gray-700 font-medium mb-1">
+                                Rua
+                              </label>
+                              <input
+                                type="text"
+                                id="rua"
+                                name="rua"
+                                value={addressFormValues.rua}
+                                onChange={handleAddressInputChange}
+                                placeholder="Nome da rua"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="numero" className="block text-gray-700 font-medium mb-1">
+                                Número
+                              </label>
+                              <input
+                                type="text"
+                                id="numero"
+                                name="numero"
+                                value={addressFormValues.numero}
+                                onChange={handleAddressInputChange}
+                                placeholder="123"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              />
+                            </div>
+                            
+                            <div className="md:col-span-2">
+                              <label htmlFor="complemento" className="block text-gray-700 font-medium mb-1">
+                                Complemento (opcional)
+                              </label>
+                              <input
+                                type="text"
+                                id="complemento"
+                                name="complemento"
+                                value={addressFormValues.complemento}
+                                onChange={handleAddressInputChange}
+                                placeholder="Apartamento, sala, etc."
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="bairro" className="block text-gray-700 font-medium mb-1">
+                                Bairro
+                              </label>
+                              <input
+                                type="text"
+                                id="bairro"
+                                name="bairro"
+                                value={addressFormValues.bairro}
+                                onChange={handleAddressInputChange}
+                                placeholder="Nome do bairro"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="cidade" className="block text-gray-700 font-medium mb-1">
+                                Cidade
+                              </label>
+                              <input
+                                type="text"
+                                id="cidade"
+                                name="cidade"
+                                value={addressFormValues.cidade}
+                                onChange={handleAddressInputChange}
+                                placeholder="Nome da cidade"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="estado" className="block text-gray-700 font-medium mb-1">
+                                Estado
+                              </label>
+                              <select
+                                id="estado"
+                                name="estado"
+                                value={addressFormValues.estado}
+                                onChange={handleAddressInputChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                required
+                              >
+                                <option value="">Selecione</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-6">
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                name="is_default"
+                                checked={addressFormValues.is_default}
+                                onChange={handleAddressInputChange}
+                                className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                              />
+                              <span className="text-gray-700">Definir como endereço padrão</span>
+                            </label>
+                          </div>
+                          
+                          <div className="flex gap-3 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddressModal(false);
+                                resetAddressForm();
+                              }}
+                              className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-50 transition"
+                              disabled={isSavingAddress}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="submit"
+                              className="bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[100px]"
+                              disabled={isSavingAddress}
+                            >
+                              {isSavingAddress ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  Salvando...
+                                </>
+                              ) : editingAddress ? 'Atualizar' : 'Adicionar'}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
