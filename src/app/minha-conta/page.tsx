@@ -17,6 +17,19 @@ import {
   Plus, // Ícone para adicionar
   Trash2, // Ícone para deletar
   Edit2, // Ícone para editar
+  Bookmark, // Ícone para posts salvos
+  Clock, // Ícone para data/hora
+  Eye, // Ícone para visualizações
+  BookmarkX, // Ícone para remover dos salvos
+  ShoppingBag, // Ícone para pedidos
+  Package, // Ícone para produtos
+  Truck, // Ícone para entrega
+  CheckCircle, // Ícone para pedido concluído
+  AlertCircle, // Ícone para alertas
+  Search, // Ícone para busca
+  Filter, // Ícone para filtros
+  Download, // Ícone para download
+  X, // Ícone para fechar
 } from 'lucide-react'; // Usar lucide para ícones consistentes
 
 // Os metadados agora são exportados de um arquivo separado
@@ -26,6 +39,55 @@ export default function MinhaContaPage() {
   const supabase = createClient();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Estados para posts salvos (mockado por enquanto)
+  const [savedPosts, setSavedPosts] = useState<Array<{
+    id: string;
+    title: string;
+    excerpt: string;
+    author: string;
+    date: string;
+    readTime: string;
+    category: string;
+    imageUrl: string;
+    views: number;
+    slug: string;
+  }>>([]);
+  const [isLoadingSavedPosts, setIsLoadingSavedPosts] = useState(false);
+  
+  // Estados para pedidos (mockado por enquanto)
+  const [orders, setOrders] = useState<Array<{
+    id: string;
+    orderNumber: string;
+    date: string;
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    total: number;
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      price: number;
+      imageUrl?: string;
+    }>;
+    paymentMethod: string;
+    shippingAddress: {
+      nome_destinatario: string;
+      rua: string;
+      numero: string;
+      complemento?: string;
+      bairro: string;
+      cidade: string;
+      estado: string;
+      cep: string;
+    };
+    trackingCode?: string;
+    estimatedDelivery?: string;
+  }>>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<typeof orders[0] | null>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const { openContatoModal } = useModal();
 
   // Estados para autenticação e dados do usuário
@@ -284,6 +346,34 @@ export default function MinhaContaPage() {
   };
   
   // Buscar CEP na API
+  // Funções auxiliares para pedidos
+  const getStatusBadge = (status: typeof orders[0]['status']) => {
+    const statusConfig = {
+      pending: { label: 'Pendente', bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
+      processing: { label: 'Processando', bg: 'bg-blue-100', text: 'text-blue-800', icon: Package },
+      shipped: { label: 'Enviado', bg: 'bg-purple-100', text: 'text-purple-800', icon: Truck },
+      delivered: { label: 'Entregue', bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+      cancelled: { label: 'Cancelado', bg: 'bg-red-100', text: 'text-red-800', icon: X }
+    };
+    
+    const config = statusConfig[status];
+    const Icon = config.icon;
+    
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+        <Icon size={14} />
+        {config.label}
+      </span>
+    );
+  };
+  
+  const filteredOrders = orders.filter(order => {
+    const matchesFilter = orderFilter === 'all' || order.status === orderFilter;
+    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesFilter && matchesSearch;
+  });
+
   const handleCepSearch = async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '');
     if (cleanCep.length !== 8) return;
@@ -399,7 +489,204 @@ export default function MinhaContaPage() {
       fetchAddresses();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentUser]); 
+  }, [activeTab, currentUser]);
+  
+  // Simular carregamento de posts salvos (mockado)
+  useEffect(() => {
+    if (activeTab === 'posts-salvos') {
+      setIsLoadingSavedPosts(true);
+      // Simular delay de carregamento
+      setTimeout(() => {
+        // Dados mockados para demonstração
+        setSavedPosts([
+          {
+            id: '1',
+            title: 'Como Superar a Ansiedade: Técnicas Práticas para o Dia a Dia',
+            excerpt: 'Descubra estratégias eficazes para gerenciar a ansiedade e melhorar sua qualidade de vida com técnicas simples e práticas.',
+            author: 'Lorena Jacob',
+            date: '2024-01-15',
+            readTime: '5 min',
+            category: 'Saúde Mental',
+            imageUrl: '/assets/palestras-bg.jpg',
+            views: 1523,
+            slug: 'como-superar-ansiedade-tecnicas-praticas'
+          },
+          {
+            id: '2',
+            title: 'O Poder da Resiliência: Transformando Desafios em Oportunidades',
+            excerpt: 'Aprenda como desenvolver resiliência emocional e transformar momentos difíceis em oportunidades de crescimento pessoal.',
+            author: 'Lorena Jacob',
+            date: '2024-01-10',
+            readTime: '8 min',
+            category: 'Desenvolvimento Pessoal',
+            imageUrl: '/assets/treinamento-bg.jpg',
+            views: 2341,
+            slug: 'poder-resiliencia-transformando-desafios'
+          },
+          {
+            id: '3',
+            title: 'Inteligência Emocional no Ambiente de Trabalho',
+            excerpt: 'Entenda a importância da inteligência emocional nas relações profissionais e como desenvolvê-la para alcançar o sucesso.',
+            author: 'Lorena Jacob',
+            date: '2024-01-05',
+            readTime: '6 min',
+            category: 'Carreira',
+            imageUrl: '',
+            views: 1875,
+            slug: 'inteligencia-emocional-ambiente-trabalho'
+          },
+          {
+            id: '4',
+            title: 'Meditação para Iniciantes: Guia Completo',
+            excerpt: 'Um guia passo a passo para começar a praticar meditação e colher os benefícios dessa prática milenar para sua saúde mental.',
+            author: 'Lorena Jacob',
+            date: '2023-12-28',
+            readTime: '7 min',
+            category: 'Bem-estar',
+            imageUrl: '/assets/depoimentosbackground.png',
+            views: 3102,
+            slug: 'meditacao-iniciantes-guia-completo'
+          }
+        ]);
+        setIsLoadingSavedPosts(false);
+      }, 1000);
+    }
+  }, [activeTab]);
+  
+  // Simular carregamento de pedidos (mockado)
+  useEffect(() => {
+    if (activeTab === 'pedidos') {
+      setIsLoadingOrders(true);
+      // Simular delay de carregamento
+      setTimeout(() => {
+        // Dados mockados para demonstração
+        setOrders([
+          {
+            id: '1',
+            orderNumber: 'PED-2024-001',
+            date: '2024-01-20T10:30:00',
+            status: 'delivered',
+            total: 297.00,
+            items: [
+              {
+                id: '1',
+                name: 'Curso Online: Inteligência Emocional',
+                quantity: 1,
+                price: 197.00,
+                imageUrl: '/assets/treinamento-bg.jpg'
+              },
+              {
+                id: '2',
+                name: 'E-book: Guia de Meditação',
+                quantity: 1,
+                price: 47.00,
+                imageUrl: '/assets/meusservicos.png'
+              },
+              {
+                id: '3',
+                name: 'Workshop: Resiliência no Trabalho',
+                quantity: 1,
+                price: 53.00,
+              }
+            ],
+            paymentMethod: 'Cartão de Crédito',
+            shippingAddress: {
+              nome_destinatario: 'João Silva',
+              rua: 'Rua das Flores',
+              numero: '123',
+              complemento: 'Apto 45',
+              bairro: 'Centro',
+              cidade: 'São Paulo',
+              estado: 'SP',
+              cep: '01234-567'
+            },
+            trackingCode: 'BR123456789',
+            estimatedDelivery: '2024-01-25'
+          },
+          {
+            id: '2',
+            orderNumber: 'PED-2024-002',
+            date: '2024-01-18T15:45:00',
+            status: 'shipped',
+            total: 147.00,
+            items: [
+              {
+                id: '4',
+                name: 'Palestra Online: Ansiedade e Produtividade',
+                quantity: 1,
+                price: 147.00,
+                imageUrl: '/assets/palestras-bg.jpg'
+              }
+            ],
+            paymentMethod: 'PIX',
+            shippingAddress: {
+              nome_destinatario: 'Maria Santos',
+              rua: 'Av. Paulista',
+              numero: '1000',
+              bairro: 'Bela Vista',
+              cidade: 'São Paulo',
+              estado: 'SP',
+              cep: '01310-100'
+            },
+            trackingCode: 'BR987654321',
+            estimatedDelivery: '2024-01-23'
+          },
+          {
+            id: '3',
+            orderNumber: 'PED-2024-003',
+            date: '2024-01-15T09:20:00',
+            status: 'processing',
+            total: 397.00,
+            items: [
+              {
+                id: '5',
+                name: 'Mentoria Individual - 3 meses',
+                quantity: 1,
+                price: 397.00,
+              }
+            ],
+            paymentMethod: 'Boleto',
+            shippingAddress: {
+              nome_destinatario: 'Pedro Oliveira',
+              rua: 'Rua Augusta',
+              numero: '500',
+              complemento: 'Sala 201',
+              bairro: 'Consolação',
+              cidade: 'São Paulo',
+              estado: 'SP',
+              cep: '01305-100'
+            }
+          },
+          {
+            id: '4',
+            orderNumber: 'PED-2024-004',
+            date: '2024-01-10T14:00:00',
+            status: 'cancelled',
+            total: 97.00,
+            items: [
+              {
+                id: '6',
+                name: 'Curso: Técnicas de Relaxamento',
+                quantity: 1,
+                price: 97.00,
+              }
+            ],
+            paymentMethod: 'Cartão de Crédito',
+            shippingAddress: {
+              nome_destinatario: 'Ana Costa',
+              rua: 'Rua Oscar Freire',
+              numero: '800',
+              bairro: 'Jardins',
+              cidade: 'São Paulo',
+              estado: 'SP',
+              cep: '01426-000'
+            }
+          }
+        ]);
+        setIsLoadingOrders(false);
+      }, 1000);
+    }
+  }, [activeTab]); 
   
   // Função para atualizar dados do perfil
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -649,6 +936,8 @@ export default function MinhaContaPage() {
                   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
                   { id: 'dados', label: 'Meus Dados', icon: UserCog },
                   { id: 'enderecos', label: 'Meus Endereços', icon: MapPin },
+                  { id: 'posts-salvos', label: 'Posts Salvos', icon: Bookmark },
+                  { id: 'pedidos', label: 'Meus Pedidos', icon: ShoppingBag },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -1049,7 +1338,7 @@ export default function MinhaContaPage() {
                 
                 {/* Modal de Adicionar/Editar Endereço */}
                 {showAddressModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                  <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                       <div className="p-6">
                         <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1267,6 +1556,497 @@ export default function MinhaContaPage() {
                             </button>
                           </div>
                         </form>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Posts Salvos */}
+            {activeTab === 'posts-salvos' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-purple-800">Posts Salvos</h2>
+                    <p className="text-gray-500 mt-1">Artigos que você salvou para ler mais tarde</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Bookmark size={16} />
+                    <span>{savedPosts.length} posts salvos</span>
+                  </div>
+                </div>
+                
+                {isLoadingSavedPosts ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[1, 2, 3, 4].map((index) => (
+                      <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden animate-pulse">
+                        <div className="h-48 bg-gray-200"></div>
+                        <div className="p-5">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                          <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-5/6 mb-4"></div>
+                          <div className="flex justify-between">
+                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                            <div className="h-3 bg-gray-200 rounded w-16"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : savedPosts.length === 0 ? (
+                  <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+                    <Bookmark className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Nenhum post salvo ainda</h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                      Quando você salvar posts do blog, eles aparecerão aqui para você poder acessá-los facilmente.
+                    </p>
+                    <Link 
+                      href="/blog"
+                      className="inline-flex items-center gap-2 bg-purple-700 text-white px-6 py-2.5 rounded-md font-medium hover:bg-purple-800 transition"
+                    >
+                      Explorar Blog
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {savedPosts.map((post) => (
+                      <article key={post.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+                        {/* Imagem do Post */}
+                        <div className="relative h-48 overflow-hidden bg-gray-100">
+                          {post.imageUrl ? (
+                            <img 
+                              src={post.imageUrl} 
+                              alt={post.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <Bookmark size={48} />
+                            </div>
+                          )}
+                          
+                          {/* Badge de Categoria */}
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-purple-600 text-white text-xs px-3 py-1 rounded-full">
+                              {post.category}
+                            </span>
+                          </div>
+                          
+                          {/* Botão de Remover dos Salvos */}
+                          <button
+                            onClick={() => {
+                              // Por enquanto apenas remove do estado local
+                              setSavedPosts(prev => prev.filter(p => p.id !== post.id));
+                            }}
+                            className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
+                            title="Remover dos salvos"
+                          >
+                            <BookmarkX size={18} className="text-gray-700" />
+                          </button>
+                        </div>
+                        
+                        {/* Conteúdo do Post */}
+                        <div className="p-5">
+                          <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                            {post.title}
+                          </h3>
+                          
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            {post.excerpt}
+                          </p>
+                          
+                          {/* Meta informações */}
+                          <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                            <div className="flex items-center gap-4">
+                              <span className="flex items-center gap-1">
+                                <Clock size={14} />
+                                {post.readTime}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Eye size={14} />
+                                {post.views.toLocaleString('pt-BR')} views
+                              </span>
+                            </div>
+                            <time>{new Date(post.date).toLocaleDateString('pt-BR')}</time>
+                          </div>
+                          
+                          {/* Footer com autor e link */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">
+                              Por <span className="font-medium text-gray-800">{post.author}</span>
+                            </span>
+                            <Link
+                              href={`/blog/${post.slug}`}
+                              className="text-purple-700 font-medium text-sm hover:text-purple-900 transition-colors"
+                            >
+                              Ler artigo →
+                            </Link>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Paginação simulada */}
+                {savedPosts.length > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <nav className="flex items-center gap-2">
+                      <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Anterior
+                      </button>
+                      <button className="px-3 py-1 rounded-md bg-purple-700 text-white">1</button>
+                      <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">2</button>
+                      <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">3</button>
+                      <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
+                        Próximo
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Meus Pedidos */}
+            {activeTab === 'pedidos' && (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-2xl font-semibold text-purple-800 mb-2">Meus Pedidos</h2>
+                  <p className="text-gray-500">Acompanhe o status dos seus pedidos e compras</p>
+                </div>
+                
+                {/* Filtros e Busca */}
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar por número do pedido ou produto..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-gray-500" />
+                    <select
+                      value={orderFilter}
+                      onChange={(e) => setOrderFilter(e.target.value as typeof orderFilter)}
+                      className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white"
+                    >
+                      <option value="all">Todos os pedidos</option>
+                      <option value="pending">Pendentes</option>
+                      <option value="processing">Processando</option>
+                      <option value="shipped">Enviados</option>
+                      <option value="delivered">Entregues</option>
+                      <option value="cancelled">Cancelados</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {isLoadingOrders ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((index) => (
+                      <div key={index} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
+                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                          </div>
+                          <div className="h-6 bg-gray-200 rounded-full w-20"></div>
+                        </div>
+                        <div className="h-px bg-gray-200 my-4"></div>
+                        <div className="space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredOrders.length === 0 ? (
+                  <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+                    <ShoppingBag className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                      {searchTerm ? 'Nenhum pedido encontrado' : 'Você ainda não fez nenhum pedido'}
+                    </h3>
+                    <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                      {searchTerm 
+                        ? 'Tente buscar com outros termos ou remova os filtros aplicados.'
+                        : 'Quando você realizar uma compra, seus pedidos aparecerão aqui.'}
+                    </p>
+                    {!searchTerm && (
+                      <Link 
+                        href="/loja"
+                        className="inline-flex items-center gap-2 bg-purple-700 text-white px-6 py-2.5 rounded-md font-medium hover:bg-purple-800 transition"
+                      >
+                        <ShoppingBag size={18} />
+                        Explorar Loja
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredOrders.map((order) => (
+                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                        <div className="p-6">
+                          {/* Header do Pedido */}
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="font-semibold text-gray-900 mb-1">
+                                Pedido {order.orderNumber}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                {new Date(order.date).toLocaleDateString('pt-BR', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              {getStatusBadge(order.status)}
+                              <p className="text-lg font-semibold text-gray-900 mt-2">
+                                R$ {order.total.toFixed(2).replace('.', ',')}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Tracking Info */}
+                          {order.trackingCode && (
+                            <div className="bg-purple-50 rounded-md p-3 mb-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Truck className="h-4 w-4 text-purple-600" />
+                                  <span className="text-purple-700 font-medium">
+                                    Código de rastreio: {order.trackingCode}
+                                  </span>
+                                </div>
+                                {order.estimatedDelivery && (
+                                  <span className="text-sm text-purple-600">
+                                    Previsão: {new Date(order.estimatedDelivery).toLocaleDateString('pt-BR')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Items do Pedido */}
+                          <div className="border-t border-gray-100 pt-4">
+                            <div className="space-y-3">
+                              {order.items.slice(0, 2).map((item) => (
+                                <div key={item.id} className="flex items-center gap-4">
+                                  <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                    {item.imageUrl ? (
+                                      <img 
+                                        src={item.imageUrl} 
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                        <Package size={24} />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
+                                    <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
+                                  </div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    R$ {item.price.toFixed(2).replace('.', ',')}
+                                  </p>
+                                </div>
+                              ))}
+                              
+                              {order.items.length > 2 && (
+                                <p className="text-sm text-gray-500 text-center py-2">
+                                  +{order.items.length - 2} {order.items.length - 2 === 1 ? 'item' : 'itens'}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Ações */}
+                          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                            <span className="text-sm text-gray-500">
+                              {order.paymentMethod}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setShowOrderModal(true);
+                                }}
+                                className="text-purple-700 font-medium text-sm hover:text-purple-900 transition"
+                              >
+                                Ver detalhes
+                              </button>
+                              {order.status === 'delivered' && (
+                                <button className="flex items-center gap-1 text-gray-600 font-medium text-sm hover:text-gray-800 transition">
+                                  <Download size={14} />
+                                  Baixar NF
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Modal de Detalhes do Pedido */}
+                {showOrderModal && selectedOrder && (
+                  <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                      <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xl font-semibold text-gray-900">
+                            Detalhes do Pedido {selectedOrder.orderNumber}
+                          </h3>
+                          <button
+                            onClick={() => {
+                              setShowOrderModal(false);
+                              setSelectedOrder(null);
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-full transition"
+                          >
+                            <X size={20} className="text-gray-500" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="p-6">
+                        {/* Status e Data */}
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <p className="text-sm text-gray-500 mb-1">Status do pedido</p>
+                              {getStatusBadge(selectedOrder.status)}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-500 mb-1">Data do pedido</p>
+                              <p className="font-medium">
+                                {new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
+                                  day: '2-digit',
+                                  month: 'long',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Timeline de Status */}
+                          {selectedOrder.trackingCode && (
+                            <div className="bg-purple-50 rounded-lg p-4">
+                              <h4 className="font-medium text-purple-900 mb-2">Informações de Envio</h4>
+                              <p className="text-sm text-purple-700">
+                                Código de rastreamento: <span className="font-mono font-medium">{selectedOrder.trackingCode}</span>
+                              </p>
+                              {selectedOrder.estimatedDelivery && (
+                                <p className="text-sm text-purple-700 mt-1">
+                                  Previsão de entrega: {new Date(selectedOrder.estimatedDelivery).toLocaleDateString('pt-BR')}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Produtos */}
+                        <div className="mb-6">
+                          <h4 className="font-medium text-gray-900 mb-4">Produtos</h4>
+                          <div className="space-y-4">
+                            {selectedOrder.items.map((item) => (
+                              <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="w-20 h-20 bg-white rounded-md overflow-hidden flex-shrink-0">
+                                  {item.imageUrl ? (
+                                    <img 
+                                      src={item.imageUrl} 
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                      <Package size={32} />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <h5 className="font-medium text-gray-900">{item.name}</h5>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    Quantidade: {item.quantity} × R$ {item.price.toFixed(2).replace('.', ',')}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-gray-900">
+                                  R$ {(item.quantity * item.price).toFixed(2).replace('.', ',')}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Endereço de Entrega */}
+                        <div className="mb-6">
+                          <h4 className="font-medium text-gray-900 mb-3">Endereço de Entrega</h4>
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="font-medium text-gray-900">{selectedOrder.shippingAddress.nome_destinatario}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {selectedOrder.shippingAddress.rua}, {selectedOrder.shippingAddress.numero}
+                              {selectedOrder.shippingAddress.complemento && ` - ${selectedOrder.shippingAddress.complemento}`}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {selectedOrder.shippingAddress.bairro} - {selectedOrder.shippingAddress.cidade}/{selectedOrder.shippingAddress.estado}
+                            </p>
+                            <p className="text-sm text-gray-600">CEP: {selectedOrder.shippingAddress.cep}</p>
+                          </div>
+                        </div>
+                        
+                        {/* Resumo do Pagamento */}
+                        <div className="border-t border-gray-200 pt-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-600">Subtotal</span>
+                            <span className="font-medium">R$ {selectedOrder.total.toFixed(2).replace('.', ',')}</span>
+                          </div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-600">Frete</span>
+                            <span className="font-medium text-green-600">Grátis</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                            <span className="font-semibold text-gray-900">Total</span>
+                            <span className="font-semibold text-lg text-gray-900">
+                              R$ {selectedOrder.total.toFixed(2).replace('.', ',')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 mt-2">
+                            Pago via {selectedOrder.paymentMethod}
+                          </p>
+                        </div>
+                        
+                        {/* Ações */}
+                        <div className="mt-6 flex gap-3">
+                          {selectedOrder.status === 'delivered' && (
+                            <button className="flex-1 bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition">
+                              Comprar Novamente
+                            </button>
+                          )}
+                          {selectedOrder.status === 'delivered' && (
+                            <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
+                              <Download size={16} />
+                              Baixar Nota Fiscal
+                            </button>
+                          )}
+                          {(selectedOrder.status === 'pending' || selectedOrder.status === 'processing') && (
+                            <button className="flex-1 border border-red-300 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-50 transition">
+                              Cancelar Pedido
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
