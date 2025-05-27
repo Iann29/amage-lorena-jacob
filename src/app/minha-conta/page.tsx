@@ -142,16 +142,18 @@ export default function MinhaContaPage() {
     estado: '',
     is_default: false
   });
-  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [addressFormMessage, setAddressFormMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [hasLoadedAddresses, setHasLoadedAddresses] = useState(false);
 
   // Ref para controlar a chamada inicial do fetchUserData
   const initialLoadDone = useRef(false);
+  const isInitializing = useRef(false);
   
   // Funções CRUD para endereços
-  const fetchAddresses = async () => {
-    if (!currentUser) return;
+  const fetchAddresses = async (force = false) => {
+    if (!currentUser || (hasLoadedAddresses && !force)) return;
     
     setIsLoadingAddresses(true);
     try {
@@ -164,6 +166,7 @@ export default function MinhaContaPage() {
       
       if (error) throw error;
       setAddresses(data || []);
+      setHasLoadedAddresses(true);
     } catch (error) {
       console.error('Erro ao carregar endereços:', error);
       setAddressFormMessage({ type: 'error', text: 'Erro ao carregar endereços.' });
@@ -237,7 +240,7 @@ export default function MinhaContaPage() {
       }
       
       // Recarregar endereços e fechar modal
-      await fetchAddresses();
+      await fetchAddresses(true);
       setTimeout(() => {
         setShowAddressModal(false);
         resetAddressForm();
@@ -263,7 +266,7 @@ export default function MinhaContaPage() {
       
       if (error) throw error;
       
-      await fetchAddresses();
+      await fetchAddresses(true);
       setAddressFormMessage({ type: 'success', text: 'Endereço excluído com sucesso!' });
     } catch (error) {
       console.error('Erro ao excluir endereço:', error);
@@ -290,7 +293,7 @@ export default function MinhaContaPage() {
       
       if (error) throw error;
       
-      await fetchAddresses();
+      await fetchAddresses(true);
       setAddressFormMessage({ type: 'success', text: 'Endereço padrão atualizado!' });
     } catch (error) {
       console.error('Erro ao definir endereço padrão:', error);
@@ -402,62 +405,90 @@ export default function MinhaContaPage() {
     router.push('/'); // Redirecionar para a home após logout
   };
 
-  // Carregar dados do usuário e perfil
-  useEffect(() => {
-    const fetchUserData = async (userToFetch: User) => {
-      if (!userToFetch) return;
+  // Função para buscar dados do usuário
+  const fetchUserData = async (userToFetch: User) => {
+    if (!userToFetch) return;
+    
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('nome, sobrenome, telefone, avatar_url')
+        .eq('user_id', userToFetch.id)
+        .single();
       
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      } 
+      
+      const dataCadastro = userToFetch.created_at 
+        ? new Date(userToFetch.created_at).toLocaleDateString('pt-BR') 
+        : 'Data indisponível';
+      
+      setUserProfile({
+        nome: profile?.nome || '',
+        sobrenome: profile?.sobrenome || '',
+        email: userToFetch.email || '',
+        telefone: profile?.telefone || '',
+        dataCadastro,
+        avatar_url: profile?.avatar_url || ''
+      });
+      
+      // Definir preview da foto se existir
+      if (profile?.avatar_url) {
+        setPhotoPreview(profile.avatar_url);
+      }
+      
+      setFormValues(prev => ({
+        ...prev,
+        nome: profile?.nome || '',
+        sobrenome: profile?.sobrenome || '',
+        telefone: profile?.telefone || '',
+      }));
+
+    } catch (error) {
+      console.error("MinhaContaPage: Erro geral ao buscar dados do usuário", error);
+      setFormMessage({ type: 'error', text: 'Erro ao carregar seus dados. Tente novamente mais tarde.' });
+    }
+  };
+
+  // Inicialização e autenticação
+  useEffect(() => {
+    const initializeAuth = async () => {
+      if (isInitializing.current || initialLoadDone.current) return;
+      isInitializing.current = true;
       setIsLoading(true);
-      setFormMessage(null);
       
       try {
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('nome, sobrenome, telefone, avatar_url')
-          .eq('user_id', userToFetch.id)
-          .single();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (profileError && profileError.code !== 'PGRST116') {
-          throw profileError;
-        } 
-        
-        const dataCadastro = userToFetch.created_at 
-          ? new Date(userToFetch.created_at).toLocaleDateString('pt-BR') 
-          : 'Data indisponível';
-        
-        setUserProfile({
-          nome: profile?.nome || '',
-          sobrenome: profile?.sobrenome || '',
-          email: userToFetch.email || '',
-          telefone: profile?.telefone || '',
-          dataCadastro,
-          avatar_url: profile?.avatar_url || ''
-        });
-        
-        // Definir preview da foto se existir
-        if (profile?.avatar_url) {
-          setPhotoPreview(profile.avatar_url);
+        if (session?.user) {
+          setCurrentUser(session.user);
+          await fetchUserData(session.user);
+        } else {
+          router.push('/autenticacao');
         }
-        
-        setFormValues(prev => ({
-          ...prev,
-          nome: profile?.nome || '',
-          sobrenome: profile?.sobrenome || '',
-          telefone: profile?.telefone || '',
-        }));
-
       } catch (error) {
-        console.error("MinhaContaPage: Erro geral ao buscar dados do usuário", error);
-        setFormMessage({ type: 'error', text: 'Erro ao carregar seus dados. Tente novamente mais tarde.' });
+        console.error('Erro ao inicializar autenticação:', error);
+        router.push('/autenticacao');
       } finally {
         setIsLoading(false);
+        initialLoadDone.current = true;
+        isInitializing.current = false;
       }
     };
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+    
+    initializeAuth();
+  }, [router]);
+  
+  // Listener de mudanças de autenticação
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      // Ignora o evento inicial para evitar duplicação
+      if (event === 'INITIAL_SESSION') return;
+      
       const user = session?.user ?? null;
 
-      if (user?.id && user.id !== currentUser?.id) {
+      if (user && user.id !== currentUser?.id) {
         setCurrentUser(user);
         await fetchUserData(user);
       } else if (!user && currentUser) { 
@@ -465,31 +496,22 @@ export default function MinhaContaPage() {
         setUserProfile(null);
         setFormValues({ nome: '', sobrenome: '', telefone: '', senhaAtual: '', novaSenha: '', confirmarSenha: ''});
         router.push('/autenticacao');
-      } else if (!user && !currentUser && !initialLoadDone.current) {
-         const { data: { session: initialSession } } = await supabase.auth.getSession();
-         if (initialSession?.user) {
-            setCurrentUser(initialSession.user);
-            await fetchUserData(initialSession.user);
-         } else {
-            router.push('/autenticacao');
-         }
       }
-      initialLoadDone.current = true;
     });
     
     return () => {
       authListener?.subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentUser?.id, router]);
   
   // Carregar endereços quando a aba for alterada
   useEffect(() => {
-    if (activeTab === 'enderecos' && currentUser) {
+    if (activeTab === 'enderecos' && currentUser && !hasLoadedAddresses) {
       fetchAddresses();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentUser]);
+  }, [activeTab, currentUser, hasLoadedAddresses]);
   
   // Simular carregamento de posts salvos (mockado)
   useEffect(() => {
@@ -884,11 +906,44 @@ export default function MinhaContaPage() {
   };
 
   // Componente de carregamento melhorado
-  if (isLoading && !userProfile) { // Alterado para !userProfile para melhor refletir o estado de carregamento dos dados
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]"> {/* Centraliza na viewport */}
-        <Loader2 className="h-12 w-12 animate-spin text-purple-700" />
-        <span className="ml-4 text-lg text-gray-600">Carregando sua conta...</span>
+      <div className="bg-gray-50 min-h-screen">
+        <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
+          <div className="mb-8 md:mb-12">
+            <div className="h-10 bg-gray-200 rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-5 bg-gray-200 rounded w-64 animate-pulse"></div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Skeleton do menu lateral */}
+            <aside className="lg:w-1/4">
+              <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2 animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+            </aside>
+            
+            {/* Skeleton do conteúdo principal */}
+            <main className="lg:w-3/4">
+              <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-200 min-h-[400px]">
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-12 w-12 animate-spin text-purple-700" />
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
       </div>
     );
   }
