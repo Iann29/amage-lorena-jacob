@@ -132,7 +132,7 @@ export default function Home() {
 
         <div className="container mx-auto px-4 pt-12 md:pt-32 pb-8 md:pb-20 absolute top-0 left-0 right-0 z-10 flex flex-col md:flex-row items-start">
           {/* Texto do Banner Principal */}
-          <div className="relative w-full md:w-[570px] md:h-80 text-white mb-12 md:mb-0 pl-6 md:pl-16 lg:pl-32">
+          <div className="relative w-full md:w-[570px] md:h-80 text-white mb-12 md:mb-0 md:pl-16 lg:pl-32">
             {/* Banner para Desktop */}
             <div className="hidden md:block">
               <div className="w-[600px] relative left-[32px] justify-center">
@@ -165,19 +165,32 @@ export default function Home() {
             </div>
             
             {/* Banner para Mobile */}
-            <div className="sm:hidden pl-4">
-              <div className="relative left-[8px]">
-                <h1 className="text-white text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>SUPORTE</h1>
-              </div>
-              <div className="relative -mt-0.5">
-                <h2 className="text-white text-lg font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PERSONALIZADO</h2>
-              </div>
-              <div className="mt-0.5 relative left-[2px]">
-                <span className="text-white text-xs font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>PARA O </span>
-                <span className="text-[#FFFCB3] text-xs font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>DESENVOLVIMENTO</span>
-              </div>
-              <div className="relative left-[8px] -mt-0.5">
-                <h2 className="text-[#FFFCB3] text-xl font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>INFANTIL</h2>
+            <div className="sm:hidden absolute inset-0 flex flex-col justify-start items-center pt-12">
+              <div className="flex flex-col items-start mx-auto">
+                {/* SUPORTE */}
+                <div className="text-white text-5xl font-bold leading-[52px] [text-shadow:_-2px_2px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  SUPORTE
+                </div>
+                
+                {/* PERSONALIZADO */}
+                <div className="text-white text-3xl font-bold leading-7 [text-shadow:_-2px_2px_0px_rgb(3_122_179_/_1.00)] -mt-1" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  PERSONALIZADO
+                </div>
+                
+                {/* PARA O DESENVOLVIMENTO */}
+                <div className="flex mt-2">
+                  <span className="text-white text-base font-bold leading-none [text-shadow:_-1px_1px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    PARA O{' '}
+                  </span>
+                  <span className="text-[#FFFCB3] text-base font-bold leading-none [text-shadow:_-1px_1px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    DESENVOLVIMENTO
+                  </span>
+                </div>
+                
+                {/* INFANTIL */}
+                <div className="text-[#FFFCB3] text-5xl font-bold leading-[53px] [text-shadow:_-2px_2px_0px_rgb(3_122_179_/_1.00)] mt-0" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  INFANTIL
+                </div>
               </div>
             
               <div className="mt-3 relative pl-2">
