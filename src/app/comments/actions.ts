@@ -2,13 +2,9 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import jsdom from 'jsdom';
-import DOMPurifyServer from 'dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 import { getAuthenticatedAdminId } from "@/app/admin/blog/actions"; // Importar função de verificação de admin
 
-// Configuração do DOMPurify no servidor
-const { window } = new jsdom.JSDOM('');
-const purify = DOMPurifyServer(window);
 
 interface SubmitCommentResponse {
   success: boolean;
@@ -37,7 +33,7 @@ export async function submitNewComment(
     }
 
     // 1. Sanitizar o conteúdo do comentário
-    const sanitizedContent = purify.sanitize(content, {
+    const sanitizedContent = DOMPurify.sanitize(content, {
       USE_PROFILES: { html: false, mathMl: false, svg: false }, // Corrigido: mathml para mathMl
       ALLOWED_TAGS: [], // Nenhuma tag HTML permitida
       ALLOWED_ATTR: []  // Nenhum atributo HTML permitido

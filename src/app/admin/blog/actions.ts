@@ -3,11 +3,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
-import jsdom from 'jsdom';
-import DOMPurifyServer from 'dompurify';
-
-const { window } = new jsdom.JSDOM('');
-const purify = DOMPurifyServer(window);
+import DOMPurify from 'isomorphic-dompurify';
 
 interface PostFormData {
   titulo: string;
