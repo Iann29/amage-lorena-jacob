@@ -129,8 +129,14 @@ export default function BlogPage() {
     isMounted.current = true;
     fetchCategories();
     setDebouncedSearchTerm(searchTerm);
+    
+    // Adiciona classe ao body para prevenir scroll horizontal
+    document.body.style.overflowX = 'hidden';
+    
     return () => {
       isMounted.current = false;
+      // Remove a classe ao desmontar
+      document.body.style.overflowX = '';
     };
   }, [fetchCategories, searchTerm]);
 
