@@ -61,10 +61,15 @@ export const metadata: Metadata = {
   title: "Lorena Jacob | Terapeuta Infantil",
   description: "E-commerce e Blog de terapia infantil especializada em desenvolvimento, autismo, TDAH e outros transtornos do neurodesenvolvimento.",
   keywords: "terapia infantil, desenvolvimento infantil, autismo, TDAH",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     title: "Lorena",
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
