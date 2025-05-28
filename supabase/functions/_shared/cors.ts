@@ -9,7 +9,8 @@ const getAllowedOrigins = (): string[] => {
     'http://localhost:4000',
     'https://amage-lorena-jacob.vercel.app',
     'https://www.lorenajacob.com.br',
-    'https://lorenajacob.com.br'
+    'https://lorenajacob.com.br',
+    'http://192.168.18.114:3000'
   ];
 
   // Verificar se há domínio configurado no ambiente

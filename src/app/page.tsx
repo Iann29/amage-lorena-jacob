@@ -205,7 +205,7 @@ export default function Home() {
                 </a>
               </div>
               
-              <div className="mt-4 border-l-4 border-white pl-3 py-2 max-w-[250px] mx-auto">
+              <div className="mt-8 border-l-4 border-white pl-3 py-2 max-w-[250px] mx-auto">
                 <p className="text-sm leading-5 text-left font-[var(--font-museo-sans)]">
                   Acompanhamento especializado para <span className="font-medium">auxiliar crianças com autismo, TDAH</span> e outras necessidades especiais.
                 </p>
@@ -272,22 +272,10 @@ export default function Home() {
           <div className="md:w-1/2 mb-8 md:mb-0 relative overflow-visible">
             <div className="rounded-3xl overflow-visible">
               <div className="relative">
-                {/* Imagem Desktop */}
-                <div className="hidden md:block w-full relative overflow-visible" style={{ marginLeft: '-5%', marginTop: '-27%', zIndex: 10 }}>
+                {/* Imagem para Desktop e Mobile */}
+                <div className="w-full relative overflow-visible" style={{ marginLeft: '-5%', marginTop: '-27%', zIndex: 10 }}>
                   <Image 
-                    src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//Sobremim.webp" 
-                    alt="Lorena Jacob" 
-                    width={605} 
-                    height={805} 
-                    className="rounded-2xl w-full h-auto max-w-[680px]"
-                    priority
-                  />
-                </div>
-                
-                {/* Imagem Mobile */}
-                <div className="md:hidden w-full relative overflow-visible" style={{ marginLeft: '-5%', marginTop: '-27%', zIndex: 10 }}>
-                  <Image 
-                    src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//sobre-mim_mobile_.webp" 
+                    src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//Sobre%20Mim.png" 
                     alt="Lorena Jacob" 
                     width={605} 
                     height={805} 
