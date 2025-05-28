@@ -354,7 +354,7 @@ export default function MinhaContaPage() {
     const statusConfig = {
       pending: { label: 'Pendente', bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
       processing: { label: 'Processando', bg: 'bg-blue-100', text: 'text-blue-800', icon: Package },
-      shipped: { label: 'Enviado', bg: 'bg-purple-100', text: 'text-purple-800', icon: Truck },
+      shipped: { label: 'Enviado', bg: 'bg-blue-100', text: 'text-blue-800', icon: Truck },
       delivered: { label: 'Entregue', bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
       cancelled: { label: 'Cancelado', bg: 'bg-red-100', text: 'text-red-800', icon: X }
     };
@@ -938,7 +938,7 @@ export default function MinhaContaPage() {
             <main className="lg:w-3/4">
               <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-200 min-h-[400px]">
                 <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-12 w-12 animate-spin text-purple-700" />
+                  <Loader2 className="h-12 w-12 animate-spin text-[#1e60a7]" />
                 </div>
               </div>
             </main>
@@ -965,7 +965,7 @@ export default function MinhaContaPage() {
             <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200"> {/* Sombra sutil e borda */}
               {/* Informações do Usuário no Topo */}
               <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-700 text-xl font-semibold overflow-hidden">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-[#1e60a7] text-xl font-semibold overflow-hidden">
                   {/* Avatar ou inicial do nome */}
                   {userProfile?.avatar_url ? (
                     <img 
@@ -999,11 +999,11 @@ export default function MinhaContaPage() {
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors duration-150 ${
                       activeTab === item.id 
-                        ? 'bg-purple-50 text-purple-700 font-medium' 
+                        ? 'bg-blue-50 text-[#1e60a7] font-medium' 
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
                     }`}
                   >
-                    <item.icon size={18} className={`${activeTab === item.id ? 'text-purple-600' : 'text-gray-400'}`} />
+                    <item.icon size={18} className={`${activeTab === item.id ? 'text-[#1e60a7]' : 'text-gray-400'}`} />
                     {item.label}
                   </button>
                 ))}
@@ -1064,7 +1064,7 @@ export default function MinhaContaPage() {
               {/* Meus Dados (Exemplo inicial, será refatorado) */}
             {activeTab === 'dados' && (
               <div>
-                <h2 className="text-2xl font-semibold text-purple-800 mb-6">Meus Dados</h2>
+                <h2 className="text-2xl font-semibold text-[#1e60a7] mb-6">Meus Dados</h2>
                 
                   {formMessage && (
                     <div className={`mb-6 p-4 rounded-md ${
@@ -1083,7 +1083,7 @@ export default function MinhaContaPage() {
                     <div className="flex items-center gap-6">
                       {/* Preview da foto */}
                       <div className="relative">
-                        <div className="w-24 h-24 bg-gray-100 rounded-full overflow-hidden border-2 border-purple-100">
+                        <div className="w-24 h-24 bg-gray-100 rounded-full overflow-hidden border-2 border-blue-100">
                           {photoPreview || userProfile?.avatar_url ? (
                             <img 
                               src={photoPreview || userProfile?.avatar_url} 
@@ -1100,7 +1100,7 @@ export default function MinhaContaPage() {
                         {/* Botão de upload sobreposto */}
                         <label 
                           htmlFor="photo-upload" 
-                          className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition shadow-lg"
+                          className="absolute bottom-0 right-0 bg-[#1e60a7] text-white p-2 rounded-full cursor-pointer hover:bg-[#184d8a] transition shadow-lg"
                         >
                           <Camera size={16} />
                           <input 
@@ -1125,8 +1125,8 @@ export default function MinhaContaPage() {
                         
                         {isUploadingPhoto && (
                           <div className="mt-2 flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
-                            <span className="text-sm text-purple-600">Fazendo upload...</span>
+                            <Loader2 className="h-4 w-4 animate-spin text-[#1e60a7]" />
+                            <span className="text-sm text-[#1e60a7]">Fazendo upload...</span>
                           </div>
                         )}
                       </div>
@@ -1146,7 +1146,7 @@ export default function MinhaContaPage() {
                             value={formValues.nome}
                             onChange={handleInputChange}
                             placeholder="Digite seu nome"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                             required
                           />
                         </div>
@@ -1160,7 +1160,7 @@ export default function MinhaContaPage() {
                             value={formValues.sobrenome}
                             onChange={handleInputChange}
                             placeholder="Digite seu sobrenome"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                         />
                       </div>
                       
@@ -1171,7 +1171,7 @@ export default function MinhaContaPage() {
                           id="email"
                           name="email"
                             value={userProfile?.email || ''}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50 text-gray-700"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] bg-gray-50 text-gray-700"
                             disabled
                             autoComplete="username"
                         />
@@ -1189,7 +1189,7 @@ export default function MinhaContaPage() {
                             value={formValues.telefone}
                             onChange={handleInputChange}
                             placeholder="Digite seu telefone"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                         />
                       </div>
                     </div>
@@ -1208,7 +1208,7 @@ export default function MinhaContaPage() {
                             value={formValues.senhaAtual}
                             onChange={handleInputChange}
                             placeholder="Digite sua senha atual"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                             autoComplete="current-password"
                         />
                       </div>
@@ -1222,7 +1222,7 @@ export default function MinhaContaPage() {
                             value={formValues.novaSenha}
                             onChange={handleInputChange}
                             placeholder="Digite sua nova senha"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                             autoComplete="new-password"
                         />
                       </div>
@@ -1236,7 +1236,7 @@ export default function MinhaContaPage() {
                             value={formValues.confirmarSenha}
                             onChange={handleInputChange}
                             placeholder="Confirme sua nova senha"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder:text-gray-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 placeholder:text-gray-500"
                             autoComplete="new-password"
                         />
                       </div>
@@ -1246,7 +1246,7 @@ export default function MinhaContaPage() {
                   <div className="flex gap-4">
                     <button
                       type="submit"
-                        className="bg-purple-700 text-white px-6 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[150px]"
+                        className="bg-[#1e60a7] text-white px-6 py-2 rounded-md font-medium hover:bg-[#184d8a] transition flex items-center justify-center min-w-[150px]"
                         disabled={isSaving}
                       >
                         {isSaving ? (
@@ -1288,13 +1288,13 @@ export default function MinhaContaPage() {
             {activeTab === 'enderecos' && (
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold text-purple-800">Meus Endereços</h2>
+                  <h2 className="text-2xl font-semibold text-[#1e60a7]">Meus Endereços</h2>
                   <button
                     onClick={() => {
                       resetAddressForm();
                       setShowAddressModal(true);
                     }}
-                    className="bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center gap-2"
+                    className="bg-[#1e60a7] text-white px-4 py-2 rounded-md font-medium hover:bg-[#184d8a] transition flex items-center gap-2"
                   >
                     <Plus size={18} />
                     Adicionar Endereço
@@ -1312,7 +1312,7 @@ export default function MinhaContaPage() {
                 
                 {isLoadingAddresses ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-purple-700" />
+                    <Loader2 className="h-8 w-8 animate-spin text-[#1e60a7]" />
                     <span className="ml-3 text-gray-600">Carregando endereços...</span>
                   </div>
                 ) : addresses.length === 0 ? (
@@ -1324,7 +1324,7 @@ export default function MinhaContaPage() {
                         resetAddressForm();
                         setShowAddressModal(true);
                       }}
-                      className="text-purple-700 font-medium hover:text-purple-900"
+                      className="text-[#1e60a7] font-medium hover:text-[#13416f]"
                     >
                       Adicionar seu primeiro endereço
                     </button>
@@ -1336,12 +1336,12 @@ export default function MinhaContaPage() {
                         key={address.id}
                         className={`border rounded-lg p-4 relative ${
                           address.is_default
-                            ? 'border-purple-500 bg-purple-50'
+                            ? 'border-[#1e60a7] bg-blue-50'
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
                         {address.is_default && (
-                          <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                          <span className="absolute top-2 right-2 bg-[#1e60a7] text-white text-xs px-2 py-1 rounded-full">
                             Padrão
                           </span>
                         )}
@@ -1366,7 +1366,7 @@ export default function MinhaContaPage() {
                           {!address.is_default && (
                             <button
                               onClick={() => handleSetDefaultAddress(address.id)}
-                              className="text-sm text-purple-700 hover:text-purple-900 font-medium"
+                              className="text-sm text-[#1e60a7] hover:text-[#13416f] font-medium"
                             >
                               Tornar padrão
                             </button>
@@ -1422,7 +1422,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.nome_destinatario}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome completo do destinatário"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1444,7 +1444,7 @@ export default function MinhaContaPage() {
                                 }}
                                 placeholder="00000-000"
                                 maxLength={9}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1460,7 +1460,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.rua}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome da rua"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1476,7 +1476,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.numero}
                                 onChange={handleAddressInputChange}
                                 placeholder="123"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1492,7 +1492,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.complemento}
                                 onChange={handleAddressInputChange}
                                 placeholder="Apartamento, sala, etc."
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                               />
                             </div>
                             
@@ -1507,7 +1507,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.bairro}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome do bairro"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1523,7 +1523,7 @@ export default function MinhaContaPage() {
                                 value={addressFormValues.cidade}
                                 onChange={handleAddressInputChange}
                                 placeholder="Nome da cidade"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white placeholder:text-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white placeholder:text-gray-400"
                                 required
                               />
                             </div>
@@ -1537,7 +1537,7 @@ export default function MinhaContaPage() {
                                 name="estado"
                                 value={addressFormValues.estado}
                                 onChange={handleAddressInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white"
                                 required
                               >
                                 <option value="">Selecione</option>
@@ -1579,7 +1579,7 @@ export default function MinhaContaPage() {
                                 name="is_default"
                                 checked={addressFormValues.is_default}
                                 onChange={handleAddressInputChange}
-                                className="w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                className="w-4 h-4 text-[#1e60a7] focus:ring-[#1e60a7] border-gray-300 rounded"
                               />
                               <span className="text-gray-700">Definir como endereço padrão</span>
                             </label>
@@ -1599,7 +1599,7 @@ export default function MinhaContaPage() {
                             </button>
                             <button
                               type="submit"
-                              className="bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition flex items-center justify-center min-w-[100px]"
+                              className="bg-[#1e60a7] text-white px-4 py-2 rounded-md font-medium hover:bg-[#184d8a] transition flex items-center justify-center min-w-[100px]"
                               disabled={isSavingAddress}
                             >
                               {isSavingAddress ? (
@@ -1623,7 +1623,7 @@ export default function MinhaContaPage() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-semibold text-purple-800">Posts Salvos</h2>
+                    <h2 className="text-2xl font-semibold text-[#1e60a7]">Posts Salvos</h2>
                     <p className="text-gray-500 mt-1">Artigos que você salvou para ler mais tarde</p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -1658,7 +1658,7 @@ export default function MinhaContaPage() {
                     </p>
                     <Link 
                       href="/blog"
-                      className="inline-flex items-center gap-2 bg-purple-700 text-white px-6 py-2.5 rounded-md font-medium hover:bg-purple-800 transition"
+                      className="inline-flex items-center gap-2 bg-[#1e60a7] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#184d8a] transition"
                     >
                       Explorar Blog
                     </Link>
@@ -1683,7 +1683,7 @@ export default function MinhaContaPage() {
                           
                           {/* Badge de Categoria */}
                           <div className="absolute top-3 left-3">
-                            <span className="bg-purple-600 text-white text-xs px-3 py-1 rounded-full">
+                            <span className="bg-[#1e60a7] text-white text-xs px-3 py-1 rounded-full">
                               {post.category}
                             </span>
                           </div>
@@ -1703,7 +1703,7 @@ export default function MinhaContaPage() {
                         
                         {/* Conteúdo do Post */}
                         <div className="p-5">
-                          <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors">
+                          <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-2 group-hover:text-[#1e60a7] transition-colors">
                             {post.title}
                           </h3>
                           
@@ -1733,7 +1733,7 @@ export default function MinhaContaPage() {
                             </span>
                             <Link
                               href={`/blog/${post.slug}`}
-                              className="text-purple-700 font-medium text-sm hover:text-purple-900 transition-colors"
+                              className="text-[#1e60a7] font-medium text-sm hover:text-[#13416f] transition-colors"
                             >
                               Ler artigo →
                             </Link>
@@ -1751,7 +1751,7 @@ export default function MinhaContaPage() {
                       <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         Anterior
                       </button>
-                      <button className="px-3 py-1 rounded-md bg-purple-700 text-white">1</button>
+                      <button className="px-3 py-1 rounded-md bg-[#1e60a7] text-white">1</button>
                       <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">2</button>
                       <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">3</button>
                       <button className="px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
@@ -1767,7 +1767,7 @@ export default function MinhaContaPage() {
             {activeTab === 'pedidos' && (
               <div>
                 <div className="mb-6">
-                  <h2 className="text-2xl font-semibold text-purple-800 mb-2">Meus Pedidos</h2>
+                  <h2 className="text-2xl font-semibold text-[#1e60a7] mb-2">Meus Pedidos</h2>
                   <p className="text-gray-500">Acompanhe o status dos seus pedidos e compras</p>
                 </div>
                 
@@ -1781,7 +1781,7 @@ export default function MinhaContaPage() {
                         placeholder="Buscar por número do pedido ou produto..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900"
                       />
                     </div>
                   </div>
@@ -1791,7 +1791,7 @@ export default function MinhaContaPage() {
                     <select
                       value={orderFilter}
                       onChange={(e) => setOrderFilter(e.target.value as typeof orderFilter)}
-                      className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 bg-white"
+                      className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white"
                     >
                       <option value="all">Todos os pedidos</option>
                       <option value="pending">Pendentes</option>
@@ -1836,7 +1836,7 @@ export default function MinhaContaPage() {
                     {!searchTerm && (
                       <Link 
                         href="/loja"
-                        className="inline-flex items-center gap-2 bg-purple-700 text-white px-6 py-2.5 rounded-md font-medium hover:bg-purple-800 transition"
+                        className="inline-flex items-center gap-2 bg-[#1e60a7] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#184d8a] transition"
                       >
                         <ShoppingBag size={18} />
                         Explorar Loja
@@ -1874,16 +1874,16 @@ export default function MinhaContaPage() {
                           
                           {/* Tracking Info */}
                           {order.trackingCode && (
-                            <div className="bg-purple-50 rounded-md p-3 mb-4">
+                            <div className="bg-blue-50 rounded-md p-3 mb-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-sm">
-                                  <Truck className="h-4 w-4 text-purple-600" />
-                                  <span className="text-purple-700 font-medium">
+                                  <Truck className="h-4 w-4 text-[#1e60a7]" />
+                                  <span className="text-[#1e60a7] font-medium">
                                     Código de rastreio: {order.trackingCode}
                                   </span>
                                 </div>
                                 {order.estimatedDelivery && (
-                                  <span className="text-sm text-purple-600">
+                                  <span className="text-sm text-[#1e60a7]">
                                     Previsão: {new Date(order.estimatedDelivery).toLocaleDateString('pt-BR')}
                                   </span>
                                 )}
@@ -1938,7 +1938,7 @@ export default function MinhaContaPage() {
                                   setSelectedOrder(order);
                                   setShowOrderModal(true);
                                 }}
-                                className="text-purple-700 font-medium text-sm hover:text-purple-900 transition"
+                                className="text-[#1e60a7] font-medium text-sm hover:text-[#13416f] transition"
                               >
                                 Ver detalhes
                               </button>
@@ -1999,13 +1999,13 @@ export default function MinhaContaPage() {
                           
                           {/* Timeline de Status */}
                           {selectedOrder.trackingCode && (
-                            <div className="bg-purple-50 rounded-lg p-4">
-                              <h4 className="font-medium text-purple-900 mb-2">Informações de Envio</h4>
-                              <p className="text-sm text-purple-700">
+                            <div className="bg-blue-50 rounded-lg p-4">
+                              <h4 className="font-medium text-[#13416f] mb-2">Informações de Envio</h4>
+                              <p className="text-sm text-[#1e60a7]">
                                 Código de rastreamento: <span className="font-mono font-medium">{selectedOrder.trackingCode}</span>
                               </p>
                               {selectedOrder.estimatedDelivery && (
-                                <p className="text-sm text-purple-700 mt-1">
+                                <p className="text-sm text-[#1e60a7] mt-1">
                                   Previsão de entrega: {new Date(selectedOrder.estimatedDelivery).toLocaleDateString('pt-BR')}
                                 </p>
                               )}
@@ -2086,7 +2086,7 @@ export default function MinhaContaPage() {
                         {/* Ações */}
                         <div className="mt-6 flex gap-3">
                           {selectedOrder.status === 'delivered' && (
-                            <button className="flex-1 bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-purple-800 transition">
+                            <button className="flex-1 bg-[#1e60a7] text-white px-4 py-2 rounded-md font-medium hover:bg-[#184d8a] transition">
                               Comprar Novamente
                             </button>
                           )}
