@@ -286,23 +286,6 @@ export default function Home() {
                     priority
                   />
                 </div>
-                
-                {/* Texto sobreposto */}
-                <div className="absolute top-12 left-6 md:w-[320px] text-white p-4" style={{ zIndex: 20, maxWidth: '320px' }}>
-                  <h2 className="text-[#FFF786] text-3xl font-bold mb-4 text-center">SOBRE MIM</h2>
-                  
-                  <p className="mb-3 text-sm leading-tight">
-                    Sou <strong>Lorena Jacob</strong>, terapeuta infantil, mãe de duas crianças autistas em formação para Terapeuta Ocupacional. Atuo há mais de 10 anos com <strong>TEA</strong>, <strong>TDAH</strong>, <strong>TOD</strong>, <strong>seletividade alimentar</strong>, <strong>deficiência intelectual</strong>, entre outros.
-                  </p>
-                  
-                  <p className="mb-3 text-sm leading-tight">
-                    Atendo presencialmente em Londres e online para outros lugares.
-                  </p>
-                  
-                  <p className="text-sm leading-tight">
-                    <strong>Ajudo famílias a compreenderem o</strong> <strong>autismo</strong> utilizando abordagens lúdicas e personalizadas para promover avanços no comportamento, linguagem, socialização, autonomia, habilidades cognitivas e motoras.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
