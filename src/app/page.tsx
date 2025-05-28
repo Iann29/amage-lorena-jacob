@@ -166,8 +166,8 @@ export default function Home() {
             </div>
             
             {/* Banner para Mobile */}
-            <div className="sm:hidden absolute inset-0 flex flex-col justify-start items-center pt-12">
-              <div className="flex flex-col items-start mx-auto">
+            <div className="sm:hidden absolute inset-0 flex flex-col justify-start items-center pt-6">
+              <div className="flex flex-col items-center mx-auto">
                 {/* SUPORTE */}
                 <div className="text-white text-5xl font-bold leading-[52px] [text-shadow:_-2px_2px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                   SUPORTE
@@ -179,27 +179,27 @@ export default function Home() {
                 </div>
                 
                 {/* PARA O DESENVOLVIMENTO */}
-                <div className="flex mt-2">
-                  <span className="text-white text-base font-bold leading-none [text-shadow:_-1px_1px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-                    PARA O{' '}
+                <div className="flex mt-2 gap-1">
+                  <span className="text-white text-base font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    PARA O
                   </span>
-                  <span className="text-[#FFFCB3] text-base font-bold leading-none [text-shadow:_-1px_1px_0px_rgb(3_122_179_/_1.00)]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  <span className="text-[#FFFCB3] text-base font-bold leading-none" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                     DESENVOLVIMENTO
                   </span>
                 </div>
                 
                 {/* INFANTIL */}
-                <div className="text-[#FFFCB3] text-5xl font-bold leading-[53px] [text-shadow:_-2px_2px_0px_rgb(3_122_179_/_1.00)] mt-0" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                <div className="text-[#FFFCB3] text-5xl font-bold leading-[53px] mt-0" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                   INFANTIL
                 </div>
               </div>
             
-              <div className="mt-3 relative pl-2">
+              <div className="mt-3 flex justify-center">
                 <a
                   href="https://wa.me/message/FDF46FODEQMTL1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#FAFFE7] text-[#6E6B46] px-3 py-1 text-[10px] rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200"
+                  className="bg-[#FAFFE7] text-[#6E6B46] px-4 py-2 text-xs rounded-lg font-bold inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg"
                 >
                   Agende uma Avaliação
                 </a>
