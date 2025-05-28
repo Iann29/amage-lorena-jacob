@@ -15,6 +15,7 @@ interface BlogFilterProps {
   onCategoryChange: (categoryId: string) => void;
   selectedTemas: string[];
   onTemaChange: (tema: string) => void;
+  onClose?: () => void;
 }
 
 export default function BlogFilter({ 
@@ -23,7 +24,8 @@ export default function BlogFilter({
   selectedCategories, 
   onCategoryChange,
   selectedTemas,
-  onTemaChange
+  onTemaChange,
+  onClose
 }: BlogFilterProps) {
   // Lista de temas mockados
   const temas = [
@@ -36,6 +38,16 @@ export default function BlogFilter({
 
   return (
     <div className={`${styles.filterPanel} ${isOpen ? styles.filterPanelOpen : ''}`}>
+      {/* Botão de fechar para mobile */}
+      {onClose && (
+        <button 
+          className={styles.filterCloseButton}
+          onClick={onClose}
+          aria-label="Fechar filtros"
+        >
+          ×
+        </button>
+      )}
       <h3 className={styles.filterHeading}>Filtrar</h3>
       
       {/* Temas */}

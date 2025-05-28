@@ -253,6 +253,12 @@ export default function BlogPage() {
 
         {/* Grid principal */}
         <div className={styles.mainGrid}>
+          {/* Overlay escuro para mobile */}
+          <div 
+            className={`${styles.filterOverlay} ${filterPanelOpen ? styles.filterOverlayActive : ''}`}
+            onClick={toggleFilterPanel}
+          />
+          
           {/* Painel de Filtros */}
           <BlogFilter
             isOpen={filterPanelOpen}
@@ -261,6 +267,7 @@ export default function BlogPage() {
             onCategoryChange={handleCategoryChange}
             selectedTemas={selectedTemas}
             onTemaChange={handleTemaChange}
+            onClose={toggleFilterPanel}
           />
 
           {/* Container de Posts */}

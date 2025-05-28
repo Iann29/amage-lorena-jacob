@@ -221,8 +221,89 @@
   transition: all 0.3s ease-in-out;
 }
 
+/* Mobile styles */
 @media (max-width: 768px) {
   .blogTitle {
     font-size: 3rem;
+  }
+  
+  /* Em mobile, o grid vira coluna */
+  .mainGrid {
+    flex-direction: column;
+    position: relative;
+  }
+  
+  /* Overlay escuro quando filtro está aberto */
+  .filterOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+  }
+  
+  .filterOverlayActive {
+    display: block;
+  }
+  
+  /* Filtro como drawer em mobile */
+  .filterPanel {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 320px;
+    background-color: white;
+    z-index: 999;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+    transition: left 0.3s ease-in-out;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+  
+  .filterPanelOpen {
+    left: 0;
+    padding: 2rem 1.5rem;
+    margin-right: 0;
+    opacity: 1;
+    width: 80%;
+    max-width: 320px;
+  }
+  
+  /* Botão de fechar filtro em mobile */
+  .filterCloseButton {
+    display: block;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #715B3F;
+  }
+  
+  /* Posts ocupam toda largura em mobile */
+  .postsContainer {
+    width: 100%;
+    padding: 0;
+  }
+}
+
+/* Desktop mantém comportamento original */
+@media (min-width: 769px) {
+  .filterCloseButton {
+    display: none;
+  }
+  
+  .filterOverlay {
+    display: none !important;
   }
 }
