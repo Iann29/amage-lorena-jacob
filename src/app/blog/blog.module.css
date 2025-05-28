@@ -222,13 +222,8 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* Previne scroll horizontal em mobile */
-@media (max-width: 768px) {
-  body {
-    overflow-x: hidden;
-  }
-  
 /* Mobile styles */
+@media (max-width: 768px) {
   .blogTitle {
     font-size: 3rem;
   }

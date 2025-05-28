@@ -95,7 +95,7 @@ export async function createPost(formData: PostFormData) {
       author_sobrenome = authorProfile.sobrenome || author_sobrenome;
     }
 
-    const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
+    const sanitizedContent = DOMPurify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
 
     const { data: postData, error: postError } = await supabase
       .from('blog_posts')
@@ -148,7 +148,7 @@ export async function updatePost(
       }
     }
 
-    const sanitizedContent = purify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
+    const sanitizedContent = DOMPurify.sanitize(formData.conteudo, { USE_PROFILES: { html: true } });
     const { data: existingPostData } = await supabase
        .from('blog_posts').select('published_at, is_published, slug').eq('id', postId).single();
     if (!existingPostData) throw new Error("Post não encontrado.");
