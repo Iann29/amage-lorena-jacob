@@ -53,3 +53,41 @@ body {
   height: 40px;
   background-color: var(--gray-light);
 }
+
+/* Correções específicas para mobile sem afetar desktop */
+@media (max-width: 768px) {
+  /* Prevenir overflow horizontal em mobile */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+  
+  /* Garantir que containers não excedam a largura da tela */
+  .container {
+    max-width: 100% !important;
+  }
+  
+  /* Ajustar elementos com largura fixa no banner */
+  [class*="w-[600px]"], 
+  [class*="w-[650px]"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Resetar posicionamentos que causam overflow */
+  [class*="left-["] {
+    left: 0 !important;
+  }
+  
+  /* Resetar margens negativas em mobile */
+  [style*="marginLeft: '-"] {
+    margin-left: 0 !important;
+  }
+  
+  /* Garantir que imagens não excedam a tela */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
