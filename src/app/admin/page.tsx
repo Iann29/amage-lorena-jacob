@@ -134,7 +134,82 @@ export default function AdminDashboardPage() {
         <p className="text-sm text-gray-500">Última atualização: {new Date().toLocaleString('pt-BR')}</p>
       </div>
       
-      {/* Cards de estatísticas */}
+      {/* Cards de estatísticas - E-commerce */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow p-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Vendas do Mês</p>
+              <p className="text-2xl font-bold text-green-600">R$ 8.752,00</p>
+            </div>
+            <div className="p-2 bg-green-100 rounded-md">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-sm text-green-500">+15% vs mês anterior</span>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow p-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Pedidos Hoje</p>
+              <p className="text-2xl font-bold text-gray-900">12</p>
+            </div>
+            <div className="p-2 bg-purple-100 rounded-md">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+          </div>
+          <div className="mt-2">
+            <Link href="/admin/pedidos" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+              Ver pedidos
+            </Link>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow p-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Produtos Ativos</p>
+              <p className="text-2xl font-bold text-gray-900">24</p>
+            </div>
+            <div className="p-2 bg-blue-100 rounded-md">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+          </div>
+          <div className="mt-2">
+            <Link href="/admin/produtos" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+              Gerenciar
+            </Link>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow p-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Novos Clientes</p>
+              <p className="text-2xl font-bold text-gray-900">8</p>
+            </div>
+            <div className="p-2 bg-yellow-100 rounded-md">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-sm text-gray-500">Últimos 7 dias</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards de estatísticas - Blog */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-5">
           <div className="flex justify-between items-start">
@@ -169,7 +244,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-sm text-gray-500">Total acumulado</span> {/* Alterado de "Últimos 30 dias" para refletir os dados reais */}
+            <span className="text-sm text-gray-500">Total acumulado</span>
           </div>
         </div>
         
@@ -210,6 +285,103 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       
+      {/* Pedidos recentes e produtos mais vendidos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Pedidos Recentes */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="border-b border-gray-200 px-6 py-4">
+            <h2 className="font-medium text-gray-900">Pedidos Recentes</h2>
+          </div>
+          <div className="divide-y divide-gray-200">
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">#2024001</h3>
+                  <p className="text-xs text-gray-500 mt-1">Maria Silva • R$ 67,00</p>
+                </div>
+                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  Pago
+                </span>
+              </div>
+            </div>
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">#2024002</h3>
+                  <p className="text-xs text-gray-500 mt-1">João Santos • R$ 497,00</p>
+                </div>
+                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  Processando
+                </span>
+              </div>
+            </div>
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">#2024003</h3>
+                  <p className="text-xs text-gray-500 mt-1">Ana Costa • R$ 2.997,00</p>
+                </div>
+                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                  Pendente
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 px-6 py-4">
+            <Link href="/admin/pedidos" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+              Ver todos os pedidos →
+            </Link>
+          </div>
+        </div>
+        
+        {/* Produtos Mais Vendidos */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="border-b border-gray-200 px-6 py-4">
+            <h2 className="font-medium text-gray-900">Produtos Mais Vendidos</h2>
+          </div>
+          <div className="divide-y divide-gray-200">
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 line-clamp-1">E-book: Transformação Pessoal</h3>
+                  <p className="text-xs text-gray-500 mt-1">47 vendas • R$ 3.149,00</p>
+                </div>
+                <Link href="/admin/produtos/editar/1" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+                  Editar
+                </Link>
+              </div>
+            </div>
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 line-clamp-1">Curso Online: Autoconhecimento</h3>
+                  <p className="text-xs text-gray-500 mt-1">12 vendas • R$ 5.964,00</p>
+                </div>
+                <Link href="/admin/produtos/editar/2" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+                  Editar
+                </Link>
+              </div>
+            </div>
+            <div className="px-6 py-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 line-clamp-1">Kit de Meditações Guiadas</h3>
+                  <p className="text-xs text-gray-500 mt-1">8 vendas • R$ 376,00</p>
+                </div>
+                <Link href="/admin/produtos/editar/4" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+                  Editar
+                </Link>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 px-6 py-4">
+            <Link href="/admin/produtos" className="text-sm font-medium text-purple-600 hover:text-purple-800">
+              Ver todos os produtos →
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Posts recentes e comentários */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Posts recentes */}

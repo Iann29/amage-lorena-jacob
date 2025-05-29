@@ -480,15 +480,28 @@ export default function Home() {
       <EbookBanner />
       
       {/* Seção de Depoimentos */}
-      <section className="py-10 sm:py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
-        {/* Imagem de fundo */}
-        <div className="absolute inset-0 z-0">
+      <section className="py-10 sm:py-12 md:py-20 w-full relative" style={{ backgroundColor: '#00BCD4' }}>
+        {/* Imagem de fundo - Desktop */}
+        <div className="absolute inset-0 z-0 hidden md:block">
           <Image 
-            src="/assets/depoimentosbackground.png" 
-            alt="Fundo de depoimentos" 
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//depoimentosbackground.png" 
+            alt="Fundo de depoimentos desktop" 
             fill 
             priority
-            className="object-cover object-center"
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
+        
+        {/* Imagem de fundo - Mobile */}
+        <div className="absolute inset-0 z-0 md:hidden">
+          <Image 
+            src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//depoimentoMobile.png" 
+            alt="Fundo de depoimentos mobile" 
+            fill 
+            priority
+            className="object-cover"
+            sizes="100vw"
           />
         </div>
         
