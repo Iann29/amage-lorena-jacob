@@ -91,9 +91,9 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
   return (
     <div className="relative max-w-6xl mx-auto px-12 overflow-hidden">
       {/* Seta esquerda em formato circular */}
-      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-50">
+      <div className="absolute left-2 top-[185px] md:top-1/2 transform md:-translate-y-1/2 -translate-y-[50%] z-50">
         <button 
-          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handlePrev}
           aria-label="Ver posts anteriores"
         >
@@ -104,7 +104,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com altura fixa para evitar saltos */}
-      <div className="relative pb-6 pt-6 px-4" style={{ height: '520px' }}>
+      <div className="relative pb-6 pt-6 px-4 h-[370px] md:h-[520px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div 
             key={currentPage}
@@ -135,9 +135,9 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Seta direita em formato circular */}
-      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 z-50">
+      <div className="absolute right-2 top-[185px] md:top-1/2 transform md:-translate-y-1/2 -translate-y-[50%] z-50">
         <button 
-          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
+          className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handleNext}
           aria-label="Ver próximos posts"
         >

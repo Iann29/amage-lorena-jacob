@@ -87,8 +87,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   }, [id, slug, initialViewCount, initialCommentCount]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3" style={{ maxWidth: '380px', height: '450px' }}>
-      <div className="h-64 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3 h-[320px] md:h-[450px]" style={{ maxWidth: '380px' }}>
+      <div className="h-28 md:h-64 overflow-hidden">
         <Image 
           src={imageUrl} 
           alt={title} 
@@ -98,21 +98,21 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           unoptimized
         />
       </div>
-      <div className="pt-1 px-3 pb-3 md:p-6 flex flex-col flex-grow">
-        <h3 className="text-2xl font-bold text-[#52A4DB] mb-2 mt-0" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
+      <div className="pt-1 px-3 pb-2 md:p-6 flex flex-col flex-grow">
+        <h3 className="text-lg md:text-2xl font-bold text-[#52A4DB] mb-1 md:mb-2 leading-tight" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
         {/* Exibe o resumo se está disponível, ou um trecho do conteúdo se estiver disponível */}
-        <p className="text-sm text-[#555555] mb-5 leading-tight">
-          {content ? extractTextFromHtml(content, 150) : summary}
+        <p className="text-xs md:text-sm text-[#555555] mb-3 md:mb-5 leading-tight line-clamp-2 md:line-clamp-none">
+          {content ? extractTextFromHtml(content, 100) : summary}
         </p>
         <div className="mt-auto">
           <a 
             href={postUrl} 
-            className="bg-[#0B5394] text-white text-center py-3 px-4 rounded-md inline-block w-full font-bold text-lg hover:bg-opacity-90 transition-all"
+            className="bg-[#0B5394] text-white text-center py-2 md:py-3 px-4 rounded-md inline-block w-full font-bold text-sm md:text-lg hover:bg-opacity-90 transition-all"
             style={{ fontFamily: 'var(--font-museo-sans)' }}
           >
             SAIBA MAIS
           </a>
-          <div className="flex justify-between items-center mt-4 text-xs text-gray-500 pt-3 border-t border-gray-200">
+          <div className="flex justify-between items-center mt-2 md:mt-4 text-xs text-gray-500 pt-2 md:pt-3 border-t border-gray-200">
             {/* Mobile: Ícones */}
             <div className="flex items-center gap-1 md:hidden">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
