@@ -462,7 +462,7 @@ export default function Home() {
           )}
           
           {/* Botão para acessar o blog */}
-          <div className="mt-16 text-center">
+          <div className="mt-8 md:mt-16 pt-8 text-center">
             <motion.a 
               href="/blog" 
               className="inline-block py-4 px-12 bg-[#806D52] text-white rounded-lg text-2xl font-bold hover:bg-opacity-90"

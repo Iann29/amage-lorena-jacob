@@ -89,7 +89,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
   }
 
   return (
-    <div className="relative max-w-6xl mx-auto px-12 overflow-hidden">
+    <div className="relative max-w-6xl mx-auto px-12 overflow-visible">
       {/* Seta esquerda em formato circular */}
       <div className="absolute left-2 top-[185px] md:top-1/2 transform md:-translate-y-1/2 -translate-y-[50%] z-50">
         <button 
@@ -104,7 +104,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com altura fixa para evitar saltos */}
-      <div className="relative pb-6 pt-6 px-4 h-[370px] md:h-[520px]">
+      <div className="relative pb-12 md:pb-6 pt-6 px-4 h-[380px] md:h-[520px]">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div 
             key={currentPage}
