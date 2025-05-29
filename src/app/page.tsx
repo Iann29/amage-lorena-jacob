@@ -367,6 +367,30 @@ export default function Home() {
           </motion.a>
           <p className="text-xl mb-6" style={{ color: '#0B5394', fontWeight: 500, fontFamily: 'var(--font-museo-sans)' }}>/@lorenajacob.st</p>
         </div>
+        
+        {/* Posts do Instagram - Apenas Mobile */}
+        <div className="grid grid-cols-2 gap-3 mx-auto max-w-sm md:hidden mt-6">
+          {instagramPostsData.slice(0, 4).map((post, index) => (
+            <a
+              key={index}
+              href={post.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block aspect-square rounded-lg overflow-hidden relative group hover:shadow-lg transition-shadow duration-300"
+              aria-label={`Ver post ${index + 1} no Instagram`}
+            >
+              <Image
+                src={post.imageUrl}
+                alt={post.altText}
+                fill
+                sizes="50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                priority={index < 2}
+                quality={75}
+              />
+            </a>
+          ))}
+        </div>
               
               <div className="flex justify-center md:justify-start md:ml-5 mt-8">
                 <a href="https://instagram.com/lorenajacob.st" target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-6 py-3 rounded-lg text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg" style={{ backgroundColor: '#0B5394', color: 'white', fontWeight: 500, fontFamily: 'var(--font-museo-sans)' }}>
@@ -413,7 +437,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           {/* Título */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl mb-2" style={{ color: '#806D52', fontWeight: 900, fontSize: 'calc(1.25rem + 1.5vw)', fontFamily: 'var(--font-museo-sans)' }}>Os temas que você vai</h2>
+            <h2 className="text-5xl md:text-6xl mb-2" style={{ color: '#806D52', fontWeight: 900, fontFamily: 'var(--font-museo-sans)' }}>Os temas que você vai</h2>
             <h2 className="text-4xl md:text-5xl italic font-bold" style={{ color: '#806D52', fontFamily: 'var(--font-mogila)' }}>encontrar no blog</h2>
           </div>
           
