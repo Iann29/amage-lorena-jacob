@@ -288,7 +288,7 @@ export default function SobrePage() {
 
           {/* Texto Mobile */}
           <motion.div
-            className="block md:hidden px-6 pb-8"
+            className="block md:hidden px-6 pb-20"
             initial="hidden"
             animate="visible"
             variants={fadeInUp}
