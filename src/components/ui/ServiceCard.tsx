@@ -32,7 +32,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     [title, ''];
     
   return (
-    <div className="relative mx-auto w-[240px] md:w-[212px] h-[250px] md:h-[480px]">
+    <div className="relative mx-auto w-[276px] md:w-[212px] h-[190px] md:h-[480px]">
       {/* Container separado para a sombra - fora do card com efeito */}
       <div className="absolute bottom-1 md:bottom-5 left-1/2 transform -translate-x-1/2 z-0 w-[320px] md:w-[313px]">
         <Image 
@@ -47,7 +47,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       
       {/* Card principal com efeito de elevação no hover */}
       <div
-        className="relative z-10 transition-transform duration-300 hover:-translate-y-1 w-[240px] md:w-[212px] h-[190px] md:h-[418px]"
+        className="relative z-10 transition-transform duration-300 hover:-translate-y-1 w-[276px] md:w-[212px] h-[142px] md:h-[418px]"
       >
         {/* Card principal */}
         <div className="w-full h-full relative overflow-hidden group transition-all duration-300 mt-0">
@@ -92,7 +92,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           </div>
           
           {/* Botão SAIBA MAIS */}
-          <div className="absolute top-[45px] md:top-[127px] left-0 w-full flex justify-center z-10">
+          <div className="absolute top-[70px] md:top-[127px] left-0 w-full flex justify-center z-10">
             {onButtonClick ? (
               <button 
                 type="button"
