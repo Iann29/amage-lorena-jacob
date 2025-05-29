@@ -555,23 +555,37 @@ export default function SobrePage() {
                 className="h-full w-full md:row-span-2"
                 variants={scaleIn}
               >
-                <PortfolioCard
-                  className="h-full w-full"
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
-                  subtitle="Acompanhamento"
-                  title="Personalizado"
-                />
+                <a 
+                  href="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20o%20acompanhamento%20personalizado."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block h-full w-full"
+                >
+                  <PortfolioCard
+                    className="h-full w-full"
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//acompanhamento-personalizado.webp"
+                    subtitle="Acompanhamento"
+                    title="Personalizado"
+                  />
+                </a>
               </motion.div>
               <motion.div
                 className="h-full w-full md:row-span-1"
                 variants={scaleIn}
               >
-                <PortfolioCard
-                  className="h-full w-full"
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//orientacao-para-pais.webp"
-                  subtitle="Orientação para"
-                  title="Pais e Cuidadores"
-                />
+                <a 
+                  href="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20orienta%C3%A7%C3%A3o%20para%20pais%20e%20educadores."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block h-full w-full"
+                >
+                  <PortfolioCard
+                    className="h-full w-full"
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//orientacao-para-pais.webp"
+                    subtitle="Orientação para"
+                    title="Pais e Cuidadores"
+                  />
+                </a>
               </motion.div>
 
               {/* Base */}
@@ -579,23 +593,37 @@ export default function SobrePage() {
                 className="h-full w-full md:row-span-3"
                 variants={scaleIn}
               >
-                <PortfolioCard
-                  className="h-full w-full"
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
-                  subtitle="Atividades Recreativas"
-                  title="Terapêuticas"
-                />
+                <a 
+                  href="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20as%20Atividades%20Recreativas%0ATerap%C3%AAuticas."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block h-full w-full"
+                >
+                  <PortfolioCard
+                    className="h-full w-full"
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//atividades-recreativas-terapeuticas.webp"
+                    subtitle="Atividades Recreativas"
+                    title="Terapêuticas"
+                  />
+                </a>
               </motion.div>
               <motion.div
                 className="h-full w-full md:row-span-2"
                 variants={scaleIn}
               >
-                <PortfolioCard
-                  className="h-full w-full"
-                  imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
-                  subtitle="Implementação e"
-                  title="Treinamento com PECS"
-                />
+                <a 
+                  href="https://wa.me/5527998206121?text=Ol%C3%A1%2C%20Lorena!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20a%20Implementa%C3%A7%C3%A3o%20e%0ATreinamento%20com%20PECS."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block h-full w-full"
+                >
+                  <PortfolioCard
+                    className="h-full w-full"
+                    imageUrl="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//implementacao-treinamento-pecs.webp"
+                    subtitle="Implementação e"
+                    title="Treinamento com PECS"
+                  />
+                </a>
               </motion.div>
             </motion.div>
           </motion.div>
