@@ -480,7 +480,7 @@ export default function Home() {
       <EbookBanner />
       
       {/* Seção de Depoimentos */}
-      <section className="py-10 sm:py-12 md:py-20 w-full relative" style={{ backgroundColor: '#00BCD4' }}>
+      <section className="py-10 sm:py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
         {/* Imagem de fundo - Desktop */}
         <div className="absolute inset-0 z-0 hidden md:block">
           <Image 

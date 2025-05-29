@@ -200,7 +200,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     required
                     value={formData.nome}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   />
                 </div>
 
@@ -214,7 +214,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     rows={3}
                     value={formData.descricao}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                     placeholder="Breve descrição do produto..."
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     min="0"
                     value={formData.preco}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   />
                 </div>
 
@@ -265,7 +265,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     min="0"
                     value={formData.preco_promocional}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   />
                 </div>
 
@@ -281,7 +281,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     min="0"
                     value={formData.estoque}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   />
                   <p className="text-xs text-gray-500 mt-1">Para produtos digitais, use 999 para ilimitado</p>
                 </div>
@@ -295,7 +295,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     name="tipo_produto"
                     value={formData.tipo_produto}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   >
                     <option value="digital">Digital</option>
                     <option value="fisico">Físico</option>
@@ -323,7 +323,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                       min="0"
                       value={formData.peso}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                     />
                   </div>
 
@@ -340,7 +340,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                         min="0"
                         value={formData.dimensoes.comprimento}
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                       />
                       <input
                         type="number"
@@ -350,7 +350,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                         min="0"
                         value={formData.dimensoes.largura}
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                       />
                       <input
                         type="number"
@@ -360,7 +360,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                         min="0"
                         value={formData.dimensoes.altura}
                         onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                       />
                     </div>
                   </div>
@@ -383,7 +383,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     name="meta_title"
                     value={formData.meta_title}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                     placeholder="Título para mecanismos de busca"
                   />
                 </div>
@@ -398,7 +398,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     rows={3}
                     value={formData.meta_description}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                     placeholder="Descrição para mecanismos de busca"
                   />
                 </div>
@@ -423,7 +423,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     required
                     value={formData.categoria}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                   >
                     <option value="">Selecione uma categoria</option>
                     {categories.map(cat => (
@@ -442,7 +442,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     name="tags"
                     value={formData.tags}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
                     placeholder="Separadas por vírgula"
                   />
                 </div>
