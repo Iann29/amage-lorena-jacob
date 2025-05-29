@@ -70,16 +70,16 @@ const PortfolioCard = ({
           </div>
         </div>
         
-        {/* Textos com efeito de blur e movimento */}
+        {/* Textos com efeito de blur e movimento - sem blur no mobile */}
         {subtitle && (
           <h3 className={`text-white text-xl md:text-2xl font-normal mb-1 transition-all duration-700 ${
-            isHovered ? 'opacity-100 translate-y-0 blur-0' : 'opacity-80 translate-y-4 blur-[1px]'
+            isHovered ? 'opacity-100 translate-y-0 blur-0' : 'opacity-90 md:opacity-80 translate-y-0 md:translate-y-4 blur-0 md:blur-[1px]'
           }`} style={{ fontFamily: '"Poppins", sans-serif' }}>
             {subtitle}
           </h3>
         )}
         <h2 className={`text-white text-2xl md:text-3xl font-bold transition-all duration-700 ${
-          isHovered ? 'opacity-100 translate-y-0 blur-0' : 'opacity-90 translate-y-4 blur-[1px]'
+          isHovered ? 'opacity-100 translate-y-0 blur-0' : 'opacity-100 md:opacity-90 translate-y-0 md:translate-y-4 blur-0 md:blur-[1px]'
         }`} style={{ fontFamily: '"Poppins", sans-serif' }}>
           {title}
         </h2>

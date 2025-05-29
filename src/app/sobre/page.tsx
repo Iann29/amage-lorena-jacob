@@ -439,14 +439,14 @@ export default function SobrePage() {
 
         <div className="container mx-auto px-4 md:px-8 lg:px-12 z-10 relative">
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-14 lg:gap-10 max-w-7xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-16 md:gap-y-20 gap-x-6 md:gap-x-10 lg:gap-10 max-w-7xl mx-auto pt-12 md:pt-0"
             initial="hidden"
             animate={isInfoCardsInView ? "visible" : "hidden"}
             variants={staggerContainer}
           >
             {/* CARD 1 */}
             <motion.div 
-              className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
+              className="w-full max-w-[280px] aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
               variants={fadeInUp}
             >
               <InfoCard
@@ -465,7 +465,7 @@ export default function SobrePage() {
 
             {/* CARD 2 */}
             <motion.div 
-              className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
+              className="w-full max-w-[280px] aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
               variants={fadeInUp}
             >
               <InfoCard
@@ -484,7 +484,7 @@ export default function SobrePage() {
 
             {/* CARD 3 */}
             <motion.div 
-              className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
+              className="w-full max-w-[280px] aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
               variants={fadeInUp}
             >
               <InfoCard
@@ -503,7 +503,7 @@ export default function SobrePage() {
 
             {/* CARD 4 */}
             <motion.div 
-              className="h-full aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
+              className="w-full max-w-[280px] aspect-[4/5] md:aspect-[4/5] lg:w-[300px] lg:h-[420px] mx-auto"
               variants={fadeInUp}
             >
               <InfoCard
@@ -553,7 +553,7 @@ export default function SobrePage() {
               transition={{ duration: 0.8, delay: 0.3 }}
             >
               <h3
-                className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal absolute left-1/4 md:left-1/3 top-16 md:top-14 lg:top-12"
+                className="text-[#FFFBE2] text-7xl md:text-8xl lg:text-9xl font-normal absolute left-1/4 md:left-1/3 top-8 md:top-14 lg:top-12"
                 style={STYLES.portfolioMyText}
               >
                 Meu
