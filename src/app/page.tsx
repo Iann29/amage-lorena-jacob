@@ -273,13 +273,13 @@ export default function Home() {
             <div className="rounded-3xl overflow-visible">
               <div className="relative">
                 {/* Imagem para Desktop e Mobile */}
-                <div className="w-full relative overflow-visible" style={{ marginLeft: '-5%', marginTop: '-27%', zIndex: 10 }}>
+                <div className="w-full relative overflow-visible flex justify-center md:block" style={{ marginLeft: 'md:-5%', marginTop: '-27%', zIndex: 10 }}>
                   <Image 
                     src="https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db//Sobre%20Mim.png" 
                     alt="Lorena Jacob" 
                     width={605} 
                     height={805} 
-                    className="rounded-2xl w-full h-auto max-w-[680px]"
+                    className="rounded-2xl w-full h-auto max-w-[680px] md:ml-[-5%]"
                     priority
                   />
                 </div>
@@ -293,7 +293,7 @@ export default function Home() {
             <h3 className="text-5xl lg:text-6xl font-bold mb-10 text-center" style={{ color: '#8B7659', fontFamily: 'var(--font-museo-sans)' }}>O DIFERENCIAL</h3>
             
             {/* Cards */}
-            <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-6">
               <ServiceCard 
                 title="Acompanhamento"
                 subtitle="Personalizado"
