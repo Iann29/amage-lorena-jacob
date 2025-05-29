@@ -224,7 +224,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                     Descrição Completa
                   </label>
                   <RichTextEditor
-                    value={formData.descricao_completa}
+                    initialContent={formData.descricao_completa}
                     onChange={(content) => setFormData(prev => ({ ...prev, descricao_completa: content }))}
                   />
                 </div>
