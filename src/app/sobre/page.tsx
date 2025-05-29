@@ -275,7 +275,7 @@ export default function SobrePage() {
 
           {/* Card Mobile */}
           <motion.div 
-            className="relative mx-auto pt-12 pb-8 block md:hidden"
+            className="relative mx-auto pt-8 pb-4 block md:hidden"
             initial="hidden"
             animate="visible"
             variants={fadeInUp}
@@ -286,12 +286,57 @@ export default function SobrePage() {
             </div>
           </motion.div>
 
-          <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]" />
+          {/* Texto Mobile */}
+          <motion.div
+            className="block md:hidden px-6 pb-8"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <div className="mb-4">
+              <p>
+                <span className="text-[#5B472B] text-2xl font-semibold font-['Fredoka'] leading-normal mr-2">
+                  Eu sou
+                </span>
+                <span className="text-[#5B472B] text-base font-semibold font-['Poppins'] leading-normal">
+                  Lorena Jacob,
+                </span>
+                <span className="text-[#5B472B] text-base font-normal font-['Poppins'] leading-normal">
+                  {" "}
+                  Terapeuta Infantil, especialista em autismo e comorbidades.
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <p>
+                <span className="text-[#5B472B] text-base font-bold font-['Poppins'] leading-normal">
+                  Há mais de 10 anos atuo com crianças autistas,
+                </span>
+                <span className="text-[#5B472B] text-base font-normal font-['Poppins'] leading-normal">
+                  {" "}
+                  ajudando famílias a construírem caminhos mais leves, funcionais e
+                  efetivos no desenvolvimento infantil.{" "}
+                </span>
+                <span className="text-[#5B472B] text-base font-semibold font-['Poppins'] leading-normal">
+                  Estou me formando como Terapeuta Ocupacional
+                </span>
+                <span className="text-[#5B472B] text-base font-normal font-['Poppins'] leading-normal">
+                  {" "}
+                  e possuo diversas especializações na área, o que me permite unir
+                  técnica, experiência e sensibilidade em cada atendimento.
+                </span>
+              </p>
+            </div>
+          </motion.div>
+
+          <div className="min-h-0 md:min-h-[95vh] lg:min-h-[95vh]" />
         </div>
 
-        {/* Lado Direito - Branco */}
+        {/* Lado Direito - Branco - Desktop Only */}
         <div
-          className="w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16"
+          className="hidden md:block w-full md:w-3/5 bg-white py-10 px-6 md:px-12 lg:px-16"
           style={STYLES.rightSection}
         >
           <div className="min-h-screen md:min-h-[95vh] lg:min-h-[95vh]" />
