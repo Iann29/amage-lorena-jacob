@@ -437,8 +437,14 @@ export default function Home() {
         <div className="container mx-auto px-4">
           {/* Título */}
           <div className="text-center mb-12">
-            <h2 className="text-5xl md:text-6xl mb-2" style={{ color: '#806D52', fontWeight: 900, fontFamily: 'var(--font-museo-sans)' }}>Os temas que você vai</h2>
-            <h2 className="text-4xl md:text-5xl italic font-bold" style={{ color: '#806D52', fontFamily: 'var(--font-mogila)' }}>encontrar no blog</h2>
+            <h2 className="mb-2" style={{ color: '#806D52', fontWeight: 900, fontFamily: 'var(--font-museo-sans)' }}>
+              <span className="text-5xl md:text-6xl">Os temas que</span>
+            </h2>
+            <h2 className="mb-2 whitespace-nowrap" style={{ color: '#806D52' }}>
+              <span className="text-3xl md:text-5xl" style={{ fontWeight: 900, fontFamily: 'var(--font-museo-sans)' }}>Você vai </span>
+              <span className="text-3xl md:text-5xl italic font-bold" style={{ fontFamily: 'var(--font-mogila)' }}>Encontrar</span>
+            </h2>
+            <h2 className="text-4xl md:text-5xl italic font-bold" style={{ color: '#806D52', fontFamily: 'var(--font-mogila)' }}>no blog</h2>
           </div>
           
           {/* Cards do Blog - Carrossel */}
