@@ -298,54 +298,103 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
 
         {/* Avaliações */}
         <div className="container mx-auto px-4 pb-8">
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Avaliações</h2>
+        <section className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
+          <h2 className="text-3xl font-bold mb-6 text-black" style={{ fontFamily: 'var(--font-museo-sans)' }}>Avaliações</h2>
           
           {/* Resumo das avaliações */}
           {product.rating_avg && (
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <div className="flex items-center gap-4">
+            <div className="bg-gray-50 rounded-2xl p-6 mb-8">
+              <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="text-center">
-                  <div className="text-4xl font-bold">{product.rating_avg.toFixed(1)}</div>
-                  <div className="flex">
+                  <div className="text-5xl font-bold text-black" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    {product.rating_avg.toFixed(1)}
+                  </div>
+                  <div className="flex justify-center my-2">
                     {[...Array(5)].map((_, i) => (
-                      <span key={i} className={`text-xl ${i < Math.round(product.rating_avg!) ? 'text-yellow-400' : 'text-gray-300'}`}>
+                      <span key={i} className={`text-2xl ${i < Math.round(product.rating_avg!) ? 'text-yellow-400' : 'text-gray-300'}`}>
                         ★
                       </span>
                     ))}
                   </div>
-                  <div className="text-sm text-gray-600">{product.review_count} avaliações</div>
+                  <div className="text-sm text-black font-medium">{product.review_count} avaliações</div>
+                </div>
+                
+                {/* Barra de progresso por estrelas */}
+                <div className="flex-1 w-full md:w-auto">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const count = productReviews.filter(r => r.rating === stars).length;
+                    const percentage = product.review_count ? (count / product.review_count) * 100 : 0;
+                    return (
+                      <div key={stars} className="flex items-center gap-2 mb-2">
+                        <span className="text-sm text-black w-12">{stars} ★</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-yellow-400 h-full rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600 w-12 text-right">{count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Lista de comentários - Reutilizando componente do blog */}
+          {/* Lista de comentários */}
           <div className="space-y-4">
-            {productReviews.map((review) => (
-              <div key={review.id} className="bg-white p-4 rounded-lg border">
-                <div className="flex items-center gap-3 mb-2">
-                  <Image
-                    src={review.user_avatar || '/assets/avatar-default.png'}
-                    alt={review.user_name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                  <div>
-                    <div className="font-medium">{review.user_name}</div>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className={`text-sm ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
-                          ★
-                        </span>
-                      ))}
+            {productReviews.length > 0 ? (
+              productReviews.map((review) => (
+                <div key={review.id} className="bg-gray-50 p-6 rounded-2xl">
+                  <div className="flex items-start gap-4">
+                    <Image
+                      src={review.user_avatar || '/assets/avatar-default.png'}
+                      alt={review.user_name}
+                      width={48}
+                      height={48}
+                      className="rounded-full border-2 border-white shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-bold text-black" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                            {review.user_name}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <span key={i} className={`text-sm ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(review.created_at).toLocaleDateString('pt-BR')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-black leading-relaxed">{review.comentario}</p>
                     </div>
                   </div>
                 </div>
-                <p className="text-gray-700">{review.comentario}</p>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
               </div>
-            ))}
+            )}
+          </div>
+          
+          {/* Botão para avaliar (se usuário comprou o produto) */}
+          <div className="mt-8 text-center">
+            <button 
+              className="px-6 py-3 rounded-full text-white font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              style={{ backgroundColor: '#5179C8', fontFamily: 'var(--font-museo-sans)' }}
+            >
+              Avaliar Produto
+            </button>
           </div>
         </section>
         </div>

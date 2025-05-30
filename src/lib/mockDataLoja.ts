@@ -484,7 +484,7 @@ export const mockReviews: Review[] = [
     user_name: "Maria Silva",
     user_avatar: "/assets/avatar-default.png",
     rating: 5,
-    comentario: "Excelente produto! Ajudou muito na organização da rotina do meu filho.",
+    comentario: "Excelente produto! Ajudou muito na organização da rotina do meu filho. O material é de ótima qualidade e as instruções são muito claras.",
     created_at: "2024-01-20T14:30:00Z"
   },
   {
@@ -495,6 +495,54 @@ export const mockReviews: Review[] = [
     rating: 4,
     comentario: "Muito bom, mas poderia ter mais opções de atividades.",
     created_at: "2024-01-18T10:15:00Z"
+  },
+  {
+    id: "r3",
+    product_id: "p1",
+    user_id: "u3",
+    user_name: "Ana Costa",
+    user_avatar: "/assets/avatar/luana-placeholder.png",
+    rating: 5,
+    comentario: "Simplesmente perfeito! Minha filha adorou e está super engajada com a rotina. Recomendo muito!",
+    created_at: "2024-01-15T09:20:00Z"
+  },
+  {
+    id: "r4",
+    product_id: "p2",
+    user_id: "u4",
+    user_name: "Pedro Oliveira",
+    rating: 5,
+    comentario: "Torre montessoriana de excelente qualidade. Meu filho de 2 anos adora brincar e aprende muito com ela.",
+    created_at: "2024-01-22T16:45:00Z"
+  },
+  {
+    id: "r5",
+    product_id: "p2",
+    user_id: "u5",
+    user_name: "Carla Mendes",
+    user_avatar: "/assets/avatar/michele-placeholder.png",
+    rating: 4,
+    comentario: "Produto muito bom, apenas achei o preço um pouco elevado. Mas a qualidade compensa!",
+    created_at: "2024-01-19T11:30:00Z"
+  },
+  {
+    id: "r6",
+    product_id: "p3",
+    user_id: "u6",
+    user_name: "Roberto Lima",
+    rating: 5,
+    comentario: "O painel sensorial é incrível! Meu bebê fica fascinado explorando as diferentes texturas.",
+    created_at: "2024-01-21T13:15:00Z"
+  },
+  {
+    id: "r7",
+    product_id: "p4",
+    user_id: "u7",
+    user_name: "Fernanda Souza",
+    user_avatar: "/assets/avatar/gabryella-placeholder.png",
+    rating: 5,
+    comentario: "Kit PECS completo e muito bem organizado. Facilitou muito a comunicação com meu filho autista.",
+    created_at: "2024-01-23T08:00:00Z"
   }
 ];
 
