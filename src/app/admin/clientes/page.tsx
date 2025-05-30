@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { adminApi } from '@/lib/admin-api';
 
 interface Customer {
   id: string;
@@ -87,96 +88,52 @@ export default function AdminClientesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState({
+    total: 0,
+    ativos: 0,
+    novos: 0,
+    totalGasto: 0
+  });
 
-  // Mock data
-  const mockCustomers: Customer[] = [
-    {
-      id: '1',
-      user_id: 'user-1',
-      nome: 'Maria',
-      sobrenome: 'Silva',
-      email: 'maria.silva@email.com',
-      telefone: '(11) 98765-4321',
-      role: 'customer',
-      created_at: '2023-06-10T10:00:00Z',
-      updated_at: '2024-01-25T10:30:00Z',
-      total_pedidos: 5,
-      total_gasto: 1245.50,
-      ultimo_pedido: '2024-01-25T10:30:00Z',
-      shipping_addresses: [
-        {
-          id: '1',
-          nome_destinatario: 'Maria Silva',
-          rua: 'Av. Paulista',
-          numero: '1000',
-          complemento: 'Apto 502',
-          bairro: 'Bela Vista',
-          cidade: 'São Paulo',
-          estado: 'SP',
-          cep: '01310-100',
-          is_default: true
-        }
-      ]
-    },
-    {
-      id: '2',
-      user_id: 'user-2',
-      nome: 'João',
-      sobrenome: 'Santos',
-      email: 'joao.santos@email.com',
-      telefone: '(21) 99876-5432',
-      role: 'customer',
-      created_at: '2023-08-20T14:00:00Z',
-      updated_at: '2024-01-20T14:20:00Z',
-      total_pedidos: 2,
-      total_gasto: 497.00,
-      ultimo_pedido: '2024-01-20T14:20:00Z',
-      shipping_addresses: [
-        {
-          id: '2',
-          nome_destinatario: 'João Santos',
-          rua: 'Rua da Assembleia',
-          numero: '10',
-          bairro: 'Centro',
-          cidade: 'Rio de Janeiro',
-          estado: 'RJ',
-          cep: '20040-020',
-          is_default: true
-        }
-      ]
-    },
-    {
-      id: '3',
-      user_id: 'user-3',
-      nome: 'Ana',
-      sobrenome: 'Costa',
-      email: 'ana.costa@email.com',
-      role: 'customer',
-      created_at: '2024-01-05T09:00:00Z',
-      updated_at: '2024-01-26T09:15:00Z',
-      total_pedidos: 1,
-      total_gasto: 2997.00,
-      ultimo_pedido: '2024-01-26T09:15:00Z',
-      shipping_addresses: []
-    },
-    {
-      id: '4',
-      user_id: 'user-4',
-      nome: 'Pedro',
-      sobrenome: 'Oliveira',
-      email: 'pedro.oliveira@email.com',
-      telefone: '(31) 98765-1234',
-      role: 'customer',
-      created_at: '2023-03-15T16:00:00Z',
-      updated_at: '2023-03-15T16:00:00Z',
-      total_pedidos: 0,
-      total_gasto: 0,
-      shipping_addresses: []
+  // Carregar clientes
+  useEffect(() => {
+    loadCustomers();
+  }, [currentPage, searchTerm, selectedRole]);
+
+  const loadCustomers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await adminApi.getCustomers({
+        page: currentPage,
+        limit: 10,
+        search: searchTerm,
+        role: selectedRole
+      });
+      
+      setCustomers(data.customers);
+      setTotalPages(data.totalPages);
+      
+      // Calcular estatísticas
+      const dataLimite = new Date();
+      dataLimite.setDate(dataLimite.getDate() - 30);
+      
+      setStats({
+        total: data.total,
+        ativos: data.customers.filter(c => c.total_pedidos && c.total_pedidos > 0).length,
+        novos: data.customers.filter(c => new Date(c.created_at) > dataLimite).length,
+        totalGasto: data.customers.reduce((sum, c) => sum + (c.total_gasto || 0), 0)
+      });
+    } catch (error) {
+      console.error('Erro ao carregar clientes:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(mockCustomers.length / itemsPerPage);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -210,17 +167,6 @@ export default function AdminClientesPage() {
     setShowCustomerDetails(true);
   };
 
-  // Estatísticas
-  const stats = {
-    total: mockCustomers.length,
-    ativos: mockCustomers.filter(c => c.total_pedidos && c.total_pedidos > 0).length,
-    novos: mockCustomers.filter(c => {
-      const dataLimite = new Date();
-      dataLimite.setDate(dataLimite.getDate() - 30);
-      return new Date(c.created_at) > dataLimite;
-    }).length,
-    totalGasto: mockCustomers.reduce((sum, c) => sum + (c.total_gasto || 0), 0)
-  };
 
   return (
     <div className="space-y-6">
@@ -354,7 +300,25 @@ export default function AdminClientesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {mockCustomers.map((customer) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex justify-center items-center">
+                      <svg className="animate-spin h-8 w-8 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="ml-2 text-gray-600">Carregando clientes...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : customers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    Nenhum cliente encontrado
+                  </td>
+                </tr>
+              ) : customers.map((customer) => (
                 <tr key={customer.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">

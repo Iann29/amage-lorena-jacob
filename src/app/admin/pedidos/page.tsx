@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { adminApi } from '@/lib/admin-api';
 
 interface Order {
   id: string;
@@ -100,174 +101,45 @@ export default function AdminPedidosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState({
+    total: 0,
+    pendentes: 0,
+    processando: 0,
+    totalVendas: 0
+  });
 
-  // Mock data
-  const mockOrders: Order[] = [
-    {
-      id: '1',
-      user_id: 'user-1',
-      status: 'entregue',
-      valor_total: 67.00,
-      metodo_pagamento: 'cartao_credito',
-      payment_id: 'pay_1234',
-      external_reference: '2024001',
-      payment_details: null,
-      desconto_aplicado: null,
-      discount_id: null,
-      shipping_address_id: 'addr-1',
-      endereco_entrega_snapshot: {
-        nome_destinatario: 'Maria Silva',
-        rua: 'Rua das Flores',
-        numero: '123',
-        bairro: 'Centro',
-        cidade: 'São Paulo',
-        estado: 'SP',
-        cep: '01001-000'
-      },
-      created_at: '2024-01-25T10:30:00Z',
-      updated_at: '2024-01-25T10:30:00Z',
-      user_profile: {
-        nome: 'Maria',
-        sobrenome: 'Silva',
-        email: 'maria.silva@email.com'
-      },
-      items: [
-        {
-          id: 'item-1',
-          quantidade: 1,
-          preco_unitario: 67.00,
-          preco_total: 67.00,
-          product: {
-            nome: 'E-book Transformação Pessoal'
-          }
-        }
-      ]
-    },
-    {
-      id: '2',
-      user_id: 'user-2',
-      status: 'processando',
-      valor_total: 497.00,
-      metodo_pagamento: 'pix',
-      payment_id: 'pay_5678',
-      external_reference: '2024002',
-      payment_details: null,
-      desconto_aplicado: null,
-      discount_id: null,
-      shipping_address_id: 'addr-2',
-      endereco_entrega_snapshot: {
-        nome_destinatario: 'João Santos',
-        rua: 'Av. Paulista',
-        numero: '1000',
-        complemento: 'Apto 502',
-        bairro: 'Bela Vista',
-        cidade: 'São Paulo',
-        estado: 'SP',
-        cep: '01310-100'
-      },
-      created_at: '2024-01-25T14:20:00Z',
-      updated_at: '2024-01-25T14:20:00Z',
-      user_profile: {
-        nome: 'João',
-        sobrenome: 'Santos',
-        email: 'joao.santos@email.com'
-      },
-      items: [
-        {
-          id: 'item-2',
-          quantidade: 1,
-          preco_unitario: 497.00,
-          preco_total: 497.00,
-          product: {
-            nome: 'Curso Online: Autoconhecimento'
-          }
-        }
-      ]
-    },
-    {
-      id: '3',
-      user_id: 'user-3',
-      status: 'pendente',
-      valor_total: 2997.00,
-      metodo_pagamento: 'boleto',
-      payment_id: null,
-      external_reference: '2024003',
-      payment_details: null,
-      desconto_aplicado: null,
-      discount_id: null,
-      shipping_address_id: 'addr-3',
-      endereco_entrega_snapshot: {
-        nome_destinatario: 'Ana Costa',
-        rua: 'Rua da Assembleia',
-        numero: '10',
-        bairro: 'Centro',
-        cidade: 'Rio de Janeiro',
-        estado: 'RJ',
-        cep: '20040-020'
-      },
-      created_at: '2024-01-26T09:15:00Z',
-      updated_at: '2024-01-26T09:15:00Z',
-      user_profile: {
-        nome: 'Ana',
-        sobrenome: 'Costa',
-        email: 'ana.costa@email.com'
-      },
-      items: [
-        {
-          id: 'item-3',
-          quantidade: 1,
-          preco_unitario: 2997.00,
-          preco_total: 2997.00,
-          product: {
-            nome: 'Mentoria Individual - 3 meses'
-          }
-        }
-      ]
-    },
-    {
-      id: '4',
-      user_id: 'user-4',
-      status: 'cancelado',
-      valor_total: 47.00,
-      metodo_pagamento: 'cartao_credito',
-      payment_id: 'pay_9012',
-      external_reference: '2024004',
-      payment_details: null,
-      desconto_aplicado: null,
-      discount_id: null,
-      shipping_address_id: 'addr-4',
-      endereco_entrega_snapshot: {
-        nome_destinatario: 'Pedro Oliveira',
-        rua: 'Rua das Laranjeiras',
-        numero: '456',
-        bairro: 'Laranjeiras',
-        cidade: 'Rio de Janeiro',
-        estado: 'RJ',
-        cep: '22240-003'
-      },
-      created_at: '2024-01-26T16:45:00Z',
-      updated_at: '2024-01-26T16:45:00Z',
-      user_profile: {
-        nome: 'Pedro',
-        sobrenome: 'Oliveira',
-        email: 'pedro.oliveira@email.com'
-      },
-      items: [
-        {
-          id: 'item-4',
-          quantidade: 1,
-          preco_unitario: 47.00,
-          preco_total: 47.00,
-          product: {
-            nome: 'Kit de Meditações Guiadas'
-          }
-        }
-      ]
+  // Carregar pedidos
+  useEffect(() => {
+    loadOrders();
+  }, [currentPage, searchTerm, selectedStatus, selectedPaymentMethod, dateRange]);
+
+  const loadOrders = async () => {
+    try {
+      setIsLoading(true);
+      const data = await adminApi.getOrders({
+        page: currentPage,
+        limit: 10,
+        search: searchTerm,
+        status: selectedStatus,
+        payment_method: selectedPaymentMethod,
+        start_date: dateRange.start,
+        end_date: dateRange.end
+      });
+      
+      setOrders(data.orders);
+      setTotalPages(data.totalPages);
+      setStats(data.statistics);
+    } catch (error) {
+      console.error('Erro ao carregar pedidos:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(mockOrders.length / itemsPerPage);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -324,13 +196,18 @@ export default function AdminPedidosPage() {
     return `#${order.external_reference || order.id.slice(0, 8)}`;
   };
 
-  // Estatísticas
-  const stats = {
-    total: mockOrders.length,
-    pendentes: mockOrders.filter(o => o.status === 'pendente').length,
-    processando: mockOrders.filter(o => o.status === 'processando').length,
-    totalVendas: mockOrders.filter(o => ['pago', 'entregue'].includes(o.status)).reduce((sum, o) => sum + o.valor_total, 0)
-  };
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <svg className="animate-spin h-8 w-8 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span className="ml-2 text-gray-600">Carregando pedidos...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -515,7 +392,13 @@ export default function AdminPedidosPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {mockOrders.map((order) => (
+                {orders.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                      Nenhum pedido encontrado
+                    </td>
+                  </tr>
+                ) : orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{getOrderNumber(order)}</div>
@@ -577,7 +460,11 @@ export default function AdminPedidosPage() {
       ) : (
         /* Cards View */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockOrders.map((order) => (
+          {orders.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              Nenhum pedido encontrado
+            </div>
+          ) : orders.map((order) => (
             <div key={order.id} className="bg-white rounded-lg shadow-md border border-gray-300 p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div>

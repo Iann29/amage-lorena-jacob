@@ -2,6 +2,40 @@ import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
 
+// Helper para fazer chamadas às Edge Functions
+async function callEdgeFunction(
+  path: string,
+  options: {
+    method?: string;
+    body?: any;
+    searchParams?: URLSearchParams;
+  } = {}
+) {
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session) throw new Error('Not authenticated');
+
+  const url = new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/${path}`);
+  if (options.searchParams) {
+    url.search = options.searchParams.toString();
+  }
+
+  const response = await fetch(url.toString(), {
+    method: options.method || 'GET',
+    headers: {
+      Authorization: `Bearer ${session.session.access_token}`,
+      'Content-Type': 'application/json'
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || `Failed to ${options.method || 'GET'} ${path}`);
+  }
+
+  return await response.json();
+}
+
 // Tipos
 export interface AdminCustomer {
   id: string;
@@ -57,25 +91,13 @@ export const adminApi = {
     search?: string;
     role?: string;
   }) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.search) searchParams.append('search', params.search);
     if (params?.role) searchParams.append('role', params.role);
 
-    const { data, error } = await supabase.functions.invoke('admin-customers', {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: {},
-      method: 'GET'
-    });
-
-    if (error) throw error;
-    return data as {
+    return await callEdgeFunction('admin-customers', { searchParams }) as {
       customers: AdminCustomer[];
       total: number;
       page: number;
@@ -84,33 +106,14 @@ export const adminApi = {
   },
 
   async getCustomer(id: string) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-customers/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      }
-    });
-
-    if (error) throw error;
-    return data as AdminCustomer;
+    return await callEdgeFunction(`admin-customers/${id}`) as AdminCustomer;
   },
 
   async updateCustomer(id: string, updates: Partial<AdminCustomer>) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-customers/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: updates,
-      method: 'PUT'
-    });
-
-    if (error) throw error;
-    return data as AdminCustomer;
+    return await callEdgeFunction(`admin-customers/${id}`, {
+      method: 'PUT',
+      body: updates
+    }) as AdminCustomer;
   },
 
   // Orders
@@ -123,9 +126,6 @@ export const adminApi = {
     start_date?: string;
     end_date?: string;
   }) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
@@ -135,16 +135,7 @@ export const adminApi = {
     if (params?.start_date) searchParams.append('start_date', params.start_date);
     if (params?.end_date) searchParams.append('end_date', params.end_date);
 
-    const { data, error } = await supabase.functions.invoke('admin-orders', {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: {},
-      method: 'GET'
-    });
-
-    if (error) throw error;
-    return data as {
+    return await callEdgeFunction('admin-orders', { searchParams }) as {
       orders: AdminOrder[];
       total: number;
       page: number;
@@ -159,33 +150,14 @@ export const adminApi = {
   },
 
   async getOrder(id: string) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-orders/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      }
-    });
-
-    if (error) throw error;
-    return data as AdminOrder;
+    return await callEdgeFunction(`admin-orders/${id}`) as AdminOrder;
   },
 
   async updateOrderStatus(id: string, status: AdminOrder['status']) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-orders/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: { status },
-      method: 'PUT'
-    });
-
-    if (error) throw error;
-    return data as AdminOrder;
+    return await callEdgeFunction(`admin-orders/${id}`, {
+      method: 'PUT',
+      body: { status }
+    }) as AdminOrder;
   },
 
   // Products
@@ -196,9 +168,6 @@ export const adminApi = {
     category_id?: string;
     is_active?: boolean;
   }) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
@@ -206,16 +175,7 @@ export const adminApi = {
     if (params?.category_id) searchParams.append('category_id', params.category_id);
     if (params?.is_active !== undefined) searchParams.append('is_active', params.is_active.toString());
 
-    const { data, error } = await supabase.functions.invoke('admin-products', {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: {},
-      method: 'GET'
-    });
-
-    if (error) throw error;
-    return data as {
+    return await callEdgeFunction('admin-products', { searchParams }) as {
       products: AdminProduct[];
       categories: Array<{ id: string; nome: string }>;
       total: number;
@@ -225,17 +185,7 @@ export const adminApi = {
   },
 
   async getProduct(id: string) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-products/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      }
-    });
-
-    if (error) throw error;
-    return data as AdminProduct;
+    return await callEdgeFunction(`admin-products/${id}`) as AdminProduct;
   },
 
   async createProduct(product: {
@@ -252,51 +202,24 @@ export const adminApi = {
       quantidade_estoque?: number;
     }>;
   }) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke('admin-products', {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: product,
-      method: 'POST'
-    });
-
-    if (error) throw error;
-    return data as AdminProduct;
+    return await callEdgeFunction('admin-products', {
+      method: 'POST',
+      body: product
+    }) as AdminProduct;
   },
 
   async updateProduct(id: string, updates: Partial<AdminProduct> & {
     images?: Array<{ url?: string; image_url?: string; is_primary?: boolean }>;
   }) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-products/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
-      body: updates,
-      method: 'PUT'
-    });
-
-    if (error) throw error;
-    return data as AdminProduct;
+    return await callEdgeFunction(`admin-products/${id}`, {
+      method: 'PUT',
+      body: updates
+    }) as AdminProduct;
   },
 
   async deleteProduct(id: string) {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session?.session) throw new Error('Not authenticated');
-
-    const { data, error } = await supabase.functions.invoke(`admin-products/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session.session.access_token}`
-      },
+    return await callEdgeFunction(`admin-products/${id}`, {
       method: 'DELETE'
-    });
-
-    if (error) throw error;
-    return data as AdminProduct;
+    }) as AdminProduct;
   }
 };

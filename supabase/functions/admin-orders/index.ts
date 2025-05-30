@@ -51,12 +51,6 @@ serve(async (req) => {
         .from('orders')
         .select(`
           *,
-          user_profile:user_profiles!orders_user_id_fkey(
-            id,
-            nome,
-            sobrenome,
-            email
-          ),
           order_items(
             id,
             quantidade,
@@ -92,6 +86,21 @@ serve(async (req) => {
 
       if (error) throw error
 
+      // Buscar dados dos usuários separadamente
+      if (orders && orders.length > 0) {
+        const userIds = [...new Set(orders.map(o => o.user_id))]
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, nome, sobrenome, email')
+          .in('user_id', userIds)
+
+        // Mapear perfis aos pedidos
+        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || [])
+        orders.forEach(order => {
+          order.user_profile = profileMap.get(order.user_id) || null
+        })
+      }
+
       // Estatísticas
       const { data: stats } = await supabase
         .from('orders')
@@ -125,7 +134,6 @@ serve(async (req) => {
         .from('orders')
         .select(`
           *,
-          user_profile:user_profiles!orders_user_id_fkey(*),
           order_items(
             *,
             product:products(
@@ -139,6 +147,17 @@ serve(async (req) => {
         .single()
 
       if (error) throw error
+
+      // Buscar dados do usuário separadamente
+      if (order) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', order.user_id)
+          .single()
+
+        order.user_profile = profile || null
+      }
 
       return new Response(
         JSON.stringify(order),

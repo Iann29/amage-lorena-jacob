@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { adminApi } from '@/lib/admin-api';
 
 interface Product {
   id: string;
@@ -83,94 +84,41 @@ export default function AdminProdutosPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; nome: string }>>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  // Mock data
-  const mockProducts: Product[] = [
-    {
-      id: '1',
-      nome: 'E-book: Transformação Pessoal',
-      descricao: 'Guia completo para sua jornada de transformação',
-      preco: 97.00,
-      quantidade_estoque: 999,
-      category_id: 'cat-1',
-      is_active: true,
-      created_by: null,
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z',
-      category: {
-        id: 'cat-1',
-        nome: 'E-books'
-      },
-      images: [
-        {
-          id: 'img-1',
-          image_url: '/assets/ebook-transformacao.jpg',
-          is_primary: true,
-          ordem_exibicao: 0
-        }
-      ]
-    },
-    {
-      id: '2',
-      nome: 'Curso Online: Autoconhecimento',
-      descricao: 'Aprenda a se conhecer profundamente',
-      preco: 497.00,
-      quantidade_estoque: 100,
-      category_id: 'cat-2',
-      is_active: true,
-      created_by: null,
-      created_at: '2024-01-10T10:00:00Z',
-      updated_at: '2024-01-10T10:00:00Z',
-      category: {
-        id: 'cat-2',
-        nome: 'Cursos'
-      },
-      images: [
-        {
-          id: 'img-2',
-          image_url: '/assets/curso-autoconhecimento.jpg',
-          is_primary: true,
-          ordem_exibicao: 0
-        }
-      ]
-    },
-    {
-      id: '3',
-      nome: 'Mentoria Individual - 3 meses',
-      descricao: 'Acompanhamento personalizado por 3 meses',
-      preco: 2997.00,
-      quantidade_estoque: 5,
-      category_id: 'cat-3',
-      is_active: true,
-      created_by: null,
-      created_at: '2024-01-05T10:00:00Z',
-      updated_at: '2024-01-05T10:00:00Z',
-      category: {
-        id: 'cat-3',
-        nome: 'Mentorias'
-      }
-    },
-    {
-      id: '4',
-      nome: 'Kit de Meditações Guiadas',
-      descricao: 'Pacote com 10 meditações exclusivas',
-      preco: 47.00,
-      quantidade_estoque: 50,
-      category_id: 'cat-4',
-      is_active: false,
-      created_by: null,
-      created_at: '2024-01-01T10:00:00Z',
-      updated_at: '2024-01-01T10:00:00Z',
-      category: {
-        id: 'cat-4',
-        nome: 'Áudios'
-      }
+  // Carregar produtos
+  useEffect(() => {
+    loadProducts();
+  }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
+
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true);
+      const data = await adminApi.getProducts({
+        page: currentPage,
+        limit: 10,
+        search: searchTerm,
+        category_id: selectedCategory,
+        is_active: selectedStatus === 'active' ? true : selectedStatus === 'inactive' ? false : undefined
+      });
+      
+      setProducts(data.products);
+      setCategories(data.categories);
+      setTotalPages(data.totalPages);
+      setTotal(data.total);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
-  const categories = ['E-books', 'Cursos', 'Mentorias', 'Áudios', 'Workshops'];
+
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(mockProducts.length / itemsPerPage);
 
   const toggleProductSelection = (productId: string) => {
     setSelectedProducts(prev =>
@@ -179,10 +127,10 @@ export default function AdminProdutosPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedProducts.length === mockProducts.length) {
+    if (selectedProducts.length === products.length) {
       setSelectedProducts([]);
     } else {
-      setSelectedProducts(mockProducts.map(p => p.id));
+      setSelectedProducts(products.map(p => p.id));
     }
   };
 
@@ -232,7 +180,7 @@ export default function AdminProdutosPage() {
             >
               <option value="">Todas as categorias</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat.id} value={cat.id}>{cat.nome}</option>
               ))}
             </select>
           </div>
@@ -305,7 +253,7 @@ export default function AdminProdutosPage() {
                   <input
                     type="checkbox"
                     className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                    checked={selectedProducts.length === mockProducts.length}
+                    checked={products.length > 0 && selectedProducts.length === products.length}
                     onChange={toggleSelectAll}
                   />
                 </th>
@@ -330,7 +278,25 @@ export default function AdminProdutosPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {mockProducts.map((product) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex justify-center items-center">
+                      <svg className="animate-spin h-8 w-8 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="ml-2 text-gray-600">Carregando produtos...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : products.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    Nenhum produto encontrado
+                  </td>
+                </tr>
+              ) : products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
@@ -430,7 +396,7 @@ export default function AdminProdutosPage() {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-800 font-medium">
-                Mostrando <span className="font-medium">{mockProducts.length}</span> de <span className="font-medium">{mockProducts.length}</span> resultados
+                Mostrando <span className="font-medium">{products.length}</span> de <span className="font-medium">{total}</span> resultados
               </p>
             </div>
           </div>

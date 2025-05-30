@@ -1,35 +1,28 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { createClient } from '@/utils/supabase/client';
+import { adminApi } from '@/lib/admin-api';
 
 const RichTextEditor = dynamic(() => import('@/components/admin/RichTextEditor'), { ssr: false });
 
 export default function NovoProdutoPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; nome: string }>>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
-    descricao_completa: '',
     preco: '',
-    preco_promocional: '',
-    estoque: '',
-    categoria: '',
-    tipo_produto: 'digital',
-    ativo: true,
-    destaque: false,
-    peso: '',
-    dimensoes: {
-      comprimento: '',
-      largura: '',
-      altura: ''
-    },
-    tags: '',
-    meta_title: '',
-    meta_description: ''
+    quantidade_estoque: '',
+    category_id: '',
+    is_active: true
   });
 
   const [images, setImages] = useState<{
@@ -48,7 +41,26 @@ export default function NovoProdutoPage() {
     galeria: []
   });
 
-  const categories = ['E-books', 'Cursos', 'Mentorias', 'Áudios', 'Workshops'];
+  // Carregar categorias ao montar o componente
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { data } = await supabase
+        .from('categories')
+        .select('id, nome')
+        .eq('is_active', true)
+        .order('nome');
+      
+      if (data) {
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -56,17 +68,13 @@ export default function NovoProdutoPage() {
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
-    } else if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev as any)[parent],
-          [child]: value
-        }
-      }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
+    // Limpar erro do campo quando o usuário começa a digitar
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -97,15 +105,92 @@ export default function NovoProdutoPage() {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório';
+    if (!formData.preco || parseFloat(formData.preco) <= 0) newErrors.preco = 'Preço deve ser maior que zero';
+    if (!formData.quantidade_estoque || parseInt(formData.quantidade_estoque) < 0) newErrors.quantidade_estoque = 'Estoque não pode ser negativo';
+    if (!formData.category_id) newErrors.category_id = 'Categoria é obrigatória';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+    
     setIsLoading(true);
     
-    // Simular salvamento
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    alert('Produto criado com sucesso!');
-    router.push('/admin/produtos');
+    try {
+      // Upload das imagens
+      const uploadedImages: Array<{ url: string; is_primary: boolean }> = [];
+      
+      if (images.principal) {
+        setIsUploading(true);
+        const fileExt = images.principal.name.split('.').pop();
+        const fileName = `${Date.now()}-principal.${fileExt}`;
+        const filePath = `products/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('lorena-images-db')
+          .upload(filePath, images.principal);
+          
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabase.storage
+          .from('lorena-images-db')
+          .getPublicUrl(filePath);
+          
+        uploadedImages.push({ url: urlData.publicUrl, is_primary: true });
+      }
+      
+      // Upload das imagens da galeria
+      for (let i = 0; i < images.galeria.length; i++) {
+        const file = images.galeria[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${i}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('lorena-images-db')
+          .upload(filePath, file);
+          
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabase.storage
+          .from('lorena-images-db')
+          .getPublicUrl(filePath);
+          
+        uploadedImages.push({ url: urlData.publicUrl, is_primary: false });
+      }
+      
+      setIsUploading(false);
+      
+      // Criar produto
+      const productData = {
+        nome: formData.nome,
+        descricao: formData.descricao || null,
+        preco: parseFloat(formData.preco),
+        quantidade_estoque: parseInt(formData.quantidade_estoque),
+        category_id: formData.category_id || null,
+        is_active: formData.is_active,
+        images: uploadedImages
+      };
+      
+      await adminApi.createProduct(productData);
+      
+      alert('Produto criado com sucesso!');
+      router.push('/admin/produtos');
+    } catch (error) {
+      console.error('Erro ao criar produto:', error);
+      alert('Erro ao criar produto. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -121,6 +206,12 @@ export default function NovoProdutoPage() {
           </Link>
         </div>
       </div>
+
+      {isUploading && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-blue-700">Fazendo upload das imagens...</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -142,32 +233,23 @@ export default function NovoProdutoPage() {
                     required
                     value={formData.nome}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    className={`w-full px-3 py-2 border ${errors.nome ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600`}
                   />
+                  {errors.nome && <p className="mt-1 text-sm text-red-600">{errors.nome}</p>}
                 </div>
 
                 <div>
                   <label htmlFor="descricao" className="block text-sm font-medium text-gray-700 mb-1">
-                    Descrição Curta
+                    Descrição
                   </label>
                   <textarea
                     id="descricao"
                     name="descricao"
-                    rows={3}
+                    rows={4}
                     value={formData.descricao}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                    placeholder="Breve descrição do produto..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Descrição Completa
-                  </label>
-                  <RichTextEditor
-                    initialContent={formData.descricao_completa}
-                    onChange={(content) => setFormData(prev => ({ ...prev, descricao_completa: content }))}
+                    placeholder="Descrição completa do produto..."
                   />
                 </div>
               </div>
@@ -180,7 +262,7 @@ export default function NovoProdutoPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="preco" className="block text-sm font-medium text-gray-700 mb-1">
-                    Preço Regular (R$) *
+                    Preço (R$) *
                   </label>
                   <input
                     type="number"
@@ -191,161 +273,31 @@ export default function NovoProdutoPage() {
                     min="0"
                     value={formData.preco}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    className={`w-full px-3 py-2 border ${errors.preco ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600`}
                   />
+                  {errors.preco && <p className="mt-1 text-sm text-red-600">{errors.preco}</p>}
                 </div>
 
                 <div>
-                  <label htmlFor="preco_promocional" className="block text-sm font-medium text-gray-700 mb-1">
-                    Preço Promocional (R$)
+                  <label htmlFor="quantidade_estoque" className="block text-sm font-medium text-gray-700 mb-1">
+                    Quantidade em Estoque *
                   </label>
                   <input
                     type="number"
-                    id="preco_promocional"
-                    name="preco_promocional"
-                    step="0.01"
-                    min="0"
-                    value={formData.preco_promocional}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="estoque" className="block text-sm font-medium text-gray-700 mb-1">
-                    Estoque *
-                  </label>
-                  <input
-                    type="number"
-                    id="estoque"
-                    name="estoque"
+                    id="quantidade_estoque"
+                    name="quantidade_estoque"
                     required
                     min="0"
-                    value={formData.estoque}
+                    value={formData.quantidade_estoque}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    className={`w-full px-3 py-2 border ${errors.quantidade_estoque ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600`}
                   />
+                  {errors.quantidade_estoque && <p className="mt-1 text-sm text-red-600">{errors.quantidade_estoque}</p>}
                   <p className="text-xs text-gray-500 mt-1">Para produtos digitais, use 999 para ilimitado</p>
                 </div>
-
-                <div>
-                  <label htmlFor="tipo_produto" className="block text-sm font-medium text-gray-700 mb-1">
-                    Tipo de Produto
-                  </label>
-                  <select
-                    id="tipo_produto"
-                    name="tipo_produto"
-                    value={formData.tipo_produto}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                  >
-                    <option value="digital">Digital</option>
-                    <option value="fisico">Físico</option>
-                    <option value="servico">Serviço</option>
-                  </select>
-                </div>
               </div>
             </div>
 
-            {/* Frete (apenas para produtos físicos) */}
-            {formData.tipo_produto === 'fisico' && (
-              <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Informações de Frete</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="peso" className="block text-sm font-medium text-gray-700 mb-1">
-                      Peso (kg)
-                    </label>
-                    <input
-                      type="number"
-                      id="peso"
-                      name="peso"
-                      step="0.001"
-                      min="0"
-                      value={formData.peso}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                    />
-                  </div>
-
-                  <div className="md:col-span-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Dimensões (cm)
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <input
-                        type="number"
-                        name="dimensoes.comprimento"
-                        placeholder="Comp."
-                        step="0.1"
-                        min="0"
-                        value={formData.dimensoes.comprimento}
-                        onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                      />
-                      <input
-                        type="number"
-                        name="dimensoes.largura"
-                        placeholder="Larg."
-                        step="0.1"
-                        min="0"
-                        value={formData.dimensoes.largura}
-                        onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                      />
-                      <input
-                        type="number"
-                        name="dimensoes.altura"
-                        placeholder="Alt."
-                        step="0.1"
-                        min="0"
-                        value={formData.dimensoes.altura}
-                        onChange={handleInputChange}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SEO */}
-            <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">SEO</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="meta_title" className="block text-sm font-medium text-gray-700 mb-1">
-                    Meta Title
-                  </label>
-                  <input
-                    type="text"
-                    id="meta_title"
-                    name="meta_title"
-                    value={formData.meta_title}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                    placeholder="Título para mecanismos de busca"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="meta_description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Meta Description
-                  </label>
-                  <textarea
-                    id="meta_description"
-                    name="meta_description"
-                    rows={3}
-                    value={formData.meta_description}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                    placeholder="Descrição para mecanismos de busca"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Coluna Lateral */}
@@ -356,60 +308,35 @@ export default function NovoProdutoPage() {
               
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-1">
                     Categoria *
                   </label>
                   <select
-                    id="categoria"
-                    name="categoria"
+                    id="category_id"
+                    name="category_id"
                     required
-                    value={formData.categoria}
+                    value={formData.category_id}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    className={`w-full px-3 py-2 border ${errors.category_id ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600`}
                   >
                     <option value="">Selecione uma categoria</option>
                     {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat.id} value={cat.id}>{cat.nome}</option>
                     ))}
                   </select>
-                </div>
-
-                <div>
-                  <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
-                    Tags
-                  </label>
-                  <input
-                    type="text"
-                    id="tags"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
-                    placeholder="Separadas por vírgula"
-                  />
+                  {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      name="ativo"
-                      checked={formData.ativo}
+                      name="is_active"
+                      checked={formData.is_active}
                       onChange={handleInputChange}
                       className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                     />
                     <span className="ml-2 text-sm text-gray-700">Produto ativo</span>
-                  </label>
-
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="destaque"
-                      checked={formData.destaque}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Produto em destaque</span>
                   </label>
                 </div>
               </div>
