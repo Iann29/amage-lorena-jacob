@@ -257,10 +257,10 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/" 
-                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white hover:text-[#F9FFD6]' : 'text-[#6E6B46] hover:text-[#52A4DB]'} text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} transition px-3 font-['Poppins'] relative group`}
                 >
                   Início
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
+                  <span className={`absolute left-0 bottom-0 h-[2px] w-0 ${pathname.startsWith('/loja') ? 'bg-[#F9FFD6]' : 'bg-[#52A4DB]'} transition-all duration-200 group-hover:w-full`}></span>
                 </Link>
               </motion.div>
               
@@ -269,10 +269,10 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/sobre" 
-                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white hover:text-[#F9FFD6]' : 'text-[#6E6B46] hover:text-[#52A4DB]'} text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} transition px-3 font-['Poppins'] relative group`}
                 >
                   Sobre Mim
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
+                  <span className={`absolute left-0 bottom-0 h-[2px] w-0 ${pathname.startsWith('/loja') ? 'bg-[#F9FFD6]' : 'bg-[#52A4DB]'} transition-all duration-200 group-hover:w-full`}></span>
                 </Link>
               </motion.div>
               
@@ -281,10 +281,10 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/blog" 
-                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white hover:text-[#F9FFD6]' : 'text-[#6E6B46] hover:text-[#52A4DB]'} text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} transition px-3 font-['Poppins'] relative group`}
                 >
                   Blog
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
+                  <span className={`absolute left-0 bottom-0 h-[2px] w-0 ${pathname.startsWith('/loja') ? 'bg-[#F9FFD6]' : 'bg-[#52A4DB]'} transition-all duration-200 group-hover:w-full`}></span>
                 </Link>
               </motion.div>
               
@@ -293,10 +293,10 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <button 
                   onClick={openContatoModal}
-                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base font-normal hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group cursor-pointer`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white hover:text-[#F9FFD6]' : 'text-[#6E6B46] hover:text-[#52A4DB]'} text-base font-normal transition px-3 font-['Poppins'] relative group cursor-pointer`}
                 >
                   Contato
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
+                  <span className={`absolute left-0 bottom-0 h-[2px] w-0 ${pathname.startsWith('/loja') ? 'bg-[#F9FFD6]' : 'bg-[#52A4DB]'} transition-all duration-200 group-hover:w-full`}></span>
                 </button>
               </motion.div>
               
