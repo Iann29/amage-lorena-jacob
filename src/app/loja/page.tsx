@@ -169,8 +169,7 @@ export default function LojaPage() {
 
       {/* Produtos */}
       <section className="py-12 px-4">
-        <div className="container mx-auto">
-          <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
+        <div className="container mx-auto bg-white rounded-3xl shadow-lg p-8 md:p-12">
           <h2 
             className="text-center mb-8 font-bold" 
             style={{ 
@@ -212,8 +211,124 @@ export default function LojaPage() {
             </span>
           </div>
 
-          {/* Grid de produtos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Grid com filtro e produtos */}
+          <div className="flex gap-8">
+            {/* Filtro Lateral */}
+            <aside className="w-56 flex-shrink-0 hidden lg:block">
+                <div className="mb-6">
+                  <h4 className="text-sm text-gray-500 mb-4" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    Filtrar por
+                  </h4>
+                  <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
+                    Categorias
+                  </h3>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link 
+                        href="/loja"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        Todos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/brinquedos-sensoriais"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        Brinquedos Sensoriais
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/brinquedos-montessorianos"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        Brinquedos Montessorianos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/material-pedagogico"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        Materiais Pedagógicos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/jogos"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        Jogos
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/pecs"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        PECS e Comunicação Alternativa
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/loja/ebooks"
+                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        E-books
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                
+                {/* Filtro de Preço */}
+                <div className="border-t pt-6">
+                  <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
+                    Preço
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm text-gray-600">Mínimo</label>
+                      <input 
+                        type="number" 
+                        placeholder="R$ 0,00"
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#5179C8]"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-600">Máximo</label>
+                      <input 
+                        type="number" 
+                        placeholder="R$ 999,00"
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#5179C8]"
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      />
+                    </div>
+                    <button 
+                      className="w-full py-2 rounded-lg text-white text-sm font-medium transition-colors hover:opacity-90"
+                      style={{ 
+                        backgroundColor: '#5179C8',
+                        fontFamily: 'var(--font-museo-sans)'
+                      }}
+                    >
+                      Aplicar Filtro
+                    </button>
+                  </div>
+                </div>
+            </aside>
+            
+            {/* Grid de produtos */}
+            <div className="flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 mb-8">
             {featuredProducts.map((product) => (
               <ProductCard 
                 key={product.id} 
@@ -239,6 +354,7 @@ export default function LojaPage() {
               VER MAIS
             </Link>
           </div>
+            </div>
           </div>
         </div>
       </section>
