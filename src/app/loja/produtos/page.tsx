@@ -149,7 +149,7 @@ export default function ProdutosPage({ categoryId, categoryName }: ProdutosPageP
 
           <div className="flex gap-8">
           {/* Sidebar de Filtros */}
-          <aside className="w-56 flex-shrink-0 hidden lg:block">
+          <aside className="w-64 flex-shrink-0 hidden lg:block">
             <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
               <div className="mb-6">
                 <h4 className="text-sm text-gray-500" style={{ fontFamily: 'var(--font-museo-sans)' }}>
@@ -176,12 +176,12 @@ export default function ProdutosPage({ categoryId, categoryName }: ProdutosPageP
                     <li key={category.id}>
                       <button
                         onClick={() => handleCategoryClick(category.slug)}
-                        className={`block py-1 text-sm ${
+                        className={`block py-1 text-sm text-left w-full ${
                           categoryId === category.id 
                             ? 'text-[#5179C8] font-bold' 
                             : 'text-black hover:text-[#5179C8]'
                         } transition-colors`}
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                        style={{ fontFamily: 'var(--font-museo-sans)', whiteSpace: 'nowrap' }}
                       >
                         {category.nome}
                       </button>
