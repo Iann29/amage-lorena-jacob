@@ -127,8 +127,12 @@ serve(async (req) => {
           nome: body.nome,
           descricao: body.descricao,
           preco: body.preco,
+          preco_promocional: body.preco_promocional || null,
           quantidade_estoque: body.quantidade_estoque,
           category_id: body.category_id,
+          idade_min: body.idade_min || 0,
+          idade_max: body.idade_max || 12,
+          tags: body.tags || [],
           is_active: body.is_active ?? true,
           created_by: user.id
         })
@@ -193,8 +197,12 @@ serve(async (req) => {
           nome: body.nome,
           descricao: body.descricao,
           preco: body.preco,
+          preco_promocional: body.preco_promocional || null,
           quantidade_estoque: body.quantidade_estoque,
           category_id: body.category_id,
+          idade_min: body.idade_min || 0,
+          idade_max: body.idade_max || 12,
+          tags: body.tags || [],
           is_active: body.is_active,
           updated_at: new Date().toISOString()
         })

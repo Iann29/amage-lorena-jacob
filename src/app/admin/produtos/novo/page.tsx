@@ -20,8 +20,12 @@ export default function NovoProdutoPage() {
     nome: '',
     descricao: '',
     preco: '',
+    preco_promocional: '',
     quantidade_estoque: '',
     category_id: '',
+    idade_min: '0',
+    idade_max: '12',
+    tags: '',
     is_active: true
   });
 
@@ -113,6 +117,16 @@ export default function NovoProdutoPage() {
     if (!formData.quantidade_estoque || parseInt(formData.quantidade_estoque) < 0) newErrors.quantidade_estoque = 'Estoque não pode ser negativo';
     if (!formData.category_id) newErrors.category_id = 'Categoria é obrigatória';
     
+    // Validar preço promocional se preenchido
+    if (formData.preco_promocional && parseFloat(formData.preco_promocional) >= parseFloat(formData.preco)) {
+      newErrors.preco_promocional = 'Preço promocional deve ser menor que o preço normal';
+    }
+    
+    // Validar faixa etária
+    if (parseInt(formData.idade_min) > parseInt(formData.idade_max)) {
+      newErrors.idade_min = 'Idade mínima não pode ser maior que a idade máxima';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -174,8 +188,12 @@ export default function NovoProdutoPage() {
         nome: formData.nome,
         descricao: formData.descricao || null,
         preco: parseFloat(formData.preco),
+        preco_promocional: formData.preco_promocional ? parseFloat(formData.preco_promocional) : null,
         quantidade_estoque: parseInt(formData.quantidade_estoque),
         category_id: formData.category_id || null,
+        idade_min: parseInt(formData.idade_min),
+        idade_max: parseInt(formData.idade_max),
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
         is_active: formData.is_active,
         images: uploadedImages
       };
@@ -294,6 +312,83 @@ export default function NovoProdutoPage() {
                   />
                   {errors.quantidade_estoque && <p className="mt-1 text-sm text-red-600">{errors.quantidade_estoque}</p>}
                   <p className="text-xs text-gray-500 mt-1">Para produtos digitais, use 999 para ilimitado</p>
+                </div>
+
+                <div>
+                  <label htmlFor="preco_promocional" className="block text-sm font-medium text-gray-700 mb-1">
+                    Preço Promocional (R$)
+                  </label>
+                  <input
+                    type="number"
+                    id="preco_promocional"
+                    name="preco_promocional"
+                    step="0.01"
+                    min="0"
+                    value={formData.preco_promocional}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    placeholder="Deixe vazio se não houver promoção"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Preço com desconto (opcional)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Faixa Etária e Tags */}
+            <div className="bg-white rounded-lg shadow-md border border-gray-300 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Informações Adicionais</h2>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="idade_min" className="block text-sm font-medium text-gray-700 mb-1">
+                      Idade Mínima
+                    </label>
+                    <input
+                      type="number"
+                      id="idade_min"
+                      name="idade_min"
+                      min="0"
+                      max="99"
+                      value={formData.idade_min}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Idade mínima recomendada</p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="idade_max" className="block text-sm font-medium text-gray-700 mb-1">
+                      Idade Máxima
+                    </label>
+                    <input
+                      type="number"
+                      id="idade_max"
+                      name="idade_max"
+                      min="0"
+                      max="99"
+                      value={formData.idade_max}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Idade máxima recomendada</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+                    Tags
+                  </label>
+                  <input
+                    type="text"
+                    id="tags"
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-600"
+                    placeholder="autismo, desenvolvimento, coordenação motora"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separe as tags por vírgula</p>
                 </div>
               </div>
             </div>
