@@ -5,11 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from './cadastro.module.css';
 import { createClient } from '@/utils/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function CadastroPage() {
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '/minha-conta';
   const [formData, setFormData] = useState({
     primeiroNome: '',
     sobrenome: '',
@@ -92,7 +94,7 @@ export default function CadastroPage() {
       setNotificationsChecked(false);
     } else if (data.session && data.user) {
       setSuccessMessage('Conta criada com sucesso! Redirecionando...');
-      router.push('/minha-conta'); 
+      router.push(redirectUrl); 
     } else {
       setErrorMessage('Ocorreu uma resposta inesperada do servidor. Por favor, tente novamente.');
     }
@@ -106,7 +108,7 @@ export default function CadastroPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}${redirectUrl}`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',

@@ -473,7 +473,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                   {/* Botões */}
                   <div className="space-y-3">
                     <Link
-                      href="/login"
+                      href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
                       className="w-full bg-[#5179C8] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#4169B8] transition-colors flex items-center justify-center gap-2"
                       style={{ fontFamily: 'var(--font-museo-sans)' }}
                     >
@@ -482,7 +482,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                     </Link>
                     
                     <Link
-                      href="/cadastro"
+                      href={`/cadastro?redirect=${encodeURIComponent(window.location.pathname)}`}
                       className="w-full bg-white text-[#5179C8] border-2 border-[#5179C8] py-3 px-6 rounded-lg font-medium hover:bg-[#5179C8] hover:text-white transition-colors flex items-center justify-center"
                       style={{ fontFamily: 'var(--font-museo-sans)' }}
                     >
@@ -502,7 +502,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                   
                   {/* Login com Google */}
                   <Link
-                    href="/login"
+                    href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}
                     className="w-full bg-white text-gray-800 border border-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-3"
                   >
                     <Image src="/assets/google.svg" alt="Google" width={20} height={20} />
