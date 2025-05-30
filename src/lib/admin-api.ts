@@ -195,10 +195,14 @@ export const adminApi = {
 
   async createProduct(product: {
     nome: string;
-    descricao?: string;
+    descricao?: string | null;
     preco: number;
+    preco_promocional?: number | null;
     quantidade_estoque: number;
-    category_id?: string;
+    category_id?: string | null;
+    idade_min?: number;
+    idade_max?: number;
+    tags?: string[];
     is_active?: boolean;
     images?: Array<{ url: string; is_primary?: boolean }>;
     variants?: Array<{
