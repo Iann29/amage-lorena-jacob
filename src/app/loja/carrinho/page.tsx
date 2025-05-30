@@ -62,8 +62,8 @@ export default function CarrinhoPage() {
             height={100}
             className="mx-auto mb-4 opacity-50"
           />
-          <h2 className="text-2xl font-bold mb-2">Seu carrinho está vazio</h2>
-          <p className="text-gray-600 mb-4">Adicione produtos para continuar</p>
+          <h2 className="text-2xl font-bold mb-2 text-black">Seu carrinho está vazio</h2>
+          <p className="text-black mb-4">Adicione produtos para continuar</p>
           <Link
             href="/loja"
             className="inline-block px-6 py-3 rounded-md text-white font-medium"
@@ -106,8 +106,8 @@ export default function CarrinhoPage() {
 
                     {/* Informações */}
                     <div className="flex-1">
-                      <h3 className="font-medium text-lg mb-1">{item.product.nome}</h3>
-                      <p className="text-gray-600 text-sm">
+                      <h3 className="font-medium text-lg mb-1 text-black">{item.product.nome}</h3>
+                      <p className="text-black text-sm">
                         R$ {price.toFixed(2).replace('.', ',')} cada
                       </p>
                     </div>
@@ -116,14 +116,14 @@ export default function CarrinhoPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                        className="w-8 h-8 rounded border-2 border-black text-black font-bold flex items-center justify-center hover:bg-gray-100 transition-colors"
                       >
                         -
                       </button>
-                      <span className="w-12 text-center">{item.quantity}</span>
+                      <span className="w-12 text-center text-black font-bold">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                        className="w-8 h-8 rounded border-2 border-black text-black font-bold flex items-center justify-center hover:bg-gray-100 transition-colors"
                       >
                         +
                       </button>
@@ -131,7 +131,7 @@ export default function CarrinhoPage() {
 
                     {/* Preço total */}
                     <div className="text-right min-w-[100px]">
-                      <p className="font-bold text-lg">
+                      <p className="font-bold text-lg text-black">
                         R$ {(price * item.quantity).toFixed(2).replace('.', ',')}
                       </p>
                     </div>
@@ -154,17 +154,17 @@ export default function CarrinhoPage() {
           {/* Resumo do Pedido */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
-              <h2 className="text-xl font-bold mb-4">Resumo do Pedido</h2>
+              <h2 className="text-xl font-bold mb-4 text-black">Resumo do Pedido</h2>
               
               {/* Subtotal */}
               <div className="flex justify-between mb-2">
-                <span>Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'})</span>
-                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                <span className="text-black">Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'})</span>
+                <span className="text-black font-medium">R$ {subtotal.toFixed(2).replace('.', ',')}</span>
               </div>
 
               {/* Frete */}
               <div className="border-t pt-4 mb-4">
-                <label className="block mb-2 font-medium">Calcular Frete</label>
+                <label className="block mb-2 font-medium text-black">Calcular Frete</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -172,7 +172,7 @@ export default function CarrinhoPage() {
                     value={cep}
                     onChange={(e) => setCep(e.target.value.replace(/\D/g, ''))}
                     maxLength={8}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#5179C8]"
+                    className="flex-1 px-3 py-2 border-2 border-gray-300 rounded focus:outline-none focus:border-[#5179C8] text-black placeholder-gray-600"
                   />
                   <button
                     onClick={calculateFrete}
@@ -191,13 +191,13 @@ export default function CarrinhoPage() {
               {/* Total */}
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between text-xl font-bold">
-                  <span>Total</span>
+                  <span className="text-black">Total</span>
                   <span style={{ color: '#2A289B' }}>
                     R$ {total.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
                 {subtotal < 99 && (
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-black mt-2">
                     Faltam R$ {(99 - subtotal).toFixed(2).replace('.', ',')} para frete grátis!
                   </p>
                 )}
