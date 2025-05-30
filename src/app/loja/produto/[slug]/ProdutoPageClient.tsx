@@ -35,7 +35,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
             <li>{'>'}</li>
             <li><Link href={`/loja/${product.category?.slug}`} className="hover:text-[#5179C8]">{product.category?.nome}</Link></li>
             <li>{'>'}</li>
-            <li className="text-gray-900 font-medium">{product.nome}</li>
+            <li className="font-bold" style={{ color: '#2A289B' }}>{product.nome}</li>
           </ol>
         </nav>
 
@@ -81,10 +81,10 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
             {/* Botão Voltar */}
             <Link 
               href="/loja/produtos"
-              className="absolute -top-20 right-0 inline-flex items-center gap-2 px-4 py-2 rounded text-white transition-colors z-10"
+              className="absolute -top-20 right-0 inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm text-white transition-colors z-10"
               style={{ backgroundColor: '#8B6F47' }}
             >
-              ← Voltar
+              <span className="text-lg">←</span> Voltar
             </Link>
             
             <div className="bg-white rounded-3xl shadow-lg p-6 sticky top-20 relative" style={{ border: '2px solid #000' }}>
