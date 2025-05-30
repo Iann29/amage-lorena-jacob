@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getRelatedProducts, mockReviews, type Product } from '@/lib/mockDataLoja';
 import { ProductCard } from '@/components/loja/ProductCard';
+import { useUser } from '@/hooks/useUser';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProdutoPageClientProps {
   product: Product;
@@ -15,6 +17,9 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  const { user } = useUser();
 
   const relatedProducts = getRelatedProducts(product.id, 3);
   const productReviews = mockReviews.filter(r => r.product_id === product.id);
@@ -22,7 +27,12 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
   const hasDiscount = !!product.preco_promocional;
 
   const handleAddToCart = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
     console.log('Adicionando ao carrinho:', { product, quantity });
+    // TODO: Implementar lógica real do carrinho
   };
 
   return (
@@ -390,6 +400,13 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           {/* Botão para avaliar (se usuário comprou o produto) */}
           <div className="mt-8 text-center">
             <button 
+              onClick={() => {
+                if (!user) {
+                  setShowLoginModal(true);
+                  return;
+                }
+                // TODO: Implementar lógica de avaliação
+              }}
               className="px-6 py-3 rounded-full text-white font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg"
               style={{ backgroundColor: '#5179C8', fontFamily: 'var(--font-museo-sans)' }}
             >
@@ -398,6 +415,104 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           </div>
         </section>
         </div>
+        
+        {/* Modal de Login */}
+        <AnimatePresence>
+          {showLoginModal && (
+            <>
+              {/* Overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowLoginModal(false)}
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+              />
+              
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", duration: 0.3 }}
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-full max-w-md px-4"
+              >
+                <div className="bg-white rounded-3xl shadow-2xl w-full p-8 relative">
+                  {/* Botão Fechar */}
+                  <button
+                    onClick={() => setShowLoginModal(false)}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  
+                  {/* Ícone do Carrinho */}
+                  <div className="flex justify-center mb-6">
+                    <div className="bg-[#E3F2FD] rounded-full p-6">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z" fill="#5179C8"/>
+                        <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z" fill="#5179C8"/>
+                        <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="#5179C8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Título */}
+                  <h2 className="text-2xl font-bold text-center mb-3" style={{ color: '#2A289B', fontFamily: 'var(--font-museo-sans)' }}>
+                    Faça login para continuar
+                  </h2>
+                  
+                  {/* Descrição */}
+                  <p className="text-gray-600 text-center mb-8" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                    Para adicionar produtos ao carrinho, você precisa estar conectado à sua conta.
+                  </p>
+                  
+                  {/* Botões */}
+                  <div className="space-y-3">
+                    <Link
+                      href="/login"
+                      className="w-full bg-[#5179C8] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#4169B8] transition-colors flex items-center justify-center gap-2"
+                      style={{ fontFamily: 'var(--font-museo-sans)' }}
+                    >
+                      <Image src="/assets/perfilIcon.png" alt="Login" width={20} height={20} className="brightness-0 invert" />
+                      Fazer Login
+                    </Link>
+                    
+                    <Link
+                      href="/cadastro"
+                      className="w-full bg-white text-[#5179C8] border-2 border-[#5179C8] py-3 px-6 rounded-lg font-medium hover:bg-[#5179C8] hover:text-white transition-colors flex items-center justify-center"
+                      style={{ fontFamily: 'var(--font-museo-sans)' }}
+                    >
+                      Criar Conta
+                    </Link>
+                  </div>
+                  
+                  {/* Divider */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">ou</span>
+                    </div>
+                  </div>
+                  
+                  {/* Login com Google */}
+                  <Link
+                    href="/login"
+                    className="w-full bg-white text-gray-800 border border-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-3"
+                  >
+                    <Image src="/assets/google.svg" alt="Google" width={20} height={20} />
+                    Entrar com Google
+                  </Link>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
     </div>
   );
 }
