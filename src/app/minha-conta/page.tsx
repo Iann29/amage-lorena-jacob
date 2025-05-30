@@ -55,22 +55,20 @@ export default function MinhaContaPage() {
   }>>([]);
   const [isLoadingSavedPosts, setIsLoadingSavedPosts] = useState(false);
   
-  // Estados para pedidos (mockado por enquanto)
+  // Estados para pedidos (estrutura do banco de dados)
   const [orders, setOrders] = useState<Array<{
     id: string;
-    orderNumber: string;
-    date: string;
-    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-    total: number;
-    items: Array<{
-      id: string;
-      name: string;
-      quantity: number;
-      price: number;
-      imageUrl?: string;
-    }>;
-    paymentMethod: string;
-    shippingAddress: {
+    user_id: string;
+    status: 'pendente' | 'processando' | 'pago' | 'enviado' | 'entregue' | 'cancelado';
+    valor_total: number;
+    metodo_pagamento: 'cartao_credito' | 'cartao_debito' | 'pix' | 'boleto' | null;
+    payment_id: string | null;
+    external_reference: string | null;
+    payment_details: any | null;
+    desconto_aplicado: number | null;
+    discount_id: string | null;
+    shipping_address_id: string | null;
+    endereco_entrega_snapshot: {
       nome_destinatario: string;
       rua: string;
       numero: string;
@@ -79,14 +77,34 @@ export default function MinhaContaPage() {
       cidade: string;
       estado: string;
       cep: string;
+      telefone_contato?: string;
     };
+    created_at: string;
+    updated_at: string;
+    items: Array<{
+      id: string;
+      order_id: string;
+      product_id: string;
+      product_variant_id: string | null;
+      quantidade: number;
+      preco_unitario: number;
+      preco_total: number;
+      product: {
+        nome: string;
+        descricao?: string;
+        images?: Array<{
+          image_url: string;
+          is_primary: boolean;
+        }>;
+      };
+    }>;
     trackingCode?: string;
     estimatedDelivery?: string;
-  }>>([]);
+  }>>([])
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<typeof orders[0] | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
-  const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'>('all');
+  const [orderFilter, setOrderFilter] = useState<'all' | 'pendente' | 'processando' | 'pago' | 'enviado' | 'entregue' | 'cancelado'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const { openContatoModal } = useModal();
 
@@ -352,14 +370,15 @@ export default function MinhaContaPage() {
   // Funções auxiliares para pedidos
   const getStatusBadge = (status: typeof orders[0]['status']) => {
     const statusConfig = {
-      pending: { label: 'Pendente', bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
-      processing: { label: 'Processando', bg: 'bg-blue-100', text: 'text-blue-800', icon: Package },
-      shipped: { label: 'Enviado', bg: 'bg-blue-100', text: 'text-blue-800', icon: Truck },
-      delivered: { label: 'Entregue', bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
-      cancelled: { label: 'Cancelado', bg: 'bg-red-100', text: 'text-red-800', icon: X }
+      pendente: { label: 'Pendente', bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
+      processando: { label: 'Processando', bg: 'bg-blue-100', text: 'text-blue-800', icon: Package },
+      pago: { label: 'Pago', bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+      enviado: { label: 'Enviado', bg: 'bg-blue-100', text: 'text-blue-800', icon: Truck },
+      entregue: { label: 'Entregue', bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+      cancelado: { label: 'Cancelado', bg: 'bg-red-100', text: 'text-red-800', icon: X }
     };
     
-    const config = statusConfig[status];
+    const config = statusConfig[status] || statusConfig.pendente;
     const Icon = config.icon;
     
     return (
@@ -372,8 +391,8 @@ export default function MinhaContaPage() {
   
   const filteredOrders = orders.filter(order => {
     const matchesFilter = orderFilter === 'all' || order.status === orderFilter;
-    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = (order.external_reference || order.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.items.some(item => item.product.nome.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
 
@@ -585,34 +604,17 @@ export default function MinhaContaPage() {
         setOrders([
           {
             id: '1',
-            orderNumber: 'PED-2024-001',
-            date: '2024-01-20T10:30:00',
-            status: 'delivered',
-            total: 297.00,
-            items: [
-              {
-                id: '1',
-                name: 'Curso Online: Inteligência Emocional',
-                quantity: 1,
-                price: 197.00,
-                imageUrl: '/assets/treinamento-bg.jpg'
-              },
-              {
-                id: '2',
-                name: 'E-book: Guia de Meditação',
-                quantity: 1,
-                price: 47.00,
-                imageUrl: '/assets/meusservicos.png'
-              },
-              {
-                id: '3',
-                name: 'Workshop: Resiliência no Trabalho',
-                quantity: 1,
-                price: 53.00,
-              }
-            ],
-            paymentMethod: 'Cartão de Crédito',
-            shippingAddress: {
+            user_id: 'user-123',
+            status: 'entregue',
+            valor_total: 297.00,
+            metodo_pagamento: 'cartao_credito',
+            payment_id: 'pay_123',
+            external_reference: 'PED-2024-001',
+            payment_details: null,
+            desconto_aplicado: null,
+            discount_id: null,
+            shipping_address_id: 'addr-1',
+            endereco_entrega_snapshot: {
               nome_destinatario: 'João Silva',
               rua: 'Rua das Flores',
               numero: '123',
@@ -622,26 +624,77 @@ export default function MinhaContaPage() {
               estado: 'SP',
               cep: '01234-567'
             },
+            created_at: '2024-01-20T10:30:00',
+            updated_at: '2024-01-20T10:30:00',
+            items: [
+              {
+                id: '1',
+                order_id: '1',
+                product_id: 'prod-1',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 197.00,
+                preco_total: 197.00,
+                product: {
+                  nome: 'Curso Online: Inteligência Emocional',
+                  descricao: 'Curso completo sobre inteligência emocional',
+                  images: [
+                    {
+                      image_url: '/assets/treinamento-bg.jpg',
+                      is_primary: true
+                    }
+                  ]
+                }
+              },
+              {
+                id: '2',
+                order_id: '1',
+                product_id: 'prod-2',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 47.00,
+                preco_total: 47.00,
+                product: {
+                  nome: 'E-book: Guia de Meditação',
+                  descricao: 'Guia completo de meditação',
+                  images: [
+                    {
+                      image_url: '/assets/meusservicos.png',
+                      is_primary: true
+                    }
+                  ]
+                }
+              },
+              {
+                id: '3',
+                order_id: '1',
+                product_id: 'prod-3',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 53.00,
+                preco_total: 53.00,
+                product: {
+                  nome: 'Workshop: Resiliência no Trabalho',
+                  descricao: 'Workshop sobre resiliência'
+                }
+              }
+            ],
             trackingCode: 'BR123456789',
             estimatedDelivery: '2024-01-25'
           },
           {
             id: '2',
-            orderNumber: 'PED-2024-002',
-            date: '2024-01-18T15:45:00',
-            status: 'shipped',
-            total: 147.00,
-            items: [
-              {
-                id: '4',
-                name: 'Palestra Online: Ansiedade e Produtividade',
-                quantity: 1,
-                price: 147.00,
-                imageUrl: '/assets/palestras-bg.jpg'
-              }
-            ],
-            paymentMethod: 'PIX',
-            shippingAddress: {
+            user_id: 'user-123',
+            status: 'enviado',
+            valor_total: 147.00,
+            metodo_pagamento: 'pix',
+            payment_id: 'pay_456',
+            external_reference: 'PED-2024-002',
+            payment_details: null,
+            desconto_aplicado: null,
+            discount_id: null,
+            shipping_address_id: 'addr-2',
+            endereco_entrega_snapshot: {
               nome_destinatario: 'Maria Santos',
               rua: 'Av. Paulista',
               numero: '1000',
@@ -650,25 +703,45 @@ export default function MinhaContaPage() {
               estado: 'SP',
               cep: '01310-100'
             },
+            created_at: '2024-01-18T15:45:00',
+            updated_at: '2024-01-18T15:45:00',
+            items: [
+              {
+                id: '4',
+                order_id: '2',
+                product_id: 'prod-4',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 147.00,
+                preco_total: 147.00,
+                product: {
+                  nome: 'Palestra Online: Ansiedade e Produtividade',
+                  descricao: 'Palestra sobre ansiedade e produtividade',
+                  images: [
+                    {
+                      image_url: '/assets/palestras-bg.jpg',
+                      is_primary: true
+                    }
+                  ]
+                }
+              }
+            ],
             trackingCode: 'BR987654321',
             estimatedDelivery: '2024-01-23'
           },
           {
             id: '3',
-            orderNumber: 'PED-2024-003',
-            date: '2024-01-15T09:20:00',
-            status: 'processing',
-            total: 397.00,
-            items: [
-              {
-                id: '5',
-                name: 'Mentoria Individual - 3 meses',
-                quantity: 1,
-                price: 397.00,
-              }
-            ],
-            paymentMethod: 'Boleto',
-            shippingAddress: {
+            user_id: 'user-123',
+            status: 'processando',
+            valor_total: 397.00,
+            metodo_pagamento: 'boleto',
+            payment_id: null,
+            external_reference: 'PED-2024-003',
+            payment_details: null,
+            desconto_aplicado: null,
+            discount_id: null,
+            shipping_address_id: 'addr-3',
+            endereco_entrega_snapshot: {
               nome_destinatario: 'Pedro Oliveira',
               rua: 'Rua Augusta',
               numero: '500',
@@ -677,24 +750,38 @@ export default function MinhaContaPage() {
               cidade: 'São Paulo',
               estado: 'SP',
               cep: '01305-100'
-            }
+            },
+            created_at: '2024-01-15T09:20:00',
+            updated_at: '2024-01-15T09:20:00',
+            items: [
+              {
+                id: '5',
+                order_id: '3',
+                product_id: 'prod-5',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 397.00,
+                preco_total: 397.00,
+                product: {
+                  nome: 'Mentoria Individual - 3 meses',
+                  descricao: 'Mentoria personalizada por 3 meses'
+                }
+              }
+            ]
           },
           {
             id: '4',
-            orderNumber: 'PED-2024-004',
-            date: '2024-01-10T14:00:00',
-            status: 'cancelled',
-            total: 97.00,
-            items: [
-              {
-                id: '6',
-                name: 'Curso: Técnicas de Relaxamento',
-                quantity: 1,
-                price: 97.00,
-              }
-            ],
-            paymentMethod: 'Cartão de Crédito',
-            shippingAddress: {
+            user_id: 'user-123',
+            status: 'cancelado',
+            valor_total: 97.00,
+            metodo_pagamento: 'cartao_credito',
+            payment_id: 'pay_789',
+            external_reference: 'PED-2024-004',
+            payment_details: null,
+            desconto_aplicado: null,
+            discount_id: null,
+            shipping_address_id: 'addr-4',
+            endereco_entrega_snapshot: {
               nome_destinatario: 'Ana Costa',
               rua: 'Rua Oscar Freire',
               numero: '800',
@@ -702,7 +789,24 @@ export default function MinhaContaPage() {
               cidade: 'São Paulo',
               estado: 'SP',
               cep: '01426-000'
-            }
+            },
+            created_at: '2024-01-10T14:00:00',
+            updated_at: '2024-01-10T14:00:00',
+            items: [
+              {
+                id: '6',
+                order_id: '4',
+                product_id: 'prod-6',
+                product_variant_id: null,
+                quantidade: 1,
+                preco_unitario: 97.00,
+                preco_total: 97.00,
+                product: {
+                  nome: 'Curso: Técnicas de Relaxamento',
+                  descricao: 'Curso de técnicas de relaxamento'
+                }
+              }
+            ]
           }
         ]);
         setIsLoadingOrders(false);
@@ -1794,11 +1898,12 @@ export default function MinhaContaPage() {
                       className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#1e60a7] text-gray-900 bg-white"
                     >
                       <option value="all">Todos os pedidos</option>
-                      <option value="pending">Pendentes</option>
-                      <option value="processing">Processando</option>
-                      <option value="shipped">Enviados</option>
-                      <option value="delivered">Entregues</option>
-                      <option value="cancelled">Cancelados</option>
+                      <option value="pendente">Pendentes</option>
+                      <option value="processando">Processando</option>
+                      <option value="pago">Pagos</option>
+                      <option value="enviado">Enviados</option>
+                      <option value="entregue">Entregues</option>
+                      <option value="cancelado">Cancelados</option>
                     </select>
                   </div>
                 </div>
@@ -1852,10 +1957,10 @@ export default function MinhaContaPage() {
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="font-semibold text-gray-900 mb-1">
-                                Pedido {order.orderNumber}
+                                Pedido #{order.external_reference || order.id.slice(0, 8)}
                               </h3>
                               <p className="text-sm text-gray-500">
-                                {new Date(order.date).toLocaleDateString('pt-BR', {
+                                {new Date(order.created_at).toLocaleDateString('pt-BR', {
                                   day: '2-digit',
                                   month: 'long',
                                   year: 'numeric',
@@ -1867,7 +1972,7 @@ export default function MinhaContaPage() {
                             <div className="text-right">
                               {getStatusBadge(order.status)}
                               <p className="text-lg font-semibold text-gray-900 mt-2">
-                                R$ {order.total.toFixed(2).replace('.', ',')}
+                                R$ {(order.valor_total || 0).toFixed(2).replace('.', ',')}
                               </p>
                             </div>
                           </div>
@@ -1897,10 +2002,10 @@ export default function MinhaContaPage() {
                               {order.items.slice(0, 2).map((item) => (
                                 <div key={item.id} className="flex items-center gap-4">
                                   <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                                    {item.imageUrl ? (
+                                    {item.product.images && item.product.images.find(img => img.is_primary)?.image_url ? (
                                       <img 
-                                        src={item.imageUrl} 
-                                        alt={item.name}
+                                        src={item.product.images.find(img => img.is_primary)?.image_url} 
+                                        alt={item.product.nome}
                                         className="w-full h-full object-cover"
                                       />
                                     ) : (
@@ -1910,11 +2015,11 @@ export default function MinhaContaPage() {
                                     )}
                                   </div>
                                   <div className="flex-1">
-                                    <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                                    <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
+                                    <h4 className="text-sm font-medium text-gray-900">{item.product.nome}</h4>
+                                    <p className="text-sm text-gray-500">Qtd: {item.quantidade}</p>
                                   </div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    R$ {item.price.toFixed(2).replace('.', ',')}
+                                    R$ {(item.preco_unitario || 0).toFixed(2).replace('.', ',')}
                                   </p>
                                 </div>
                               ))}
@@ -1930,7 +2035,7 @@ export default function MinhaContaPage() {
                           {/* Ações */}
                           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                             <span className="text-sm text-gray-500">
-                              {order.paymentMethod}
+                              {order.metodo_pagamento ? order.metodo_pagamento.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Não informado'}
                             </span>
                             <div className="flex items-center gap-3">
                               <button
@@ -1942,7 +2047,7 @@ export default function MinhaContaPage() {
                               >
                                 Ver detalhes
                               </button>
-                              {order.status === 'delivered' && (
+                              {order.status === 'entregue' && (
                                 <button className="flex items-center gap-1 text-gray-600 font-medium text-sm hover:text-gray-800 transition">
                                   <Download size={14} />
                                   Baixar NF
@@ -1963,7 +2068,7 @@ export default function MinhaContaPage() {
                       <div className="sticky top-0 bg-white border-b border-gray-200 p-6">
                         <div className="flex items-center justify-between">
                           <h3 className="text-xl font-semibold text-gray-900">
-                            Detalhes do Pedido {selectedOrder.orderNumber}
+                            Detalhes do Pedido #{selectedOrder.external_reference || selectedOrder.id.slice(0, 8)}
                           </h3>
                           <button
                             onClick={() => {
@@ -1988,7 +2093,7 @@ export default function MinhaContaPage() {
                             <div className="text-right">
                               <p className="text-sm text-gray-500 mb-1">Data do pedido</p>
                               <p className="font-medium">
-                                {new Date(selectedOrder.date).toLocaleDateString('pt-BR', {
+                                {new Date(selectedOrder.created_at).toLocaleDateString('pt-BR', {
                                   day: '2-digit',
                                   month: 'long',
                                   year: 'numeric'
@@ -2020,10 +2125,10 @@ export default function MinhaContaPage() {
                             {selectedOrder.items.map((item) => (
                               <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                                 <div className="w-20 h-20 bg-white rounded-md overflow-hidden flex-shrink-0">
-                                  {item.imageUrl ? (
+                                  {item.product.images && item.product.images.find(img => img.is_primary)?.image_url ? (
                                     <img 
-                                      src={item.imageUrl} 
-                                      alt={item.name}
+                                      src={item.product.images.find(img => img.is_primary)?.image_url} 
+                                      alt={item.product.nome}
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
@@ -2033,13 +2138,13 @@ export default function MinhaContaPage() {
                                   )}
                                 </div>
                                 <div className="flex-1">
-                                  <h5 className="font-medium text-gray-900">{item.name}</h5>
+                                  <h5 className="font-medium text-gray-900">{item.product.nome}</h5>
                                   <p className="text-sm text-gray-500 mt-1">
-                                    Quantidade: {item.quantity} × R$ {item.price.toFixed(2).replace('.', ',')}
+                                    Quantidade: {item.quantidade || 0} × R$ {(item.preco_unitario || 0).toFixed(2).replace('.', ',')}
                                   </p>
                                 </div>
                                 <p className="font-semibold text-gray-900">
-                                  R$ {(item.quantity * item.price).toFixed(2).replace('.', ',')}
+                                  R$ {(item.preco_total || 0).toFixed(2).replace('.', ',')}
                                 </p>
                               </div>
                             ))}
@@ -2050,15 +2155,15 @@ export default function MinhaContaPage() {
                         <div className="mb-6">
                           <h4 className="font-medium text-gray-900 mb-3">Endereço de Entrega</h4>
                           <div className="bg-gray-50 rounded-lg p-4">
-                            <p className="font-medium text-gray-900">{selectedOrder.shippingAddress.nome_destinatario}</p>
+                            <p className="font-medium text-gray-900">{selectedOrder.endereco_entrega_snapshot.nome_destinatario}</p>
                             <p className="text-sm text-gray-600 mt-1">
-                              {selectedOrder.shippingAddress.rua}, {selectedOrder.shippingAddress.numero}
-                              {selectedOrder.shippingAddress.complemento && ` - ${selectedOrder.shippingAddress.complemento}`}
+                              {selectedOrder.endereco_entrega_snapshot.rua}, {selectedOrder.endereco_entrega_snapshot.numero}
+                              {selectedOrder.endereco_entrega_snapshot.complemento && ` - ${selectedOrder.endereco_entrega_snapshot.complemento}`}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {selectedOrder.shippingAddress.bairro} - {selectedOrder.shippingAddress.cidade}/{selectedOrder.shippingAddress.estado}
+                              {selectedOrder.endereco_entrega_snapshot.bairro} - {selectedOrder.endereco_entrega_snapshot.cidade}/{selectedOrder.endereco_entrega_snapshot.estado}
                             </p>
-                            <p className="text-sm text-gray-600">CEP: {selectedOrder.shippingAddress.cep}</p>
+                            <p className="text-sm text-gray-600">CEP: {selectedOrder.endereco_entrega_snapshot.cep}</p>
                           </div>
                         </div>
                         
@@ -2066,7 +2171,7 @@ export default function MinhaContaPage() {
                         <div className="border-t border-gray-200 pt-4">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-gray-600">Subtotal</span>
-                            <span className="font-medium">R$ {selectedOrder.total.toFixed(2).replace('.', ',')}</span>
+                            <span className="font-medium">R$ {(selectedOrder.valor_total || 0).toFixed(2).replace('.', ',')}</span>
                           </div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-gray-600">Frete</span>
@@ -2075,28 +2180,28 @@ export default function MinhaContaPage() {
                           <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                             <span className="font-semibold text-gray-900">Total</span>
                             <span className="font-semibold text-lg text-gray-900">
-                              R$ {selectedOrder.total.toFixed(2).replace('.', ',')}
+                              R$ {(selectedOrder.valor_total || 0).toFixed(2).replace('.', ',')}
                             </span>
                           </div>
                           <p className="text-sm text-gray-500 mt-2">
-                            Pago via {selectedOrder.paymentMethod}
+                            Pago via {selectedOrder.metodo_pagamento ? selectedOrder.metodo_pagamento.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Não informado'}
                           </p>
                         </div>
                         
                         {/* Ações */}
                         <div className="mt-6 flex gap-3">
-                          {selectedOrder.status === 'delivered' && (
+                          {selectedOrder.status === 'entregue' && (
                             <button className="flex-1 bg-[#1e60a7] text-white px-4 py-2 rounded-md font-medium hover:bg-[#184d8a] transition">
                               Comprar Novamente
                             </button>
                           )}
-                          {selectedOrder.status === 'delivered' && (
+                          {selectedOrder.status === 'entregue' && (
                             <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
                               <Download size={16} />
                               Baixar Nota Fiscal
                             </button>
                           )}
-                          {(selectedOrder.status === 'pending' || selectedOrder.status === 'processing') && (
+                          {(selectedOrder.status === 'pendente' || selectedOrder.status === 'processando') && (
                             <button className="flex-1 border border-red-300 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-50 transition">
                               Cancelar Pedido
                             </button>

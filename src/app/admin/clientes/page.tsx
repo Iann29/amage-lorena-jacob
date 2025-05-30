@@ -5,28 +5,30 @@ import Link from 'next/link';
 
 interface Customer {
   id: string;
+  user_id: string;
   nome: string;
   sobrenome: string;
   email: string;
   telefone?: string;
-  cpf?: string;
-  data_nascimento?: string;
-  data_cadastro: string;
-  total_pedidos: number;
-  total_gasto: number;
-  status: 'ativo' | 'inativo' | 'bloqueado';
+  role: 'customer' | 'admin';
+  created_at: string;
+  updated_at: string;
+  avatar_url?: string;
+  total_pedidos?: number;
+  total_gasto?: number;
   ultimo_pedido?: string;
-  enderecos: {
+  shipping_addresses?: {
     id: string;
-    tipo: 'entrega' | 'cobranca';
-    cep: string;
-    logradouro: string;
+    nome_destinatario: string;
+    rua: string;
     numero: string;
     complemento?: string;
     bairro: string;
     cidade: string;
     estado: string;
-    padrao: boolean;
+    cep: string;
+    telefone_contato?: string;
+    is_default: boolean;
   }[];
 }
 
@@ -81,7 +83,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
 
 export default function AdminClientesPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
@@ -90,80 +92,86 @@ export default function AdminClientesPage() {
   const mockCustomers: Customer[] = [
     {
       id: '1',
+      user_id: 'user-1',
       nome: 'Maria',
       sobrenome: 'Silva',
       email: 'maria.silva@email.com',
       telefone: '(11) 98765-4321',
-      cpf: '123.456.789-00',
-      data_nascimento: '1985-05-15',
-      data_cadastro: '2023-06-10T10:00:00Z',
+      role: 'customer',
+      created_at: '2023-06-10T10:00:00Z',
+      updated_at: '2024-01-25T10:30:00Z',
       total_pedidos: 5,
       total_gasto: 1245.50,
-      status: 'ativo',
       ultimo_pedido: '2024-01-25T10:30:00Z',
-      enderecos: [
+      shipping_addresses: [
         {
           id: '1',
-          tipo: 'entrega',
-          cep: '01310-100',
-          logradouro: 'Av. Paulista',
+          nome_destinatario: 'Maria Silva',
+          rua: 'Av. Paulista',
           numero: '1000',
           complemento: 'Apto 502',
           bairro: 'Bela Vista',
           cidade: 'São Paulo',
           estado: 'SP',
-          padrao: true
+          cep: '01310-100',
+          is_default: true
         }
       ]
     },
     {
       id: '2',
+      user_id: 'user-2',
       nome: 'João',
       sobrenome: 'Santos',
       email: 'joao.santos@email.com',
       telefone: '(21) 99876-5432',
-      data_cadastro: '2023-08-20T14:00:00Z',
+      role: 'customer',
+      created_at: '2023-08-20T14:00:00Z',
+      updated_at: '2024-01-20T14:20:00Z',
       total_pedidos: 2,
       total_gasto: 497.00,
-      status: 'ativo',
       ultimo_pedido: '2024-01-20T14:20:00Z',
-      enderecos: [
+      shipping_addresses: [
         {
           id: '2',
-          tipo: 'entrega',
-          cep: '20040-020',
-          logradouro: 'Rua da Assembleia',
+          nome_destinatario: 'João Santos',
+          rua: 'Rua da Assembleia',
           numero: '10',
           bairro: 'Centro',
           cidade: 'Rio de Janeiro',
           estado: 'RJ',
-          padrao: true
+          cep: '20040-020',
+          is_default: true
         }
       ]
     },
     {
       id: '3',
+      user_id: 'user-3',
       nome: 'Ana',
       sobrenome: 'Costa',
       email: 'ana.costa@email.com',
-      data_cadastro: '2024-01-05T09:00:00Z',
+      role: 'customer',
+      created_at: '2024-01-05T09:00:00Z',
+      updated_at: '2024-01-26T09:15:00Z',
       total_pedidos: 1,
       total_gasto: 2997.00,
-      status: 'ativo',
       ultimo_pedido: '2024-01-26T09:15:00Z',
-      enderecos: []
+      shipping_addresses: []
     },
     {
       id: '4',
+      user_id: 'user-4',
       nome: 'Pedro',
       sobrenome: 'Oliveira',
       email: 'pedro.oliveira@email.com',
       telefone: '(31) 98765-1234',
-      data_cadastro: '2023-03-15T16:00:00Z',
+      role: 'customer',
+      created_at: '2023-03-15T16:00:00Z',
+      updated_at: '2023-03-15T16:00:00Z',
       total_pedidos: 0,
       total_gasto: 0,
-      status: 'inativo',
-      enderecos: []
+      shipping_addresses: []
     }
   ];
 
@@ -181,22 +189,20 @@ export default function AdminClientesPage() {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  const getStatusColor = (status: Customer['status']) => {
+  const getRoleColor = (role: Customer['role']) => {
     const colors = {
-      ativo: 'bg-green-100 text-green-800',
-      inativo: 'bg-gray-100 text-gray-800',
-      bloqueado: 'bg-red-100 text-red-800'
+      customer: 'bg-blue-100 text-blue-800',
+      admin: 'bg-purple-100 text-purple-800'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return colors[role] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusLabel = (status: Customer['status']) => {
+  const getRoleLabel = (role: Customer['role']) => {
     const labels = {
-      ativo: 'Ativo',
-      inativo: 'Inativo',
-      bloqueado: 'Bloqueado'
+      customer: 'Cliente',
+      admin: 'Administrador'
     };
-    return labels[status] || status;
+    return labels[role] || role;
   };
 
   const handleViewCustomer = (customer: Customer) => {
@@ -207,13 +213,13 @@ export default function AdminClientesPage() {
   // Estatísticas
   const stats = {
     total: mockCustomers.length,
-    ativos: mockCustomers.filter(c => c.status === 'ativo').length,
+    ativos: mockCustomers.filter(c => c.total_pedidos && c.total_pedidos > 0).length,
     novos: mockCustomers.filter(c => {
       const dataLimite = new Date();
       dataLimite.setDate(dataLimite.getDate() - 30);
-      return new Date(c.data_cadastro) > dataLimite;
+      return new Date(c.created_at) > dataLimite;
     }).length,
-    totalGasto: mockCustomers.reduce((sum, c) => sum + c.total_gasto, 0)
+    totalGasto: mockCustomers.reduce((sum, c) => sum + (c.total_gasto || 0), 0)
   };
 
   return (
@@ -307,13 +313,12 @@ export default function AdminClientesPage() {
           <div className="sm:w-48">
             <select
               className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
             >
-              <option value="">Todos os status</option>
-              <option value="ativo">Ativos</option>
-              <option value="inativo">Inativos</option>
-              <option value="bloqueado">Bloqueados</option>
+              <option value="">Todos os perfis</option>
+              <option value="customer">Clientes</option>
+              <option value="admin">Administradores</option>
             </select>
           </div>
         </div>
@@ -341,7 +346,7 @@ export default function AdminClientesPage() {
                   Total Gasto
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Status
+                  Perfil
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                   Ações
@@ -363,7 +368,7 @@ export default function AdminClientesPage() {
                           {customer.nome} {customer.sobrenome}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {customer.cpf || 'CPF não informado'}
+                          ID: {customer.id.slice(0, 8)}
                         </div>
                       </div>
                     </div>
@@ -373,10 +378,10 @@ export default function AdminClientesPage() {
                     <div className="text-sm text-gray-500">{customer.telefone || 'Sem telefone'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(customer.data_cadastro)}
+                    {formatDate(customer.created_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{customer.total_pedidos} pedido(s)</div>
+                    <div className="text-sm text-gray-900">{customer.total_pedidos || 0} pedido(s)</div>
                     {customer.ultimo_pedido && (
                       <div className="text-sm text-gray-500">
                         Último: {formatDate(customer.ultimo_pedido)}
@@ -384,11 +389,11 @@ export default function AdminClientesPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(customer.total_gasto)}
+                    {formatCurrency(customer.total_gasto || 0)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(customer.status)}`}>
-                      {getStatusLabel(customer.status)}
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleColor(customer.role)}`}>
+                      {getRoleLabel(customer.role)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -7,14 +7,24 @@ import Image from 'next/image';
 interface Product {
   id: string;
   nome: string;
-  descricao: string;
+  descricao: string | null;
   preco: number;
-  preco_promocional?: number;
-  estoque: number;
-  categoria: string;
-  ativo: boolean;
-  imagem_url?: string;
+  quantidade_estoque: number;
+  category_id: string | null;
+  is_active: boolean;
+  created_by: string | null;
   created_at: string;
+  updated_at: string;
+  category?: {
+    id: string;
+    nome: string;
+  };
+  images?: Array<{
+    id: string;
+    image_url: string;
+    is_primary: boolean;
+    ordem_exibicao: number;
+  }>;
 }
 
 interface PaginationProps {
@@ -81,43 +91,80 @@ export default function AdminProdutosPage() {
       nome: 'E-book: Transformação Pessoal',
       descricao: 'Guia completo para sua jornada de transformação',
       preco: 97.00,
-      preco_promocional: 67.00,
-      estoque: 999,
-      categoria: 'E-books',
-      ativo: true,
-      imagem_url: '/assets/ebook-transformacao.jpg',
-      created_at: '2024-01-15T10:00:00Z'
+      quantidade_estoque: 999,
+      category_id: 'cat-1',
+      is_active: true,
+      created_by: null,
+      created_at: '2024-01-15T10:00:00Z',
+      updated_at: '2024-01-15T10:00:00Z',
+      category: {
+        id: 'cat-1',
+        nome: 'E-books'
+      },
+      images: [
+        {
+          id: 'img-1',
+          image_url: '/assets/ebook-transformacao.jpg',
+          is_primary: true,
+          ordem_exibicao: 0
+        }
+      ]
     },
     {
       id: '2',
       nome: 'Curso Online: Autoconhecimento',
       descricao: 'Aprenda a se conhecer profundamente',
       preco: 497.00,
-      estoque: 100,
-      categoria: 'Cursos',
-      ativo: true,
-      imagem_url: '/assets/curso-autoconhecimento.jpg',
-      created_at: '2024-01-10T10:00:00Z'
+      quantidade_estoque: 100,
+      category_id: 'cat-2',
+      is_active: true,
+      created_by: null,
+      created_at: '2024-01-10T10:00:00Z',
+      updated_at: '2024-01-10T10:00:00Z',
+      category: {
+        id: 'cat-2',
+        nome: 'Cursos'
+      },
+      images: [
+        {
+          id: 'img-2',
+          image_url: '/assets/curso-autoconhecimento.jpg',
+          is_primary: true,
+          ordem_exibicao: 0
+        }
+      ]
     },
     {
       id: '3',
       nome: 'Mentoria Individual - 3 meses',
       descricao: 'Acompanhamento personalizado por 3 meses',
       preco: 2997.00,
-      estoque: 5,
-      categoria: 'Mentorias',
-      ativo: true,
-      created_at: '2024-01-05T10:00:00Z'
+      quantidade_estoque: 5,
+      category_id: 'cat-3',
+      is_active: true,
+      created_by: null,
+      created_at: '2024-01-05T10:00:00Z',
+      updated_at: '2024-01-05T10:00:00Z',
+      category: {
+        id: 'cat-3',
+        nome: 'Mentorias'
+      }
     },
     {
       id: '4',
       nome: 'Kit de Meditações Guiadas',
       descricao: 'Pacote com 10 meditações exclusivas',
       preco: 47.00,
-      estoque: 50,
-      categoria: 'Áudios',
-      ativo: false,
-      created_at: '2024-01-01T10:00:00Z'
+      quantidade_estoque: 50,
+      category_id: 'cat-4',
+      is_active: false,
+      created_by: null,
+      created_at: '2024-01-01T10:00:00Z',
+      updated_at: '2024-01-01T10:00:00Z',
+      category: {
+        id: 'cat-4',
+        nome: 'Áudios'
+      }
     }
   ];
 
@@ -295,12 +342,16 @@ export default function AdminProdutosPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      {product.imagem_url ? (
+                      {product.images && product.images.find(img => img.is_primary)?.image_url ? (
                         <div className="flex-shrink-0 h-10 w-10 mr-3">
                           <div className="h-10 w-10 rounded overflow-hidden bg-gray-100">
-                            <div className="h-full w-full bg-gray-300 flex items-center justify-center text-gray-500 text-xs">
-                              IMG
-                            </div>
+                            <Image
+                              src={product.images.find(img => img.is_primary)!.image_url}
+                              alt={product.nome}
+                              width={40}
+                              height={40}
+                              className="object-cover"
+                            />
                           </div>
                         </div>
                       ) : (
@@ -321,32 +372,24 @@ export default function AdminProdutosPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.categoria}</div>
+                    <div className="text-sm text-gray-900">{product.category?.nome || 'Sem categoria'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm">
-                      {product.preco_promocional ? (
-                        <>
-                          <span className="text-gray-500 line-through">{formatCurrency(product.preco)}</span>
-                          <br />
-                          <span className="text-green-600 font-medium">{formatCurrency(product.preco_promocional)}</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-900">{formatCurrency(product.preco)}</span>
-                      )}
+                      <span className="text-gray-900">{formatCurrency(product.preco)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {product.estoque > 10 ? (
-                        product.estoque
+                      {product.quantidade_estoque > 10 ? (
+                        product.quantidade_estoque
                       ) : (
-                        <span className="text-red-600 font-medium">{product.estoque}</span>
+                        <span className="text-red-600 font-medium">{product.quantidade_estoque}</span>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {product.ativo ? (
+                    {product.is_active ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         Ativo
                       </span>

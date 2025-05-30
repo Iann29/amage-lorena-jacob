@@ -5,17 +5,43 @@ import Link from 'next/link';
 
 interface Order {
   id: string;
-  numero_pedido: string;
-  cliente: {
+  user_id: string;
+  status: 'pendente' | 'processando' | 'pago' | 'enviado' | 'entregue' | 'cancelado';
+  valor_total: number;
+  metodo_pagamento: 'cartao_credito' | 'cartao_debito' | 'pix' | 'boleto' | null;
+  payment_id: string | null;
+  external_reference: string | null;
+  payment_details: any | null;
+  desconto_aplicado: number | null;
+  discount_id: string | null;
+  shipping_address_id: string | null;
+  endereco_entrega_snapshot: {
+    nome_destinatario: string;
+    rua: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    cep: string;
+    telefone_contato?: string;
+  };
+  created_at: string;
+  updated_at: string;
+  user_profile?: {
     nome: string;
+    sobrenome: string;
     email: string;
   };
-  data_pedido: string;
-  status: 'pendente' | 'processando' | 'pago' | 'enviado' | 'entregue' | 'cancelado';
-  status_pagamento: 'pendente' | 'pago' | 'falhou' | 'reembolsado';
-  metodo_pagamento: string;
-  total: number;
-  itens: number;
+  items?: Array<{
+    id: string;
+    quantidade: number;
+    preco_unitario: number;
+    preco_total: number;
+    product: {
+      nome: string;
+    };
+  }>;
 }
 
 interface PaginationProps {
@@ -70,7 +96,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) 
 export default function AdminPedidosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
@@ -79,59 +105,164 @@ export default function AdminPedidosPage() {
   const mockOrders: Order[] = [
     {
       id: '1',
-      numero_pedido: '#2024001',
-      cliente: {
-        nome: 'Maria Silva',
+      user_id: 'user-1',
+      status: 'entregue',
+      valor_total: 67.00,
+      metodo_pagamento: 'cartao_credito',
+      payment_id: 'pay_1234',
+      external_reference: '2024001',
+      payment_details: null,
+      desconto_aplicado: null,
+      discount_id: null,
+      shipping_address_id: 'addr-1',
+      endereco_entrega_snapshot: {
+        nome_destinatario: 'Maria Silva',
+        rua: 'Rua das Flores',
+        numero: '123',
+        bairro: 'Centro',
+        cidade: 'São Paulo',
+        estado: 'SP',
+        cep: '01001-000'
+      },
+      created_at: '2024-01-25T10:30:00Z',
+      updated_at: '2024-01-25T10:30:00Z',
+      user_profile: {
+        nome: 'Maria',
+        sobrenome: 'Silva',
         email: 'maria.silva@email.com'
       },
-      data_pedido: '2024-01-25T10:30:00Z',
-      status: 'entregue',
-      status_pagamento: 'pago',
-      metodo_pagamento: 'Cartão de Crédito',
-      total: 67.00,
-      itens: 1
+      items: [
+        {
+          id: 'item-1',
+          quantidade: 1,
+          preco_unitario: 67.00,
+          preco_total: 67.00,
+          product: {
+            nome: 'E-book Transformação Pessoal'
+          }
+        }
+      ]
     },
     {
       id: '2',
-      numero_pedido: '#2024002',
-      cliente: {
-        nome: 'João Santos',
+      user_id: 'user-2',
+      status: 'processando',
+      valor_total: 497.00,
+      metodo_pagamento: 'pix',
+      payment_id: 'pay_5678',
+      external_reference: '2024002',
+      payment_details: null,
+      desconto_aplicado: null,
+      discount_id: null,
+      shipping_address_id: 'addr-2',
+      endereco_entrega_snapshot: {
+        nome_destinatario: 'João Santos',
+        rua: 'Av. Paulista',
+        numero: '1000',
+        complemento: 'Apto 502',
+        bairro: 'Bela Vista',
+        cidade: 'São Paulo',
+        estado: 'SP',
+        cep: '01310-100'
+      },
+      created_at: '2024-01-25T14:20:00Z',
+      updated_at: '2024-01-25T14:20:00Z',
+      user_profile: {
+        nome: 'João',
+        sobrenome: 'Santos',
         email: 'joao.santos@email.com'
       },
-      data_pedido: '2024-01-25T14:20:00Z',
-      status: 'processando',
-      status_pagamento: 'pago',
-      metodo_pagamento: 'PIX',
-      total: 497.00,
-      itens: 1
+      items: [
+        {
+          id: 'item-2',
+          quantidade: 1,
+          preco_unitario: 497.00,
+          preco_total: 497.00,
+          product: {
+            nome: 'Curso Online: Autoconhecimento'
+          }
+        }
+      ]
     },
     {
       id: '3',
-      numero_pedido: '#2024003',
-      cliente: {
-        nome: 'Ana Costa',
+      user_id: 'user-3',
+      status: 'pendente',
+      valor_total: 2997.00,
+      metodo_pagamento: 'boleto',
+      payment_id: null,
+      external_reference: '2024003',
+      payment_details: null,
+      desconto_aplicado: null,
+      discount_id: null,
+      shipping_address_id: 'addr-3',
+      endereco_entrega_snapshot: {
+        nome_destinatario: 'Ana Costa',
+        rua: 'Rua da Assembleia',
+        numero: '10',
+        bairro: 'Centro',
+        cidade: 'Rio de Janeiro',
+        estado: 'RJ',
+        cep: '20040-020'
+      },
+      created_at: '2024-01-26T09:15:00Z',
+      updated_at: '2024-01-26T09:15:00Z',
+      user_profile: {
+        nome: 'Ana',
+        sobrenome: 'Costa',
         email: 'ana.costa@email.com'
       },
-      data_pedido: '2024-01-26T09:15:00Z',
-      status: 'pendente',
-      status_pagamento: 'pendente',
-      metodo_pagamento: 'Boleto',
-      total: 2997.00,
-      itens: 1
+      items: [
+        {
+          id: 'item-3',
+          quantidade: 1,
+          preco_unitario: 2997.00,
+          preco_total: 2997.00,
+          product: {
+            nome: 'Mentoria Individual - 3 meses'
+          }
+        }
+      ]
     },
     {
       id: '4',
-      numero_pedido: '#2024004',
-      cliente: {
-        nome: 'Pedro Oliveira',
+      user_id: 'user-4',
+      status: 'cancelado',
+      valor_total: 47.00,
+      metodo_pagamento: 'cartao_credito',
+      payment_id: 'pay_9012',
+      external_reference: '2024004',
+      payment_details: null,
+      desconto_aplicado: null,
+      discount_id: null,
+      shipping_address_id: 'addr-4',
+      endereco_entrega_snapshot: {
+        nome_destinatario: 'Pedro Oliveira',
+        rua: 'Rua das Laranjeiras',
+        numero: '456',
+        bairro: 'Laranjeiras',
+        cidade: 'Rio de Janeiro',
+        estado: 'RJ',
+        cep: '22240-003'
+      },
+      created_at: '2024-01-26T16:45:00Z',
+      updated_at: '2024-01-26T16:45:00Z',
+      user_profile: {
+        nome: 'Pedro',
+        sobrenome: 'Oliveira',
         email: 'pedro.oliveira@email.com'
       },
-      data_pedido: '2024-01-26T16:45:00Z',
-      status: 'cancelado',
-      status_pagamento: 'reembolsado',
-      metodo_pagamento: 'Cartão de Crédito',
-      total: 47.00,
-      itens: 1
+      items: [
+        {
+          id: 'item-4',
+          quantidade: 1,
+          preco_unitario: 47.00,
+          preco_total: 47.00,
+          product: {
+            nome: 'Kit de Meditações Guiadas'
+          }
+        }
+      ]
     }
   ];
 
@@ -167,14 +298,14 @@ export default function AdminPedidosPage() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const getPaymentStatusColor = (status: Order['status_pagamento']) => {
-    const colors = {
-      pendente: 'bg-yellow-100 text-yellow-800',
-      pago: 'bg-green-100 text-green-800',
-      falhou: 'bg-red-100 text-red-800',
-      reembolsado: 'bg-gray-100 text-gray-800'
+  const getPaymentMethodLabel = (method: Order['metodo_pagamento']) => {
+    const labels = {
+      cartao_credito: 'Cartão de Crédito',
+      cartao_debito: 'Cartão de Débito',
+      pix: 'PIX',
+      boleto: 'Boleto'
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return method ? labels[method] : 'Não informado';
   };
 
   const getStatusLabel = (status: Order['status']) => {
@@ -189,14 +320,8 @@ export default function AdminPedidosPage() {
     return labels[status] || status;
   };
 
-  const getPaymentStatusLabel = (status: Order['status_pagamento']) => {
-    const labels = {
-      pendente: 'Pendente',
-      pago: 'Pago',
-      falhou: 'Falhou',
-      reembolsado: 'Reembolsado'
-    };
-    return labels[status] || status;
+  const getOrderNumber = (order: Order) => {
+    return `#${order.external_reference || order.id.slice(0, 8)}`;
   };
 
   // Estatísticas
@@ -204,7 +329,7 @@ export default function AdminPedidosPage() {
     total: mockOrders.length,
     pendentes: mockOrders.filter(o => o.status === 'pendente').length,
     processando: mockOrders.filter(o => o.status === 'processando').length,
-    totalVendas: mockOrders.filter(o => o.status_pagamento === 'pago').reduce((sum, o) => sum + o.total, 0)
+    totalVendas: mockOrders.filter(o => ['pago', 'entregue'].includes(o.status)).reduce((sum, o) => sum + o.valor_total, 0)
   };
 
   return (
@@ -331,14 +456,14 @@ export default function AdminPedidosPage() {
           <div>
             <select
               className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              value={selectedPaymentStatus}
-              onChange={(e) => setSelectedPaymentStatus(e.target.value)}
+              value={selectedPaymentMethod}
+              onChange={(e) => setSelectedPaymentMethod(e.target.value)}
             >
-              <option value="">Status pagamento</option>
-              <option value="pendente">Pendente</option>
-              <option value="pago">Pago</option>
-              <option value="falhou">Falhou</option>
-              <option value="reembolsado">Reembolsado</option>
+              <option value="">Método pagamento</option>
+              <option value="cartao_credito">Cartão de Crédito</option>
+              <option value="cartao_debito">Cartão de Débito</option>
+              <option value="pix">PIX</option>
+              <option value="boleto">Boleto</option>
             </select>
           </div>
 
@@ -393,15 +518,15 @@ export default function AdminPedidosPage() {
                 {mockOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{order.numero_pedido}</div>
-                      <div className="text-sm text-gray-500">{order.itens} item(ns)</div>
+                      <div className="text-sm font-medium text-gray-900">{getOrderNumber(order)}</div>
+                      <div className="text-sm text-gray-500">{order.items?.length || 0} item(ns)</div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{order.cliente.nome}</div>
-                      <div className="text-sm text-gray-500">{order.cliente.email}</div>
+                      <div className="text-sm text-gray-900">{order.user_profile?.nome} {order.user_profile?.sobrenome}</div>
+                      <div className="text-sm text-gray-500">{order.user_profile?.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(order.data_pedido)}
+                      {formatDate(order.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
@@ -409,15 +534,12 @@ export default function AdminPedidosPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentStatusColor(order.status_pagamento)}`}>
-                          {getPaymentStatusLabel(order.status_pagamento)}
-                        </span>
-                        <span className="text-xs text-gray-500 mt-1">{order.metodo_pagamento}</span>
-                      </div>
+                      <span className="text-sm text-gray-900">
+                        {getPaymentMethodLabel(order.metodo_pagamento)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatCurrency(order.total)}
+                      {formatCurrency(order.valor_total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
@@ -459,8 +581,8 @@ export default function AdminPedidosPage() {
             <div key={order.id} className="bg-white rounded-lg shadow-md border border-gray-300 p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{order.numero_pedido}</h3>
-                  <p className="text-sm text-gray-500">{formatDate(order.data_pedido)}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{getOrderNumber(order)}</h3>
+                  <p className="text-sm text-gray-500">{formatDate(order.created_at)}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
                   {getStatusLabel(order.status)}
@@ -470,25 +592,22 @@ export default function AdminPedidosPage() {
               <div className="space-y-2 mb-4">
                 <div>
                   <p className="text-sm font-medium text-gray-700">Cliente</p>
-                  <p className="text-sm text-gray-900">{order.cliente.nome}</p>
-                  <p className="text-xs text-gray-500">{order.cliente.email}</p>
+                  <p className="text-sm text-gray-900">{order.user_profile?.nome} {order.user_profile?.sobrenome}</p>
+                  <p className="text-xs text-gray-500">{order.user_profile?.email}</p>
                 </div>
 
                 <div>
                   <p className="text-sm font-medium text-gray-700">Pagamento</p>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${getPaymentStatusColor(order.status_pagamento)}`}>
-                      {getPaymentStatusLabel(order.status_pagamento)}
-                    </span>
-                    <span className="text-xs text-gray-500">{order.metodo_pagamento}</span>
-                  </div>
+                  <span className="text-sm text-gray-900">
+                    {getPaymentMethodLabel(order.metodo_pagamento)}
+                  </span>
                 </div>
               </div>
 
               <div className="border-t pt-4 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">{order.itens} item(ns)</p>
-                  <p className="text-lg font-bold text-gray-900">{formatCurrency(order.total)}</p>
+                  <p className="text-sm text-gray-500">{order.items?.length || 0} item(ns)</p>
+                  <p className="text-lg font-bold text-gray-900">{formatCurrency(order.valor_total)}</p>
                 </div>
                 <div className="flex space-x-2">
                   <Link 
