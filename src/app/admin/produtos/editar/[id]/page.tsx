@@ -583,7 +583,7 @@ export default function EditarProdutoPage({ params }: PageProps) {
                         onClick={() => {
                           // Se for uma imagem existente, remover da lista
                           const existingImg = existingImages.find(img => img.image_url === previewUrls.principal && img.is_primary);
-                          if (existingImg) {
+                          if (existingImg && previewUrls.principal) {
                             removeExistingImage(previewUrls.principal);
                           } else {
                             // Se for uma nova imagem, limpar
