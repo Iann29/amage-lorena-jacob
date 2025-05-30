@@ -14,6 +14,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   const relatedProducts = getRelatedProducts(product.id, 3);
   const productReviews = mockReviews.filter(r => r.product_id === product.id);
@@ -83,9 +84,23 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
 
           {/* Informações do Produto */}
           <div>
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-20">
+            <div className="bg-white rounded-3xl shadow-lg p-6 sticky top-20 relative" style={{ border: '2px solid #000' }}>
+              {/* Botão de Like */}
+              <button
+                onClick={() => setIsLiked(!isLiked)}
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Adicionar aos favoritos"
+              >
+                <Image
+                  src={isLiked ? "/assets/like.png" : "/assets/likeVazio.png"}
+                  alt="Favoritar"
+                  width={24}
+                  height={24}
+                  className="transition-transform hover:scale-110"
+                />
+              </button>
               <h1 
-                className="text-3xl font-bold mb-4"
+                className="text-3xl font-bold mb-4 pr-12"
                 style={{ color: '#76A3C3', fontFamily: 'var(--font-museo-sans)' }}
               >
                 {product.nome}
