@@ -143,32 +143,32 @@ const Footer = () => {
                 </div>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
-                    <Link href="/loja/categoria/brinquedos-sensoriais" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/brinquedos-sensoriais" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Brinquedos sensoriais</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/categoria/jogos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/jogos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> Jogos
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/categoria/brinquedos-montessorianos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/brinquedos-montessorianos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> Brinquedos Montessorianos
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/categoria/pecs" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/pecs" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">PECS</span> & Comunicação Alternativa</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/categoria/ebooks" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/ebooks" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> E-BOOKS
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/categoria/materiais" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                    <Link href="/loja/material-pedagogico" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
                       <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Materiais</span> Pedagógicos</span>
                     </Link>
                   </li>

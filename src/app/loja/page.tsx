@@ -312,44 +312,54 @@ export default function LojaPage() {
                   </h3>
                   <div className="space-y-4">
                     <div className="px-2">
-                      <div className="relative h-8">
-                        <input
-                          type="range"
-                          min="0"
-                          max="12"
-                          value={ageRange.min}
-                          onChange={(e) => {
-                            const newMin = Number(e.target.value);
-                            if (newMin <= ageRange.max) {
-                              setAgeRange({ ...ageRange, min: newMin });
-                            }
-                          }}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider absolute top-3"
-                          style={{ zIndex: ageRange.min === ageRange.max ? 2 : 1 }}
-                        />
-                        <input
-                          type="range"
-                          min="0"
-                          max="12"
-                          value={ageRange.max}
-                          onChange={(e) => {
-                            const newMax = Number(e.target.value);
-                            if (newMax >= ageRange.min) {
-                              setAgeRange({ ...ageRange, max: newMax });
-                            }
-                          }}
-                          className="w-full h-2 bg-transparent rounded-lg appearance-none cursor-pointer slider absolute top-3"
-                          style={{
-                            background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${(ageRange.min / 12) * 100}%, #5179C8 ${(ageRange.min / 12) * 100}%, #5179C8 ${(ageRange.max / 12) * 100}%, #e5e7eb ${(ageRange.max / 12) * 100}%, #e5e7eb 100%)`
-                          }}
-                        />
+                      <div className="space-y-4">
+                        {/* Idade Mínima */}
+                        <div>
+                          <label className="text-sm text-gray-600 mb-1 block" style={{ fontFamily: 'var(--font-museo-sans)' }}>Idade Mínima: {ageRange.min} anos</label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="12"
+                            value={ageRange.min}
+                            onChange={(e) => {
+                              const newMin = Number(e.target.value);
+                              if (newMin <= ageRange.max) {
+                                setAgeRange({ ...ageRange, min: newMin });
+                              }
+                            }}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                            style={{
+                              background: `linear-gradient(to right, #5179C8 0%, #5179C8 ${(ageRange.min / 12) * 100}%, #e5e7eb ${(ageRange.min / 12) * 100}%, #e5e7eb 100%)`
+                            }}
+                          />
+                        </div>
+                        
+                        {/* Idade Máxima */}
+                        <div>
+                          <label className="text-sm text-gray-600 mb-1 block" style={{ fontFamily: 'var(--font-museo-sans)' }}>Idade Máxima: {ageRange.max} anos</label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="12"
+                            value={ageRange.max}
+                            onChange={(e) => {
+                              const newMax = Number(e.target.value);
+                              if (newMax >= ageRange.min) {
+                                setAgeRange({ ...ageRange, max: newMax });
+                              }
+                            }}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                            style={{
+                              background: `linear-gradient(to right, #5179C8 0%, #5179C8 ${(ageRange.max / 12) * 100}%, #e5e7eb ${(ageRange.max / 12) * 100}%, #e5e7eb 100%)`
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="flex justify-between mt-4">
-                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>0 anos</span>
+                      
+                      <div className="text-center mt-3">
                         <span className="text-sm font-bold text-[#5179C8]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                           {ageRange.min} - {ageRange.max} anos
                         </span>
-                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>12 anos</span>
                       </div>
                     </div>
                   </div>
