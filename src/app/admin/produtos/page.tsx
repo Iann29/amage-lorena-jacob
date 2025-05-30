@@ -3,31 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { adminApi } from '@/lib/admin-api';
+import { adminApi, AdminProduct } from '@/lib/admin-api';
 import { createClient } from '@/utils/supabase/client';
-
-interface Product {
-  id: string;
-  nome: string;
-  descricao: string | null;
-  preco: number;
-  quantidade_estoque: number;
-  category_id: string | null;
-  is_active: boolean;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-  category?: {
-    id: string;
-    nome: string;
-  };
-  images?: Array<{
-    id: string;
-    image_url: string;
-    is_primary: boolean;
-    ordem_exibicao: number;
-  }>;
-}
 
 interface PaginationProps {
   currentPage: number;
@@ -85,7 +62,7 @@ export default function AdminProdutosPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
   const [categories, setCategories] = useState<Array<{ id: string; nome: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
