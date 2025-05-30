@@ -130,6 +130,10 @@ export const lojaApi = {
 
   // Buscar detalhes de uma categoria
   async getCategoryBySlug(slug: string): Promise<{ category: Category }> {
+    console.log('=== DEBUG getCategoryBySlug ===');
+    console.log('Slug recebido na função:', slug);
+    console.log('Body que será enviado:', { slug });
+    
     const { data, error } = await supabase.functions.invoke('loja-categories', {
       headers: {
         'Content-Type': 'application/json',
@@ -137,7 +141,12 @@ export const lojaApi = {
       body: { slug },
     });
 
-    if (error) throw error;
+    console.log('Resposta do Supabase:', { data, error });
+    
+    if (error) {
+      console.error('Erro do Supabase:', error);
+      throw error;
+    }
     return data;
   },
 };

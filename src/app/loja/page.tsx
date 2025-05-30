@@ -16,6 +16,17 @@ const mockBanners = [
   }
 ];
 
+// Mapeamento fixo das imagens das categorias
+const categoryImages: Record<string, string> = {
+  'Brinquedos Sensoriais': 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/categorias-inicio/brinquedoSensoriais.png',
+  'PECS': 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/categorias-inicio/pecs.png',
+  'Material Pedagógico': 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/categorias-inicio/materialPedagogico.png',
+  'E-books': 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/categorias-inicio/ebook.png',
+};
+
+// Ordem específica das categorias principais
+const mainCategoriesOrder = ['Brinquedos Sensoriais', 'PECS', 'Material Pedagógico', 'E-books'];
+
 export default function LojaPage() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +48,7 @@ export default function LojaPage() {
         
         // Carregar categorias
         const { categories: categoriesData } = await lojaApi.getCategories();
+        console.log('Categorias carregadas:', categoriesData.map(c => ({ nome: c.nome, slug: c.slug })));
         setCategories(categoriesData);
         
         // Carregar produtos
@@ -114,7 +126,26 @@ export default function LojaPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              {categories.slice(0, 4).map((category) => (
+              {mainCategoriesOrder
+                .map(categoryName => {
+                  // Procura a categoria no banco
+                  const category = categories.find(cat => cat.nome === categoryName);
+                  // Se não encontrar, cria uma categoria temporária
+                  if (!category) {
+                    return {
+                      id: categoryName,
+                      nome: categoryName,
+                      slug: categoryName.toLowerCase().replace(/\s+/g, '-').replace('ó', 'o'),
+                      imagem_url: categoryImages[categoryName],
+                      is_active: true,
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    };
+                  }
+                  return category;
+                })
+                .slice(0, 4)
+                .map((category) => (
                 <Link
                   key={category.id}
                   href={`/loja/${category.slug}`}
@@ -122,7 +153,7 @@ export default function LojaPage() {
                 >
                   <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                     <Image
-                      src={category.imagem_url || '/assets/category-placeholder.jpg'}
+                      src={categoryImages[category.nome] || category.imagem_url || '/assets/category-placeholder.jpg'}
                       alt={category.nome}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -18,15 +18,20 @@ serve(async (req) => {
     let body = null;
     try {
       const text = await req.text();
+      console.log('=== DEBUG EDGE FUNCTION ===');
+      console.log('Texto recebido:', text);
       if (text) {
         body = JSON.parse(text);
+        console.log('Body parseado:', body);
       }
     } catch (e) {
+      console.error('Erro ao fazer parse do body:', e);
       // Se não conseguir fazer parse, body permanece null
     }
     
     // Se veio um slug no body, é busca por categoria específica
     if (body?.slug) {
+      console.log('Buscando categoria com slug:', body.slug);
       const { data: category, error } = await supabase
         .from('categories')
         .select(`
