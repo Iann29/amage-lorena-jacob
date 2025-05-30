@@ -14,7 +14,7 @@ export default function LojaPage() {
   const featuredProducts = mockProducts.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Banner Carrossel */}
       <section className="relative h-[400px] md:h-[500px] overflow-hidden">
         <div className="relative w-full h-full">
@@ -170,6 +170,7 @@ export default function LojaPage() {
       {/* Produtos */}
       <section className="py-12 px-4">
         <div className="container mx-auto">
+          <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
           <h2 
             className="text-center mb-8 font-bold" 
             style={{ 
@@ -237,6 +238,7 @@ export default function LojaPage() {
             >
               VER MAIS
             </Link>
+          </div>
           </div>
         </div>
       </section>

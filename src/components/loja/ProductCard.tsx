@@ -32,8 +32,8 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const hasDiscount = !!product.preco_promocional;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100">
-      <div className="relative p-4">
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-black/60 w-[280px] h-[400px] mx-auto flex flex-col">
+      <div className="relative p-4 flex-shrink-0">
         <Link href={`/loja/produto/${product.slug}`}>
           <div className="relative h-48 overflow-hidden rounded-lg">
             <Image
@@ -61,16 +61,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </button>
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 flex-1 flex flex-col">
         <Link href={`/loja/produto/${product.slug}`}>
           <h3 
-            className="text-center font-bold text-base mb-2 line-clamp-2 hover:text-[#5179C8] transition-colors min-h-[48px]"
+            className="text-center font-bold text-base mb-2 line-clamp-2 hover:text-[#5179C8] transition-colors h-[48px] flex items-center justify-center"
             style={{ color: '#5179C8', fontFamily: 'var(--font-museo-sans)' }}
           >
             {product.nome}
           </h3>
         </Link>
         
+        <div className="mt-auto">
         <div className="text-center mb-3">
           {hasDiscount && (
             <span className="text-gray-400 line-through text-sm mr-2">
@@ -105,6 +106,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
+        </div>
         </div>
       </div>
     </div>
