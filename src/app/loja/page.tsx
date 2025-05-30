@@ -1,266 +1,231 @@
-import Link from 'next/link';
+'use client';
 
-export const metadata = {
-  title: 'Loja | Lorena Jacob',
-  description: 'E-books, cursos e materiais terapêuticos para desenvolvimento infantil, autismo e TDAH.'
-};
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { mockProducts, mockCategories, mockBanners } from '@/lib/mockDataLoja';
+import { ProductCard } from '@/components/loja/ProductCard';
 
 export default function LojaPage() {
-  // Flag para controlar a exibição da loja ou da mensagem "Em Breve"
-  const isLojaLive = false; // Mude para true para ativar a loja
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  if (!isLojaLive) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 text-center px-4 py-10">
-        <div className="max-w-lg">
-          <h1 className="text-4xl md:text-5xl font-bold text-purple-700 mb-6" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-            Nossa Loja Chega em Breve!
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8">
-            Estamos preparando um espaço incrível com e-books e materiais exclusivos para você. 
-            Volte em breve para conferir as novidades!
-          </p>
-          <Link
-            href="/"
-            className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all duration-300 ease-in-out text-lg"
-            style={{ fontFamily: 'var(--font-museo-sans)' }}
-          >
-            Voltar para a Página Inicial
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // O código da loja real começa aqui. Só será alcançado se isLojaLive = true;
-  const produtos = [
-    {
-      id: 1,
-      slug: 'guia-pratico-autismo',
-      nome: 'Guia Prático: Sinais de Autismo',
-      descricao: 'E-book com orientações para identificar sinais precoces de TEA e estratégias iniciais de intervenção.',
-      preco: 39.90,
-      categoria: 'E-book',
-      imagem: '/placeholder-produto-1.jpg',
-      destaque: true
-    },
-    {
-      id: 2,
-      slug: 'curso-tdah-em-casa',
-      nome: 'Curso: TDAH na Rotina Familiar',
-      descricao: 'Curso online com 10 módulos de estratégias práticas para pais ajudarem seus filhos com TDAH em casa.',
-      preco: 149.90,
-      categoria: 'Curso',
-      imagem: '/placeholder-produto-2.jpg',
-      destaque: true
-    },
-    {
-      id: 3,
-      slug: 'kit-atividades-sensoriais',
-      nome: 'Kit de Atividades Sensoriais',
-      descricao: 'Material digital com 50 atividades sensoriais para estimulação de crianças com autismo ou atrasos no desenvolvimento.',
-      preco: 59.90,
-      categoria: 'Material Digital',
-      imagem: '/placeholder-produto-3.jpg',
-      destaque: false
-    },
-    {
-      id: 4,
-      slug: 'guia-alimentacao-tdah',
-      nome: 'Guia de Alimentação para Crianças com TDAH',
-      descricao: 'E-book com orientações nutricionais, receitas e dicas de alimentação que podem auxiliar no controle dos sintomas do TDAH.',
-      preco: 45.90,
-      categoria: 'E-book',
-      imagem: '/placeholder-produto-4.jpg',
-      destaque: false
-    },
-    {
-      id: 5,
-      slug: 'planejador-rotina-visual',
-      nome: 'Planejador de Rotina Visual',
-      descricao: 'Kit digital com templates para criar rotinas visuais para crianças com autismo ou dificuldades na organização temporal.',
-      preco: 37.90,
-      categoria: 'Material Digital',
-      imagem: '/placeholder-produto-5.jpg',
-      destaque: true
-    },
-    {
-      id: 6,
-      slug: 'minicurso-comunicacao-alternativa',
-      nome: 'Minicurso: Introdução à Comunicação Alternativa',
-      descricao: 'Curso introdutório para pais e educadores sobre métodos de comunicação alternativa para crianças não-verbais.',
-      preco: 89.90,
-      categoria: 'Curso',
-      imagem: '/placeholder-produto-6.jpg',
-      destaque: false
-    },
-    {
-      id: 7,
-      slug: 'audiobook-desenvolvimento-emocional',
-      nome: 'Audiobook: Desenvolvimento Emocional na Infância',
-      descricao: 'Audiobook com estratégias para ajudar no desenvolvimento da inteligência emocional de crianças típicas e atípicas.',
-      preco: 29.90,
-      categoria: 'Audiobook',
-      imagem: '/placeholder-produto-7.jpg',
-      destaque: false
-    },
-    {
-      id: 8,
-      slug: 'jogo-habilidades-sociais',
-      nome: 'Jogo Digital: Desenvolvendo Habilidades Sociais',
-      descricao: 'Jogo digital em PDF para imprimir, com atividades lúdicas que estimulam o desenvolvimento de habilidades sociais.',
-      preco: 42.90,
-      categoria: 'Material Digital',
-      imagem: '/placeholder-produto-8.jpg',
-      destaque: true
-    }
-  ];
-
-  const categorias = [
-    { nome: 'E-books', slug: 'ebooks' },
-    { nome: 'Cursos', slug: 'cursos' },
-    { nome: 'Materiais Digitais', slug: 'materiais-digitais' },
-    { nome: 'Audiobooks', slug: 'audiobooks' }
-  ];
+  // Produtos em destaque (primeiros 6)
+  const featuredProducts = mockProducts.slice(0, 6);
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-purple-800 mb-2">Loja</h1>
-      <p className="text-gray-600 mb-8 text-lg">
-        E-books, cursos e materiais para ajudar no desenvolvimento do seu filho.
-      </p>
-      
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-1/4">
-          <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">Categorias</h3>
-            <ul className="space-y-2">
-              <li className="border-b border-gray-100 pb-2">
-                <Link href="/loja" className="text-purple-700 font-medium">
-                  Todos os Produtos
-                </Link>
-              </li>
-              {categorias.map((categoria) => (
-                <li key={categoria.slug} className="border-b border-gray-100 pb-2">
-                  <Link href={`/loja/categorias/${categoria.slug}`} className="text-gray-700 hover:text-purple-700">
-                    {categoria.nome}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+    <div className="min-h-screen bg-white">
+      {/* Banner Carrossel */}
+      <section className="relative h-[400px] md:h-[500px] overflow-hidden">
+        <div className="relative w-full h-full">
+          {mockBanners.map((banner, index) => (
+            <Link
+              key={banner.id}
+              href={banner.link}
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                index === currentBanner ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <Image
+                src={banner.image_url}
+                alt={banner.alt}
+                fill
+                className="object-cover"
+                priority={index === 0}
+              />
+            </Link>
+          ))}
+        </div>
+        
+        {/* Indicadores do carrossel */}
+        {mockBanners.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {mockBanners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentBanner(index)}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  index === currentBanner ? 'bg-white' : 'bg-white/50'
+                }`}
+                aria-label={`Ir para banner ${index + 1}`}
+              />
+            ))}
           </div>
-          
-          <div className="mb-8 bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-xl font-semibold text-purple-800 mb-4">Faixa de Preço</h3>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <input type="checkbox" id="preco1" className="mr-2" />
-                <label htmlFor="preco1" className="text-gray-700">Até R$ 30,00</label>
+        )}
+      </section>
+
+      {/* Categorias */}
+      <section className="py-12 px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {mockCategories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/loja/${category.slug}`}
+                className="group"
+              >
+                <div className="relative h-40 md:h-48 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                  <Image
+                    src={category.imagem_url}
+                    alt={category.nome}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                      {category.nome.includes(' ') ? (
+                        <span className="flex flex-col">
+                          <span style={{ color: '#2A289B' }}>{category.nome.split(' ')[0]}</span>
+                          <span style={{ color: '#7877D0' }}>{category.nome.split(' ').slice(1).join(' ')}</span>
+                        </span>
+                      ) : (
+                        category.nome
+                      )}
+                    </h3>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Seção de Benefícios */}
+      <section className="py-8 px-4" style={{ backgroundColor: '#5179C8' }}>
+        <div className="container mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 mb-3 relative">
+                <Image
+                  src="/assets/loja/frete-gratis.png"
+                  alt="Frete Grátis"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <div className="flex items-center">
-                <input type="checkbox" id="preco2" className="mr-2" />
-                <label htmlFor="preco2" className="text-gray-700">R$ 30,00 - R$ 50,00</label>
+              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+                Frete Grátis
+              </h4>
+              <p className="text-white text-sm">acima de R$ 99,00</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 mb-3 relative">
+                <Image
+                  src="/assets/loja/parcelamento.png"
+                  alt="Parcelamento"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <div className="flex items-center">
-                <input type="checkbox" id="preco3" className="mr-2" />
-                <label htmlFor="preco3" className="text-gray-700">R$ 50,00 - R$ 100,00</label>
+              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+                Parcelamento
+              </h4>
+              <p className="text-white text-sm">até 3x sem juros</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 mb-3 relative">
+                <Image
+                  src="/assets/loja/pagamento-a-vista.png"
+                  alt="Pagamento à Vista"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <div className="flex items-center">
-                <input type="checkbox" id="preco4" className="mr-2" />
-                <label htmlFor="preco4" className="text-gray-700">Acima de R$ 100,00</label>
+              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+                Pagamento à Vista
+              </h4>
+              <p className="text-white text-sm">3% de desconto no PIX</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="w-16 h-16 mb-3 relative">
+                <Image
+                  src="/assets/loja/seguranca.png"
+                  alt="Segurança"
+                  fill
+                  className="object-contain"
+                />
               </div>
+              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+                Segurança
+              </h4>
+              <p className="text-white text-sm">SSL de proteção</p>
             </div>
           </div>
-          
-          <div className="bg-purple-700 text-white p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-2">Kit Completo</h3>
-            <p className="text-sm mb-4">
-              Adquira o kit completo de materiais para autismo com 30% de desconto!
-            </p>
-            <Link 
-              href="/loja/kit-completo-autismo" 
-              className="bg-white text-purple-800 px-4 py-2 rounded-md font-medium text-sm inline-block hover:bg-purple-100 transition"
+        </div>
+      </section>
+
+      {/* Produtos */}
+      <section className="py-12 px-4">
+        <div className="container mx-auto">
+          <h2 
+            className="text-3xl font-bold text-center mb-8" 
+            style={{ color: '#2A289B', fontFamily: 'var(--font-museo-sans)' }}
+          >
+            PRODUTOS
+          </h2>
+
+          {/* Barra de pesquisa */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Pesquisar produtos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:border-[#5179C8]"
+                style={{ fontFamily: 'var(--font-museo-sans)' }}
+              />
+              <button className="absolute right-4 top-1/2 -translate-y-1/2">
+                <Image
+                  src="/assets/searchIcon.png"
+                  alt="Pesquisar"
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Contador e filtros */}
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+              TODOS ({mockProducts.length})
+            </span>
+          </div>
+
+          {/* Grid de produtos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {featuredProducts.map((product) => (
+              <ProductCard 
+                key={product.id} 
+                product={product}
+                onAddToCart={(product) => {
+                  // TODO: Implementar lógica do carrinho
+                  console.log('Produto adicionado ao carrinho:', product);
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Botão Ver Mais */}
+          <div className="text-center">
+            <Link
+              href="/loja/produtos"
+              className="inline-block px-8 py-3 rounded-full text-white font-medium transition-colors"
+              style={{ 
+                backgroundColor: '#5179C8',
+                fontFamily: 'var(--font-museo-sans)'
+              }}
             >
-              Ver Oferta
+              VER MAIS
             </Link>
           </div>
         </div>
-        
-        <div className="md:w-3/4">
-          <div className="flex justify-between items-center mb-6">
-            <div className="text-gray-600">
-              Mostrando {produtos.length} produtos
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-600 mr-2">Ordenar por:</span>
-              <select className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                <option value="relevancia">Relevância</option>
-                <option value="menor-preco">Menor Preço</option>
-                <option value="maior-preco">Maior Preço</option>
-                <option value="novidades">Novidades</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {produtos.map((produto) => (
-              <div key={produto.id} className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition">
-                <Link href={`/loja/${produto.slug}`}>
-                  <div className="h-48 bg-purple-200 relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-purple-700 font-medium">
-                      Imagem do Produto
-                    </div>
-                    {produto.destaque && (
-                      <div className="absolute top-2 left-2 bg-purple-700 text-white text-xs px-2 py-1 rounded">
-                        Destaque
-                      </div>
-                    )}
-                  </div>
-                </Link>
-                
-                <div className="p-4">
-                  <span className="text-xs text-purple-600 font-medium">{produto.categoria}</span>
-                  <h3 className="font-semibold mt-1 mb-2">
-                    <Link href={`/loja/${produto.slug}`} className="hover:text-purple-700">
-                      {produto.nome}
-                    </Link>
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {produto.descricao}
-                  </p>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-purple-800 font-bold">R$ {produto.preco.toFixed(2).replace('.', ',')}</span>
-                    <button className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700 transition">
-                      Adicionar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="flex justify-center mt-12">
-            <nav className="inline-flex">
-              <a href="#" className="px-4 py-2 border border-gray-300 bg-white text-purple-700 rounded-l-md hover:bg-gray-50">
-                Anterior
-              </a>
-              <a href="#" className="px-4 py-2 border-t border-b border-gray-300 bg-purple-700 text-white hover:bg-purple-800">
-                1
-              </a>
-              <a href="#" className="px-4 py-2 border-t border-b border-gray-300 bg-white text-purple-700 hover:bg-gray-50">
-                2
-              </a>
-              <a href="#" className="px-4 py-2 border-t border-b border-gray-300 bg-white text-purple-700 hover:bg-gray-50">
-                3
-              </a>
-              <a href="#" className="px-4 py-2 border border-gray-300 bg-white text-purple-700 rounded-r-md hover:bg-gray-50">
-                Próxima
-              </a>
-            </nav>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

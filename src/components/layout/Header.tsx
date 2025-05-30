@@ -207,7 +207,9 @@ const Header = () => {
   return (
     <>
       <motion.header 
-        className="w-full sticky top-0 z-50 bg-white relative"
+        className={`w-full sticky top-0 z-50 relative ${
+          pathname.startsWith('/loja') ? 'bg-[#5179C8]' : 'bg-white'
+        }`}
         style={{
           boxShadow: headerShadow,
           height: headerHeight,
@@ -227,7 +229,10 @@ const Header = () => {
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               >
                 <Image 
-                  src="/logos/logo1.webp" 
+                  src={pathname.startsWith('/loja') 
+                    ? "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/logos/logobranca.webp"
+                    : "/logos/logo1.webp"
+                  } 
                   alt="Lorena Jacob - Terapeuta Infantil" 
                   width={250} 
                   height={50}
@@ -252,50 +257,50 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/" 
-                  className={`text-[#6E6B46] text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
                 >
                   Início
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               </motion.div>
               
-              <div className="h-4 mx-2 w-px bg-gray-300"></div>
+              <div className={`h-4 mx-2 w-px ${pathname.startsWith('/loja') ? 'bg-white/30' : 'bg-gray-300'}`}></div>
               
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/sobre" 
-                  className={`text-[#6E6B46] text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/sobre' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
                 >
                   Sobre Mim
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               </motion.div>
               
-              <div className="h-4 mx-2 w-px bg-gray-300"></div>
+              <div className={`h-4 mx-2 w-px ${pathname.startsWith('/loja') ? 'bg-white/30' : 'bg-gray-300'}`}></div>
               
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link 
                   href="/blog" 
-                  className={`text-[#6E6B46] text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base ${pathname === '/blog' ? 'font-bold' : 'font-normal'} hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group`}
                 >
                   Blog
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               </motion.div>
               
-              <div className="h-4 mx-2 w-px bg-gray-300"></div>
+              <div className={`h-4 mx-2 w-px ${pathname.startsWith('/loja') ? 'bg-white/30' : 'bg-gray-300'}`}></div>
               
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <button 
                   onClick={openContatoModal}
-                  className={`text-[#6E6B46] text-base font-normal hover:text-[#52A4DB] transition px-3 font-['Poppins'] relative group cursor-pointer`}
+                  className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'} text-base font-normal hover:text-[#F9FFD6] transition px-3 font-['Poppins'] relative group cursor-pointer`}
                 >
                   Contato
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#52A4DB] transition-all duration-200 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-[#F9FFD6] transition-all duration-200 group-hover:w-full"></span>
                 </button>
               </motion.div>
               
-              <div className="h-4 mx-2 w-px bg-gray-300"></div>
+              <div className={`h-4 mx-2 w-px ${pathname.startsWith('/loja') ? 'bg-white/30' : 'bg-gray-300'}`}></div>
               
               <div className="px-3">
                 <motion.div 
@@ -305,7 +310,11 @@ const Header = () => {
                   <Link 
                     href="/loja" 
                     prefetch={false}
-                    className="bg-[#52A4DB] text-white text-sm font-['Poppins'] rounded-md px-4 py-1 hover:bg-[#4790c2] transition"
+                    className={`${
+                      pathname.startsWith('/loja') 
+                        ? 'bg-[#F9FFD6] text-[#6E6B46]' 
+                        : 'bg-[#52A4DB] text-white hover:bg-[#4790c2]'
+                    } text-sm font-['Poppins'] rounded-md px-4 py-1 transition`}
                   >
                     Loja
                   </Link>
@@ -316,6 +325,38 @@ const Header = () => {
 
           {/* Área Direita Desktop (Autenticação e Redes Sociais) */}
           <motion.div className="hidden lg:flex items-center justify-end gap-24">
+            {/* Carrinho (apenas na loja) */}
+            {pathname.startsWith('/loja') && (
+              <motion.div 
+                className="flex flex-col items-center mr-6"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/loja/carrinho" className="flex flex-col items-center relative">
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                    className="relative"
+                  >
+                    <Image 
+                      src="/assets/loja/carrinhoHeader.png" 
+                      alt="Carrinho" 
+                      width={40} 
+                      height={40}
+                      className="mb-0.5"
+                      unoptimized
+                      style={{ width: '40px', height: '40px' }}
+                    />
+                    {/* Contador do carrinho */}
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      0
+                    </span>
+                  </motion.div>
+                  <span className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#365F71]'} text-xs font-['Poppins']`}>Carrinho</span>
+                </Link>
+              </motion.div>
+            )}
+            
             {isLoadingAuth ? (
               <div className="flex flex-col items-center">
                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse mb-0.5"></div>
@@ -331,7 +372,7 @@ const Header = () => {
                   >
                     {userProfile.iniciais || 'U'}
                   </motion.div>
-                  <span className="text-[#365F71] text-xs font-['Poppins'] truncate max-w-[100px]">
+                  <span className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#365F71]'} text-xs font-['Poppins'] truncate max-w-[100px]`}>
                     Olá, {userProfile.nome.split(' ')[0] || 'Usuário'}!
                   </span>
                 </button>
@@ -381,7 +422,7 @@ const Header = () => {
                       style={{ width: '40px', height: '40px' }}
                     />
                   </motion.div>
-                  <span className="text-[#365F71] text-xs font-['Poppins']">Minha Conta</span>
+                  <span className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#365F71]'} text-xs font-['Poppins']`}>Minha Conta</span>
                 </Link>
               </motion.div>
             )}
@@ -434,6 +475,23 @@ const Header = () => {
 
           {/* Wrapper para Botão Minha Conta Mobile e Botão Menu Mobile */}
           <div className="lg:hidden flex items-center gap-3">
+            {/* Carrinho Mobile (apenas na loja) */}
+            {pathname.startsWith('/loja') && (
+              <Link href="/loja/carrinho" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors relative">
+                <Image 
+                  src="/assets/loja/carrinhoHeader.png" 
+                  alt="Carrinho" 
+                  width={26}
+                  height={26}
+                  unoptimized
+                />
+                {/* Contador do carrinho */}
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                  0
+                </span>
+              </Link>
+            )}
+            
             {/* Botão Minha Conta Mobile (Movido para cá) */}
             {isLoadingAuth ? (
               <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
