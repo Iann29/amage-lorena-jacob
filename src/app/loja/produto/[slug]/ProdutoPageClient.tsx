@@ -44,7 +44,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
             {/* Galeria de Imagens */}
             <div className="relative">
-            <div className="relative h-[500px] bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative h-[500px] bg-white rounded-lg overflow-hidden">
               <Image
                 src={product.imagens[selectedImage]?.image_url || '/placeholder.jpg'}
                 alt={product.nome}
@@ -179,16 +179,20 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
               <div className="space-y-3">
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-3 text-white font-medium rounded transition-colors"
+                  className="w-full py-3 text-white font-medium rounded transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   style={{ backgroundColor: '#5179C8' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4169B8'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5179C8'}
                   disabled={product.quantidade_estoque === 0}
                 >
                   Comprar Agora
                 </button>
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-3 text-white font-medium rounded transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 text-white font-medium rounded transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2"
                   style={{ backgroundColor: '#4CAF50' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45A049'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
                   disabled={product.quantidade_estoque === 0}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -205,8 +209,8 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
         </div>
 
         {/* Descrição */}
-        <section id="descricao" className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Descrição</h2>
+        <section id="descricao" className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-black">Descrição</h2>
           <div className={`prose max-w-none ${!showFullDescription ? 'line-clamp-4' : ''}`}>
             <p className="text-gray-700 whitespace-pre-line">{product.descricao}</p>
           </div>
@@ -242,9 +246,17 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
 
         {/* Produtos Relacionados */}
         {relatedProducts.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">Produtos da mesma categoria</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <section className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
+            <h2 
+              className="text-2xl font-bold mb-6"
+              style={{ 
+                color: '#6FB1CE',
+                fontFamily: 'var(--font-museo-sans)'
+              }}
+            >
+              + da mesma categoria
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {relatedProducts.map((relatedProduct) => (
                 <ProductCard 
                   key={relatedProduct.id} 
