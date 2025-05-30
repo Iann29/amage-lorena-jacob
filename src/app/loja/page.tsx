@@ -57,14 +57,14 @@ export default function LojaPage() {
       {/* Categorias */}
       <section className="py-12 px-4">
         <div className="container mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {mockCategories.map((category) => (
               <Link
                 key={category.id}
                 href={`/loja/${category.slug}`}
                 className="group"
               >
-                <div className="relative h-40 md:h-48 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                   <Image
                     src={category.imagem_url}
                     alt={category.nome}
@@ -72,13 +72,20 @@ export default function LojaPage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-                      {category.nome.includes(' ') ? (
-                        <span className="flex flex-col">
-                          <span style={{ color: '#2A289B' }}>{category.nome.split(' ')[0]}</span>
-                          <span style={{ color: '#7877D0' }}>{category.nome.split(' ').slice(1).join(' ')}</span>
+                  <div className="absolute inset-0 flex items-end justify-center pb-4 md:pb-6">
+                    <h3 className="text-white text-center">
+                      {category.nome === 'Brinquedos Sensoriais' ? (
+                        <span className="flex flex-col leading-tight">
+                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Brinquedos</span>
+                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Sensoriais</span>
                         </span>
+                      ) : category.nome === 'Material Pedagógico' ? (
+                        <span className="flex flex-col leading-tight">
+                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Material</span>
+                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Pedagógico</span>
+                        </span>
+                      ) : category.nome === 'PECS' || category.nome === 'E-books' ? (
+                        <span className="text-2xl md:text-3xl lg:text-4xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>{category.nome}</span>
                       ) : (
                         category.nome
                       )}
