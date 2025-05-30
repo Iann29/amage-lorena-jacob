@@ -212,7 +212,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
         <section id="descricao" className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
           <h2 className="text-2xl font-bold mb-4 text-black">Descrição</h2>
           <div className={`prose max-w-none ${!showFullDescription ? 'line-clamp-4' : ''}`}>
-            <p className="text-gray-700 whitespace-pre-line">{product.descricao}</p>
+            <p className="text-black whitespace-pre-line">{product.descricao}</p>
           </div>
           {product.descricao.length > 200 && (
             <button
@@ -227,19 +227,19 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           <div className="mt-6 space-y-2">
             <div className="flex items-start gap-2">
               <span className="text-green-500 text-xl">✓</span>
-              <span>Modelos de rotina prontos para diferentes idades</span>
+              <span className="text-black">Modelos de rotina prontos para diferentes idades</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-500 text-xl">✓</span>
-              <span>Sugestões de atividades educativas e recreativas</span>
+              <span className="text-black">Sugestões de atividades educativas e recreativas</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-500 text-xl">✓</span>
-              <span>Orientações para lidar com a resistência das crianças</span>
+              <span className="text-black">Orientações para lidar com a resistência das crianças</span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-500 text-xl">✓</span>
-              <span>Dicas de temporização e adaptação para cada família</span>
+              <span className="text-black">Dicas de temporização e adaptação para cada família</span>
             </div>
           </div>
         </section>
@@ -251,7 +251,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
         <section className="bg-white w-screen relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] py-8 mb-12 shadow-lg">
             <div className="container mx-auto px-4">
             <h2 
-              className="text-2xl font-bold mb-6"
+              className="text-3xl font-bold mb-6"
               style={{ 
                 color: '#6FB1CE',
                 fontFamily: 'var(--font-museo-sans)'
@@ -259,15 +259,37 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
             >
               + da mesma categoria
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {relatedProducts.map((relatedProduct) => (
-                <ProductCard 
-                  key={relatedProduct.id} 
-                  product={relatedProduct}
-                  onAddToCart={(product) => {
-                    console.log('Produto adicionado ao carrinho:', product);
-                  }}
-                />
+                <Link 
+                  key={relatedProduct.id}
+                  href={`/loja/produto/${relatedProduct.slug}`}
+                  className="group"
+                >
+                  <div className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="relative h-48 mb-3 overflow-hidden rounded-xl">
+                      <Image
+                        src={relatedProduct.imagens[0]?.image_url || '/placeholder.jpg'}
+                        alt={relatedProduct.nome}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                    <h3 className="font-bold text-sm mb-2 line-clamp-2 text-black group-hover:text-[#5179C8] transition-colors" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                      {relatedProduct.nome}
+                    </h3>
+                    <div className="flex items-baseline gap-2">
+                      {relatedProduct.preco_promocional && (
+                        <span className="text-xs text-gray-400 line-through">
+                          R$ {relatedProduct.preco.toFixed(2).replace('.', ',')}
+                        </span>
+                      )}
+                      <span className="text-lg font-bold text-[#5179C8]">
+                        R$ {(relatedProduct.preco_promocional || relatedProduct.preco).toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
             </div>
