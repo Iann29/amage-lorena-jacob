@@ -3,15 +3,28 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { mockProducts, mockCategories, mockBanners } from '@/lib/mockDataLoja';
+import { mockProducts, mockCategories, allCategories, mockBanners } from '@/lib/mockDataLoja';
 import { ProductCard } from '@/components/loja/ProductCard';
 
 export default function LojaPage() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [productsToShow, setProductsToShow] = useState(6);
 
-  // Produtos em destaque (primeiros 6)
-  const featuredProducts = mockProducts.slice(0, 6);
+  // Produtos filtrados por pesquisa
+  const filteredProducts = mockProducts.filter(product => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return product.nome.toLowerCase().includes(query) || 
+           product.descricao.toLowerCase().includes(query);
+  });
+
+  // Produtos visíveis (limitados pelo estado productsToShow)
+  const visibleProducts = filteredProducts.slice(0, productsToShow);
+
+  const handleLoadMore = () => {
+    setProductsToShow(prev => Math.min(prev + 6, filteredProducts.length));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -207,7 +220,7 @@ export default function LojaPage() {
           {/* Contador centralizado */}
           <div className="text-center mb-8">
             <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-              TODOS ({mockProducts.length})
+              TODOS ({filteredProducts.length})
             </span>
           </div>
 
@@ -217,7 +230,7 @@ export default function LojaPage() {
             <aside className="w-56 flex-shrink-0 hidden lg:block">
               <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
                 <div className="mb-6">
-                  <h4 className="text-sm text-gray-500 mb-4" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  <h4 className="text-sm text-gray-500" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                     Filtrar por
                   </h4>
                   <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
@@ -227,90 +240,47 @@ export default function LojaPage() {
                     <li>
                       <Link 
                         href="/loja"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
+                        className="block py-1 text-sm text-black hover:text-[#5179C8] transition-colors"
                         style={{ fontFamily: 'var(--font-museo-sans)' }}
                       >
                         Todos
                       </Link>
                     </li>
-                    <li>
-                      <Link 
-                        href="/loja/brinquedos-sensoriais"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        Brinquedos Sensoriais
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/loja/brinquedos-montessorianos"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        Brinquedos Montessorianos
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/loja/material-pedagogico"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        Materiais Pedagógicos
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/loja/jogos"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        Jogos
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/loja/pecs"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        PECS e Comunicação Alternativa
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/loja/ebooks"
-                        className="block py-1 text-sm hover:text-[#5179C8] transition-colors"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      >
-                        E-books
-                      </Link>
-                    </li>
+                    {allCategories.map((category) => (
+                      <li key={category.id}>
+                        <Link 
+                          href={`/loja/${category.slug}`}
+                          className="block py-1 text-sm text-black hover:text-[#5179C8] transition-colors"
+                          style={{ fontFamily: 'var(--font-museo-sans)' }}
+                        >
+                          {category.nome}
+                        </Link>
+                      </li>
+                    ))}
                   </ul>
                 </div>
                 
                 {/* Filtro de Preço */}
-                <div className="border-t pt-6">
+                <div className="border-t border-gray-400 pt-6">
                   <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
                     Preço
                   </h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm text-gray-600">Mínimo</label>
+                      <label className="text-sm text-black">Mínimo</label>
                       <input 
                         type="number" 
                         placeholder="R$ 0,00"
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#5179C8]"
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
                         style={{ fontFamily: 'var(--font-museo-sans)' }}
                       />
                     </div>
                     <div>
-                      <label className="text-sm text-gray-600">Máximo</label>
+                      <label className="text-sm text-black">Máximo</label>
                       <input 
                         type="number" 
                         placeholder="R$ 999,00"
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#5179C8]"
+                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
                         style={{ fontFamily: 'var(--font-museo-sans)' }}
                       />
                     </div>
@@ -331,7 +301,7 @@ export default function LojaPage() {
             {/* Grid de produtos */}
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 mb-8">
-            {featuredProducts.map((product) => (
+            {visibleProducts.map((product) => (
               <ProductCard 
                 key={product.id} 
                 product={product}
@@ -344,18 +314,20 @@ export default function LojaPage() {
           </div>
 
           {/* Botão Ver Mais */}
-          <div className="text-center">
-            <Link
-              href="/loja/produtos"
-              className="inline-block px-8 py-3 rounded-full text-white font-medium transition-colors"
-              style={{ 
-                backgroundColor: '#5179C8',
-                fontFamily: 'var(--font-museo-sans)'
-              }}
-            >
-              VER MAIS
-            </Link>
-          </div>
+          {productsToShow < filteredProducts.length && (
+            <div className="text-center">
+              <button
+                onClick={handleLoadMore}
+                className="px-8 py-3 rounded-full text-white font-medium transition-colors hover:opacity-90"
+                style={{ 
+                  backgroundColor: '#0048C5',
+                  fontFamily: 'var(--font-museo-sans)'
+                }}
+              >
+                VER MAIS
+              </button>
+            </div>
+          )}
             </div>
           </div>
         </div>

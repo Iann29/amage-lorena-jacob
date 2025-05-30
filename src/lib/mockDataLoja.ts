@@ -53,7 +53,7 @@ export interface Review {
   created_at: string;
 }
 
-// Categorias
+// Categorias principais (aparecem como cards)
 export const mockCategories: Category[] = [
   {
     id: "1",
@@ -86,6 +86,27 @@ export const mockCategories: Category[] = [
     descricao: "Livros digitais sobre desenvolvimento infantil",
     imagem_url: "https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/categorias-inicio/ebook.png",
     produtos_count: 5
+  }
+];
+
+// Todas as categorias (incluindo as que aparecem apenas no filtro)
+export const allCategories: Category[] = [
+  ...mockCategories,
+  {
+    id: "5",
+    nome: "Jogos",
+    slug: "jogos",
+    descricao: "Jogos educativos e terapêuticos para desenvolvimento",
+    imagem_url: "",
+    produtos_count: 10
+  },
+  {
+    id: "6",
+    nome: "Brinquedos Montessorianos",
+    slug: "brinquedos-montessorianos",
+    descricao: "Brinquedos baseados no método Montessori",
+    imagem_url: "",
+    produtos_count: 8
   }
 ];
 
@@ -345,6 +366,112 @@ export const mockProducts: Product[] = [
     tags: ["atividades", "sensorial", "casa"],
     created_at: "2024-01-22T10:00:00Z",
     updated_at: "2024-01-22T10:00:00Z"
+  },
+
+  // Jogos
+  {
+    id: "p11",
+    nome: "Jogo da Memória Emoções",
+    slug: "jogo-memoria-emocoes",
+    descricao: "Jogo educativo para identificação e reconhecimento de emoções. Contém 20 pares com expressões faciais.",
+    preco: 59.90,
+    preco_promocional: 49.90,
+    quantidade_estoque: 50,
+    category_id: "5",
+    category: mockCategories[4],
+    imagens: [
+      {
+        id: "img11",
+        image_url: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=500",
+        is_primary: true,
+        ordem_exibicao: 1
+      }
+    ],
+    idade_min: 3,
+    idade_max: 8,
+    rating_avg: 4.9,
+    review_count: 15,
+    tags: ["emoções", "memória", "educativo"],
+    created_at: "2024-01-28T10:00:00Z",
+    updated_at: "2024-01-28T10:00:00Z"
+  },
+  {
+    id: "p12",
+    nome: "Quebra-Cabeça Sequência Lógica",
+    slug: "quebra-cabeca-sequencia-logica",
+    descricao: "Desenvolve raciocínio lógico e sequencial. 30 peças para formar diferentes sequências.",
+    preco: 69.90,
+    quantidade_estoque: 35,
+    category_id: "5",
+    category: mockCategories[4],
+    imagens: [
+      {
+        id: "img12",
+        image_url: "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=500",
+        is_primary: true,
+        ordem_exibicao: 1
+      }
+    ],
+    idade_min: 4,
+    idade_max: 10,
+    rating_avg: 4.7,
+    review_count: 12,
+    tags: ["lógica", "quebra-cabeça", "raciocínio"],
+    created_at: "2024-01-26T10:00:00Z",
+    updated_at: "2024-01-26T10:00:00Z"
+  },
+
+  // Brinquedos Montessorianos
+  {
+    id: "p13",
+    nome: "Torre Rosa Montessori",
+    slug: "torre-rosa-montessori",
+    descricao: "Material clássico Montessori para desenvolvimento de percepção visual e coordenação. 10 cubos em madeira.",
+    preco: 119.90,
+    preco_promocional: 99.90,
+    quantidade_estoque: 25,
+    category_id: "6",
+    category: mockCategories[5],
+    imagens: [
+      {
+        id: "img13",
+        image_url: "https://images.unsplash.com/photo-1632204171588-b4e6a8db3c2e?w=500",
+        is_primary: true,
+        ordem_exibicao: 1
+      }
+    ],
+    idade_min: 2,
+    idade_max: 6,
+    rating_avg: 5.0,
+    review_count: 20,
+    tags: ["montessori", "torre rosa", "coordenação"],
+    created_at: "2024-01-30T10:00:00Z",
+    updated_at: "2024-01-30T10:00:00Z"
+  },
+  {
+    id: "p14",
+    nome: "Barras Vermelhas Montessori",
+    slug: "barras-vermelhas-montessori",
+    descricao: "Material sensorial para compreensão de dimensões e preparação matemática. 10 barras em madeira.",
+    preco: 139.90,
+    quantidade_estoque: 20,
+    category_id: "6",
+    category: mockCategories[5],
+    imagens: [
+      {
+        id: "img14",
+        image_url: "https://images.unsplash.com/photo-1586095120892-69e5aae5e3b3?w=500",
+        is_primary: true,
+        ordem_exibicao: 1
+      }
+    ],
+    idade_min: 3,
+    idade_max: 7,
+    rating_avg: 4.8,
+    review_count: 18,
+    tags: ["montessori", "matemática", "dimensões"],
+    created_at: "2024-01-29T10:00:00Z",
+    updated_at: "2024-01-29T10:00:00Z"
   }
 ];
 

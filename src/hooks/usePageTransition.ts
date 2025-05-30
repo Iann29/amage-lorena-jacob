@@ -7,7 +7,7 @@ export function usePageTransition() {
   const pathname = usePathname();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const previousPathRef = useRef(pathname);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout>();
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Limpa timeout anterior

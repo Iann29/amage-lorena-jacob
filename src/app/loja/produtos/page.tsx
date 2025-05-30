@@ -2,16 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { mockProducts, mockCategories, filterProducts } from '@/lib/mockDataLoja';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { mockProducts, mockCategories, allCategories, filterProducts } from '@/lib/mockDataLoja';
 import { ProductCard } from '@/components/loja/ProductCard';
 
-export default function ProdutosPage() {
+interface ProdutosPageProps {
+  categoryId?: string;
+  categoryName?: string;
+}
+
+export default function ProdutosPage({ categoryId, categoryName }: ProdutosPageProps = {}) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 200 });
-  const [ageRange, setAgeRange] = useState({ min: 0, max: 12 });
-  const [showFilters, setShowFilters] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(categoryId ? [categoryId] : []);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 999 });
   const [filteredProducts, setFilteredProducts] = useState(mockProducts);
+  const [productsToShow, setProductsToShow] = useState(9);
 
   // Aplicar filtros
   useEffect(() => {
@@ -36,29 +43,20 @@ export default function ProdutosPage() {
       return price >= priceRange.min && price <= priceRange.max;
     });
 
-    // Filtro de idade
-    filtered = filtered.filter(p => {
-      if (!p.idade_min && !p.idade_max) return true;
-      if (p.idade_min && p.idade_min > ageRange.max) return false;
-      if (p.idade_max && p.idade_max < ageRange.min) return false;
-      return true;
-    });
-
     setFilteredProducts(filtered);
-  }, [searchQuery, selectedCategories, priceRange, ageRange]);
+  }, [searchQuery, selectedCategories, priceRange]);
 
-  const handleCategoryToggle = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
-    );
+  const handleCategoryClick = (categorySlug: string) => {
+    if (categorySlug === 'todos') {
+      router.push('/loja');
+    } else {
+      router.push(`/loja/${categorySlug}`);
+    }
   };
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setPriceRange({ min: 0, max: 200 });
-    setAgeRange({ min: 0, max: 12 });
+    setPriceRange({ min: 0, max: 999 });
     setSearchQuery('');
   };
 
@@ -69,139 +67,166 @@ export default function ProdutosPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Título */}
-        <h1 
-          className="text-4xl font-bold text-center mb-8" 
-          style={{ color: '#2A289B', fontFamily: 'var(--font-museo-sans)' }}
-        >
-          PRODUTOS
-        </h1>
+      <div className="container mx-auto px-4 py-12">
+        <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
+          {/* Título */}
+          <h1 
+            className="text-center mb-8 font-bold" 
+            style={{ 
+              color: '#2A289B', 
+              fontFamily: 'var(--font-fredoka)',
+              fontWeight: '700',
+              fontSize: 'clamp(56px, 10vw, 120px)'
+            }}
+          >
+            {categoryName ? (
+              (() => {
+                const name = categoryName.toUpperCase();
+                // Títulos que devem ser divididos
+                if (name === 'BRINQUEDOS SENSORIAIS') {
+                  return (
+                    <span className="flex flex-col leading-none">
+                      <span>BRINQUEDOS</span>
+                      <span style={{ color: '#7877D0' }}>SENSORIAIS</span>
+                    </span>
+                  );
+                } else if (name === 'BRINQUEDOS MONTESSORIANOS') {
+                  return (
+                    <span className="flex flex-col leading-none">
+                      <span>BRINQUEDOS</span>
+                      <span style={{ color: '#7877D0' }}>MONTESSORIANOS</span>
+                    </span>
+                  );
+                } else if (name === 'PECS E COMUNICAÇÃO ALTERNATIVA') {
+                  return (
+                    <span className="flex flex-col leading-none">
+                      <span>PECS E COMUNICAÇÃO</span>
+                      <span style={{ color: '#7877D0' }}>ALTERNATIVA</span>
+                    </span>
+                  );
+                } else if (name === 'MATERIAL PEDAGÓGICO' || name === 'MATERIAIS PEDAGÓGICOS') {
+                  return (
+                    <span className="flex flex-col leading-none">
+                      <span>MATERIAIS</span>
+                      <span style={{ color: '#7877D0' }}>PEDAGÓGICOS</span>
+                    </span>
+                  );
+                } else {
+                  return name;
+                }
+              })()
+            ) : 'PRODUTOS'}
+          </h1>
 
-        {/* Barra de pesquisa */}
-        <div className="max-w-2xl mx-auto mb-8">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Pesquisar por palavra ou tema"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:border-[#5179C8]"
-              style={{ fontFamily: 'var(--font-museo-sans)' }}
-            />
-            <button className="absolute right-4 top-1/2 -translate-y-1/2">
-              <Image
-                src="/assets/searchIcon.png"
-                alt="Pesquisar"
-                width={20}
-                height={20}
+          {/* Barra de pesquisa */}
+          <div className="max-w-2xl mx-auto mb-4">
+            <div className="relative">
+              <button className="absolute left-4 top-1/2 -translate-y-1/2">
+                <Image
+                  src="/assets/searchIcon.png"
+                  alt="Pesquisar"
+                  width={20}
+                  height={20}
+                />
+              </button>
+              <input
+                type="text"
+                placeholder="Pesquisar por palavra ou tema"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#5179C8] placeholder-[#A6A6A6] text-[#A6A6A6]"
+                style={{ fontFamily: 'var(--font-museo-sans)' }}
               />
-            </button>
+            </div>
           </div>
-        </div>
 
-        {/* Contador */}
-        <div className="text-center mb-6">
-          <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-            TODOS ({filteredProducts.length})
-          </span>
-        </div>
+          {/* Contador */}
+          <div className="text-center mb-8">
+            <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+              TODOS ({filteredProducts.length})
+            </span>
+          </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex gap-8">
           {/* Sidebar de Filtros */}
-          <aside className={`lg:w-64 ${showFilters ? '' : 'hidden lg:block'}`}>
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
+          <aside className="w-56 flex-shrink-0 hidden lg:block">
+            <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
               <div className="mb-6">
-                <h3 className="text-lg font-bold mb-1 text-gray-500 text-sm">Filtrar por</h3>
-                <h2 className="text-2xl font-bold mb-4">Categorias</h2>
+                <h4 className="text-sm text-gray-500" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                  Filtrar por
+                </h4>
+                <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
+                  Categorias
+                </h3>
                 
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setSelectedCategories([])}
-                    className={`block w-full text-left py-1 ${
-                      selectedCategories.length === 0 ? 'text-[#5179C8] font-bold' : 'text-gray-700'
-                    }`}
-                  >
-                    Todos
-                  </button>
-                  
-                  {mockCategories.map((category) => (
+                <ul className="space-y-2">
+                  <li>
                     <button
-                      key={category.id}
-                      onClick={() => handleCategoryToggle(category.id)}
-                      className={`block w-full text-left py-1 ${
-                        selectedCategories.includes(category.id) 
-                          ? 'text-[#5179C8] font-bold' 
-                          : 'text-gray-700'
-                      }`}
+                      onClick={() => handleCategoryClick('todos')}
+                      className={`block py-1 text-sm ${
+                        !categoryId ? 'text-[#5179C8] font-bold' : 'text-black hover:text-[#5179C8]'
+                      } transition-colors`}
+                      style={{ fontFamily: 'var(--font-museo-sans)' }}
                     >
-                      • {category.nome} ({getCategoryCount(category.id)})
+                      Todos
                     </button>
+                  </li>
+                  
+                  {allCategories.map((category) => (
+                    <li key={category.id}>
+                      <button
+                        onClick={() => handleCategoryClick(category.slug)}
+                        className={`block py-1 text-sm ${
+                          categoryId === category.id 
+                            ? 'text-[#5179C8] font-bold' 
+                            : 'text-black hover:text-[#5179C8]'
+                        } transition-colors`}
+                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                      >
+                        {category.nome}
+                      </button>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
 
               {/* Filtro de Preço */}
-              <div className="mb-6 pt-6 border-t">
-                <h2 className="text-2xl font-bold mb-4">Preço</h2>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span>De<br/>R$ {priceRange.min.toFixed(2)}</span>
-                    <span>Até<br/>R$ {priceRange.max.toFixed(2)}</span>
+              <div className="border-t border-gray-400 pt-6">
+                <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
+                  Preço
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm text-black">Mínimo</label>
+                    <input 
+                      type="number" 
+                      placeholder="R$ 0,00"
+                      value={priceRange.min || ''}
+                      onChange={(e) => setPriceRange({ ...priceRange, min: Number(e.target.value) })}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
+                      style={{ fontFamily: 'var(--font-museo-sans)' }}
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={priceRange.max}
-                    onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) })}
-                    className="w-full"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setPriceRange({ min: 0, max: 200 })}
-                      className="flex-1 py-2 border border-gray-300 rounded text-sm font-medium"
-                    >
-                      LIMPAR
-                    </button>
-                    <button
-                      className="flex-1 py-2 bg-black text-white rounded text-sm font-medium"
-                    >
-                      APLICAR
-                    </button>
+                  <div>
+                    <label className="text-sm text-black">Máximo</label>
+                    <input 
+                      type="number" 
+                      placeholder="R$ 999,00"
+                      value={priceRange.max || ''}
+                      onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) })}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
+                      style={{ fontFamily: 'var(--font-museo-sans)' }}
+                    />
                   </div>
-                </div>
-              </div>
-
-              {/* Filtro de Idade */}
-              <div className="pt-6 border-t">
-                <h2 className="text-2xl font-bold mb-4">Idade</h2>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span>De<br/>{ageRange.min} anos</span>
-                    <span>Até<br/>{ageRange.max} anos</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="12"
-                    value={ageRange.max}
-                    onChange={(e) => setAgeRange({ ...ageRange, max: Number(e.target.value) })}
-                    className="w-full"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setAgeRange({ min: 0, max: 12 })}
-                      className="flex-1 py-2 border border-gray-300 rounded text-sm font-medium"
-                    >
-                      LIMPAR
-                    </button>
-                    <button
-                      className="flex-1 py-2 bg-black text-white rounded text-sm font-medium"
-                    >
-                      APLICAR
-                    </button>
-                  </div>
+                  <button 
+                    className="w-full py-2 rounded-lg text-white text-sm font-medium transition-colors hover:opacity-90"
+                    style={{ 
+                      backgroundColor: '#0048C5',
+                      fontFamily: 'var(--font-museo-sans)'
+                    }}
+                  >
+                    Aplicar Filtro
+                  </button>
                 </div>
               </div>
             </div>
@@ -209,14 +234,6 @@ export default function ProdutosPage() {
 
           {/* Grid de Produtos */}
           <div className="flex-1">
-            {/* Botão de toggle filtros no mobile */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden mb-4 text-[#5179C8] font-medium"
-            >
-              {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-            </button>
-
             {filteredProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">Nenhum produto encontrado.</p>
@@ -229,8 +246,8 @@ export default function ProdutosPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {filteredProducts.map((product) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 mb-8">
+                  {filteredProducts.slice(0, productsToShow).map((product) => (
                     <ProductCard 
                       key={product.id} 
                       product={product}
@@ -242,19 +259,23 @@ export default function ProdutosPage() {
                 </div>
 
                 {/* Botão Ver Mais */}
-                <div className="text-center">
-                  <button
-                    className="px-8 py-3 rounded-full text-white font-medium transition-colors"
-                    style={{ 
-                      backgroundColor: '#5179C8',
-                      fontFamily: 'var(--font-museo-sans)'
-                    }}
-                  >
-                    VER MAIS
-                  </button>
-                </div>
+                {productsToShow < filteredProducts.length && (
+                  <div className="text-center">
+                    <button
+                      onClick={() => setProductsToShow(prev => Math.min(prev + 9, filteredProducts.length))}
+                      className="px-8 py-3 rounded-full text-white font-medium transition-colors hover:opacity-90"
+                      style={{ 
+                        backgroundColor: '#0048C5',
+                        fontFamily: 'var(--font-museo-sans)'
+                      }}
+                    >
+                      VER MAIS
+                    </button>
+                  </div>
+                )}
               </>
             )}
+          </div>
           </div>
         </div>
       </div>
