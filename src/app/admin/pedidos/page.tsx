@@ -2,48 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { adminApi } from '@/lib/admin-api';
-
-interface Order {
-  id: string;
-  user_id: string;
-  status: 'pendente' | 'processando' | 'pago' | 'enviado' | 'entregue' | 'cancelado';
-  valor_total: number;
-  metodo_pagamento: 'cartao_credito' | 'cartao_debito' | 'pix' | 'boleto' | null;
-  payment_id: string | null;
-  external_reference: string | null;
-  payment_details: any | null;
-  desconto_aplicado: number | null;
-  discount_id: string | null;
-  shipping_address_id: string | null;
-  endereco_entrega_snapshot: {
-    nome_destinatario: string;
-    rua: string;
-    numero: string;
-    complemento?: string;
-    bairro: string;
-    cidade: string;
-    estado: string;
-    cep: string;
-    telefone_contato?: string;
-  };
-  created_at: string;
-  updated_at: string;
-  user_profile?: {
-    nome: string;
-    sobrenome: string;
-    email: string;
-  };
-  items?: Array<{
-    id: string;
-    quantidade: number;
-    preco_unitario: number;
-    preco_total: number;
-    product: {
-      nome: string;
-    };
-  }>;
-}
+import { adminApi, AdminOrder } from '@/lib/admin-api';
 
 interface PaginationProps {
   currentPage: number;
@@ -101,7 +60,7 @@ export default function AdminPedidosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState({
