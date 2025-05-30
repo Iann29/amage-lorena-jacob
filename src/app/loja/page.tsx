@@ -48,7 +48,6 @@ export default function LojaPage() {
         
         // Carregar categorias
         const { categories: categoriesData } = await lojaApi.getCategories();
-        console.log('Categorias carregadas:', categoriesData.map(c => ({ nome: c.nome, slug: c.slug })));
         setCategories(categoriesData);
         
         // Carregar produtos

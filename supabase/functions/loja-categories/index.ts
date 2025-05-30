@@ -8,30 +8,36 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  console.log('=== INICIO DA EDGE FUNCTION ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Parse body apenas se houver conteúdo
-    let body = null;
+    // Parse body
+    let body = {};
     try {
       const text = await req.text();
-      console.log('=== DEBUG EDGE FUNCTION ===');
-      console.log('Texto recebido:', text);
-      if (text) {
+      console.log('Texto do body:', text);
+      if (text && text.trim() !== '') {
         body = JSON.parse(text);
-        console.log('Body parseado:', body);
       }
     } catch (e) {
       console.error('Erro ao fazer parse do body:', e);
-      // Se não conseguir fazer parse, body permanece null
+      body = {};
     }
     
+    console.log('Body parseado:', body);
+    console.log('Tem slug?:', 'slug' in body);
+    console.log('Valor do slug:', body.slug);
+    
     // Se veio um slug no body, é busca por categoria específica
-    if (body?.slug) {
-      console.log('Buscando categoria com slug:', body.slug);
+    if (body.slug !== undefined && body.slug !== null && body.slug !== '') {
+      console.log('ENTRANDO NO MODO BUSCA POR SLUG:', body.slug);
       const { data: category, error } = await supabase
         .from('categories')
         .select(`
@@ -42,7 +48,10 @@ serve(async (req) => {
         .eq('is_active', true)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao buscar categoria:', error);
+        throw error;
+      }
 
       if (!category) {
         return new Response(
@@ -57,12 +66,16 @@ serve(async (req) => {
         produtos_count: category.produtos_count?.[0]?.count || 0
       }
 
+      console.log('Categoria encontrada:', processedCategory);
+
       return new Response(
         JSON.stringify({
           category: processedCategory
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    } else {
+      console.log('SLUG NÃO ENCONTRADO, RETORNANDO TODAS AS CATEGORIAS');
     }
     
     // Caso contrário, é listagem de categorias

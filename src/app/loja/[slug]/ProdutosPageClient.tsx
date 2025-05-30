@@ -106,26 +106,61 @@ export default function ProdutosPageClient({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header da categoria */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center mb-4">
-            <Link href="/loja" className="text-white/80 hover:text-white mr-2">
-              Loja
-            </Link>
-            <span className="text-white/60 mx-2">/</span>
-            <span className="text-white">{category.nome}</span>
-          </div>
-          <h1 className="text-4xl font-bold mb-4">{category.nome}</h1>
-          {category.descricao && (
-            <p className="text-lg text-white/90">{category.descricao}</p>
-          )}
-        </div>
-      </section>
-
       {/* Produtos */}
       <section className="py-12 px-4">
         <div className="container mx-auto bg-white rounded-3xl shadow-lg p-8 md:p-12">
+          {/* Título grandão da categoria */}
+          <h1 
+            className="text-center mb-8 font-bold" 
+            style={{ 
+              color: '#2A289B', 
+              fontFamily: 'var(--font-fredoka)',
+              fontWeight: '700',
+              fontSize: 'clamp(56px, 10vw, 120px)'
+            }}
+          >
+            {(() => {
+              const name = category.nome.toUpperCase();
+              const words = name.split(' ');
+              
+              // Se tem duas palavras, coloca uma em cima da outra
+              if (words.length === 2) {
+                return (
+                  <span className="flex flex-col leading-none">
+                    <span>{words[0]}</span>
+                    <span style={{ color: '#7877D0' }}>{words[1]}</span>
+                  </span>
+                );
+              }
+              
+              // Casos especiais para PECS e outras categorias
+              if (name === 'PECS') {
+                return name;
+              }
+              
+              // Se tem mais de duas palavras, verifica casos específicos
+              if (name === 'BRINQUEDOS SENSORIAIS') {
+                return (
+                  <span className="flex flex-col leading-none">
+                    <span>BRINQUEDOS</span>
+                    <span style={{ color: '#7877D0' }}>SENSORIAIS</span>
+                  </span>
+                );
+              }
+              
+              if (name === 'MATERIAL PEDAGÓGICO') {
+                return (
+                  <span className="flex flex-col leading-none">
+                    <span>MATERIAL</span>
+                    <span style={{ color: '#7877D0' }}>PEDAGÓGICO</span>
+                  </span>
+                );
+              }
+              
+              // Padrão: retorna o nome como está
+              return name;
+            })()}
+          </h1>
           {/* Barra de pesquisa */}
           <div className="max-w-2xl mx-auto mb-4">
             <div className="relative">
