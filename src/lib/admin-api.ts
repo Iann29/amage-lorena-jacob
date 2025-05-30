@@ -73,11 +73,16 @@ export interface AdminProduct {
   nome: string;
   descricao: string | null;
   preco: number;
+  preco_promocional: number | null;
   quantidade_estoque: number;
   category_id: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  slug: string | null;
+  idade_min: number | null;
+  idade_max: number | null;
+  tags: string[] | null;
   category?: any;
   images?: any[];
 }
