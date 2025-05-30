@@ -3,16 +3,21 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getRelatedProducts, mockReviews, type Product } from '@/lib/mockDataLoja';
 import { ProductCard } from '@/components/loja/ProductCard';
 import { useUser } from '@/hooks/useUser';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Product } from '@/lib/loja-api';
 
 interface ProdutoPageClientProps {
-  product: Product;
+  product: Product & {
+    imagens: Array<{ id: string; image_url: string }>;
+    rating_avg?: number;
+    review_count?: number;
+  };
+  relatedProducts?: Product[];
 }
 
-export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
+export default function ProdutoPageClient({ product, relatedProducts = [] }: ProdutoPageClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -21,8 +26,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
   
   const { user } = useUser();
 
-  const relatedProducts = getRelatedProducts(product.id, 3);
-  const productReviews = mockReviews.filter(r => r.product_id === product.id);
+  const productReviews: any[] = []; // TODO: Implementar sistema de reviews
   const price = product.preco_promocional || product.preco;
   const hasDiscount = !!product.preco_promocional;
 
@@ -43,8 +47,12 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           <ol className="flex items-center gap-2 text-sm text-gray-600">
             <li><Link href="/loja" className="hover:text-[#5179C8]">Produtos</Link></li>
             <li>{'>'}</li>
-            <li><Link href={`/loja/${product.category?.slug}`} className="hover:text-[#5179C8]">{product.category?.nome}</Link></li>
-            <li>{'>'}</li>
+            {product.category && (
+              <>
+                <li><Link href={`/loja/${product.category.slug}`} className="hover:text-[#5179C8]">{product.category.nome}</Link></li>
+                <li>{'>'}</li>
+              </>
+            )}
             <li className="font-bold" style={{ color: '#2A289B' }}>{product.nome}</li>
           </ol>
         </nav>
@@ -90,7 +98,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           <div className="relative">
             {/* Botão Voltar */}
             <Link 
-              href="/loja/produtos"
+              href={product.category ? `/loja/${product.category.slug}` : "/loja"}
               className="absolute -top-20 right-0 inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm text-white transition-colors z-10"
               style={{ backgroundColor: '#8B6F47' }}
             >
@@ -279,7 +287,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                   <div className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="relative h-48 mb-3 overflow-hidden rounded-xl">
                       <Image
-                        src={relatedProduct.imagens[0]?.image_url || '/placeholder.jpg'}
+                        src={relatedProduct.imagem_principal || '/placeholder.jpg'}
                         alt={relatedProduct.nome}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-300"

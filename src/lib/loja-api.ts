@@ -105,12 +105,17 @@ export const lojaApi = {
 
   // Buscar detalhes de um produto
   async getProductBySlug(slug: string): Promise<ProductDetailsResponse> {
+    console.log('=== API getProductBySlug ===');
+    console.log('Slug:', slug);
+    
     const { data, error } = await supabase.functions.invoke('loja-products', {
       headers: {
         'Content-Type': 'application/json',
       },
       body: { slug },
     });
+
+    console.log('Resposta da edge function:', { data, error });
 
     if (error) throw error;
     return data;
