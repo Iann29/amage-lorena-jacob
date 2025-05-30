@@ -317,7 +317,7 @@ export default function LojaPage() {
                     <button 
                       className="w-full py-2 rounded-lg text-white text-sm font-medium transition-colors hover:opacity-90"
                       style={{ 
-                        backgroundColor: '#5179C8',
+                        backgroundColor: '#0048C5',
                         fontFamily: 'var(--font-museo-sans)'
                       }}
                     >

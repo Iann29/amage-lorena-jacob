@@ -33,7 +33,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-black/60 w-[280px] h-[400px] flex flex-col">
-      <div className="relative p-4 flex-shrink-0">
+      <div className="relative p-4 pb-0 flex-shrink-0">
         <Link href={`/loja/produto/${product.slug}`}>
           <div className="relative h-48 overflow-hidden rounded-lg">
             <Image
@@ -60,6 +60,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           />
         </button>
       </div>
+      
+      {/* Linha divisória */}
+      <div className="border-b border-black/60"></div>
 
       <div className="px-4 pb-4 flex-1 flex flex-col">
         <Link href={`/loja/produto/${product.slug}`}>
@@ -71,14 +74,13 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </h3>
         </Link>
         
-        <div className="mt-auto">
-        <div className="text-center mb-3">
+        <div className="text-center mt-2 mb-auto">
           {hasDiscount && (
             <span className="text-gray-400 line-through text-sm mr-2">
               R$ {product.preco.toFixed(2).replace('.', ',')}
             </span>
           )}
-          <div className="font-bold text-xl" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+          <div className="font-bold text-xl text-black" style={{ fontFamily: 'var(--font-museo-sans)' }}>
             R$ {price.toFixed(2).replace('.', ',')}
           </div>
         </div>
@@ -88,7 +90,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             href={`/loja/produto/${product.slug}`}
             className="flex-1 text-center py-2 px-3 rounded-md text-white text-sm font-medium transition-all hover:opacity-90 hover:scale-105"
             style={{ 
-              backgroundColor: '#5179C8',
+              backgroundColor: '#0048C5',
               fontFamily: 'var(--font-museo-sans)'
             }}
           >
@@ -106,7 +108,6 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-        </div>
         </div>
       </div>
     </div>
