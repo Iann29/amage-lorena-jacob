@@ -39,17 +39,11 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Galeria de Imagens */}
-          <div className="relative">
-            <Link 
-              href="/loja/produtos"
-              className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded text-white transition-colors"
-              style={{ backgroundColor: '#8B6F47' }}
-            >
-              ← Voltar
-            </Link>
-
+        {/* Container com fundo branco */}
+        <div className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+            {/* Galeria de Imagens */}
+            <div className="relative">
             <div className="relative h-[500px] bg-gray-100 rounded-lg overflow-hidden">
               <Image
                 src={product.imagens[selectedImage]?.image_url || '/placeholder.jpg'}
@@ -83,7 +77,16 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
           </div>
 
           {/* Informações do Produto */}
-          <div>
+          <div className="relative">
+            {/* Botão Voltar */}
+            <Link 
+              href="/loja/produtos"
+              className="absolute -top-20 right-0 inline-flex items-center gap-2 px-4 py-2 rounded text-white transition-colors z-10"
+              style={{ backgroundColor: '#8B6F47' }}
+            >
+              ← Voltar
+            </Link>
+            
             <div className="bg-white rounded-3xl shadow-lg p-6 sticky top-20 relative" style={{ border: '2px solid #000' }}>
               {/* Botão de Like */}
               <button
@@ -100,7 +103,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                 />
               </button>
               <h1 
-                className="text-3xl font-bold mb-4 pr-12"
+                className="text-4xl font-bold mb-4 pr-12"
                 style={{ color: '#76A3C3', fontFamily: 'var(--font-museo-sans)' }}
               >
                 {product.nome}
@@ -113,7 +116,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                     R$ {product.preco.toFixed(2).replace('.', ',')}
                   </span>
                 )}
-                <span className="text-3xl font-bold">
+                <span className="text-3xl font-bold text-black">
                   R$ {price.toFixed(2).replace('.', ',')}
                 </span>
               </div>
@@ -149,11 +152,11 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
 
               {/* Quantidade */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">Quantidade:</label>
+                <label className="block text-sm font-bold mb-2 text-black">Quantidade:</label>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                    className="w-10 h-10 rounded border-2 border-black text-black font-bold flex items-center justify-center hover:bg-gray-100"
                   >
                     -
                   </button>
@@ -161,11 +164,11 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 h-10 text-center border border-gray-300 rounded"
+                    className="w-16 h-10 text-center border-2 border-black text-black font-bold rounded"
                   />
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+                    className="w-10 h-10 rounded border-2 border-black text-black font-bold flex items-center justify-center hover:bg-gray-100"
                   >
                     +
                   </button>
@@ -197,6 +200,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </div>
 
