@@ -3,9 +3,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from "framer-motion";
 import { useModal } from "@/contexts/ModalContext";
 import { createClient } from '@/utils/supabase/client'; // Mantido para signOut
 import { useUser } from '../../hooks/useUser'; // Importar o hook centralizado
@@ -17,6 +17,8 @@ const Header = () => {
   const pathname = usePathname();
   const { openContatoModal } = useModal();
   const { scrollY } = useScroll();
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Usar o hook centralizado para estado de autenticação e perfil
   const { user: currentUser, profile: userProfile, isLoading: isLoadingAuth } = useUser();
@@ -30,14 +32,26 @@ const Header = () => {
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const initialLangSyncDone = useRef(false); // Ref para controlar a sincronização inicial
 
-  const headerHeight = useTransform(scrollY, [0, 100], ["80px", "65px"]);
-  const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98]);
-  const logoScale = useTransform(scrollY, [0, 100], [1, 0.72]);
-  const headerShadow = useTransform(
-    scrollY,
-    [0, 20, 100],
-    ["none", "0px 2px 8px rgba(0,0,0,0.05)", "0px 4px 12px rgba(0,0,0,0.15)"]
-  );
+  // Usar useSpring para animações mais suaves e com melhor performance
+  const isScrolled = scrollPosition > 50;
+  const headerHeight = useSpring(isScrolled ? 65 : 80, {
+    stiffness: 400,
+    damping: 30,
+    mass: 0.8
+  });
+  
+  const logoScale = useSpring(isScrolled ? 0.8 : 1, {
+    stiffness: 400,
+    damping: 30,
+    mass: 0.8
+  });
+
+  // Valores memoizados para evitar recálculos
+  const headerShadow = useMemo(() => {
+    if (scrollPosition > 100) return "0px 4px 12px rgba(0,0,0,0.15)";
+    if (scrollPosition > 20) return "0px 2px 8px rgba(0,0,0,0.05)";
+    return "none";
+  }, [scrollPosition]);
   
   // Fechar o menu ao mudar de rota
   const closeMenu = useCallback(() => {
@@ -96,6 +110,34 @@ const Header = () => {
       document.body.style.overflow = 'auto';
     };
   }, [isMenuOpen]);
+
+  // Listener de scroll otimizado com throttle
+  useEffect(() => {
+    let ticking = false;
+    let lastScrollPosition = 0;
+    
+    const updateScrollPosition = () => {
+      setScrollPosition(window.scrollY);
+      setIsScrolling(false);
+      ticking = false;
+    };
+    
+    const handleScroll = () => {
+      lastScrollPosition = window.scrollY;
+      
+      if (!ticking) {
+        setIsScrolling(true);
+        window.requestAnimationFrame(updateScrollPosition);
+        ticking = true;
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const initGoogleTranslate = () => {
@@ -207,13 +249,14 @@ const Header = () => {
   return (
     <>
       <motion.header 
-        className={`w-full sticky top-0 z-50 relative ${
+        className={`w-full sticky top-0 z-50 relative transform-gpu will-change-transform ${
           pathname.startsWith('/loja') ? 'bg-[#5179C8]' : 'bg-white'
-        }`}
+        } ${isScrolling ? 'pointer-events-none' : ''}`}
         style={{
           boxShadow: headerShadow,
           height: headerHeight,
-          opacity: headerOpacity,
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
         }}
       >
         <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
@@ -245,12 +288,8 @@ const Header = () => {
           </motion.div>
 
           {/* Menu Desktop */}
-          <motion.nav 
+          <nav 
             className="hidden lg:flex items-center justify-center flex-1"
-            style={{ 
-              translateY: useTransform(scrollY, [0, 100], [0, -2]),
-              scale: useTransform(scrollY, [0, 100], [1, 0.95]) 
-            }}
           >
             {/* ... (links do menu como estavam) ... */}
              <div className="flex items-center justify-center">
@@ -321,7 +360,7 @@ const Header = () => {
                 </motion.div>
               </div>
             </div>
-          </motion.nav>
+          </nav>
 
           {/* Área Direita Desktop (Autenticação e Redes Sociais) */}
           <motion.div className={`hidden lg:flex items-center justify-end ${pathname.startsWith('/loja') ? 'gap-12' : 'gap-24'}`}>
@@ -860,7 +899,7 @@ const Header = () => {
       </motion.header>
 
       {/* Barra "Acessar Loja" Mobile */}
-      <div className="lg:hidden w-full bg-[#52A4DB] shadow-md sticky top-[65px] z-40">
+      <div className="lg:hidden w-full bg-[#52A4DB] shadow-md sticky top-[65px] z-40 transform-gpu will-change-transform">
         <Link
           href="/loja"
           prefetch={false}

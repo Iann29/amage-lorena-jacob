@@ -81,14 +81,9 @@ export default function PageTransition({ children }: { children: React.ReactNode
         )}
       </AnimatePresence>
       
-      <motion.div
-        initial={false}
-        animate={{ opacity: isTransitioning ? 0 : 1 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        style={{ pointerEvents: isTransitioning ? 'none' : 'auto' }}
-      >
+      <div style={{ pointerEvents: isTransitioning ? 'none' : 'auto' }}>
         {children}
-      </motion.div>
+      </div>
     </>
   );
 }
