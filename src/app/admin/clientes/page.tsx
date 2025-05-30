@@ -467,12 +467,12 @@ export default function AdminClientesPage() {
                     <p className="text-sm text-gray-700 font-medium">Pedidos</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.total_gasto)}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.total_gasto || 0)}</p>
                     <p className="text-sm text-gray-700 font-medium">Total Gasto</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-blue-600">
-                      {selectedCustomer.total_pedidos > 0 ? formatCurrency(selectedCustomer.total_gasto / selectedCustomer.total_pedidos) : 'R$ 0,00'}
+                      {(selectedCustomer.total_pedidos || 0) > 0 ? formatCurrency((selectedCustomer.total_gasto || 0) / (selectedCustomer.total_pedidos || 1)) : 'R$ 0,00'}
                     </p>
                     <p className="text-sm text-gray-700 font-medium">Ticket Médio</p>
                   </div>
