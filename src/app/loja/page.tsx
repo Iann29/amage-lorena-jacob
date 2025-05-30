@@ -10,13 +10,29 @@ export default function LojaPage() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [productsToShow, setProductsToShow] = useState(6);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 500 });
+  const [ageRange, setAgeRange] = useState({ min: 0, max: 12 });
 
-  // Produtos filtrados por pesquisa
+  // Produtos filtrados por pesquisa, preço e idade
   const filteredProducts = mockProducts.filter(product => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return product.nome.toLowerCase().includes(query) || 
-           product.descricao.toLowerCase().includes(query);
+    // Filtro de pesquisa
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = product.nome.toLowerCase().includes(query) || 
+                          product.descricao.toLowerCase().includes(query);
+      if (!matchesSearch) return false;
+    }
+    
+    // Filtro de preço
+    const price = product.preco_promocional || product.preco;
+    if (price < priceRange.min || price > priceRange.max) return false;
+    
+    // Filtro de idade
+    if (product.idade_min !== undefined && product.idade_max !== undefined) {
+      if (product.idade_max < ageRange.min || product.idade_min > ageRange.max) return false;
+    }
+    
+    return true;
   });
 
   // Produtos visíveis (limitados pelo estado productsToShow)
@@ -265,34 +281,77 @@ export default function LojaPage() {
                   <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
                     Preço
                   </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-sm text-black">Mínimo</label>
-                      <input 
-                        type="number" 
-                        placeholder="R$ 0,00"
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
+                  <div className="space-y-4">
+                    <div className="px-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="500"
+                        value={priceRange.max}
+                        onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) })}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #5179C8 0%, #5179C8 ${(priceRange.max / 500) * 100}%, #e5e7eb ${(priceRange.max / 500) * 100}%, #e5e7eb 100%)`
+                        }}
                       />
+                      <div className="flex justify-between mt-2">
+                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>R$ 0</span>
+                        <span className="text-sm font-bold text-[#5179C8]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                          Até R$ {priceRange.max}
+                        </span>
+                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>R$ 500</span>
+                      </div>
                     </div>
-                    <div>
-                      <label className="text-sm text-black">Máximo</label>
-                      <input 
-                        type="number" 
-                        placeholder="R$ 999,00"
-                        className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-black focus:outline-none focus:border-[#5179C8] placeholder-gray-700"
-                        style={{ fontFamily: 'var(--font-museo-sans)' }}
-                      />
+                  </div>
+                </div>
+                
+                {/* Filtro de Idade */}
+                <div className="border-t border-gray-400 pt-6">
+                  <h3 className="text-xl font-bold mb-4" style={{ color: '#000', fontFamily: 'var(--font-museo-sans)' }}>
+                    Idade
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="px-2">
+                      <div className="relative h-8">
+                        <input
+                          type="range"
+                          min="0"
+                          max="12"
+                          value={ageRange.min}
+                          onChange={(e) => {
+                            const newMin = Number(e.target.value);
+                            if (newMin <= ageRange.max) {
+                              setAgeRange({ ...ageRange, min: newMin });
+                            }
+                          }}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider absolute top-3"
+                          style={{ zIndex: ageRange.min === ageRange.max ? 2 : 1 }}
+                        />
+                        <input
+                          type="range"
+                          min="0"
+                          max="12"
+                          value={ageRange.max}
+                          onChange={(e) => {
+                            const newMax = Number(e.target.value);
+                            if (newMax >= ageRange.min) {
+                              setAgeRange({ ...ageRange, max: newMax });
+                            }
+                          }}
+                          className="w-full h-2 bg-transparent rounded-lg appearance-none cursor-pointer slider absolute top-3"
+                          style={{
+                            background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${(ageRange.min / 12) * 100}%, #5179C8 ${(ageRange.min / 12) * 100}%, #5179C8 ${(ageRange.max / 12) * 100}%, #e5e7eb ${(ageRange.max / 12) * 100}%, #e5e7eb 100%)`
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between mt-4">
+                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>0 anos</span>
+                        <span className="text-sm font-bold text-[#5179C8]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+                          {ageRange.min} - {ageRange.max} anos
+                        </span>
+                        <span className="text-sm text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>12 anos</span>
+                      </div>
                     </div>
-                    <button 
-                      className="w-full py-2 rounded-lg text-white text-sm font-medium transition-colors hover:opacity-90"
-                      style={{ 
-                        backgroundColor: '#0048C5',
-                        fontFamily: 'var(--font-museo-sans)'
-                      }}
-                    >
-                      Aplicar Filtro
-                    </button>
                   </div>
                 </div>
               </div>
