@@ -427,12 +427,6 @@ export default function AdminClientesPage() {
                     <span className="font-medium text-gray-700">Telefone:</span> <span className="text-gray-900">{selectedCustomer.telefone || 'Não informado'}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">CPF:</span> <span className="text-gray-900">{selectedCustomer.cpf || 'Não informado'}</span>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Data de Nascimento:</span> <span className="text-gray-900">{selectedCustomer.data_nascimento ? formatDate(selectedCustomer.data_nascimento) : 'Não informado'}</span>
-                  </div>
-                  <div>
                     <span className="font-medium text-gray-700">Cliente desde:</span> <span className="text-gray-900">{formatDate(selectedCustomer.data_cadastro)}</span>
                   </div>
                 </div>
