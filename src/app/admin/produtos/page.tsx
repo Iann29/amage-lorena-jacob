@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { adminApi } from '@/lib/admin-api';
+import { createClient } from '@/utils/supabase/client';
 
 interface Product {
   id: string;
@@ -373,7 +374,38 @@ export default function AdminProdutosPage() {
                       >
                         Editar
                       </Link>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button 
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir este produto?')) {
+                            try {
+                              // Buscar imagens do produto
+                              const productDetails = await adminApi.getProduct(product.id);
+                              
+                              // Deletar imagens do bucket
+                              if (productDetails.images && productDetails.images.length > 0) {
+                                const imagePaths = productDetails.images.map((img: any) => {
+                                  const url = img.image_url;
+                                  const path = url.split('/lorena-images-db/')[1];
+                                  return path;
+                                }).filter(Boolean);
+                                
+                                if (imagePaths.length > 0) {
+                                  const supabase = createClient();
+                                  await supabase.storage.from('lorena-images-db').remove(imagePaths);
+                                }
+                              }
+                              
+                              await adminApi.deleteProduct(product.id);
+                              alert('Produto excluído com sucesso!');
+                              loadProducts();
+                            } catch (error) {
+                              console.error('Erro ao excluir produto:', error);
+                              alert('Erro ao excluir produto');
+                            }
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         Excluir
                       </button>
                     </div>

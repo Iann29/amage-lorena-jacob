@@ -42,7 +42,7 @@ export const getCorsHeaders = (request: Request): Record<string, string> => {
   
   return {
     'Access-Control-Allow-Origin': isOriginAllowed(origin) ? origin || '*' : getAllowedOrigins()[0],
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info',
     'Access-Control-Max-Age': '86400', // 24 horas em segundos
   };

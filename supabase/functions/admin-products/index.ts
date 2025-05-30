@@ -103,12 +103,7 @@ serve(async (req) => {
           *,
           category:categories(*),
           images:product_images(*),
-          variants:product_variants(*),
-          price_history(*),
-          reviews:product_reviews(
-            *,
-            user:user_profiles(nome, sobrenome)
-          )
+          variants:product_variants(*)
         `)
         .eq('id', productId)
         .single()
@@ -238,25 +233,27 @@ serve(async (req) => {
       )
     }
 
-    // DELETE /admin-products/:id - Desativar produto
+    // DELETE /admin-products/:id - Deletar produto
     if (method === 'DELETE' && pathname.startsWith('/admin-products/')) {
       const productId = pathname.split('/')[2]
 
-      // Não deletar fisicamente, apenas desativar
-      const { data, error } = await supabase
+      // Primeiro buscar o produto para obter as imagens
+      const { data: product } = await supabase
         .from('products')
-        .update({
-          is_active: false,
-          updated_at: new Date().toISOString()
-        })
+        .select('*, images:product_images(*)')
         .eq('id', productId)
-        .select()
         .single()
+
+      // Deletar o produto (as imagens serão deletadas em cascata devido à foreign key)
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
 
       if (error) throw error
 
       return new Response(
-        JSON.stringify(data),
+        JSON.stringify({ success: true, deletedProduct: product }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
