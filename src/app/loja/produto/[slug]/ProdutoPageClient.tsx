@@ -26,8 +26,8 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6">
           <ol className="flex items-center gap-2 text-sm text-gray-600">
@@ -243,10 +243,13 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
             </div>
           </div>
         </section>
-
-        {/* Produtos Relacionados */}
-        {relatedProducts.length > 0 && (
-          <section className="bg-white rounded-3xl p-8 mb-12 shadow-lg">
+        
+      </div>
+      
+      {/* Produtos Relacionados - Fora do container para cobrir toda a largura */}
+      {relatedProducts.length > 0 && (
+        <section className="bg-white w-screen relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] py-8 mb-12 shadow-lg">
+            <div className="container mx-auto px-4">
             <h2 
               className="text-2xl font-bold mb-6"
               style={{ 
@@ -267,10 +270,12 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
                 />
               ))}
             </div>
+            </div>
           </section>
         )}
 
         {/* Avaliações */}
+        <div className="container mx-auto px-4 pb-8">
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Avaliações</h2>
           
@@ -321,7 +326,7 @@ export default function ProdutoPageClient({ product }: ProdutoPageClientProps) {
             ))}
           </div>
         </section>
-      </div>
+        </div>
     </div>
   );
 }
