@@ -117,7 +117,7 @@ export default function AdminPedidosPage() {
     });
   };
 
-  const getStatusColor = (status: Order['status']) => {
+  const getStatusColor = (status: AdminOrder['status']) => {
     const colors = {
       pendente: 'bg-yellow-100 text-yellow-800',
       processando: 'bg-blue-100 text-blue-800',
@@ -129,7 +129,7 @@ export default function AdminPedidosPage() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const getPaymentMethodLabel = (method: Order['metodo_pagamento']) => {
+  const getPaymentMethodLabel = (method: AdminOrder['metodo_pagamento']) => {
     const labels = {
       cartao_credito: 'Cartão de Crédito',
       cartao_debito: 'Cartão de Débito',
@@ -139,7 +139,7 @@ export default function AdminPedidosPage() {
     return method ? labels[method] : 'Não informado';
   };
 
-  const getStatusLabel = (status: Order['status']) => {
+  const getStatusLabel = (status: AdminOrder['status']) => {
     const labels = {
       pendente: 'Pendente',
       processando: 'Processando',
@@ -151,7 +151,7 @@ export default function AdminPedidosPage() {
     return labels[status] || status;
   };
 
-  const getOrderNumber = (order: Order) => {
+  const getOrderNumber = (order: AdminOrder) => {
     return `#${order.external_reference || order.id.slice(0, 8)}`;
   };
 
