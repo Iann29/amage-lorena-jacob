@@ -435,18 +435,18 @@ export default function AdminClientesPage() {
               {/* Endereços */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3">Endereços</h4>
-                {selectedCustomer.enderecos.length > 0 ? (
+                {selectedCustomer.shipping_addresses && selectedCustomer.shipping_addresses.length > 0 ? (
                   <div className="space-y-2">
-                    {selectedCustomer.enderecos.map((endereco) => (
+                    {selectedCustomer.shipping_addresses.map((endereco) => (
                       <div key={endereco.id} className="bg-white border border-gray-200 p-3 rounded text-sm">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-semibold text-gray-900 mb-1">{endereco.tipo === 'entrega' ? 'Endereço de Entrega' : 'Endereço de Cobrança'}</p>
-                            <p className="text-gray-800">{endereco.logradouro}, {endereco.numero} {endereco.complemento && `- ${endereco.complemento}`}</p>
+                            <p className="font-semibold text-gray-900 mb-1">{endereco.nome_destinatario}</p>
+                            <p className="text-gray-800">{endereco.rua}, {endereco.numero} {endereco.complemento && `- ${endereco.complemento}`}</p>
                             <p className="text-gray-800">{endereco.bairro} - {endereco.cidade}/{endereco.estado}</p>
                             <p className="text-gray-800">CEP: {endereco.cep}</p>
                           </div>
-                          {endereco.padrao && (
+                          {endereco.is_default && (
                             <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-medium">Padrão</span>
                           )}
                         </div>
