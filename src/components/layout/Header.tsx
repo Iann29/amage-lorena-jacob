@@ -216,7 +216,7 @@ const Header = () => {
           opacity: headerOpacity,
         }}
       >
-        <div className={`container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px] ${pathname.startsWith('/loja') ? 'pr-[60px]' : ''}`}>
+        <div className="container mx-auto px-6 flex justify-between items-center h-full max-w-[1280px]">
           {/* Logo */}
           <motion.div>
             <Link href="/" className="flex items-center">
@@ -324,7 +324,7 @@ const Header = () => {
           </motion.nav>
 
           {/* Área Direita Desktop (Autenticação e Redes Sociais) */}
-          <motion.div className={`hidden lg:flex items-center justify-end ${pathname.startsWith('/loja') ? 'gap-4' : 'gap-24'}`}>
+          <motion.div className={`hidden lg:flex items-center justify-end ${pathname.startsWith('/loja') ? 'gap-12' : 'gap-24'}`}>
             {/* Conta e Carrinho agrupados quando na loja */}
             <div className={`flex items-center ${pathname.startsWith('/loja') ? 'gap-4' : ''}`}>
               {isLoadingAuth ? (
@@ -387,7 +387,7 @@ const Header = () => {
                       alt="Minha Conta" 
                       width={40} 
                       height={40}
-                      className="mb-0.5"
+                      className={`mb-0.5 ${pathname.startsWith('/loja') ? 'brightness-0 invert' : ''}`}
                       unoptimized
                       style={{ width: '40px', height: '40px' }}
                     />
@@ -431,7 +431,7 @@ const Header = () => {
             </div>
             
             {/* Redes Sociais */}
-            <motion.div className="flex flex-col items-center">
+            <motion.div className={`flex flex-col items-center ${pathname.startsWith('/loja') ? 'absolute top-3 right-3' : ''}`}>
               {!pathname.startsWith('/loja') && (
                 <div className="text-[10px] font-['Poppins'] mb-1 text-center">
                   <span className="text-[#52A4DB] font-bold">Siga-me</span>
@@ -451,10 +451,10 @@ const Header = () => {
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
-                    className={`w-5 h-5 ${
+                    className={`${
                       pathname.startsWith('/loja') 
-                        ? 'text-white hover:text-gray-200' 
-                        : 'text-[#6fb1ce] hover:text-[#1877F2]'
+                        ? 'w-4 h-4 text-white hover:text-gray-200' 
+                        : 'w-5 h-5 text-[#6fb1ce] hover:text-[#1877F2]'
                     } transition-colors duration-200`}
                     fill="currentColor"
                   >
@@ -472,10 +472,10 @@ const Header = () => {
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24"
-                    className={`w-6 h-6 ${
+                    className={`${
                       pathname.startsWith('/loja') 
-                        ? 'text-white hover:text-gray-200' 
-                        : 'text-[#6fb1ce] hover:text-[#C13584]'
+                        ? 'w-4 h-4 text-white hover:text-gray-200' 
+                        : 'w-6 h-6 text-[#6fb1ce] hover:text-[#C13584]'
                     } transition-colors duration-200`}
                     fill="currentColor"
                   >
@@ -607,18 +607,22 @@ const Header = () => {
         </div>
 
         {/* Novo Seletor de Idioma Desktop - Posicionado Absolutamente */}
-        <div className="hidden lg:block absolute top-0 right-0 mr-32 h-full flex items-center justify-center" ref={langDropdownRef}>
+        <div className={`hidden lg:block absolute top-0 right-0 ${pathname.startsWith('/loja') ? 'mr-20' : 'mr-32'} h-full flex items-center justify-center`} ref={langDropdownRef}>
           <div className="flex items-center h-full relative">
             <motion.button
               onClick={() => setIsLangDropdownOpen(prev => !prev)}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors focus:outline-none border border-gray-400 bg-white"
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors focus:outline-none ${
+                pathname.startsWith('/loja') 
+                  ? 'border-2 border-white/50 bg-transparent hover:bg-white/10' 
+                  : 'border border-gray-400 bg-white hover:bg-gray-100'
+              }`}
               aria-label="Selecionar idioma"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              {selectedLang === 'pt' && <span className="text-sm font-medium text-[#6E6B46]">BR</span>}
-              {selectedLang === 'en' && <span className="text-sm font-medium text-[#6E6B46]">EN</span>}
-              {selectedLang === 'es' && <span className="text-sm font-medium text-[#6E6B46]">ES</span>}
+              {selectedLang === 'pt' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>BR</span>}
+              {selectedLang === 'en' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>EN</span>}
+              {selectedLang === 'es' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>ES</span>}
             </motion.button>
             <AnimatePresence>
               {isLangDropdownOpen && (
