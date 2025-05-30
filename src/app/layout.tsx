@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Poppins } from "next/font/google";
+import { Poppins, Fredoka } from "next/font/google";
 import localFont from "next/font/local";
 import "../styles/globals.css";
 
@@ -26,6 +26,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const fredoka = Fredoka({
+  weight: ["400", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-fredoka",
+  display: "swap",
 });
 
 // Fontes locais
@@ -79,7 +86,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} ${museoSansRounded.variable} ${mogilaBold.variable} antialiased flex flex-col min-h-screen`}>
+      <body className={`${poppins.variable} ${geistSans.variable} ${geistMono.variable} ${museoSansRounded.variable} ${mogilaBold.variable} ${fredoka.variable} antialiased flex flex-col min-h-screen`}>
         <LoadingWrapper>
           <LayoutProvider>
             {children}

@@ -99,8 +99,9 @@ export default function LojaPage() {
       </section>
 
       {/* Seção de Benefícios */}
-      <section className="py-8 px-4" style={{ backgroundColor: '#5179C8' }}>
+      <section className="py-12 px-4">
         <div className="container mx-auto">
+          <div className="rounded-2xl py-8 px-4" style={{ backgroundColor: '#5179C8' }}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 mb-3 relative">
@@ -111,7 +112,7 @@ export default function LojaPage() {
                   className="object-contain"
                 />
               </div>
-              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+              <h4 className="font-bold mb-1 text-lg md:text-xl" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
                 Frete Grátis
               </h4>
               <p className="text-white text-sm">acima de R$ 99,00</p>
@@ -126,7 +127,7 @@ export default function LojaPage() {
                   className="object-contain"
                 />
               </div>
-              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+              <h4 className="font-bold mb-1 text-lg md:text-xl" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
                 Parcelamento
               </h4>
               <p className="text-white text-sm">até 3x sem juros</p>
@@ -141,7 +142,7 @@ export default function LojaPage() {
                   className="object-contain"
                 />
               </div>
-              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+              <h4 className="font-bold mb-1 text-lg md:text-xl" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
                 Pagamento à Vista
               </h4>
               <p className="text-white text-sm">3% de desconto no PIX</p>
@@ -156,11 +157,12 @@ export default function LojaPage() {
                   className="object-contain"
                 />
               </div>
-              <h4 className="font-bold mb-1" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
+              <h4 className="font-bold mb-1 text-lg md:text-xl" style={{ color: '#F9FFD6', fontFamily: 'var(--font-museo-sans)' }}>
                 Segurança
               </h4>
               <p className="text-white text-sm">SSL de proteção</p>
             </div>
+          </div>
           </div>
         </div>
       </section>
@@ -169,24 +171,21 @@ export default function LojaPage() {
       <section className="py-12 px-4">
         <div className="container mx-auto">
           <h2 
-            className="text-3xl font-bold text-center mb-8" 
-            style={{ color: '#2A289B', fontFamily: 'var(--font-museo-sans)' }}
+            className="text-center mb-8 font-bold" 
+            style={{ 
+              color: '#2A289B', 
+              fontFamily: 'var(--font-fredoka)',
+              fontWeight: '700',
+              fontSize: 'clamp(56px, 10vw, 120px)'
+            }}
           >
             PRODUTOS
           </h2>
 
           {/* Barra de pesquisa */}
-          <div className="max-w-2xl mx-auto mb-8">
+          <div className="max-w-2xl mx-auto mb-4">
             <div className="relative">
-              <input
-                type="text"
-                placeholder="Pesquisar produtos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:border-[#5179C8]"
-                style={{ fontFamily: 'var(--font-museo-sans)' }}
-              />
-              <button className="absolute right-4 top-1/2 -translate-y-1/2">
+              <button className="absolute left-4 top-1/2 -translate-y-1/2">
                 <Image
                   src="/assets/searchIcon.png"
                   alt="Pesquisar"
@@ -194,11 +193,19 @@ export default function LojaPage() {
                   height={20}
                 />
               </button>
+              <input
+                type="text"
+                placeholder="Pesquisar por palavra ou tema"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#5179C8] placeholder-[#A6A6A6] text-[#A6A6A6]"
+                style={{ fontFamily: 'var(--font-museo-sans)' }}
+              />
             </div>
           </div>
 
-          {/* Contador e filtros */}
-          <div className="flex justify-between items-center mb-6">
+          {/* Contador centralizado */}
+          <div className="text-center mb-8">
             <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
               TODOS ({mockProducts.length})
             </span>
