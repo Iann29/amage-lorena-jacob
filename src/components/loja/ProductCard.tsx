@@ -32,7 +32,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const hasDiscount = !!product.preco_promocional;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-black/60 w-[280px] h-[400px] mx-auto flex flex-col">
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-black/60 w-[280px] h-[400px] flex flex-col">
       <div className="relative p-4 flex-shrink-0">
         <Link href={`/loja/produto/${product.slug}`}>
           <div className="relative h-48 overflow-hidden rounded-lg">

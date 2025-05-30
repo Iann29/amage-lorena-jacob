@@ -215,6 +215,7 @@ export default function LojaPage() {
           <div className="flex gap-8">
             {/* Filtro Lateral */}
             <aside className="w-56 flex-shrink-0 hidden lg:block">
+              <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
                 <div className="mb-6">
                   <h4 className="text-sm text-gray-500 mb-4" style={{ fontFamily: 'var(--font-museo-sans)' }}>
                     Filtrar por
@@ -324,6 +325,7 @@ export default function LojaPage() {
                     </button>
                   </div>
                 </div>
+              </div>
             </aside>
             
             {/* Grid de produtos */}
