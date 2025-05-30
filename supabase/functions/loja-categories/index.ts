@@ -14,48 +14,26 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    const { pathname } = new URL(req.url)
-    const method = req.method
-
-    // GET /loja-categories - Listar todas as categorias ativas
-    if (method === 'GET' && pathname === '/loja-categories') {
-      // Buscar categorias com contagem de produtos
-      const { data: categories, error } = await supabase
-        .from('categories')
-        .select(`
-          *,
-          produtos_count:products(count)
-        `)
-        .eq('is_active', true)
-        .order('nome')
-
-      if (error) throw error
-
-      // Processar categorias para adicionar contagem de produtos
-      const processedCategories = categories?.map(category => ({
-        ...category,
-        produtos_count: category.produtos_count?.[0]?.count || 0
-      })) || []
-
-      return new Response(
-        JSON.stringify({
-          categories: processedCategories
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // Parse body apenas se houver conteúdo
+    let body = null;
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch (e) {
+      // Se não conseguir fazer parse, body permanece null
     }
-
-    // GET /loja-categories/:slug - Detalhes de uma categoria
-    if (method === 'GET' && pathname.startsWith('/loja-categories/')) {
-      const categorySlug = pathname.split('/')[2]
-      
+    
+    // Se veio um slug no body, é busca por categoria específica
+    if (body?.slug) {
       const { data: category, error } = await supabase
         .from('categories')
         .select(`
           *,
           produtos_count:products(count)
         `)
-        .eq('slug', categorySlug)
+        .eq('slug', body.slug)
         .eq('is_active', true)
         .single()
 
@@ -81,11 +59,32 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    
+    // Caso contrário, é listagem de categorias
+      // Buscar categorias com contagem de produtos
+      const { data: categories, error } = await supabase
+        .from('categories')
+        .select(`
+          *,
+          produtos_count:products(count)
+        `)
+        .eq('is_active', true)
+        .order('nome')
 
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+      if (error) throw error
+
+      // Processar categorias para adicionar contagem de produtos
+      const processedCategories = categories?.map(category => ({
+        ...category,
+        produtos_count: category.produtos_count?.[0]?.count || 0
+      })) || []
+
+      return new Response(
+        JSON.stringify({
+          categories: processedCategories
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
 
   } catch (error) {
     console.error('Error:', error)

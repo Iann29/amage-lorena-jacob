@@ -14,22 +14,86 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    const { pathname, searchParams } = new URL(req.url)
-    const method = req.method
+    // Parse body apenas se houver conteúdo
+    let body = null;
+    try {
+      const text = await req.text();
+      if (text) {
+        body = JSON.parse(text);
+      }
+    } catch (e) {
+      // Se não conseguir fazer parse, body permanece null
+    }
+    
+    // Se veio um slug no body, é busca por produto específico
+    if (body?.slug) {
+      const { data: product, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*),
+          images:product_images(*),
+          variants:product_variants(*)
+        `)
+        .eq('slug', body.slug)
+        .eq('is_active', true)
+        .single()
 
-    // GET /loja-products - Listar produtos da loja (públicos)
-    if (method === 'GET' && pathname === '/loja-products') {
-      const page = parseInt(searchParams.get('page') || '1')
-      const limit = parseInt(searchParams.get('limit') || '12')
-      const search = searchParams.get('search') || ''
-      const categorySlug = searchParams.get('category') || ''
-      const minPrice = parseFloat(searchParams.get('min_price') || '0')
-      const maxPrice = parseFloat(searchParams.get('max_price') || '999999')
-      const minAge = parseInt(searchParams.get('min_age') || '0')
-      const maxAge = parseInt(searchParams.get('max_age') || '12')
-      const sortBy = searchParams.get('sort_by') || 'created_at'
-      const sortOrder = searchParams.get('sort_order') || 'desc'
-      const offset = (page - 1) * limit
+      if (error) throw error
+
+      if (!product) {
+        return new Response(
+          JSON.stringify({ error: 'Produto não encontrado' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Buscar produtos relacionados (mesma categoria)
+      const { data: relatedProducts } = await supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*),
+          images:product_images(*)
+        `)
+        .eq('category_id', product.category_id)
+        .neq('id', product.id)
+        .eq('is_active', true)
+        .limit(4)
+
+      // Processar produtos relacionados
+      const processedRelated = relatedProducts?.map(p => {
+        const primaryImage = p.images?.find((img: any) => img.is_primary) || p.images?.[0]
+        return {
+          ...p,
+          imagem_principal: primaryImage?.image_url || null
+        }
+      }) || []
+
+      return new Response(
+        JSON.stringify({
+          product,
+          relatedProducts: processedRelated
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    // Caso contrário, é listagem de produtos
+    const queryString = body?.queryParams || ''
+    const searchParams = new URLSearchParams(queryString)
+    
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '12')
+    const search = searchParams.get('search') || ''
+    const categorySlug = searchParams.get('category') || ''
+    const minPrice = parseFloat(searchParams.get('min_price') || '0')
+    const maxPrice = parseFloat(searchParams.get('max_price') || '999999')
+    const minAge = parseInt(searchParams.get('min_age') || '0')
+    const maxAge = parseInt(searchParams.get('max_age') || '12')
+    const sortBy = searchParams.get('sort_by') || 'created_at'
+    const sortOrder = searchParams.get('sort_order') || 'desc'
+    const offset = (page - 1) * limit
 
       // Query base - apenas produtos ativos
       let query = supabase
@@ -91,68 +155,6 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
-    }
-
-    // GET /loja-products/:slug - Detalhes do produto por slug
-    if (method === 'GET' && pathname.startsWith('/loja-products/')) {
-      const productSlug = pathname.split('/')[2]
-      
-      const { data: product, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          category:categories(*),
-          images:product_images(*),
-          variants:product_variants(*)
-        `)
-        .eq('slug', productSlug)
-        .eq('is_active', true)
-        .single()
-
-      if (error) throw error
-
-      if (!product) {
-        return new Response(
-          JSON.stringify({ error: 'Produto não encontrado' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      // Buscar produtos relacionados (mesma categoria)
-      const { data: relatedProducts } = await supabase
-        .from('products')
-        .select(`
-          *,
-          category:categories(*),
-          images:product_images(*)
-        `)
-        .eq('category_id', product.category_id)
-        .neq('id', product.id)
-        .eq('is_active', true)
-        .limit(4)
-
-      // Processar produtos relacionados
-      const processedRelated = relatedProducts?.map(p => {
-        const primaryImage = p.images?.find((img: any) => img.is_primary) || p.images?.[0]
-        return {
-          ...p,
-          imagem_principal: primaryImage?.image_url || null
-        }
-      }) || []
-
-      return new Response(
-        JSON.stringify({
-          product,
-          relatedProducts: processedRelated
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
 
   } catch (error) {
     console.error('Error:', error)

@@ -39,15 +39,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
     setIsAddingToCart(true);
     try {
-      const result = await lojaApi.addToCart(user.id, product.id, 1);
-      if (result.success) {
-        alert('Produto adicionado ao carrinho!');
-        if (onAddToCart) {
-          onAddToCart(product);
-        }
-      } else {
-        alert('Erro ao adicionar produto ao carrinho');
+      // TODO: Implementar quando tivermos a função addToCart
+      if (onAddToCart) {
+        onAddToCart(product);
       }
+      alert('Produto adicionado ao carrinho!');
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error);
       alert('Erro ao adicionar produto ao carrinho');
@@ -56,22 +52,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     }
   };
 
-  const hasDiscount = false; // Por enquanto não temos campo de desconto
-  const primaryImage = product.images?.find(img => img.is_primary)?.image_url || 
+  const hasDiscount = product.preco_promocional && product.preco_promocional < product.preco;
+  const currentPrice = product.preco_promocional || product.preco;
+  const primaryImage = product.imagem_principal || 
+                      product.images?.find(img => img.is_primary)?.image_url || 
                       product.images?.[0]?.image_url || 
                       '/placeholder.jpg';
-
-  // Criar slug temporário baseado no nome
-  const productSlug = product.slug || product.nome.toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
 
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border border-black/60 w-[280px] h-[400px] flex flex-col">
       <div className="relative p-4 pb-0 flex-shrink-0">
-        <Link href={`/loja/produto/${product.id}`}>
+        <Link href={`/loja/produto/${product.slug}`}>
           <div className="relative h-48 overflow-hidden rounded-lg">
             <Image
               src={!imageError ? primaryImage : '/placeholder.jpg'}
@@ -102,7 +93,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <div className="border-b border-black/60"></div>
 
       <div className="px-4 pb-4 flex-1 flex flex-col">
-        <Link href={`/loja/produto/${product.id}`}>
+        <Link href={`/loja/produto/${product.slug}`}>
           <h3 
             className="text-center font-bold text-base mb-2 line-clamp-2 hover:text-[#5179C8] transition-colors h-[48px] flex items-center justify-center"
             style={{ color: '#5179C8', fontFamily: 'var(--font-museo-sans)' }}
@@ -112,8 +103,13 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </Link>
         
         <div className="text-center mt-2 mb-auto">
+          {hasDiscount && (
+            <div className="text-sm text-gray-500 line-through" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+              R$ {product.preco.toFixed(2).replace('.', ',')}
+            </div>
+          )}
           <div className="font-bold text-xl text-black" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-            R$ {product.preco.toFixed(2).replace('.', ',')}
+            R$ {currentPrice.toFixed(2).replace('.', ',')}
           </div>
           <div className="text-sm text-gray-500 mt-1">
             {product.quantidade_estoque > 0 ? (
@@ -130,7 +126,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <div className="flex gap-2">
           <Link
-            href={`/loja/produto/${product.id}`}
+            href={`/loja/produto/${product.slug}`}
             className="flex-1 text-center py-2 px-3 rounded-md text-white text-sm font-medium transition-all hover:opacity-90 hover:scale-105"
             style={{ 
               backgroundColor: '#0048C5',

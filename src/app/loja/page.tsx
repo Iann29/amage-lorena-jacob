@@ -1,45 +1,67 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { mockProducts, mockCategories, allCategories, mockBanners } from '@/lib/mockDataLoja';
+import { lojaApi, type Product, type Category } from '@/lib/loja-api';
 import { ProductCard } from '@/components/loja/ProductCard';
+
+// Dados mockados temporários para o banner
+const mockBanners = [
+  {
+    id: '1',
+    image_url: 'https://vqldbbetnfhzealxumcl.supabase.co/storage/v1/object/public/lorena-images-db/loja/banner-loja/banner1.png',
+    alt: 'Promoção de Brinquedos Educativos',
+    link: '/loja/brinquedos-sensoriais'
+  }
+];
 
 export default function LojaPage() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [productsToShow, setProductsToShow] = useState(6);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 500 });
   const [ageRange, setAgeRange] = useState({ min: 0, max: 12 });
+  
+  // Estados para dados do Supabase
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
 
-  // Produtos filtrados por pesquisa, preço e idade
-  const filteredProducts = mockProducts.filter(product => {
-    // Filtro de pesquisa
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = product.nome.toLowerCase().includes(query) || 
-                          product.descricao.toLowerCase().includes(query);
-      if (!matchesSearch) return false;
-    }
-    
-    // Filtro de preço
-    const price = product.preco_promocional || product.preco;
-    if (price < priceRange.min || price > priceRange.max) return false;
-    
-    // Filtro de idade
-    if (product.idade_min !== undefined && product.idade_max !== undefined) {
-      if (product.idade_max < ageRange.min || product.idade_min > ageRange.max) return false;
-    }
-    
-    return true;
-  });
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Carregar categorias
+        const { categories: categoriesData } = await lojaApi.getCategories();
+        setCategories(categoriesData);
+        
+        // Carregar produtos
+        const response = await lojaApi.getProducts({
+          page: 1,
+          limit: 12,
+        });
+        
+        setProducts(response.products);
+        setTotalPages(response.totalPages);
+        setTotalProducts(response.total);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Produtos visíveis (limitados pelo estado productsToShow)
-  const visibleProducts = filteredProducts.slice(0, productsToShow);
+    loadData();
+  }, []);
 
   const handleLoadMore = () => {
-    setProductsToShow(prev => Math.min(prev + 6, filteredProducts.length));
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
   };
 
   return (
@@ -86,44 +108,50 @@ export default function LojaPage() {
       {/* Categorias */}
       <section className="py-12 px-4">
         <div className="container mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {mockCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/loja/${category.slug}`}
-                className="group"
-              >
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <Image
-                    src={category.imagem_url}
-                    alt={category.nome}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute inset-0 flex items-end justify-center pb-4 md:pb-6">
-                    <h3 className="text-white text-center">
-                      {category.nome === 'Brinquedos Sensoriais' ? (
-                        <span className="flex flex-col leading-tight">
-                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Brinquedos</span>
-                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Sensoriais</span>
-                        </span>
-                      ) : category.nome === 'Material Pedagógico' ? (
-                        <span className="flex flex-col leading-tight">
-                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Material</span>
-                          <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Pedagógico</span>
-                        </span>
-                      ) : category.nome === 'PECS' || category.nome === 'E-books' ? (
-                        <span className="text-2xl md:text-3xl lg:text-4xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>{category.nome}</span>
-                      ) : (
-                        category.nome
-                      )}
-                    </h3>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              {categories.slice(0, 4).map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/loja/${category.slug}`}
+                  className="group"
+                >
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                    <Image
+                      src={category.imagem_url || '/assets/category-placeholder.jpg'}
+                      alt={category.nome}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-0 flex items-end justify-center pb-4 md:pb-6">
+                      <h3 className="text-white text-center">
+                        {category.nome === 'Brinquedos Sensoriais' ? (
+                          <span className="flex flex-col leading-tight">
+                            <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Brinquedos</span>
+                            <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Sensoriais</span>
+                          </span>
+                        ) : category.nome === 'Material Pedagógico' ? (
+                          <span className="flex flex-col leading-tight">
+                            <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '500' }}>Material</span>
+                            <span className="text-xl md:text-2xl lg:text-3xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>Pedagógico</span>
+                          </span>
+                        ) : category.nome === 'PECS' || category.nome === 'E-books' ? (
+                          <span className="text-2xl md:text-3xl lg:text-4xl" style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: '900' }}>{category.nome}</span>
+                        ) : (
+                          category.nome
+                        )}
+                      </h3>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -236,7 +264,7 @@ export default function LojaPage() {
           {/* Contador centralizado */}
           <div className="text-center mb-8">
             <span className="text-gray-600" style={{ fontFamily: 'var(--font-museo-sans)' }}>
-              TODOS ({filteredProducts.length})
+              TODOS ({totalProducts})
             </span>
           </div>
 
@@ -262,7 +290,7 @@ export default function LojaPage() {
                         Todos
                       </Link>
                     </li>
-                    {allCategories.map((category) => (
+                    {categories.map((category) => (
                       <li key={category.id}>
                         <Link 
                           href={`/loja/${category.slug}`}
@@ -369,34 +397,47 @@ export default function LojaPage() {
             
             {/* Grid de produtos */}
             <div className="flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 mb-8">
-            {visibleProducts.map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product}
-                onAddToCart={(product) => {
-                  // TODO: Implementar lógica do carrinho
-                  console.log('Produto adicionado ao carrinho:', product);
-                }}
-              />
-            ))}
-          </div>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-16">
+                  <p className="text-gray-500 text-lg">Nenhum produto encontrado.</p>
+                  <p className="text-gray-400 text-sm mt-2">Tente ajustar os filtros ou realizar uma nova busca.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-4 mb-8">
+                    {products.map((product) => (
+                      <ProductCard 
+                        key={product.id} 
+                        product={product}
+                        onAddToCart={(product) => {
+                          // TODO: Implementar lógica do carrinho
+                          console.log('Produto adicionado ao carrinho:', product);
+                        }}
+                      />
+                    ))}
+                  </div>
 
-          {/* Botão Ver Mais */}
-          {productsToShow < filteredProducts.length && (
-            <div className="text-center">
-              <button
-                onClick={handleLoadMore}
-                className="px-8 py-3 rounded-full text-white font-medium transition-colors hover:opacity-90"
-                style={{ 
-                  backgroundColor: '#0048C5',
-                  fontFamily: 'var(--font-museo-sans)'
-                }}
-              >
-                VER MAIS
-              </button>
-            </div>
-          )}
+                  {/* Botão Ver Mais */}
+                  {currentPage < totalPages && (
+                    <div className="text-center">
+                      <button
+                        onClick={handleLoadMore}
+                        className="px-8 py-3 rounded-full text-white font-medium transition-colors hover:opacity-90"
+                        style={{ 
+                          backgroundColor: '#0048C5',
+                          fontFamily: 'var(--font-museo-sans)'
+                        }}
+                      >
+                        VER MAIS
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
