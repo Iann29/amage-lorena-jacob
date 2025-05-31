@@ -232,7 +232,7 @@ export default function ProdutoPageClient({ product, relatedProducts = [] }: Pro
           <div className={`prose max-w-none ${!showFullDescription ? 'line-clamp-4' : ''}`}>
             <p className="text-black whitespace-pre-line">{product.descricao}</p>
           </div>
-          {product.descricao.length > 200 && (
+          {product.descricao && product.descricao.length > 200 && (
             <button
               onClick={() => setShowFullDescription(!showFullDescription)}
               className="text-[#5179C8] underline mt-2"
