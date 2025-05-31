@@ -59,8 +59,12 @@ export interface ProductsResponse {
 }
 
 export interface ProductDetailsResponse {
-  product: Product;
-  relatedProducts: Product[];
+  product?: Product;
+  products?: Product[];
+  relatedProducts?: Product[];
+  total?: number;
+  page?: number;
+  totalPages?: number;
 }
 
 export const lojaApi = {
@@ -134,7 +138,7 @@ export const lojaApi = {
   },
 
   // Buscar detalhes de uma categoria
-  async getCategoryBySlug(slug: string): Promise<{ category: Category }> {
+  async getCategoryBySlug(slug: string): Promise<{ category?: Category; categories?: Category[] }> {
     const { data, error } = await supabase.functions.invoke('loja-categories', {
       headers: {
         'Content-Type': 'application/json',
