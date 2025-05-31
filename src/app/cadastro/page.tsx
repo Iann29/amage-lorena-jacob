@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import styles from './cadastro.module.css';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function CadastroPage() {
+function CadastroForm() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -383,5 +383,13 @@ export default function CadastroPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <CadastroForm />
+    </Suspense>
   );
 }
