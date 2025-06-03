@@ -111,7 +111,7 @@ export default function Home() {
             priority
             sizes="100vw"
             quality={85}
-            className="w-full h-auto"
+            className="w-full h-auto animate-parallax-zoom"
             style={{ display: 'block' }}
           />
         </div>
@@ -126,7 +126,7 @@ export default function Home() {
             priority
             sizes="100vw"
             quality={85}
-            className="w-full h-auto"
+            className="w-full h-auto animate-parallax-zoom"
             style={{ display: 'block' }}
           />
         </div>
@@ -199,7 +199,7 @@ export default function Home() {
                   href="https://wa.me/message/FDF46FODEQMTL1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#FAFFE7] text-[#6E6B46] px-4 py-2 text-xs rounded-lg font-bold inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg"
+                  className="bg-[#FAFFE7] text-[#6E6B46] px-4 py-2 text-xs rounded-lg font-bold inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-lg"
                 >
                   Agende uma Avaliação
                 </a>
@@ -218,7 +218,7 @@ export default function Home() {
                 href="https://wa.me/message/FDF46FODEQMTL1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 mt-8"
+                className="bg-[#FAFFE7] text-[#6E6B46] px-6 py-2 text-sm rounded-lg font-medium inline-block hover:bg-opacity-90 hover:scale-105 active:scale-95 transition-all duration-300 mt-8"
               >
                 Agende uma Avaliação
               </a>
@@ -230,7 +230,7 @@ export default function Home() {
                 href="https://wa.me/message/FDF46FODEQMTL1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-200 hover:shadow-md" 
+                className="bg-[#FAFFE7] text-[#6E6B46] px-8 py-3 rounded-lg inline-block hover:bg-opacity-90 hover:scale-110 active:scale-95 transition-all duration-300 hover:shadow-md" 
                 style={{ fontFamily: 'var(--font-museo-sans)', fontWeight: 'bold', fontSize: '1.125rem' }}
               >
                 Agende uma Avaliação
@@ -261,6 +261,13 @@ export default function Home() {
           {/* Espaço para imagem (está no background) */}
           <div className="md:w-1/2">
             {/* A imagem está no background */}
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-44 md:bottom-56 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white rounded-full mt-2 animate-scroll-indicator"></div>
           </div>
         </div>
       </section>

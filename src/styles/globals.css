@@ -148,3 +148,40 @@ input[type="range"].slider::-moz-range-thumb {
   border: 3px solid white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+/* Animação Parallax Zoom */
+@keyframes parallaxZoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-parallax-zoom {
+  animation: parallaxZoom 20s ease-in-out infinite;
+}
+
+/* Animação Scroll Indicator */
+@keyframes scrollIndicator {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-scroll-indicator {
+  animation: scrollIndicator 1.5s ease-in-out infinite;
+}
