@@ -206,7 +206,7 @@ export default function Home() {
               </div>
               
               <div className="mt-8 border-l-4 border-white pl-3 py-2 max-w-[250px] mr-auto ml-4">
-                <p className="text-sm leading-5 text-left font-[var(--font-museo-sans)]">
+                <p className="text-sm leading-5 text-left font-[var(--font-museo-sans)] [text-shadow:_-0.5px_0.5px_0px_rgb(0_0_0_/_0.3)]">
                   Acompanhamento especializado para <span className="font-medium">auxiliar crianças com autismo, TDAH</span> e outras necessidades especiais.
                 </p>
               </div>
