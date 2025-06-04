@@ -37,10 +37,10 @@ const Footer = () => {
                   <Image 
                     src="/logos/logo1.webp" 
                     alt="Lorena Jacob - Terapeuta Infantil" 
-                    width={320} 
-                    height={64}
+                    width={400} 
+                    height={80}
                     priority
-                    style={{ width: 'clamp(180px, 20vw, 280px)', height: 'auto' }}
+                    style={{ width: 'clamp(240px, 25vw, 360px)', height: 'auto' }}
                     className="max-w-none"
                   />
                 </Link>
