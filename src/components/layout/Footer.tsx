@@ -56,8 +56,8 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row md:justify-end md:col-span-8 lg:col-span-7 space-x-0 md:space-x-10 lg:space-x-16 pl-0">
               {/* Início */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/')}>
+                <h3 className="text-[#07B1E4] text-xl font-semibold font-['Poppins'] mb-7 h-[38px] flex items-center">
+                  <span className="cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/')}>
                     Início
                   </span>
                 </h3>
@@ -92,8 +92,8 @@ const Footer = () => {
 
               {/* Sobre mim */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-black font-['Poppins'] mb-7" style={{fontSize: '1.49rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/sobre')}>
+                <h3 className="text-[#07B1E4] text-xl font-semibold font-['Poppins'] mb-7 h-[38px] flex items-center">
+                  <span className="cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/sobre')}>
                     Sobre mim
                   </span>
                 </h3>
@@ -113,8 +113,8 @@ const Footer = () => {
 
               {/* Blog */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <h3 className="text-[#07B1E4] text-lg font-semibold font-['Poppins'] mb-7" style={{fontSize: '1.24rem', display: 'block', height: '38px', lineHeight: '38px'}}>
-                  <span className="inline-block cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/blog')}>
+                <h3 className="text-[#07B1E4] text-xl font-semibold font-['Poppins'] mb-7 h-[38px] flex items-center">
+                  <span className="cursor-pointer hover:opacity-80 transition-opacity duration-200" onClick={() => router.push('/blog')}>
                     Blog
                   </span>
                 </h3>
@@ -134,13 +134,11 @@ const Footer = () => {
 
               {/* Loja */}
               <div className="mb-8 md:mb-0 md:w-auto" style={{maxWidth: "200px"}}>
-                <div style={{height: '38px', display: 'flex', alignItems: 'center', marginBottom: '28px'}}>
-                  <h3 className="text-white text-lg font-semibold font-['Poppins'] mb-0 px-6 py-0 rounded-md bg-[#52a4db]" style={{fontSize: '1.24rem', display: 'inline-block', lineHeight: '1.6rem'}}>
-                    <span className="inline-block cursor-pointer hover:opacity-90 transition-opacity duration-200" onClick={() => router.push('/loja')}>
-                      Loja
-                    </span>
-                  </h3>
-                </div>
+                <h3 className="mb-7 h-[38px] flex items-center">
+                  <span className="text-white text-xl font-semibold font-['Poppins'] px-6 py-1 rounded-md bg-[#52a4db] cursor-pointer hover:opacity-90 transition-opacity duration-200" onClick={() => router.push('/loja')}>
+                    Loja
+                  </span>
+                </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/loja/brinquedos-sensoriais" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
@@ -148,13 +146,13 @@ const Footer = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/jogos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> Jogos
+                    <Link href="/loja/jogos" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                      <span className="mr-2">•</span> <span className="text-black hover:text-[#52A4DB] transition-colors duration-200">Jogos</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/brinquedos-montessorianos" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> Brinquedos Montessorianos
+                    <Link href="/loja/brinquedos-montessorianos" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                      <span className="mr-2">•</span> <span className="text-black hover:text-[#52A4DB] transition-colors duration-200">Brinquedos Montessorianos</span>
                     </Link>
                   </li>
                   <li>
@@ -163,8 +161,8 @@ const Footer = () => {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/loja/ebooks" prefetch={false} className="hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> E-BOOKS
+                    <Link href="/loja/ebooks" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                      <span className="mr-2">•</span> <span className="text-black hover:text-[#52A4DB] transition-colors duration-200">E-BOOKS</span>
                     </Link>
                   </li>
                   <li>
