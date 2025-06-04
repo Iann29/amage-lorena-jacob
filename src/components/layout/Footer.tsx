@@ -64,27 +64,27 @@ const Footer = () => {
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/#suporte" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-start">
-                      <span className="mr-2 mt-0.5">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Suporte personalizado</span> para o desenvolvimento infantil</span>
+                      <span className="mr-2 mt-0.5">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Suporte personalizado para o desenvolvimento infantil</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/#treinamento" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-start">
-                      <span className="mr-2 mt-0.5">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Treinamento</span> para Pais e Educadores</span>
+                      <span className="mr-2 mt-0.5">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Treinamento para Pais e Educadores</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/#palestras" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Palestras & Consultorias</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Palestras & Consultorias</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/#ebook" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">E-book</span> Rotina Diária</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">E-book Rotina Diária</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/#depoimentos" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Depoimentos</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Depoimentos</span>
                     </Link>
                   </li>
                 </ul>
@@ -100,12 +100,12 @@ const Footer = () => {
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/sobre" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Lorena Jacob</span>, Terapeuta infantil</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Lorena Jacob, Terapeuta infantil</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/sobre#portfolio" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Meu portfólio</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Meu portfólio</span>
                     </Link>
                   </li>
                 </ul>
@@ -121,12 +121,12 @@ const Footer = () => {
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/blog/categoria/dicas" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span>Dicas para <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">estimular o desenvolvimento infantil</span></span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Dicas para estimular o desenvolvimento infantil</span>
                     </Link>
                   </li>
                   <li>
                     <Link href="/blog/categoria/rotina" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span>Como <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">criar uma rotina estruturada para crianças</span></span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Como criar uma rotina estruturada para crianças</span>
                     </Link>
                   </li>
                 </ul>
@@ -144,7 +144,7 @@ const Footer = () => {
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
                     <Link href="/loja/brinquedos-sensoriais" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Brinquedos sensoriais</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Brinquedos sensoriais</span>
                     </Link>
                   </li>
                   <li>
@@ -159,7 +159,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link href="/loja/pecs" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">PECS</span> & Comunicação Alternativa</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">PECS & Comunicação Alternativa</span>
                     </Link>
                   </li>
                   <li>
@@ -169,7 +169,7 @@ const Footer = () => {
                   </li>
                   <li>
                     <Link href="/loja/material-pedagogico" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="mr-2">•</span> <span><span className="font-bold text-black group-hover:text-[#52A4DB] transition-colors duration-200">Materiais</span> Pedagógicos</span>
+                      <span className="mr-2">•</span> <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Materiais Pedagógicos</span>
                     </Link>
                   </li>
                 </ul>
@@ -194,8 +194,7 @@ const Footer = () => {
               <div className="mr-6 md:mr-8">
                 <div className="text-center md:text-left">
                   <span className="text-white text-2xl font-extrabold font-['Poppins'] leading-normal">SIGA-ME</span>
-                  <br/>
-                  <span className="text-white text-2xl font-medium font-['Poppins'] leading-normal">NAS REDES</span>
+                  <span className="text-white text-2xl font-medium font-['Poppins'] leading-normal ml-2">NAS REDES</span>
                 </div>
               </div>
               
