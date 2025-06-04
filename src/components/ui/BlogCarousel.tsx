@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import BlogPostCard from './BlogPostCard';
 
@@ -22,10 +22,35 @@ interface BlogCarouselProps {
 
 const BlogCarousel: React.FC<BlogCarouselProps> = ({
   posts,
-  postsPerPage = 3
+  postsPerPage: defaultPostsPerPage = 3
 }) => {
   // Estado para controlar qual página de posts está sendo exibida
   const [currentPage, setCurrentPage] = useState(0);
+  const [postsPerPage, setPostsPerPage] = useState(defaultPostsPerPage);
+  
+  // Detectar tamanho da tela e ajustar posts por página
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setPostsPerPage(1); // Mobile: 1 post por vez
+      } else {
+        setPostsPerPage(defaultPostsPerPage); // Desktop: 3 posts por vez
+      }
+    };
+    
+    // Verificar no carregamento inicial
+    handleResize();
+    
+    // Adicionar listener para mudanças de tamanho
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, [defaultPostsPerPage]);
+  
+  // Resetar página atual quando posts por página mudar
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [postsPerPage]);
   
   // Calculando o número total de páginas
   const totalPages = Math.ceil(posts.length / postsPerPage);
@@ -78,14 +103,17 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
 
   // Determinar classes dinâmicas para o layout do grid
   const numCurrentPosts = currentPosts.length;
-  let motionDivClassName = "grid grid-cols-1 gap-8 mx-auto h-full"; // Base para mobile e outras props
-
-  if (numCurrentPosts === 1) {
-    motionDivClassName += " md:grid-cols-1 md:justify-items-center";
+  let motionDivClassName = "grid gap-8 mx-auto h-full"; // Base
+  
+  // No mobile sempre 1 coluna, no desktop depende do número de posts
+  if (postsPerPage === 1) {
+    motionDivClassName += " grid-cols-1 justify-items-center";
+  } else if (numCurrentPosts === 1) {
+    motionDivClassName += " grid-cols-1 md:grid-cols-1 md:justify-items-center";
   } else if (numCurrentPosts === 2) {
-    motionDivClassName += " md:grid-cols-2";
-  } else { // Default para 3 posts (considerando postsPerPage = 3)
-    motionDivClassName += " md:grid-cols-3";
+    motionDivClassName += " grid-cols-1 md:grid-cols-2";
+  } else { // Default para 3 posts
+    motionDivClassName += " grid-cols-1 md:grid-cols-3";
   }
 
   return (
