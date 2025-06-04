@@ -411,29 +411,20 @@ const Header = () => {
                 </AnimatePresence>
               </div>
             ) : (
-              <motion.div 
-                className="flex flex-col items-center"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link href="/autenticacao" className="flex flex-col items-center">
-                  <motion.div
-                    whileHover={{ y: -2 }}
-                    transition={{ type: "spring", stiffness: 400 }}
-                  >
-                    <Image 
-                      src="/assets/perfilIcon.png" 
-                      alt="Minha Conta" 
-                      width={40} 
-                      height={40}
-                      className={`mb-0.5 ${pathname.startsWith('/loja') ? 'brightness-0 invert' : ''}`}
-                      unoptimized
-                      style={{ width: '40px', height: '40px' }}
-                    />
-                  </motion.div>
+              <div className="flex flex-col items-center">
+                <Link href="/autenticacao" className="flex flex-col items-center group">
+                  <Image 
+                    src="/assets/perfilIcon.png" 
+                    alt="Minha Conta" 
+                    width={40} 
+                    height={40}
+                    className={`mb-0.5 transition-transform duration-200 group-hover:scale-105 ${pathname.startsWith('/loja') ? 'brightness-0 invert' : ''}`}
+                    unoptimized
+                    style={{ width: '40px', height: '40px' }}
+                  />
                   <span className={`${pathname.startsWith('/loja') ? 'text-white' : 'text-[#365F71]'} text-xs font-['Poppins']`}>Minha Conta</span>
                 </Link>
-              </motion.div>
+              </div>
             )}
               
               {/* Carrinho (apenas na loja) */}
