@@ -107,12 +107,12 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
         <div className="mt-auto">
           <a 
             href={postUrl} 
-            className="bg-[#0B5394] text-white text-center py-2 md:py-3 px-4 rounded-md inline-block w-full font-bold text-sm md:text-lg hover:bg-opacity-90 transition-all"
+            className="bg-[#0B5394] text-white text-center py-1.5 md:py-2 px-4 rounded-md inline-block w-full font-bold text-base md:text-xl hover:bg-opacity-90 transition-all"
             style={{ fontFamily: 'var(--font-museo-sans)' }}
           >
             SAIBA MAIS
           </a>
-          <div className="flex justify-between items-center mt-2 md:mt-4 text-xs text-gray-500 pt-2 md:pt-3 border-t border-gray-200">
+          <div className="flex justify-between items-center mt-2 md:mt-4 text-xs text-gray-500 pt-2 md:pt-3 border-t-4 border-gray-200">
             {/* Mobile: Ícones */}
             <div className="flex items-center gap-1 md:hidden">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
