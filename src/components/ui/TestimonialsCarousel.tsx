@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import TestimonialCard from './TestimonialCard';
 
 // Interface para os dados de depoimento
@@ -116,35 +116,38 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
     setActiveIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
   };
 
-  // Variantes para animação de deslize suave
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
+  // Variantes para animação de deslize fluida
+  const slideVariants = {
+    enter: (direction: number) => {
+      return {
+        x: direction > 0 ? 1000 : -1000,
+        opacity: 0
+      };
+    },
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => {
+      return {
+        zIndex: 0,
+        x: direction < 0 ? 1000 : -1000,
+        opacity: 0
+      };
     }
   };
   
-  const itemVariants = {
-    hidden: (custom: number) => ({
-      x: custom > 0 ? 100 : -100,
-      opacity: 0
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        damping: 20,
-        stiffness: 300
-      }
-    }
+  // Transição suave para o slide
+  const swipeTransition = {
+    x: { type: "spring", stiffness: 300, damping: 30 },
+    opacity: { duration: 0.2 }
   };
 
   return (
-    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12 overflow-hidden" style={{ minHeight: '420px' }}>
+    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12 overflow-hidden" style={{ minHeight: isClient && displayConfig.width < 640 ? '300px' : '420px' }}>
       {/* Seta esquerda em formato circular */}
-      <div className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 z-50">
+      <div className={`absolute left-2 md:left-4 z-50 ${isClient && displayConfig.width < 640 ? 'top-[100px]' : 'top-[175px]'}`}>
         <button 
           className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handlePrev}
@@ -157,7 +160,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com deslizamento individual */}
-      <div className="relative py-6 sm:py-8 md:py-10 flex flex-col items-center" style={{ height: '350px' }}>
+      <div className="relative py-6 sm:py-8 md:py-10 flex flex-col items-center overflow-hidden" style={{ height: isClient && displayConfig.width < 640 ? '200px' : '350px' }}>
         {!isClient ? (
           // Mostrar placeholder ou esqueleto durante SSR
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full">
@@ -166,35 +169,37 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
             ))}
           </div>
         ) : (
+          <AnimatePresence initial={false} custom={direction}>
           <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            key={`container-${activeIndex}-${displayConfig.itemsToShow}`}
-            className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full`}
+            key={activeIndex}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={swipeTransition}
+            className={`grid grid-cols-1 ${displayConfig.itemsToShow > 1 ? 'sm:grid-cols-2' : ''} ${displayConfig.itemsToShow > 2 ? 'lg:grid-cols-3' : ''} gap-3 sm:gap-4 lg:gap-6 justify-items-center w-full h-full absolute inset-0`}
           >
           {visibleTestimonials.map((testimonial, idx) => (
-            <motion.div
-              key={`${testimonial.id}-${idx}-${activeIndex}`}
-              custom={direction}
-              variants={itemVariants}
-              initial="hidden"
-              animate="visible"
-              className="w-full"
+            <div
+              key={`${testimonial.id}-${idx}`}
+              className="w-full flex items-center justify-center"
             >
               <TestimonialCard 
                 quote={testimonial.quote}
                 name={testimonial.name}
                 avatarSrc={testimonial.avatarSrc}
+                isCompact={isClient && displayConfig.width < 640} // Passar flag para modo compacto
               />
-            </motion.div>
+            </div>
           ))}
         </motion.div>
+          </AnimatePresence>
         )}
       </div>
 
       {/* Seta direita em formato circular */}
-      <div className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 z-50">
+      <div className={`absolute right-2 md:right-4 z-50 ${isClient && displayConfig.width < 640 ? 'top-[100px]' : 'top-[175px]'}`}>
         <button 
           className="bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none"
           onClick={handleNext}
@@ -208,7 +213,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 
       {/* Indicadores de posição */}
       {isClient && (
-        <div className="flex justify-center mt-12 sm:mt-16 md:mt-20 space-x-2 sm:space-x-3">
+        <div className={`flex justify-center ${isClient && displayConfig.width < 640 ? 'mt-8' : 'mt-12 sm:mt-16 md:mt-20'} space-x-2 sm:space-x-3`}>
         {testimonials.map((_, i) => (
           <button
             key={i}

@@ -7,13 +7,33 @@ interface TestimonialCardProps {
   quote: string;
   name: string;
   avatarSrc?: string;
+  isCompact?: boolean;
 }
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({
   quote,
   name,
-  avatarSrc = "/assets/avatar-placeholder.png"
+  avatarSrc = "/assets/avatar-placeholder.png",
+  isCompact = false
 }) => {
+  // Versão compacta para mobile
+  if (isCompact) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center mx-auto relative w-full" style={{ width: '100%', maxWidth: '320px' }}>
+        {/* Citação */}
+        <p className="text-center text-[#555555] italic text-sm leading-relaxed mb-4">
+          &quot;{quote}&quot;
+        </p>
+        
+        {/* Nome com símbolo */}
+        <p className="text-base font-bold text-[#333333]" style={{ fontFamily: 'var(--font-museo-sans)' }}>
+          ~ {name}
+        </p>
+      </div>
+    );
+  }
+
+  // Versão completa para desktop/tablet
   return (
     <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 flex flex-col items-center mx-auto relative w-full min-h-[280px] sm:min-h-[320px] md:min-h-[340px]" style={{ width: '100%', maxWidth: '320px' }}>
       {/* Citação */}
