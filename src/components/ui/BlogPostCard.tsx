@@ -99,9 +99,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
         />
       </div>
       <div className="pt-1 px-3 pb-2 md:p-6 flex flex-col flex-grow">
-        <h3 className="text-lg md:text-2xl font-bold text-[#52A4DB] mb-1 md:mb-2 leading-tight" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
+        <h3 className="text-lg md:text-2xl font-bold text-[#6397C3] mb-1 md:mb-2 leading-tight" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
         {/* Exibe o resumo se está disponível, ou um trecho do conteúdo se estiver disponível */}
-        <p className="text-xs md:text-sm text-[#555555] mb-3 md:mb-5 leading-tight line-clamp-2 md:line-clamp-none">
+        <p className="text-xs md:text-sm text-[#003169] mb-3 md:mb-5 leading-tight line-clamp-2 md:line-clamp-none">
           {content ? extractTextFromHtml(content, 100) : summary}
         </p>
         <div className="mt-auto">
