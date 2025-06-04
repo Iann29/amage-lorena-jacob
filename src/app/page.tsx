@@ -288,6 +288,8 @@ export default function Home() {
                     height={805} 
                     className="rounded-2xl w-full h-auto max-w-[680px] md:ml-[-5%]"
                     priority
+                    quality={100}
+                    unoptimized
                   />
                 </div>
               </div>
