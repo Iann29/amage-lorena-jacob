@@ -103,15 +103,15 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
 
   // Determinar classes dinâmicas para o layout do grid
   const numCurrentPosts = currentPosts.length;
-  let motionDivClassName = "grid gap-8 mx-auto h-full"; // Base
+  let motionDivClassName = "grid gap-8 mx-auto h-full place-items-center"; // Base com centralização
   
   // No mobile sempre 1 coluna, no desktop depende do número de posts
   if (postsPerPage === 1) {
-    motionDivClassName += " grid-cols-1 justify-items-center";
+    motionDivClassName += " grid-cols-1";
   } else if (numCurrentPosts === 1) {
-    motionDivClassName += " grid-cols-1 md:grid-cols-1 md:justify-items-center";
+    motionDivClassName += " grid-cols-1 md:grid-cols-1";
   } else if (numCurrentPosts === 2) {
-    motionDivClassName += " grid-cols-1 md:grid-cols-2";
+    motionDivClassName += " grid-cols-1 md:grid-cols-2 md:max-w-[800px]"; // Limita largura para 2 posts
   } else { // Default para 3 posts
     motionDivClassName += " grid-cols-1 md:grid-cols-3";
   }
@@ -132,7 +132,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       </div>
 
       {/* Container do carrossel com altura fixa para evitar saltos */}
-      <div className="relative pb-12 md:pb-6 pt-6 px-4 h-[380px] md:h-[520px]">
+      <div className="relative pb-12 md:pb-6 pt-6 px-4 h-[380px] md:h-[520px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div 
             key={currentPage}

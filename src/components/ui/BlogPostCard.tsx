@@ -87,8 +87,8 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
   }, [id, slug, initialViewCount, initialCommentCount]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col m-3 h-[320px] md:h-[450px]" style={{ maxWidth: '380px' }}>
-      <div className="h-28 md:h-64 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col w-full max-w-[360px] h-[320px] md:h-[450px]">
+      <div className="h-24 md:h-48 overflow-hidden flex-shrink-0">
         <Image 
           src={imageUrl} 
           alt={title} 
@@ -98,13 +98,15 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
           unoptimized
         />
       </div>
-      <div className="pt-1 px-3 pb-2 md:p-6 flex flex-col flex-grow">
-        <h3 className="text-lg md:text-2xl font-bold text-[#6397C3] mb-1 md:mb-2 leading-tight" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
-        {/* Exibe o resumo se está disponível, ou um trecho do conteúdo se estiver disponível */}
-        <p className="text-xs md:text-sm text-[#003169] mb-3 md:mb-5 leading-tight line-clamp-2 md:line-clamp-none">
-          {content ? extractTextFromHtml(content, 100) : summary}
-        </p>
-        <div className="mt-auto">
+      <div className="pt-2 px-3 pb-2 md:p-4 flex flex-col flex-grow">
+        <div className="flex-grow">
+          <h3 className="text-base md:text-xl font-bold text-[#6397C3] mb-1 md:mb-2 leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-museo-sans)' }}>{title}</h3>
+          {/* Exibe o resumo se está disponível, ou um trecho do conteúdo se estiver disponível */}
+          <p className="text-xs md:text-sm text-[#003169] mb-2 md:mb-3 leading-tight line-clamp-2">
+            {content ? extractTextFromHtml(content, 100) : summary}
+          </p>
+        </div>
+        <div>
           <a 
             href={postUrl} 
             className="bg-[#0B5394] text-white text-center py-1.5 md:py-2 px-4 rounded-md inline-block w-full font-bold text-base md:text-xl hover:bg-opacity-90 transition-all"
