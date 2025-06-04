@@ -489,7 +489,7 @@ export default function Home() {
       <EbookBanner />
       
       {/* Seção de Depoimentos */}
-      <section className="py-10 sm:py-12 md:py-20 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
+      <section className="py-6 sm:py-8 md:py-10 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
         {/* Imagem de fundo - Desktop */}
         <div className="absolute inset-0 z-0 hidden md:block">
           <Image 
@@ -497,6 +497,8 @@ export default function Home() {
             alt="Fundo de depoimentos desktop" 
             fill 
             priority
+            quality={100}
+            unoptimized
             className="object-cover"
             sizes="100vw"
           />
@@ -509,6 +511,8 @@ export default function Home() {
             alt="Fundo de depoimentos mobile" 
             fill 
             priority
+            quality={100}
+            unoptimized
             className="object-cover"
             sizes="100vw"
           />
@@ -516,8 +520,8 @@ export default function Home() {
         
         <div className="container mx-auto px-4 relative z-10">
           {/* Título */}
-          <div className="text-center mb-8 sm:mb-12 md:mb-16">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white" style={{ fontFamily: 'var(--font-museo-sans)' }}>DEPOIMENTOS</h2>
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: 'var(--font-museo-sans)' }}>DEPOIMENTOS</h2>
           </div>
           
           {/* Carrossel de Depoimentos */}

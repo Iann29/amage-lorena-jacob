@@ -76,12 +76,14 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
   }
 
   return (
-    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12" style={{ minHeight: isMobile ? '300px' : '420px' }}>
+    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 md:px-12" style={{ minHeight: isMobile ? '200px' : '280px' }}>
       {/* Seta esquerda */}
       <button 
-        className={`absolute left-2 md:left-4 z-50 bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none ${
-          isMobile ? 'top-[100px]' : 'top-[175px]'
-        }`}
+        className={`absolute left-2 md:left-4 z-50 bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none`}
+        style={{ 
+          top: isMobile ? '40%' : '35%',
+          transform: 'translateY(-50%)'
+        }}
         onClick={prevSlide}
         aria-label="Ver depoimentos anteriores"
       >
@@ -91,7 +93,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </button>
 
       {/* Container do carrossel */}
-      <div className="overflow-hidden py-6 sm:py-8 md:py-10">
+      <div className="overflow-hidden py-3 sm:py-4 md:py-6 relative">
         <motion.div 
           className="flex"
           animate={{ x: `${-currentIndex * (100 / itemsToShow)}%` }}
@@ -134,9 +136,11 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 
       {/* Seta direita */}
       <button 
-        className={`absolute right-2 md:right-4 z-50 bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none ${
-          isMobile ? 'top-[100px]' : 'top-[175px]'
-        }`}
+        className={`absolute right-2 md:right-4 z-50 bg-[#F5F5E7] hover:bg-[#e9e9cc] w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-105 focus:outline-none`}
+        style={{ 
+          top: isMobile ? '40%' : '35%',
+          transform: 'translateY(-50%)'
+        }}
         onClick={nextSlide}
         aria-label="Ver próximos depoimentos"
       >
@@ -146,7 +150,7 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
       </button>
 
       {/* Indicadores de posição */}
-      <div className={`flex justify-center ${isMobile ? 'mt-8' : 'mt-12 sm:mt-16 md:mt-20'} space-x-2 sm:space-x-3`}>
+      <div className={`flex justify-center ${isMobile ? 'mt-4' : 'mt-6 sm:mt-8 md:mt-10'} space-x-2 sm:space-x-3`}>
         {Array.from({ length: Math.ceil(testimonials.length / itemsToShow) }).map((_, pageIndex) => {
           const isActive = isMobile 
             ? currentIndex === pageIndex

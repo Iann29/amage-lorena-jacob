@@ -8,14 +8,24 @@ const WhatsAppFloat = () => {
   const [footerOffset, setFooterOffset] = useState(0);
   const { scrollY } = useScroll();
   
-  // Detectar a posição do footer
+  // Detectar a posição do footer e da seção de depoimentos
   useEffect(() => {
     const updateFooterPosition = () => {
-      const footer = document.querySelector('footer');
-      if (footer) {
-        const footerRect = footer.getBoundingClientRect();
-        const footerTop = footerRect.top + window.scrollY;
-        setFooterOffset(footerTop);
+      // Procurar pela seção de depoimentos pelo background color
+      const sections = document.querySelectorAll('section');
+      let depoimentosSection = null;
+      
+      sections.forEach(section => {
+        const bgColor = window.getComputedStyle(section).backgroundColor;
+        if (bgColor === 'rgb(0, 188, 212)') { // #00BCD4 em RGB
+          depoimentosSection = section;
+        }
+      });
+      
+      if (depoimentosSection) {
+        const rect = depoimentosSection.getBoundingClientRect();
+        const sectionBottom = rect.bottom + window.scrollY;
+        setFooterOffset(sectionBottom);
       }
     };
 
@@ -47,7 +57,7 @@ const WhatsAppFloat = () => {
 
   return (
     <motion.div
-      className="fixed bottom-6 right-6 z-50"
+      className="fixed bottom-6 right-6 z-40"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ 
