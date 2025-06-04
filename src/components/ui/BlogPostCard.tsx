@@ -129,8 +129,12 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({
             </div>
             
             {/* Desktop: Texto completo */}
-            <span className="hidden md:block">{viewCount} visualizações</span>
-            <span className="hidden md:block">{commentCount} comentários</span>
+            <div className="hidden md:flex items-center gap-3">
+              <span>{viewCount} visualizações</span>
+              <span>•</span>
+              <span>{commentCount} comentários</span>
+            </div>
+            <div className="hidden md:block"></div>
           </div>
         </div>
       </div>
