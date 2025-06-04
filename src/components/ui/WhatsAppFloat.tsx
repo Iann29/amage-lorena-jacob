@@ -1,9 +1,49 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const WhatsAppFloat = () => {
   const whatsappLink = "https://wa.me/message/FDF46FODEQMTL1";
+  const [footerOffset, setFooterOffset] = useState(0);
+  const { scrollY } = useScroll();
+  
+  // Detectar a posição do footer
+  useEffect(() => {
+    const updateFooterPosition = () => {
+      const footer = document.querySelector('footer');
+      if (footer) {
+        const footerRect = footer.getBoundingClientRect();
+        const footerTop = footerRect.top + window.scrollY;
+        setFooterOffset(footerTop);
+      }
+    };
+
+    // Atualizar na montagem e quando redimensionar
+    updateFooterPosition();
+    window.addEventListener('resize', updateFooterPosition);
+    
+    // Pequeno delay para garantir que o DOM esteja completamente carregado
+    setTimeout(updateFooterPosition, 100);
+    
+    return () => window.removeEventListener('resize', updateFooterPosition);
+  }, []);
+
+  // Calcular a posição Y do botão baseado no scroll
+  const buttonY = useTransform(scrollY, (value) => {
+    if (footerOffset === 0) return 0; // Se ainda não detectou o footer
+    
+    const windowHeight = window.innerHeight;
+    const buttonHeight = 80; // Altura do botão + margem
+    const safetyMargin = 100; // Margem extra para parar antes do footer
+    const maxScroll = footerOffset - windowHeight - safetyMargin;
+    
+    if (value >= maxScroll) {
+      // Quando se aproxima do footer, move o botão para cima
+      return -(value - maxScroll);
+    }
+    return 0;
+  });
 
   return (
     <motion.div
@@ -16,6 +56,7 @@ const WhatsAppFloat = () => {
         damping: 20,
         delay: 1
       }}
+      style={{ y: buttonY }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >
@@ -49,4 +90,4 @@ const WhatsAppFloat = () => {
   );
 };
 
-export default WhatsAppFloat; 
+export default WhatsAppFloat;
