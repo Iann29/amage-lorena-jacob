@@ -273,7 +273,7 @@ export default function Home() {
       </section>
 
       {/* Sobre Mim Section */}
-      <section className="py-12 md:py-16 bg-white overflow-visible relative">
+      <section id="o-diferencial" className="py-12 md:py-16 bg-white overflow-visible relative">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center">
           {/* Sobre Mim Card */}
           <div className="md:w-1/2 mb-8 md:mb-0 relative overflow-visible">
@@ -489,7 +489,7 @@ export default function Home() {
       <EbookBanner />
       
       {/* Seção de Depoimentos */}
-      <section className="py-6 sm:py-8 md:py-10 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
+      <section id="depoimentos" className="py-6 sm:py-8 md:py-10 w-full relative overflow-hidden" style={{ backgroundColor: '#00BCD4' }}>
         {/* Imagem de fundo - Desktop */}
         <div className="absolute inset-0 z-0 hidden md:block">
           <Image 

@@ -524,7 +524,7 @@ export default function SobrePage() {
       </div>
 
       {/* SEÇÃO PORTFÓLIO */}
-      <div className="flex flex-col md:flex-row w-full py-12 md:py-24 relative" ref={portfolioRef}>
+      <div id="portfolio" className="flex flex-col md:flex-row w-full py-12 md:py-24 relative" ref={portfolioRef}>
         {/* Fundo Dividido */}
         <div className="absolute inset-0 flex w-full h-full">
           <div className="w-full md:w-1/2 bg-[#ADD4E4]" />

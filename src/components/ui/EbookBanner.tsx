@@ -52,7 +52,7 @@ const EbookBanner: React.FC = () => {
   const activeSlide = slidesData[currentIndex];
 
   return (
-    <section className="w-full relative overflow-hidden group">
+    <section id="ebook-banner" className="w-full relative overflow-hidden group">
       <div className="relative w-full h-auto">
         <Link href={activeSlide.href} passHref>
           {/* Usar um aspect ratio para o contêiner da imagem ajuda a evitar "layout shift" */}
