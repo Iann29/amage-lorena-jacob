@@ -569,7 +569,7 @@ export default function MinhaContaPage() {
           }
 
           // Formatar os dados para o formato esperado pelo componente
-          const formattedPosts = savedPostsData?.map(item => {
+          const formattedPosts = savedPostsData?.map((item: any) => {
             const post = item.post;
             // Extrair resumo do conteúdo HTML se não houver resumo
             const extractTextFromHtml = (html: string) => {
