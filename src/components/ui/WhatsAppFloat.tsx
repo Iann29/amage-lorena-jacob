@@ -12,20 +12,16 @@ const WhatsAppFloat = () => {
   useEffect(() => {
     const updateFooterPosition = () => {
       // Procurar pela seção de depoimentos pelo background color
-      const sections = document.querySelectorAll<HTMLElement>('section');
-      let depoimentosSection: HTMLElement | null = null;
+      const sections = Array.from(document.querySelectorAll('section'));
       
-      sections.forEach(section => {
+      for (const section of sections) {
         const bgColor = window.getComputedStyle(section).backgroundColor;
         if (bgColor === 'rgb(0, 188, 212)') { // #00BCD4 em RGB
-          depoimentosSection = section;
+          const rect = section.getBoundingClientRect();
+          const sectionBottom = rect.bottom + window.scrollY;
+          setFooterOffset(sectionBottom);
+          break;
         }
-      });
-      
-      if (depoimentosSection && depoimentosSection instanceof HTMLElement) {
-        const rect = depoimentosSection.getBoundingClientRect();
-        const sectionBottom = rect.bottom + window.scrollY;
-        setFooterOffset(sectionBottom);
       }
     };
 
