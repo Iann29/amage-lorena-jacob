@@ -13,7 +13,7 @@ const WhatsAppFloat = () => {
     const updateFooterPosition = () => {
       // Procurar pela seção de depoimentos pelo background color
       const sections = document.querySelectorAll('section');
-      let depoimentosSection = null;
+      let depoimentosSection: HTMLElement | null = null;
       
       sections.forEach(section => {
         const bgColor = window.getComputedStyle(section).backgroundColor;
