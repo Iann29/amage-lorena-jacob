@@ -49,7 +49,12 @@ export const getCorsHeaders = (request: Request): Record<string, string> => {
 };
 
 // Versão simplificada para quando não temos a request (cabeçalhos padrão)
-export const corsHeaders = getCorsHeaders(new Request('https://example.com'));
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*', // Permitir qualquer origem quando não temos a request
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, apikey',
+  'Access-Control-Max-Age': '86400', // 24 horas em segundos
+};
 
 // Função para verificar se a requisição é uma OPTIONS (preflight)
 export function isPreflightRequest(request: Request): boolean {
