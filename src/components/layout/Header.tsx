@@ -637,11 +637,11 @@ const Header = () => {
         </div>
 
         {/* Novo Seletor de Idioma Desktop - Posicionado Absolutamente */}
-        <div className={`hidden lg:block absolute top-0 right-0 ${pathname.startsWith('/loja') ? 'mr-20' : 'mr-32'} h-full flex items-center justify-center`} ref={langDropdownRef}>
+        <div className={`hidden lg:block absolute top-0 right-0 ${pathname.startsWith('/loja') ? 'mr-3' : 'mr-3'} h-full flex items-center justify-center`} ref={langDropdownRef}>
           <div className="flex items-center h-full relative">
             <motion.button
               onClick={() => setIsLangDropdownOpen(prev => !prev)}
-              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors focus:outline-none ${
+              className={`flex items-center justify-center w-8 h-8 xl:w-10 xl:h-10 rounded-full transition-colors focus:outline-none ${
                 pathname.startsWith('/loja') 
                   ? 'border-2 border-white/50 bg-transparent hover:bg-white/10' 
                   : 'border border-gray-400 bg-white hover:bg-gray-100'
@@ -650,9 +650,9 @@ const Header = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              {selectedLang === 'pt' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>BR</span>}
-              {selectedLang === 'en' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>EN</span>}
-              {selectedLang === 'es' && <span className={`text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>ES</span>}
+              {selectedLang === 'pt' && <span className={`text-xs xl:text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>BR</span>}
+              {selectedLang === 'en' && <span className={`text-xs xl:text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>EN</span>}
+              {selectedLang === 'es' && <span className={`text-xs xl:text-sm font-medium ${pathname.startsWith('/loja') ? 'text-white' : 'text-[#6E6B46]'}`}>ES</span>}
             </motion.button>
             <AnimatePresence>
               {isLangDropdownOpen && (
