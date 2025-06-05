@@ -63,7 +63,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 fill
                 sizes="(max-width: 768px) 100vw, 212px"
                 priority
-                className="absolute w-full h-full object-cover opacity-40 mix-blend-multiply"
+                className="absolute w-full h-full object-cover opacity-70 mix-blend-multiply"
               />
             </div>
           ) : (
@@ -74,7 +74,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
                 width={800} 
                 height={600}
                 priority
-                className="absolute w-full h-full object-cover opacity-50 transform scale-105"
+                className="absolute w-full h-full object-cover opacity-70 transform scale-105"
               />
             </div>
           )}
