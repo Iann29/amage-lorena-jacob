@@ -555,6 +555,22 @@ create index IF not exists idx_audit_logs_user_id on public.audit_logs using btr
 
 create index IF not exists idx_audit_logs_table_name on public.audit_logs using btree (table_name) TABLESPACE pg_default;
 
+create table public.blog_post_saves (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  post_id uuid not null,
+  user_id uuid not null,
+  created_at timestamp with time zone null default now(),
+  constraint blog_post_saves_pkey primary key (id),
+  constraint blog_post_saves_post_id_user_id_key unique (post_id, user_id),
+  constraint blog_post_saves_post_id_fkey foreign KEY (post_id) references blog_posts (id) on delete CASCADE,
+  constraint blog_post_saves_user_id_fkey foreign KEY (user_id) references auth.users (id) on delete CASCADE
+) TABLESPACE pg_default;
 
+create index IF not exists idx_blog_post_saves_post_id on public.blog_post_saves using btree (post_id) TABLESPACE pg_default;
 
+create index IF not exists idx_blog_post_saves_user_id on public.blog_post_saves using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_blog_post_saves_user_post on public.blog_post_saves using btree (user_id, post_id) TABLESPACE pg_default;
+
+create index IF not exists idx_blog_post_saves_user_created on public.blog_post_saves using btree (user_id, created_at desc) TABLESPACE pg_default;
 

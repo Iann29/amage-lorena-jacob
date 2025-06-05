@@ -532,67 +532,85 @@ export default function MinhaContaPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, currentUser, hasLoadedAddresses]);
   
-  // Simular carregamento de posts salvos (mockado)
+  // Carregar posts salvos do banco de dados
   useEffect(() => {
-    if (activeTab === 'posts-salvos') {
+    if (activeTab === 'posts-salvos' && currentUser) {
       setIsLoadingSavedPosts(true);
-      // Simular delay de carregamento
-      setTimeout(() => {
-        // Dados mockados para demonstração
-        setSavedPosts([
-          {
-            id: '1',
-            title: 'Como Superar a Ansiedade: Técnicas Práticas para o Dia a Dia',
-            excerpt: 'Descubra estratégias eficazes para gerenciar a ansiedade e melhorar sua qualidade de vida com técnicas simples e práticas.',
-            author: 'Lorena Jacob',
-            date: '2024-01-15',
-            readTime: '5 min',
-            category: 'Saúde Mental',
-            imageUrl: '/assets/palestras-bg.jpg',
-            views: 1523,
-            slug: 'como-superar-ansiedade-tecnicas-praticas'
-          },
-          {
-            id: '2',
-            title: 'O Poder da Resiliência: Transformando Desafios em Oportunidades',
-            excerpt: 'Aprenda como desenvolver resiliência emocional e transformar momentos difíceis em oportunidades de crescimento pessoal.',
-            author: 'Lorena Jacob',
-            date: '2024-01-10',
-            readTime: '8 min',
-            category: 'Desenvolvimento Pessoal',
-            imageUrl: '/assets/treinamento-bg.jpg',
-            views: 2341,
-            slug: 'poder-resiliencia-transformando-desafios'
-          },
-          {
-            id: '3',
-            title: 'Inteligência Emocional no Ambiente de Trabalho',
-            excerpt: 'Entenda a importância da inteligência emocional nas relações profissionais e como desenvolvê-la para alcançar o sucesso.',
-            author: 'Lorena Jacob',
-            date: '2024-01-05',
-            readTime: '6 min',
-            category: 'Carreira',
-            imageUrl: '',
-            views: 1875,
-            slug: 'inteligencia-emocional-ambiente-trabalho'
-          },
-          {
-            id: '4',
-            title: 'Meditação para Iniciantes: Guia Completo',
-            excerpt: 'Um guia passo a passo para começar a praticar meditação e colher os benefícios dessa prática milenar para sua saúde mental.',
-            author: 'Lorena Jacob',
-            date: '2023-12-28',
-            readTime: '7 min',
-            category: 'Bem-estar',
-            imageUrl: '/assets/depoimentosbackground.png',
-            views: 3102,
-            slug: 'meditacao-iniciantes-guia-completo'
+      
+      const fetchSavedPosts = async () => {
+        try {
+          // Buscar posts salvos pelo usuário
+          const { data: savedPostsData, error: savedError } = await supabase
+            .from('blog_post_saves')
+            .select(`
+              id,
+              created_at,
+              post:blog_posts (
+                id,
+                titulo,
+                slug,
+                resumo,
+                conteudo,
+                imagem_destaque_url,
+                author_id,
+                published_at,
+                view_count,
+                author_nome,
+                author_sobrenome
+              )
+            `)
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false });
+
+          if (savedError) {
+            console.error('Erro ao buscar posts salvos:', savedError);
+            setSavedPosts([]);
+            return;
           }
-        ]);
-        setIsLoadingSavedPosts(false);
-      }, 1000);
+
+          // Formatar os dados para o formato esperado pelo componente
+          const formattedPosts = savedPostsData?.map(item => {
+            const post = item.post;
+            // Extrair resumo do conteúdo HTML se não houver resumo
+            const extractTextFromHtml = (html: string) => {
+              const div = document.createElement('div');
+              div.innerHTML = html;
+              return div.textContent || div.innerText || '';
+            };
+            
+            const excerpt = post.resumo || extractTextFromHtml(post.conteudo).substring(0, 150) + '...';
+            const authorName = `${post.author_nome || 'Lorena'} ${post.author_sobrenome || 'Jacob'}`;
+            
+            // Calcular tempo de leitura estimado (média de 200 palavras por minuto)
+            const wordCount = extractTextFromHtml(post.conteudo).split(' ').length;
+            const readTime = Math.ceil(wordCount / 200);
+            
+            return {
+              id: post.id,
+              title: post.titulo,
+              excerpt: excerpt,
+              author: authorName,
+              date: new Date(post.published_at || post.created_at).toLocaleDateString('pt-BR'),
+              readTime: `${readTime} min`,
+              category: 'Blog', // Categoria padrão por enquanto
+              imageUrl: post.imagem_destaque_url || '',
+              views: post.view_count || 0,
+              slug: post.slug
+            };
+          }) || [];
+
+          setSavedPosts(formattedPosts);
+        } catch (error) {
+          console.error('Erro ao processar posts salvos:', error);
+          setSavedPosts([]);
+        } finally {
+          setIsLoadingSavedPosts(false);
+        }
+      };
+
+      fetchSavedPosts();
     }
-  }, [activeTab]);
+  }, [activeTab, currentUser]);
   
   // Simular carregamento de pedidos (mockado)
   useEffect(() => {
@@ -1794,9 +1812,24 @@ export default function MinhaContaPage() {
                           
                           {/* Botão de Remover dos Salvos */}
                           <button
-                            onClick={() => {
-                              // Por enquanto apenas remove do estado local
-                              setSavedPosts(prev => prev.filter(p => p.id !== post.id));
+                            onClick={async () => {
+                              if (!currentUser) return;
+                              
+                              try {
+                                // Remover do banco de dados
+                                const { error } = await supabase
+                                  .from('blog_post_saves')
+                                  .delete()
+                                  .eq('post_id', post.id)
+                                  .eq('user_id', currentUser.id);
+                                
+                                if (!error) {
+                                  // Remover do estado local apenas se a remoção do banco foi bem-sucedida
+                                  setSavedPosts(prev => prev.filter(p => p.id !== post.id));
+                                }
+                              } catch (error) {
+                                console.error('Erro ao remover post dos salvos:', error);
+                              }
                             }}
                             className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
                             title="Remover dos salvos"

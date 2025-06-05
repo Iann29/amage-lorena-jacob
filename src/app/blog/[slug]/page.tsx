@@ -6,6 +6,7 @@ import { Suspense, lazy } from 'react';
 // Importar as funções da nova API
 import { getBlogPostBySlug, getPopularBlogPosts, getPublishedBlogPosts } from '@/lib/blog-api'; // Remova getPopularBlogPosts se não usar
 import LikeButton from '@/components/blog/LikeButton';
+import SaveButton from '@/components/blog/SaveButton';
 import styles from './post.module.css';
 // import PostViewTracker from '@/components/blog/PostViewTracker'; // <<< LINHA REMOVIDA
 
@@ -110,6 +111,7 @@ async function PostContent({ slug }: { slug: string }) {
             url={postUrl} 
           />
           <LikeButton itemId={post.id} itemType="post" initialLikeCount={post.like_count} />
+          <SaveButton postId={post.id} />
         </div>
       </div>
     </>
