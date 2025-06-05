@@ -9,10 +9,11 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
+    // Use service role key to bypass RLS if needed
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Parse body apenas se houver conteúdo
     let body = null;
@@ -135,7 +136,24 @@ serve(async (req) => {
 
       const { data: products, error, count } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching products:', error)
+        console.error('Query details:', {
+          search,
+          categorySlug,
+          minPrice,
+          maxPrice,
+          minAge,
+          maxAge,
+          sortBy,
+          sortOrder,
+          offset,
+          limit
+        })
+        throw error
+      }
+      
+      console.log(`Found ${count} products, returning ${products?.length || 0} on page ${page}`)
 
       // Processar produtos para incluir imagem principal
       const processedProducts = products?.map(product => {

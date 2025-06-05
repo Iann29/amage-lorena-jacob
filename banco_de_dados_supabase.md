@@ -87,9 +87,17 @@ create table public.products (
   created_by uuid null,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
+  slug character varying(200) null,
+  preco_promocional numeric(10, 2) null,
+  idade_min integer null default 0,
+  idade_max integer null default 12,
+  tags text[] null,
   constraint products_pkey primary key (id),
-  constraint products_category_id_fkey foreign KEY (category_id) references categories (id) on delete set null,
+  constraint products_slug_key unique (slug),
   constraint products_created_by_fkey foreign KEY (created_by) references auth.users (id),
+  constraint products_category_id_fkey foreign KEY (category_id) references categories (id) on delete set null,
+  constraint products_idade_max_check check ((idade_max >= idade_min)),
+  constraint products_idade_min_check check ((idade_min >= 0)),
   constraint products_preco_check check ((preco >= (0)::numeric)),
   constraint products_quantidade_estoque_check check ((quantidade_estoque >= 0))
 ) TABLESPACE pg_default;
@@ -102,12 +110,19 @@ create index IF not exists idx_products_nome on public.products using btree (nom
 
 create index IF not exists idx_products_active on public.products using btree (is_active) TABLESPACE pg_default;
 
+create index IF not exists idx_products_slug on public.products using btree (slug) TABLESPACE pg_default;
+
 create trigger audit_product_changes_trigger
 after INSERT
 or DELETE
 or
 update on products for EACH row
 execute FUNCTION audit_product_changes ();
+
+create trigger set_product_slug_trigger BEFORE INSERT
+or
+update on products for EACH row
+execute FUNCTION set_product_slug ();
 
 create trigger set_products_updated_at BEFORE
 update on products for EACH row
@@ -355,12 +370,22 @@ create table public.categories (
   is_active boolean null default true,
   created_at timestamp with time zone null default now(),
   updated_at timestamp with time zone null default now(),
+  slug character varying(100) null,
+  imagem_url text null,
   constraint categories_pkey primary key (id),
   constraint categories_nome_key unique (nome),
+  constraint categories_slug_key unique (slug),
   constraint categories_parent_id_fkey foreign KEY (parent_id) references categories (id) on delete set null
 ) TABLESPACE pg_default;
 
 create index IF not exists idx_categories_parent_id on public.categories using btree (parent_id) TABLESPACE pg_default;
+
+create index IF not exists idx_categories_slug on public.categories using btree (slug) TABLESPACE pg_default;
+
+create trigger set_category_slug_trigger BEFORE INSERT
+or
+update on categories for EACH row
+execute FUNCTION set_category_slug ();
 
 # Tabela cart_items
 
@@ -574,3 +599,646 @@ create index IF not exists idx_blog_post_saves_user_post on public.blog_post_sav
 
 create index IF not exists idx_blog_post_saves_user_created on public.blog_post_saves using btree (user_id, created_at desc) TABLESPACE pg_default;
 
+#POLICES##########3
+
+#audit_logs
+
+Name: Admins podem ver logs de auditoria
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#blog_categories
+
+Name: Permitir leitura pública de categorias do blog
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: true
+CHECK expression: none
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#blog_comment_likes
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários autenticados podem ver seus próprios likes de coment
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem gerenciar seus próprios likes de comentários
+Action: PERMISSIVE
+Command: INSERT
+Target roles: authenticated
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários podem remover seus próprios likes de comentários
+Action: PERMISSIVE
+Command: DELETE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: none
+
+#blog_comments
+
+Name: Admins podem gerenciar todos os comentários
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Comentários aprovados são visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_approved = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem atualizar seus próprios comentários
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem criar comentários
+Action: PERMISSIVE
+Command: INSERT
+Target roles: public
+USING expression:
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários podem ver seus próprios comentários
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#blog_post_categories
+
+Name: Permitir exclusão de blog_post_categories para admins
+Action: PERMISSIVE
+Command: DELETE
+Target roles: authenticated
+USING expression: (EXISTS ( SELECT 1 FROM blog_posts WHERE ((blog_posts.id = blog_post_categories.post_id) AND (blog_posts.author_id = auth.uid()))))
+CHECK expression: None
+
+Name: Permitir inserção em blog_post_categories para admins
+Action: PERMISSIVE
+Command: INSERT
+Target roles: authenticated
+USING expression: 
+CHECK expression: (EXISTS ( SELECT 1 FROM blog_posts WHERE ((blog_posts.id = blog_post_categories.post_id) AND (blog_posts.author_id = auth.uid()))))
+
+Name: Permitir leitura pública de relações post-categoria
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: true
+CHECK expression: 
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#blog_post_likes
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários autenticados podem ver seus próprios likes de posts
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem gerenciar seus próprios likes de posts
+Action: PERMISSIVE
+Command: INSERT
+Target roles: authenticated
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários podem remover seus próprios likes de posts
+Action: PERMISSIVE
+Command: DELETE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#blog_post_saves
+
+Name: Administradores podem ver todos os posts salvos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles WHERE ((user_profiles.user_id = auth.uid()) AND (user_profiles.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Usuários podem remover seus posts salvos
+Action: PERMISSIVE
+Command: DELETE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem salvar posts
+Action: PERMISSIVE
+Command: INSERT
+Target roles: authenticated
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários podem ver seus próprios posts salvos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#blog_posts
+
+Name: Admins podem gerenciar posts
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Permitir leitura de TODOS os posts para admins
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() IN ( SELECT user_profiles.user_id FROM user_profiles WHERE ((user_profiles.role)::text = 'admin'::text)))
+CHECK expression: None
+
+Name: Posts publicados visiveis para publico
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_published = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#cart_items
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem gerenciar itens do seu carrinho
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM shopping_carts sc WHERE ((sc.id = cart_items.cart_id) AND (sc.user_id = auth.uid()))))
+CHECK expression: (EXISTS ( SELECT 1 FROM shopping_carts sc WHERE ((sc.id = cart_items.cart_id) AND (sc.user_id = auth.uid()))))
+
+Name: Usuários veem apenas itens do seu carrinho
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM shopping_carts sc WHERE ((sc.id = cart_items.cart_id) AND (sc.user_id = auth.uid()))))
+CHECK expression: None
+
+#categories
+
+Name: Admins podem gerenciar categorias
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Categorias visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_active = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#discount_usage
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#discounts
+
+Name: Admins podem gerenciar cupons
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Cupons ativos visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_active = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#order_items
+
+Name: Admins veem todos os itens de pedidos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários veem itens dos seus pedidos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM orders o WHERE ((o.id = order_items.order_id) AND (o.user_id = auth.uid()))))
+CHECK expression: None
+
+#orders
+
+Name: Admins podem atualizar pedidos
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Admins veem todos os pedidos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem criar seus próprios pedidos
+Action: PERMISSIVE
+Command: INSERT
+Target roles: public
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários veem apenas seus próprios pedidos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#price_history
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#product_images
+
+Name: Admins podem gerenciar imagens de produtos
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Imagens de produtos visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM products p WHERE ((p.id = product_images.product_id) AND (p.is_active = true))))
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#product_reviews
+
+Name: Admins podem gerenciar todas as avaliações
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Avaliações aprovadas visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_approved = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem atualizar suas próprias avaliações
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem criar avaliações
+Action: PERMISSIVE
+Command: INSERT
+Target roles: public
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários podem ver suas próprias avaliações
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#product_variants
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#products
+
+Name: Admins podem atualizar produtos
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Admins podem criar produtos
+Action: PERMISSIVE
+Command: INSERT
+Target roles: public
+USING expression: 
+CHECK expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+
+Name: Admins podem excluir produtos
+Action: PERMISSIVE
+Command: DELETE
+Target roles: public
+USING expression: (EXISTS ( SELECT 1 FROM user_profiles up WHERE ((up.user_id = auth.uid()) AND (up.role = 'admin'::user_role))))
+CHECK expression: None
+
+Name: Produtos visíveis para todos
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (is_active = true)
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+#shipping_addresses
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: users_delete_own_addresses
+Action: PERMISSIVE
+Command: DELETE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: users_insert_own_addresses
+Action: PERMISSIVE
+Command: INSERT
+Target roles: authenticated
+USING expression: 
+CHECK expression: (auth.uid() = user_id)
+
+Name: users_update_own_addresses
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: (auth.uid() = user_id)
+
+Name: users_view_own_addresses
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem gerenciar seus endereços
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários veem apenas seus próprios endereços
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#shopping_carts
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem gerenciar seu próprio carrinho
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: (auth.uid() = user_id)
+
+Name: Usuários veem apenas seu próprio carrinho
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#user_profiles
+
+Name: Admins podem atualizar todos os perfis de usuário
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: authenticated
+USING expression: is_admin(auth.uid())
+CHECK expression: is_admin(auth.uid())
+
+Name: Admins podem ler todos os perfis de usuário
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: is_admin(auth.uid())
+CHECK expression: None
+
+Name: Service role bypass
+Action: PERMISSIVE
+Command: ALL
+Target roles: public
+USING expression: (auth.role() = 'service_role'::text)
+CHECK expression: (auth.role() = 'service_role'::text)
+
+Name: Usuários podem atualizar seu próprio perfil
+Action: PERMISSIVE
+Command: UPDATE
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários podem ver seu próprio perfil
+Action: PERMISSIVE
+Command: SELECT
+Target roles: authenticated
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+Name: Usuários veem apenas seu próprio perfil
+Action: PERMISSIVE
+Command: SELECT
+Target roles: public
+USING expression: (auth.uid() = user_id)
+CHECK expression: None
+
+#Politicas do bucket (lorena-images-db)
+
+Permitir exclusão de imagens da pasta blog-post para admins
+{authenticated}
+((bucket_id = 'lorena-images-db'::text) AND (name ~~ 'blog-post/%'::text) AND (auth.role() = 'authenticated'::text) AND (auth.uid() IN ( SELECT user_profiles.user_id
+   FROM user_profiles
+  WHERE ((user_profiles.role)::text = 'admin'::text))))
+
+Permitir seleção de imagens da pasta blog-post para admins
+{Defaults to all (public) roles if none selected}
+((bucket_id = 'lorena-images-db'::text) AND (name ~~ 'blog-post/%'::text) AND (auth.role() = 'authenticated'::text) AND (auth.uid() IN ( SELECT user_profiles.user_id
+   FROM user_profiles
+  WHERE ((user_profiles.role)::text = 'admin'::text))))
+
+Permitir upload de imagens do blog para admins
+{authenticated}
+((bucket_id = 'lorena-images-db'::text) AND (auth.uid() IN ( SELECT user_profiles.user_id
+   FROM user_profiles
+  WHERE (user_profiles.role = 'admin'::user_role))))
+
+Profile pics are publicly accessible
+{Defaults to all (public) roles if none selected}
+((bucket_id = 'lorena-images-db'::text) AND ((storage.foldername(name))[1] = 'profile-pic'::text))
+
+Users can delete own profile pics
+{authenticated}
+((bucket_id = 'lorena-images-db'::text) AND ((storage.foldername(name))[1] = 'profile-pic'::text) AND (storage.filename(name) ~~ (('%'::text || (auth.uid())::text) || '%'::text)))
+
+Users can update own profile pics
+{authenticated}
+((bucket_id = 'lorena-images-db'::text) AND ((storage.foldername(name))[1] = 'profile-pic'::text) AND (storage.filename(name) ~~ (('%'::text || (auth.uid())::text) || '%'::text)))
+WITH CHECK expression:
+((bucket_id = 'lorena-images-db'::text) AND ((storage.foldername(name))[1] = 'profile-pic'::text) AND (storage.filename(name) ~~ (('%'::text || (auth.uid())::text) || '%'::text)))
+
+Users can upload own profile pics
+{authenticated}
+((bucket_id = 'lorena-images-db'::text) AND ((storage.foldername(name))[1] = 'profile-pic'::text) AND (storage.filename(name) ~~ (('%'::text || (auth.uid())::text) || '%'::text)))

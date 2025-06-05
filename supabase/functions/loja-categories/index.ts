@@ -13,10 +13,11 @@ serve(async (req) => {
   console.log('URL:', req.url);
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
+    // Use service role key to bypass RLS if needed
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Parse body
     let body = {};
