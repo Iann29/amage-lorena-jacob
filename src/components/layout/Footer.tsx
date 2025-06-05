@@ -120,13 +120,13 @@ const Footer = () => {
                 </h3>
                 <ul className="text-[#6E6B46] space-y-3 text-xs font-['Poppins']">
                   <li>
-                    <Link href="/blog" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Dicas para estimular o desenvolvimento infantil</span>
+                    <Link href="/blog/como-identificar-o-autismo" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                      <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Como identificar o autismo</span>
                     </Link>
                   </li>
                   <li>
-                    <Link href="/blog" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
-                      <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Como criar uma rotina estruturada para crianças</span>
+                    <Link href="/blog/autismo-na-vida-adulta" prefetch={false} className="group hover:text-[#52A4DB] transition-colors duration-200 flex items-center">
+                      <span className="text-black group-hover:text-[#52A4DB] transition-colors duration-200">Autismo na vida adulta</span>
                     </Link>
                   </li>
                 </ul>

@@ -18,6 +18,7 @@ const CommentSection = lazy(() => import('@/components/blog/CommentSection'));
 import { getCommentsTreeByPostId } from '@/app/comments/actions';
 import { createClient } from '@/utils/supabase/server';
 import ShareButton from '@/components/blog/ShareButton';
+import ScrollToTop from '@/components/blog/ScrollToTop';
 
 export const revalidate = 3600;
 
@@ -176,6 +177,7 @@ export default async function PostPage(props: PostPageProps) {
 
   return (
     <main className="min-h-screen bg-[#FFFFFF] relative">
+      <ScrollToTop />
 
       {/* Header do Post */}
       <header className="w-full relative">
