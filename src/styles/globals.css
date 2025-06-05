@@ -57,7 +57,24 @@ body {
 
 /* Otimização para elementos sticky */
 .sticky {
-  will-change: transform;
+  will-change: auto;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Otimizações para header */
+header {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Previne blur em elementos durante animações */
+header * {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Configurações para o header */
