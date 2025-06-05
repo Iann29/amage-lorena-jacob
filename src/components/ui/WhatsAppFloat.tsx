@@ -12,7 +12,7 @@ const WhatsAppFloat = () => {
   useEffect(() => {
     const updateFooterPosition = () => {
       // Procurar pela seção de depoimentos pelo background color
-      const sections = document.querySelectorAll('section');
+      const sections = document.querySelectorAll<HTMLElement>('section');
       let depoimentosSection: HTMLElement | null = null;
       
       sections.forEach(section => {
@@ -22,7 +22,7 @@ const WhatsAppFloat = () => {
         }
       });
       
-      if (depoimentosSection) {
+      if (depoimentosSection && depoimentosSection instanceof HTMLElement) {
         const rect = depoimentosSection.getBoundingClientRect();
         const sectionBottom = rect.bottom + window.scrollY;
         setFooterOffset(sectionBottom);
